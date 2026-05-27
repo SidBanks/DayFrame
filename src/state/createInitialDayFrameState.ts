@@ -1,9 +1,11 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
-import type { DayFrameState } from "./types.js";
+import type { LocalDateString } from "../core/shifts/types.js";
+import type { DayFramePreviewRange, DayFramePreviewRangePreset, DayFrameState } from "./types.js";
 
 export type PersistedDayFrameState = Pick<
   DayFrameState,
   | "schedulingPreferences"
+  | "previewRange"
   | "shiftDefinitions"
   | "shiftCycle"
   | "blockTemplates"
@@ -26,12 +28,45 @@ export function createInitialDayFrameState(
       weekStartsOn: "saturday",
       ...persistedState?.schedulingPreferences,
     },
+    previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
     shiftDefinitions: normalizedAuthoredSetup.shiftDefinitions,
     shiftCycle: normalizedAuthoredSetup.shiftCycle,
     blockTemplates: normalizedAuthoredSetup.blockTemplates,
     blockRecurrences: normalizedAuthoredSetup.blockRecurrences,
     savedProfiles: [],
     preview: null,
+  };
+}
+
+export function createDefaultPreviewRange(): DayFramePreviewRange {
+  return {
+    preset: "threeDays",
+    startDate: "2026-05-04",
+    endDate: "2026-05-05",
+  };
+}
+
+export function normalizePersistedPreviewRange(
+  previewRange?: Partial<DayFramePreviewRange> | null,
+): DayFramePreviewRange {
+  const defaultPreviewRange = createDefaultPreviewRange();
+
+  if (!previewRange) {
+    return defaultPreviewRange;
+  }
+
+  return {
+    preset: isPreviewRangePreset(previewRange.preset)
+      ? previewRange.preset
+      : defaultPreviewRange.preset,
+    startDate:
+      typeof previewRange.startDate === "string"
+        ? (previewRange.startDate as LocalDateString)
+        : defaultPreviewRange.startDate,
+    endDate:
+      typeof previewRange.endDate === "string"
+        ? (previewRange.endDate as LocalDateString)
+        : defaultPreviewRange.endDate,
   };
 }
 
@@ -86,4 +121,14 @@ function normalizePersistedBlockTemplates(
 
     return blockTemplate;
   });
+}
+
+function isPreviewRangePreset(value: unknown): value is DayFramePreviewRangePreset {
+  return (
+    value === "threeDays" ||
+    value === "oneWeek" ||
+    value === "twoWeeks" ||
+    value === "oneMonth" ||
+    value === "custom"
+  );
 }

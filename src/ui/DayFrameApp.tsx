@@ -3,10 +3,15 @@ import { useEffect, useRef, useState, type ChangeEvent, type ReactElement } from
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
 import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../core/cycles/resolveEffectiveSchedulePreferences.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
-import type { ShiftDefinition } from "../core/shifts/types.js";
+import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import { parseDayFrameBackupJson, type DayFrameBackupV1 } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
-import type { DayFrameState, DayFrameStore, GeneratePreviewActionInput } from "../state/types.js";
+import type {
+  DayFramePreviewRange,
+  DayFrameState,
+  DayFrameStore,
+  GeneratePreviewActionInput,
+} from "../state/types.js";
 import { PreviewScreen } from "./PreviewScreen.js";
 import { SetupScreen, buildSetupDraft, type SetupDraft } from "./SetupScreen.js";
 import "./dayFrameUi.css";
@@ -22,6 +27,7 @@ export type DayFrameAppStore = Pick<
   | "exportBackup"
   | "importBackup"
   | "setSchedulingPreferences"
+  | "setPreviewRange"
   | "setShiftDefinitions"
   | "setShiftCycle"
   | "setBlockTemplates"
@@ -50,7 +56,7 @@ export function DayFrameApp({
   getRevisedAt = createIsoTimestamp,
   getExportedAt = createIsoTimestamp,
   getNow = () => new Date(),
-  getPreviewWindow = createDefaultPreviewWindow,
+  getPreviewWindow,
 }: DayFrameAppProps): ReactElement {
   const storeRef = useRef<DayFrameAppStore>(store ?? createSeededDayFrameStore());
   const importInputRef = useRef<FileInputLike | null>(null);
@@ -81,6 +87,7 @@ export function DayFrameApp({
     setSetupDraft(buildSetupDraft(stateSnapshot, createIsoTimestamp()));
   }, [
     stateSnapshot.schedulingPreferences,
+    stateSnapshot.previewRange,
     stateSnapshot.shiftDefinitions,
     stateSnapshot.shiftCycle,
     stateSnapshot.blockTemplates,
@@ -356,6 +363,7 @@ export function DayFrameApp({
               const savedAt = createIsoTimestamp();
 
               storeRef.current.setSchedulingPreferences(setupDraft.schedulingPreferences);
+              storeRef.current.setPreviewRange(setupDraft.previewRange);
               storeRef.current.setShiftDefinitions(
                 setupDraft.shiftDefinitions.map((shiftDefinition) => ({
                   ...shiftDefinition,
@@ -406,7 +414,9 @@ export function DayFrameApp({
                       return;
                     }
 
-                    const previewWindow = getPreviewWindow();
+                    const previewWindow =
+                      getPreviewWindow?.() ??
+                      createPreviewWindowFromRange(storeRef.current.getState().previewRange);
 
                     storeRef.current.generatePreview({
                       planningWindowStart: previewWindow.planningWindowStart,
@@ -572,16 +582,6 @@ function createIsoTimestamp(): GeneratePreviewActionInput["generatedAt"] {
   return new Date().toISOString();
 }
 
-function createDefaultPreviewWindow(): Pick<
-  GeneratePreviewActionInput,
-  "planningWindowStart" | "planningWindowEnd"
-> {
-  return {
-    planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
-    planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
-  };
-}
-
 async function handleBackupFileSelection(
   event: ChangeEvent<HTMLInputElement>,
   store: DayFrameAppStore,
@@ -703,4 +703,25 @@ function getMissingPreviewSetupItems(state: DayFrameState): string[] {
   }
 
   return missingItems;
+}
+
+function createPreviewWindowFromRange(
+  previewRange: DayFramePreviewRange,
+): Pick<GeneratePreviewActionInput, "planningWindowStart" | "planningWindowEnd"> {
+  return {
+    planningWindowStart: createDateAtStartOfDay(previewRange.startDate),
+    planningWindowEnd: createDateAtEndOfDay(previewRange.endDate),
+  };
+}
+
+function createDateAtStartOfDay(localDate: LocalDateString): Date {
+  const [year, month, day] = localDate.split("-").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 0, 0, 0, 0);
+}
+
+function createDateAtEndOfDay(localDate: LocalDateString): Date {
+  const [year, month, day] = localDate.split("-").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 23, 59, 0, 0);
 }

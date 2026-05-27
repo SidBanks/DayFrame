@@ -31,6 +31,11 @@ describe("dayFrameStore", () => {
           dayBoundaryStartTime: "04:00",
           weekStartsOn: "monday",
         },
+        previewRange: {
+          preset: "twoWeeks",
+          startDate: "2026-05-04",
+          endDate: "2026-05-17",
+        },
         shiftDefinitions: [
           {
             id: "shift_day",
@@ -74,6 +79,11 @@ describe("dayFrameStore", () => {
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
     });
+    expect(state.previewRange).toEqual({
+      preset: "twoWeeks",
+      startDate: "2026-05-04",
+      endDate: "2026-05-17",
+    });
     expect(state.shiftDefinitions).toHaveLength(1);
     expect(state.shiftCycle?.name).toBe("Day Rotation");
     expect(state.preview).toBeNull();
@@ -84,6 +94,11 @@ describe("dayFrameStore", () => {
       schedulingPreferences: {
         dayBoundaryStartTime: "03:00",
         weekStartsOn: "saturday",
+      },
+      previewRange: {
+        preset: "threeDays",
+        startDate: "2026-05-04",
+        endDate: "2026-05-05",
       },
       shiftDefinitions: [],
       shiftCycle: null,
@@ -200,12 +215,22 @@ describe("dayFrameStore", () => {
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
     });
+    store.setPreviewRange({
+      preset: "oneWeek",
+      startDate: "2026-05-04",
+      endDate: "2026-05-10",
+    });
 
     const state = store.getState();
 
     expect(state.schedulingPreferences).toEqual({
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
+    });
+    expect(state.previewRange).toEqual({
+      preset: "oneWeek",
+      startDate: "2026-05-04",
+      endDate: "2026-05-10",
     });
     expect(state.shiftDefinitions).toEqual(shiftDefinitions);
     expect(state.shiftCycle).toEqual(shiftCycle);
@@ -214,6 +239,11 @@ describe("dayFrameStore", () => {
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
+      },
+      previewRange: {
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-10",
       },
       shiftDefinitions,
       shiftCycle,
@@ -344,6 +374,11 @@ describe("dayFrameStore", () => {
             dayBoundaryStartTime: "04:00",
             weekStartsOn: "monday",
           },
+          previewRange: {
+            preset: "threeDays",
+            startDate: "2026-05-04",
+            endDate: "2026-05-05",
+          },
           shiftDefinitions: buildShiftDefinitions(),
           shiftCycle: buildShiftCycle(),
           blockTemplates: buildBlockTemplates(),
@@ -382,6 +417,11 @@ describe("dayFrameStore", () => {
             dayBoundaryStartTime: "04:00",
             weekStartsOn: "monday",
           },
+          previewRange: {
+            preset: "custom",
+            startDate: "2026-05-07",
+            endDate: "2026-05-09",
+          },
           shiftDefinitions: buildShiftDefinitions(),
           shiftCycle: buildShiftCycle(),
           blockTemplates: [],
@@ -396,12 +436,22 @@ describe("dayFrameStore", () => {
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
     });
+    expect(state.previewRange).toEqual({
+      preset: "custom",
+      startDate: "2026-05-07",
+      endDate: "2026-05-09",
+    });
     expect(state.savedProfiles).toHaveLength(1);
     expect(state.savedProfiles[0]?.name).toBe("Week A");
     expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
+      },
+      previewRange: {
+        preset: "custom",
+        startDate: "2026-05-07",
+        endDate: "2026-05-09",
       },
       shiftDefinitions: buildShiftDefinitions(),
       shiftCycle: buildShiftCycle(),
@@ -577,6 +627,11 @@ describe("dayFrameStore", () => {
       schedulingPreferences: {
         dayBoundaryStartTime: "03:00",
         weekStartsOn: "saturday",
+      },
+      previewRange: {
+        preset: "threeDays",
+        startDate: "2026-05-04",
+        endDate: "2026-05-05",
       },
       shiftDefinitions,
       shiftCycle,

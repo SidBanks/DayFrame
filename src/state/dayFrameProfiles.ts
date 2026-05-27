@@ -1,3 +1,4 @@
+import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js";
 import { cloneDayFrameAuthoredSetup } from "./dayFrameBackup.js";
 import type { DayFrameAuthoredSetup, DayFrameSavedProfile } from "./types.js";
 
@@ -56,7 +57,7 @@ export function validateDayFrameProfilesStorage(
         id: profile.id as string,
         name: profile.name as string,
         savedAt: profile.savedAt as string,
-        data: profile.data as DayFrameAuthoredSetup,
+        data: normalizeAuthoredSetup(profile.data as Record<string, unknown>),
       }),
     );
 
@@ -76,4 +77,26 @@ export function cloneSavedProfiles(profiles: DayFrameSavedProfile[]): DayFrameSa
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthoredSetup {
+  const schedulingPreferences = isRecord(value.schedulingPreferences)
+    ? value.schedulingPreferences
+    : {};
+
+  return {
+    schedulingPreferences: {
+      dayBoundaryStartTime:
+        schedulingPreferences.dayBoundaryStartTime as DayFrameAuthoredSetup["schedulingPreferences"]["dayBoundaryStartTime"],
+      weekStartsOn:
+        schedulingPreferences.weekStartsOn as DayFrameAuthoredSetup["schedulingPreferences"]["weekStartsOn"],
+    },
+    previewRange: normalizePersistedPreviewRange(
+      value.previewRange as Partial<DayFrameAuthoredSetup["previewRange"]> | undefined,
+    ),
+    shiftDefinitions: (value.shiftDefinitions ?? []) as DayFrameAuthoredSetup["shiftDefinitions"],
+    shiftCycle: (value.shiftCycle ?? null) as DayFrameAuthoredSetup["shiftCycle"],
+    blockTemplates: (value.blockTemplates ?? []) as DayFrameAuthoredSetup["blockTemplates"],
+    blockRecurrences: (value.blockRecurrences ?? []) as DayFrameAuthoredSetup["blockRecurrences"],
+  };
 }

@@ -18,6 +18,7 @@ import {
 import type {
   ApplyPreviewFixActionInput,
   DayFramePreview,
+  DayFramePreviewRange,
   DayFrameSavedProfile,
   DayFrameSchedulingPreferences,
   DayFrameState,
@@ -52,6 +53,20 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       schedulingPreferences: {
         ...state.schedulingPreferences,
         ...schedulingPreferences,
+      },
+      preview: markPreviewStale(state.preview),
+    };
+
+    persistState(state);
+
+    return notify();
+  }
+
+  function setPreviewRange(previewRange: DayFramePreviewRange): DayFrameState {
+    state = {
+      ...state,
+      previewRange: {
+        ...previewRange,
       },
       preview: markPreviewStale(state.preview),
     };
@@ -276,6 +291,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     getState,
     subscribe,
     setSchedulingPreferences,
+    setPreviewRange,
     setShiftDefinitions,
     setShiftCycle,
     setBlockTemplates,
@@ -307,6 +323,9 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
       ...baseState.schedulingPreferences,
       ...initialState.schedulingPreferences,
     },
+    previewRange: initialState.previewRange
+      ? { ...initialState.previewRange }
+      : { ...baseState.previewRange },
     shiftDefinitions: initialState.shiftDefinitions
       ? cloneShiftDefinitions(initialState.shiftDefinitions)
       : baseState.shiftDefinitions,
@@ -355,6 +374,9 @@ function persistState(state: DayFrameState): void {
     schedulingPreferences: {
       ...state.schedulingPreferences,
     },
+    previewRange: {
+      ...state.previewRange,
+    },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
     shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
@@ -393,6 +415,7 @@ function loadPersistedProfiles(): DayFrameSavedProfile[] {
 function getAuthoredSetup(state: DayFrameState): PersistedDayFrameState {
   return cloneDayFrameAuthoredSetup({
     schedulingPreferences: state.schedulingPreferences,
+    previewRange: state.previewRange,
     shiftDefinitions: state.shiftDefinitions,
     shiftCycle: state.shiftCycle,
     blockTemplates: state.blockTemplates,
@@ -463,6 +486,9 @@ function cloneState(state: DayFrameState): DayFrameState {
   return {
     schedulingPreferences: {
       ...state.schedulingPreferences,
+    },
+    previewRange: {
+      ...state.previewRange,
     },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
     shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,

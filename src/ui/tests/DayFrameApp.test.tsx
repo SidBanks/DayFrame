@@ -95,9 +95,13 @@ describe("DayFrameApp", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Preview Range" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Schedule Periods" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
+    expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
+    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-05");
     expect(screen.getByDisplayValue("Day Rotation")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Include in Preview")[0]).toBeChecked();
@@ -146,6 +150,26 @@ describe("DayFrameApp", () => {
     expect(store.getState().schedulingPreferences).toEqual({
       dayBoundaryStartTime: "05:00",
       weekStartsOn: "monday",
+    });
+  });
+
+  it("updates preview range after saving setup", () => {
+    const store = createDayFrameStore();
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Range Preset"), {
+      target: { value: "oneWeek" },
+    });
+    fireEvent.change(screen.getByLabelText("Start Date"), {
+      target: { value: "2026-05-05" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().previewRange).toEqual({
+      preset: "oneWeek",
+      startDate: "2026-05-05",
+      endDate: "2026-05-11",
     });
   });
 
@@ -230,6 +254,11 @@ describe("DayFrameApp", () => {
     expect(store.getState().shiftCycle).toMatchObject({
       name: "Weekend Rotation",
     });
+    expect(store.getState().previewRange).toMatchObject({
+      preset: "threeDays",
+      startDate: "2026-05-04",
+      endDate: "2026-05-05",
+    });
     expect(store.getState().blockTemplates[0]).toMatchObject({
       title: "Sleep Baseline",
     });
@@ -308,9 +337,19 @@ describe("DayFrameApp", () => {
           weekdays: ["monday"],
         },
       ],
+      previewRange: {
+        preset: "threeDays",
+        startDate: "2026-05-04",
+        endDate: "2026-05-05",
+      },
     });
 
     render(<DayFrameApp store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Range Preset"), {
+      target: { value: "oneWeek" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
     fireEvent.change(screen.getByLabelText("Profile Name"), {
       target: { value: "Night Rotation" },
@@ -339,6 +378,8 @@ describe("DayFrameApp", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
     });
+    expect(screen.getByLabelText("Range Preset")).toHaveValue("oneWeek");
+    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-10");
 
     expect(screen.getByText('Loaded profile "Night Rotation".')).toBeInTheDocument();
 
@@ -368,6 +409,27 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Errands 2:30 PM - 3:30 PM")).toBeInTheDocument();
     expect(screen.getByLabelText("Day visualizer for 2026-05-04")).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+  });
+
+  it("generates preview using the saved preview range instead of the old hardcoded window", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Range Preset"), {
+      target: { value: "oneWeek" },
+    });
+    fireEvent.change(screen.getByLabelText("Start Date"), {
+      target: { value: "2026-05-05" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("May 5-11, 2026")).toBeInTheDocument();
   });
 
   it("uses the current preferred window values when generating preview placements", () => {
@@ -1121,6 +1183,11 @@ describe("DayFrameApp", () => {
             dayBoundaryStartTime: "03:00",
             weekStartsOn: "saturday",
           },
+          previewRange: {
+            preset: "threeDays",
+            startDate: "2026-05-04",
+            endDate: "2026-05-05",
+          },
           shiftDefinitions: [
             {
               id: "shift_day",
@@ -1230,6 +1297,11 @@ describe("DayFrameApp", () => {
                       dayBoundaryStartTime: "04:00",
                       weekStartsOn: "monday",
                     },
+                    previewRange: {
+                      preset: "custom",
+                      startDate: "2026-05-08",
+                      endDate: "2026-05-12",
+                    },
                     shiftDefinitions: [
                       {
                         id: "shift_night",
@@ -1265,6 +1337,11 @@ describe("DayFrameApp", () => {
     expect(store.getState().schedulingPreferences).toEqual({
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
+    });
+    expect(store.getState().previewRange).toEqual({
+      preset: "custom",
+      startDate: "2026-05-08",
+      endDate: "2026-05-12",
     });
     expect(store.getState().shiftDefinitions[0]?.name).toBe("Night Shift");
   });

@@ -78,6 +78,11 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
       dayBoundaryStartTime: "03:00",
       weekStartsOn: "saturday",
     },
+    previewRange: {
+      preset: "oneWeek",
+      startDate: "2026-05-04",
+      endDate: "2026-05-10",
+    },
     shiftDefinitions: [
       {
         id: "shift_day",

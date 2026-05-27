@@ -1,7 +1,7 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { GenerateSchedulePreviewResult } from "../core/engine/generateSchedulePreview.js";
-import type { ShiftDefinition } from "../core/shifts/types.js";
+import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { DayFrameBackupV1 } from "./dayFrameBackup.js";
 import type { SuggestedFixFeedback } from "../core/friction/types.js";
@@ -9,6 +9,19 @@ import type { SuggestedFixFeedback } from "../core/friction/types.js";
 export type DayFrameSchedulingPreferences = {
   dayBoundaryStartTime: TimeString;
   weekStartsOn: Weekday;
+};
+
+export type DayFramePreviewRangePreset =
+  | "threeDays"
+  | "oneWeek"
+  | "twoWeeks"
+  | "oneMonth"
+  | "custom";
+
+export type DayFramePreviewRange = {
+  preset: DayFramePreviewRangePreset;
+  startDate: LocalDateString;
+  endDate: LocalDateString;
 };
 
 export type DayFramePreview = {
@@ -30,6 +43,7 @@ export type DayFrameSavedProfile = {
 
 export type DayFrameState = {
   schedulingPreferences: DayFrameSchedulingPreferences;
+  previewRange: DayFramePreviewRange;
   shiftDefinitions: ShiftDefinition[];
   shiftCycle: ShiftCycle | null;
   blockTemplates: BlockTemplate[];
@@ -41,6 +55,7 @@ export type DayFrameState = {
 export type DayFrameAuthoredSetup = Pick<
   DayFrameState,
   | "schedulingPreferences"
+  | "previewRange"
   | "shiftDefinitions"
   | "shiftCycle"
   | "blockTemplates"
@@ -65,6 +80,7 @@ export type DayFrameStore = {
   setSchedulingPreferences: (
     schedulingPreferences: Partial<DayFrameSchedulingPreferences>,
   ) => DayFrameState;
+  setPreviewRange: (previewRange: DayFramePreviewRange) => DayFrameState;
   setShiftDefinitions: (shiftDefinitions: ShiftDefinition[]) => DayFrameState;
   setShiftCycle: (shiftCycle: ShiftCycle | null) => DayFrameState;
   setBlockTemplates: (blockTemplates: BlockTemplate[]) => DayFrameState;

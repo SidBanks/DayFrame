@@ -1,3 +1,4 @@
+import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 
 export type DayFrameBackupV1 = {
@@ -52,8 +53,7 @@ export function validateDayFrameBackup(value: unknown): DayFrameBackupV1 {
     throw new RangeError("Backup file must include authored setup data.");
   }
 
-  validateAuthoredSetup(value.data);
-  const authoredSetup = value.data as DayFrameAuthoredSetup;
+  const authoredSetup = normalizeAuthoredSetup(value.data);
 
   return {
     app: "DayFrame",
@@ -69,6 +69,9 @@ export function cloneDayFrameAuthoredSetup(
   return {
     schedulingPreferences: {
       ...authoredSetup.schedulingPreferences,
+    },
+    previewRange: {
+      ...authoredSetup.previewRange,
     },
     shiftDefinitions: authoredSetup.shiftDefinitions.map((shiftDefinition) => ({
       ...shiftDefinition,
@@ -115,6 +118,10 @@ function validateAuthoredSetup(value: Record<string, unknown>): void {
     throw new RangeError("Backup file must include a weekStartsOn value.");
   }
 
+  if (value.previewRange !== undefined && !isRecord(value.previewRange)) {
+    throw new RangeError("Backup file previewRange must be a valid object.");
+  }
+
   if (!Array.isArray(value.shiftDefinitions)) {
     throw new RangeError("Backup file must include shiftDefinitions.");
   }
@@ -130,6 +137,27 @@ function validateAuthoredSetup(value: Record<string, unknown>): void {
   if (!Array.isArray(value.blockRecurrences)) {
     throw new RangeError("Backup file must include blockRecurrences.");
   }
+}
+
+function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthoredSetup {
+  validateAuthoredSetup(value);
+  const schedulingPreferences = value.schedulingPreferences as Record<string, unknown>;
+
+  return {
+    schedulingPreferences: {
+      dayBoundaryStartTime:
+        schedulingPreferences.dayBoundaryStartTime as DayFrameAuthoredSetup["schedulingPreferences"]["dayBoundaryStartTime"],
+      weekStartsOn:
+        schedulingPreferences.weekStartsOn as DayFrameAuthoredSetup["schedulingPreferences"]["weekStartsOn"],
+    },
+    previewRange: normalizePersistedPreviewRange(
+      value.previewRange as Partial<DayFrameAuthoredSetup["previewRange"]> | undefined,
+    ),
+    shiftDefinitions: value.shiftDefinitions as DayFrameAuthoredSetup["shiftDefinitions"],
+    shiftCycle: value.shiftCycle as DayFrameAuthoredSetup["shiftCycle"],
+    blockTemplates: value.blockTemplates as DayFrameAuthoredSetup["blockTemplates"],
+    blockRecurrences: value.blockRecurrences as DayFrameAuthoredSetup["blockRecurrences"],
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

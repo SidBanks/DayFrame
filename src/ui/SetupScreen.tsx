@@ -8,7 +8,12 @@ import type {
 } from "../core/blocks/types.js";
 import type { ShiftCycle, ShiftSegment } from "../core/cycles/types.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
-import type { DayFrameSchedulingPreferences, DayFrameState } from "../state/types.js";
+import type {
+  DayFramePreviewRange,
+  DayFramePreviewRangePreset,
+  DayFrameSchedulingPreferences,
+  DayFrameState,
+} from "../state/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 import { useState } from "react";
@@ -53,6 +58,14 @@ const recurrenceFrequencies: RecurrenceFrequency[] = [
   "custom",
 ];
 
+const previewRangePresets: DayFramePreviewRangePreset[] = [
+  "threeDays",
+  "oneWeek",
+  "twoWeeks",
+  "oneMonth",
+  "custom",
+];
+
 const weekdays: Weekday[] = [
   "sunday",
   "monday",
@@ -70,6 +83,7 @@ export type SetupDraftEntry = {
 
 export type SetupDraft = {
   schedulingPreferences: DayFrameSchedulingPreferences;
+  previewRange: DayFramePreviewRange;
   shiftDefinitions: ShiftDefinition[];
   shiftCycle: ShiftCycle;
   templateEntries: SetupDraftEntry[];
@@ -168,6 +182,103 @@ export function SetupScreen({
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="setup-preview-range-heading" className="df-panel df-form-stack">
+        <div className="df-screen-header">
+          <h2 className="df-panel-title" id="setup-preview-range-heading">
+            Preview Range
+          </h2>
+          <p className="df-support">
+            Choose the saved date range DayFrame should use when generating preview.
+          </p>
+        </div>
+        <div className="df-grid">
+          <div className="df-field">
+            <label htmlFor="setup-preview-range-preset">Range Preset</label>
+            <select
+              id="setup-preview-range-preset"
+              onChange={(event) => {
+                const nextPreset = (event.target as { value: DayFramePreviewRangePreset }).value;
+
+                setDraft((currentDraft) => ({
+                  ...currentDraft,
+                  previewRange: {
+                    ...currentDraft.previewRange,
+                    preset: nextPreset,
+                    ...(nextPreset === "custom"
+                      ? {}
+                      : {
+                          endDate: calculatePreviewRangeEndDate(
+                            currentDraft.previewRange.startDate,
+                            nextPreset,
+                          ),
+                        }),
+                  },
+                }));
+              }}
+              value={draft.previewRange.preset}
+            >
+              {previewRangePresets.map((preset) => (
+                <option key={preset} value={preset}>
+                  {formatPreviewRangePresetLabel(preset)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="df-field">
+            <label htmlFor="setup-preview-range-start-date">Start Date</label>
+            <input
+              id="setup-preview-range-start-date"
+              onChange={(event) => {
+                const nextStartDate = (event.target as { value: string }).value as LocalDateString;
+
+                setDraft((currentDraft) => ({
+                  ...currentDraft,
+                  previewRange: {
+                    ...currentDraft.previewRange,
+                    startDate: nextStartDate,
+                    ...(currentDraft.previewRange.preset === "custom"
+                      ? {}
+                      : {
+                          endDate: calculatePreviewRangeEndDate(
+                            nextStartDate,
+                            currentDraft.previewRange.preset,
+                          ),
+                        }),
+                  },
+                }));
+              }}
+              type="date"
+              value={draft.previewRange.startDate}
+            />
+          </div>
+
+          <div className="df-field">
+            <label htmlFor="setup-preview-range-end-date">End Date</label>
+            <input
+              id="setup-preview-range-end-date"
+              onChange={(event) => {
+                const nextEndDate = (event.target as { value: string }).value as LocalDateString;
+
+                setDraft((currentDraft) => ({
+                  ...currentDraft,
+                  previewRange: {
+                    ...currentDraft.previewRange,
+                    preset:
+                      currentDraft.previewRange.preset === "custom"
+                        ? currentDraft.previewRange.preset
+                        : "custom",
+                    endDate: nextEndDate,
+                  },
+                }));
+              }}
+              type="date"
+              value={draft.previewRange.endDate}
+            />
           </div>
         </div>
       </section>
@@ -1548,6 +1659,9 @@ export function buildSetupDraft(state: DayFrameState, timestamp: string): SetupD
     schedulingPreferences: {
       ...state.schedulingPreferences,
     },
+    previewRange: {
+      ...state.previewRange,
+    },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
     shiftCycle,
     templateEntries: buildDraftEntries(state),
@@ -1875,6 +1989,21 @@ function formatRecurrenceFrequencyLabel(frequency: RecurrenceFrequency): string 
   }
 }
 
+function formatPreviewRangePresetLabel(preset: DayFramePreviewRangePreset): string {
+  switch (preset) {
+    case "threeDays":
+      return "3 days";
+    case "oneWeek":
+      return "1 week";
+    case "twoWeeks":
+      return "2 weeks";
+    case "oneMonth":
+      return "1 month";
+    case "custom":
+      return "Custom";
+  }
+}
+
 function formatWeekdayLabel(weekday: Weekday): string {
   return weekday.slice(0, 1).toUpperCase() + weekday.slice(1);
 }
@@ -1893,4 +2022,46 @@ function deriveCrossesMidnight(
 
 function createIsoTimestamp(): string {
   return new Date().toISOString();
+}
+
+function calculatePreviewRangeEndDate(
+  startDate: LocalDateString,
+  preset: DayFramePreviewRangePreset,
+): LocalDateString {
+  const start = createDateFromLocalDate(startDate);
+
+  switch (preset) {
+    case "threeDays":
+      return createLocalDateString(addDays(start, 2));
+    case "oneWeek":
+      return createLocalDateString(addDays(start, 6));
+    case "twoWeeks":
+      return createLocalDateString(addDays(start, 13));
+    case "oneMonth":
+      return createLocalDateString(addDays(start, 29));
+    case "custom":
+      return startDate;
+  }
+}
+
+function createDateFromLocalDate(localDate: LocalDateString): Date {
+  const [year, month, day] = localDate.split("-").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+}
+
+function addDays(date: Date, days: number): Date {
+  const nextDate = new Date(date);
+
+  nextDate.setDate(nextDate.getDate() + days);
+
+  return nextDate;
+}
+
+function createLocalDateString(date: Date): LocalDateString {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}` as LocalDateString;
 }

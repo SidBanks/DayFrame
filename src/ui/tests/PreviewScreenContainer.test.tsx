@@ -187,6 +187,11 @@ function buildState(partialState: Partial<DayFrameState>): DayFrameState {
       dayBoundaryStartTime: "03:00",
       weekStartsOn: "saturday",
     },
+    previewRange: {
+      preset: "threeDays",
+      startDate: "2026-05-04",
+      endDate: "2026-05-05",
+    },
     shiftDefinitions: [],
     shiftCycle: null,
     blockTemplates: [],
