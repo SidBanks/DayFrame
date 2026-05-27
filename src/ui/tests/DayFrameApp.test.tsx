@@ -1,0 +1,1285 @@
+/* @vitest-environment jsdom */
+
+import "@testing-library/jest-dom/vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createDayFrameBackup } from "../../state/dayFrameBackup.js";
+import { createDayFrameStore, DAYFRAME_STORAGE_KEY } from "../../state/dayFrameStore.js";
+import { DayFrameApp } from "../DayFrameApp.js";
+
+let createObjectUrlMock: ReturnType<typeof vi.fn>;
+let revokeObjectUrlMock: ReturnType<typeof vi.fn>;
+let anchorClickMock: ReturnType<typeof vi.fn>;
+let originalAnchorClick: (() => void) | undefined;
+
+beforeEach(() => {
+  createObjectUrlMock = vi.fn(() => "blob:dayframe-backup");
+  revokeObjectUrlMock = vi.fn();
+  anchorClickMock = vi.fn();
+
+  const urlLike = globalThis.URL as unknown as {
+    createObjectURL: (blob: Blob) => string;
+    revokeObjectURL: (id: string) => void;
+  };
+  const htmlAnchorElementLike = globalThis as unknown as {
+    HTMLAnchorElement?: {
+      prototype: {
+        click: () => void;
+      };
+    };
+  };
+
+  urlLike.createObjectURL = createObjectUrlMock as unknown as (blob: Blob) => string;
+  urlLike.revokeObjectURL = revokeObjectUrlMock as unknown as (id: string) => void;
+
+  if (htmlAnchorElementLike.HTMLAnchorElement) {
+    originalAnchorClick = htmlAnchorElementLike.HTMLAnchorElement.prototype.click;
+    htmlAnchorElementLike.HTMLAnchorElement.prototype.click = () => {
+      const recordAnchorClick = anchorClickMock as unknown as () => void;
+
+      recordAnchorClick();
+    };
+  }
+});
+
+afterEach(() => {
+  cleanup();
+
+  const htmlAnchorElementLike = globalThis as unknown as {
+    HTMLAnchorElement?: {
+      prototype: {
+        click: () => void;
+      };
+    };
+  };
+
+  if (htmlAnchorElementLike.HTMLAnchorElement && originalAnchorClick) {
+    htmlAnchorElementLike.HTMLAnchorElement.prototype.click = originalAnchorClick;
+  }
+
+  if ("localStorage" in globalThis && globalThis.localStorage) {
+    globalThis.localStorage.clear();
+  }
+});
+
+describe("DayFrameApp", () => {
+  const retiredGuardrailMessage =
+    "Add at least one shift definition, an active shift cycle, at least one block template, and at least one block recurrence before generating a preview.";
+
+  it("renders the shell and opens on setup", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    expect(screen.getByRole("heading", { name: "DayFrame" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Setup" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save Setup" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Save Current Setup as Profile" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Saved Setup Profiles" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export Setup Backup" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Import Setup Backup" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clear Local Data" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Set up your shifts, connect them to a cycle, add repeatable life blocks, then generate a preview.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
+  });
+
+  it("shows unified setup content and still lets the user open preview", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule Periods" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Day Rotation")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Include in Preview")[0]).toBeChecked();
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeInTheDocument();
+    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+  });
+
+  it("keeps unified setup draft edits when switching to preview and back", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Sunrise Shift" },
+    });
+    expect(screen.getByLabelText("Name")).toHaveValue("Sunrise Shift");
+
+    fireEvent.change(screen.getByLabelText("Cycle Name"), {
+      target: { value: "Weekend Rotation" },
+    });
+    expect(screen.getByDisplayValue("Weekend Rotation")).toBeInTheDocument();
+
+    fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
+      target: { value: "Sleep Baseline" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+
+    expect(screen.getByDisplayValue("Sleep Baseline")).toBeInTheDocument();
+  });
+
+  it("updates global schedule preferences after saving setup", () => {
+    const store = createDayFrameStore();
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
+      target: { value: "05:00" },
+    });
+    fireEvent.change(screen.getByLabelText("Week Starts On"), {
+      target: { value: "monday" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().schedulingPreferences).toEqual({
+      dayBoundaryStartTime: "05:00",
+      weekStartsOn: "monday",
+    });
+  });
+
+  it("saves unified authored edits through the single setup action", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+    });
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Sunrise Shift" },
+    });
+    fireEvent.change(screen.getByLabelText("Cycle Name"), {
+      target: { value: "Weekend Rotation" },
+    });
+    fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
+      target: { value: "Sleep Baseline" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(screen.getByText("Setup saved.")).toBeInTheDocument();
+    expect(store.getState().shiftDefinitions[0]).toMatchObject({
+      name: "Sunrise Shift",
+    });
+    expect(store.getState().shiftCycle).toMatchObject({
+      name: "Weekend Rotation",
+    });
+    expect(store.getState().blockTemplates[0]).toMatchObject({
+      title: "Sleep Baseline",
+    });
+  });
+
+  it("clears the unified save message when the draft changes again", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    expect(screen.getByText("Setup saved.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Sunrise Shift" },
+    });
+
+    expect(screen.queryByText("Setup saved.")).not.toBeInTheDocument();
+  });
+
+  it("saves, loads, and deletes a local setup profile", async () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(<DayFrameApp store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Profile Name"), {
+      target: { value: "Night Rotation" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+
+    expect(screen.getByText("Current setup saved as a local profile.")).toBeInTheDocument();
+    expect(screen.getByText("Night Rotation")).toBeInTheDocument();
+
+    store.setShiftDefinitions([
+      {
+        id: "shift_temp",
+        userId: "user_001",
+        name: "Temp Shift",
+        startTime: "07:00",
+        endTime: "15:00",
+        workDays: ["monday"],
+        crossesMidnight: false,
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+    ]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Load Profile" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
+    });
+
+    expect(screen.getByText('Loaded profile "Night Rotation".')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete Profile" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("No saved profiles yet.")).toBeInTheDocument();
+    });
+  });
+
+  it("generates a seeded preview when the user requests it", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
+    expect(screen.getByText("Sleep 8:45 PM - 4:45 AM")).toBeInTheDocument();
+    expect(screen.getByText("Errands 2:30 PM - 3:30 PM")).toBeInTheDocument();
+    expect(screen.getByLabelText("Day visualizer for 2026-05-04")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+  });
+
+  it("uses the current preferred window values when generating preview placements", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.change(screen.getAllByLabelText("Preferred Window")[0]!, {
+      target: { value: "afterWork" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Sleep 2:15 PM - 10:15 PM")).toBeInTheDocument();
+    expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
+  });
+
+  it("shows a clear setup message when preview data is incomplete", () => {
+    const store = createDayFrameStore();
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.getByText("Add at least one shift definition.")).toBeInTheDocument();
+    expect(screen.getByText("Add an active shift cycle.")).toBeInTheDocument();
+    expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
+    expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
+    expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+  });
+
+  it("shows only the missing setup items that still need attention", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+    });
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.queryByText("Add at least one shift definition.")).not.toBeInTheDocument();
+    expect(screen.getByText("Add an active shift cycle.")).toBeInTheDocument();
+    expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
+    expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
+    expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+  });
+
+  it("generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["tuesday", "wednesday", "thursday"],
+          crossesMidnight: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Night Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_night",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_night",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 510,
+          bufferBeforeMinutes: 60,
+          bufferAfterMinutes: 60,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "daily",
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 5, 16, 0, 0, 0)}
+        getPreviewWindow={() => ({
+          planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+          planningWindowEnd: new Date(2026, 4, 8, 3, 0, 0, 0),
+        })}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.queryByText("Finish setup before generating a preview:")).not.toBeInTheDocument();
+    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getByText("May 5-8, 2026")).toBeInTheDocument();
+    expect(screen.getByText("Tuesday, 2026-05-05")).toBeInTheDocument();
+    expect(screen.getByText("Wednesday, 2026-05-06")).toBeInTheDocument();
+    expect(screen.getByText("Thursday, 2026-05-07")).toBeInTheDocument();
+    expect(screen.queryByText("Monday, 2026-05-04")).not.toBeInTheDocument();
+    expect(screen.queryByText("Friday, 2026-05-08")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Sleep 12:15 PM - 8:45 PM")).toHaveLength(3);
+    expect(screen.getAllByText("Workout 6:15 AM - 7:15 AM")).toHaveLength(3);
+    expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(3);
+  });
+
+  it("lets the user apply a suggested fix after generating a preview", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+        {
+          id: "template_errands",
+          userId: "user_001",
+          title: "Errands",
+          category: "admin",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 3,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameDay",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+        {
+          id: "rec_errands",
+          blockTemplateId: "template_errands",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        getRevisedAt={() => "2026-05-03T14:00:00-05:00"}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move block" }));
+
+    expect(screen.getByText("Revised")).toBeInTheDocument();
+    expect(screen.getByText("Today at 2:00 PM")).toBeInTheDocument();
+    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
+  });
+
+  it("marks an existing preview as stale after setup changes", async () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Updated Day Shift" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Setup changed. Generate a new preview to see updates."),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
+  });
+
+  it("regenerates a stale preview after a template edit and clears the stale warning", async () => {
+    const getGeneratedAt = vi
+      .fn<() => string>()
+      .mockReturnValueOnce("2026-05-03T13:00:00-05:00")
+      .mockReturnValueOnce("2026-05-03T15:00:00-05:00");
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={getGeneratedAt}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+    expect(screen.getByText("Sleep 8:45 PM - 4:45 AM")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+    fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
+      target: { value: "Sleep Recovery" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Setup changed. Generate a new preview to see updates."),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeEnabled();
+    expect(screen.getByText("Sleep 8:45 PM - 4:45 AM")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Setup changed. Generate a new preview to see updates."),
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("Today at 3:00 PM")).toBeInTheDocument();
+    expect(screen.getByText("Sleep Recovery 8:45 PM - 4:45 AM")).toBeInTheDocument();
+    expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
+  });
+
+  it("shows review-fixed-time guidance after clicking Review fixed time", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "fixed",
+          fixedStartTime: "06:00",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "askUser",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        getRevisedAt={() => "2026-05-03T14:00:00-05:00"}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
+
+    expect(
+      screen.getByText(
+        "Edit this block's fixed start time in Template Editor, then generate a new preview.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("re-enables persisted untouched default sleep and generates preview", () => {
+    globalThis.localStorage.setItem(
+      DAYFRAME_STORAGE_KEY,
+      JSON.stringify({
+        schedulingPreferences: {
+          dayBoundaryStartTime: "03:00",
+          weekStartsOn: "saturday",
+        },
+        shiftDefinitions: [
+          {
+            id: "shift_day",
+            userId: "user_001",
+            name: "Day Shift",
+            startTime: "05:45",
+            endTime: "14:15",
+            workDays: ["monday"],
+            crossesMidnight: false,
+            createdAt: "2026-05-03T00:00:00-05:00",
+            updatedAt: "2026-05-03T00:00:00-05:00",
+          },
+        ],
+        shiftCycle: {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Day Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_day",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_day",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+        blockTemplates: [
+          {
+            id: "default_sleep",
+            userId: "user_001",
+            title: "Sleep",
+            category: "sleep",
+            placementType: "flexible",
+            durationMinutes: 480,
+            priority: 1,
+            preferredWindow: "beforeSleep",
+            rescheduleBehavior: "autoSameUserWeek",
+            requiresResource: false,
+            externalResources: [],
+            enabled: false,
+            createdAt: "2026-05-03T00:00:00-05:00",
+            updatedAt: "2026-05-03T00:00:00-05:00",
+          },
+        ],
+        blockRecurrences: [
+          {
+            id: "rec_sleep",
+            blockTemplateId: "default_sleep",
+            frequency: "daily",
+          },
+        ],
+      }),
+    );
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        store={createDayFrameStore()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getAllByText("Sleep 7:00 PM - 3:00 AM")).toHaveLength(3);
+  });
+
+  it("allows preview generation when sleep is intentionally disabled but another template is enabled", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeSleep",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-04T00:00:00-05:00",
+        },
+        {
+          id: "template_errands",
+          userId: "user_001",
+          title: "Errands",
+          category: "admin",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 3,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameDay",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+        {
+          id: "rec_errands",
+          blockTemplateId: "template_errands",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getByText("Errands 2:15 PM - 3:15 PM")).toBeInTheDocument();
+    expect(screen.queryByText("Sleep 7:00 PM - 3:00 AM")).not.toBeInTheDocument();
+  });
+
+  it("shows a clear guardrail when all templates are disabled", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeSleep",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-04T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+    });
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
+    expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
+  });
+
+  it("requires confirmation before clearing locally saved setup data", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
+
+    expect(screen.getByText("Clear all locally saved DayFrame setup data?")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Confirm Clear Local Data" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(
+      screen.queryByText("Clear all locally saved DayFrame setup data?"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Local DayFrame setup data cleared from this device."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
+  });
+
+  it("clears local setup data after confirmation", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
+
+    expect(
+      screen.queryByText("Clear all locally saved DayFrame setup data?"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Local DayFrame setup data cleared from this device."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No shifts yet. Add your first shift definition to get started."),
+    ).toBeInTheDocument();
+  });
+
+  it("exports authored setup as a json backup file", async () => {
+    render(<DayFrameApp getExportedAt={() => "2026-05-05T10:00:00-05:00"} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Export Setup Backup" }));
+
+    expect(createObjectUrlMock).toHaveBeenCalledTimes(1);
+    expect(anchorClickMock).toHaveBeenCalledTimes(1);
+    expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("DayFrame setup backup downloaded.")).toBeInTheDocument();
+
+    const backupBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
+    const backupJson = await backupBlob.text();
+
+    expect(JSON.parse(backupJson)).toEqual(
+      createDayFrameBackup(
+        {
+          schedulingPreferences: {
+            dayBoundaryStartTime: "03:00",
+            weekStartsOn: "saturday",
+          },
+          shiftDefinitions: [
+            {
+              id: "shift_day",
+              userId: "user_001",
+              name: "Day Shift",
+              startTime: "05:45",
+              endTime: "14:15",
+              workDays: ["monday"],
+              crossesMidnight: false,
+              createdAt: "2026-05-03T00:00:00-05:00",
+              updatedAt: "2026-05-03T00:00:00-05:00",
+            },
+          ],
+          shiftCycle: {
+            id: "cycle_001",
+            userId: "user_001",
+            name: "Day Rotation",
+            type: "fixedSegments",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+            segments: [
+              {
+                id: "segment_day",
+                shiftCycleId: "cycle_001",
+                shiftDefinitionId: "shift_day",
+                startsOnDate: "2026-05-01",
+                endsOnDate: "2026-05-31",
+                schedulePreferences: {
+                  dayBoundaryStartTime: "03:00",
+                  weekStartsOn: "monday",
+                },
+              },
+            ],
+            createdAt: "2026-05-03T00:00:00-05:00",
+            updatedAt: "2026-05-03T00:00:00-05:00",
+          },
+          blockTemplates: [
+            {
+              id: "default_sleep",
+              userId: "user_001",
+              title: "Sleep",
+              category: "sleep",
+              placementType: "flexible",
+              durationMinutes: 480,
+              bufferAfterMinutes: 60,
+              priority: 1,
+              preferredWindow: "beforeWork",
+              rescheduleBehavior: "autoSameUserWeek",
+              requiresResource: false,
+              externalResources: [],
+              enabled: true,
+              createdAt: "2026-05-03T00:00:00-05:00",
+              updatedAt: "2026-05-03T00:00:00-05:00",
+            },
+            {
+              id: "template_errands",
+              userId: "user_001",
+              title: "Errands",
+              category: "admin",
+              placementType: "flexible",
+              durationMinutes: 60,
+              bufferBeforeMinutes: 15,
+              bufferAfterMinutes: 15,
+              priority: 3,
+              preferredWindow: "afterWork",
+              rescheduleBehavior: "autoSameDay",
+              requiresResource: false,
+              externalResources: [],
+              enabled: true,
+              createdAt: "2026-05-03T00:00:00-05:00",
+              updatedAt: "2026-05-03T00:00:00-05:00",
+            },
+          ],
+          blockRecurrences: [
+            {
+              id: "rec_sleep",
+              blockTemplateId: "default_sleep",
+              frequency: "daily",
+            },
+            {
+              id: "rec_errands",
+              blockTemplateId: "template_errands",
+              frequency: "specificWeekdays",
+              weekdays: ["monday"],
+            },
+          ],
+        },
+        "2026-05-05T10:00:00-05:00",
+      ),
+    );
+  });
+
+  it("imports a valid setup backup json file", async () => {
+    const store = createDayFrameStore();
+
+    render(<DayFrameApp store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
+      target: {
+        files: [
+          new File(
+            [
+              JSON.stringify(
+                createDayFrameBackup(
+                  {
+                    schedulingPreferences: {
+                      dayBoundaryStartTime: "04:00",
+                      weekStartsOn: "monday",
+                    },
+                    shiftDefinitions: [
+                      {
+                        id: "shift_night",
+                        userId: "user_001",
+                        name: "Night Shift",
+                        startTime: "22:00",
+                        endTime: "06:00",
+                        workDays: ["tuesday"],
+                        crossesMidnight: true,
+                        createdAt: "2026-05-03T00:00:00-05:00",
+                        updatedAt: "2026-05-03T00:00:00-05:00",
+                      },
+                    ],
+                    shiftCycle: null,
+                    blockTemplates: [],
+                    blockRecurrences: [],
+                  },
+                  "2026-05-05T10:00:00-05:00",
+                ),
+              ),
+            ],
+            "dayframe-backup.json",
+            { type: "application/json" },
+          ),
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("DayFrame setup backup imported.")).toBeInTheDocument();
+    });
+
+    expect(store.getState().schedulingPreferences).toEqual({
+      dayBoundaryStartTime: "04:00",
+      weekStartsOn: "monday",
+    });
+    expect(store.getState().shiftDefinitions[0]?.name).toBe("Night Shift");
+  });
+
+  it("shows an error when backup import fails", async () => {
+    render(<DayFrameApp />);
+
+    fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
+      target: {
+        files: [new File(["not json"], "bad-backup.json", { type: "application/json" })],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Backup file is not valid JSON.")).toBeInTheDocument();
+    });
+  });
+});
