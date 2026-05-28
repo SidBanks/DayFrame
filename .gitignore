@@ -4,3 +4,5 @@ coverage/
 .vite/
 vite.config.js.timestamp-*
 tsconfig.tsbuildinfo
+vitest.config.js
+vitest.config.js.map

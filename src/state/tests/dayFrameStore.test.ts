@@ -34,7 +34,7 @@ describe("dayFrameStore", () => {
         previewRange: {
           preset: "twoWeeks",
           startDate: "2026-05-04",
-          endDate: "2026-05-17",
+          endDate: "2026-05-18",
         },
         shiftDefinitions: [
           {
@@ -82,7 +82,7 @@ describe("dayFrameStore", () => {
     expect(state.previewRange).toEqual({
       preset: "twoWeeks",
       startDate: "2026-05-04",
-      endDate: "2026-05-17",
+      endDate: "2026-05-18",
     });
     expect(state.shiftDefinitions).toHaveLength(1);
     expect(state.shiftCycle?.name).toBe("Day Rotation");
@@ -98,7 +98,7 @@ describe("dayFrameStore", () => {
       previewRange: {
         preset: "threeDays",
         startDate: "2026-05-04",
-        endDate: "2026-05-05",
+        endDate: "2026-05-06",
       },
       shiftDefinitions: [],
       shiftCycle: null,
@@ -218,7 +218,7 @@ describe("dayFrameStore", () => {
     store.setPreviewRange({
       preset: "oneWeek",
       startDate: "2026-05-04",
-      endDate: "2026-05-10",
+      endDate: "2026-05-11",
     });
 
     const state = store.getState();
@@ -230,7 +230,7 @@ describe("dayFrameStore", () => {
     expect(state.previewRange).toEqual({
       preset: "oneWeek",
       startDate: "2026-05-04",
-      endDate: "2026-05-10",
+      endDate: "2026-05-11",
     });
     expect(state.shiftDefinitions).toEqual(shiftDefinitions);
     expect(state.shiftCycle).toEqual(shiftCycle);
@@ -243,7 +243,7 @@ describe("dayFrameStore", () => {
       previewRange: {
         preset: "oneWeek",
         startDate: "2026-05-04",
-        endDate: "2026-05-10",
+        endDate: "2026-05-11",
       },
       shiftDefinitions,
       shiftCycle,
@@ -316,6 +316,8 @@ describe("dayFrameStore", () => {
     store.setBlockRecurrences(blockRecurrences);
 
     const state = store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-05",
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
       generatedAt: "2026-05-03T13:00:00-05:00",
@@ -340,6 +342,8 @@ describe("dayFrameStore", () => {
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
     store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-05",
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
       generatedAt: "2026-05-03T13:00:00-05:00",
@@ -377,7 +381,7 @@ describe("dayFrameStore", () => {
           previewRange: {
             preset: "threeDays",
             startDate: "2026-05-04",
-            endDate: "2026-05-05",
+            endDate: "2026-05-06",
           },
           shiftDefinitions: buildShiftDefinitions(),
           shiftCycle: buildShiftCycle(),
@@ -405,6 +409,8 @@ describe("dayFrameStore", () => {
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
     store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-05",
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
       generatedAt: "2026-05-03T13:00:00-05:00",
@@ -594,6 +600,8 @@ describe("dayFrameStore", () => {
     store.setBlockTemplates(blockTemplates);
     store.setBlockRecurrences(blockRecurrences);
     store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-05",
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
       generatedAt: "2026-05-03T13:00:00-05:00",
@@ -631,7 +639,7 @@ describe("dayFrameStore", () => {
       previewRange: {
         preset: "threeDays",
         startDate: "2026-05-04",
-        endDate: "2026-05-05",
+        endDate: "2026-05-06",
       },
       shiftDefinitions,
       shiftCycle,
@@ -710,6 +718,8 @@ describe("dayFrameStore", () => {
             },
           ],
         },
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
         planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
         planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
         generatedAt: "2026-05-03T13:00:00-05:00",

@@ -232,6 +232,8 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       ...state,
       preview: {
         result: previewResult,
+        rangeStartDate: input.rangeStartDate,
+        rangeEndDate: input.rangeEndDate,
         planningWindowStart: new Date(input.planningWindowStart),
         planningWindowEnd: new Date(input.planningWindowEnd),
         generatedAt: input.generatedAt,
@@ -259,6 +261,8 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       ...state,
       preview: {
         result: revisedPreviewResult.preview,
+        rangeStartDate: state.preview.rangeStartDate,
+        rangeEndDate: state.preview.rangeEndDate,
         planningWindowStart: new Date(state.preview.planningWindowStart),
         planningWindowEnd: new Date(state.preview.planningWindowEnd),
         generatedAt: state.preview.generatedAt,
@@ -502,6 +506,8 @@ function cloneState(state: DayFrameState): DayFrameState {
 function clonePreview(preview: DayFramePreview): DayFramePreview {
   return {
     result: clonePreviewResult(preview.result),
+    rangeStartDate: preview.rangeStartDate,
+    rangeEndDate: preview.rangeEndDate,
     planningWindowStart: new Date(preview.planningWindowStart),
     planningWindowEnd: new Date(preview.planningWindowEnd),
     generatedAt: preview.generatedAt,

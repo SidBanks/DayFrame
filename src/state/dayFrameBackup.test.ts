@@ -81,7 +81,7 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
     previewRange: {
       preset: "oneWeek",
       startDate: "2026-05-04",
-      endDate: "2026-05-10",
+      endDate: "2026-05-11",
     },
     shiftDefinitions: [
       {

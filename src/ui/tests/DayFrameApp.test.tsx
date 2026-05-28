@@ -101,7 +101,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
     expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
-    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-05");
+    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-06");
     expect(screen.getByDisplayValue("Day Rotation")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Include in Preview")[0]).toBeChecked();
@@ -257,7 +257,7 @@ describe("DayFrameApp", () => {
     expect(store.getState().previewRange).toMatchObject({
       preset: "threeDays",
       startDate: "2026-05-04",
-      endDate: "2026-05-05",
+      endDate: "2026-05-06",
     });
     expect(store.getState().blockTemplates[0]).toMatchObject({
       title: "Sleep Baseline",
@@ -340,7 +340,7 @@ describe("DayFrameApp", () => {
       previewRange: {
         preset: "threeDays",
         startDate: "2026-05-04",
-        endDate: "2026-05-05",
+        endDate: "2026-05-06",
       },
     });
 
@@ -431,6 +431,54 @@ describe("DayFrameApp", () => {
 
     expect(screen.getByText("May 5-11, 2026")).toBeInTheDocument();
   });
+
+  it.each([
+    {
+      preset: "threeDays" as const,
+      expectedVisibleDayCount: 3,
+      expectedPlanningWindowLabel: "May 5-7, 2026",
+    },
+    {
+      preset: "oneWeek" as const,
+      expectedVisibleDayCount: 7,
+      expectedPlanningWindowLabel: "May 5-11, 2026",
+    },
+    {
+      preset: "twoWeeks" as const,
+      expectedVisibleDayCount: 14,
+      expectedPlanningWindowLabel: "May 5-18, 2026",
+    },
+    {
+      preset: "oneMonth" as const,
+      expectedVisibleDayCount: 31,
+      expectedPlanningWindowLabel: "May 5 - June 4, 2026",
+    },
+  ])(
+    "shows exactly $expectedVisibleDayCount visible user days for $preset",
+    ({ preset, expectedVisibleDayCount, expectedPlanningWindowLabel }) => {
+      render(
+        <DayFrameApp
+          getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+          getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        />,
+      );
+
+      fireEvent.change(screen.getByLabelText("Range Preset"), {
+        target: { value: preset },
+      });
+      fireEvent.change(screen.getByLabelText("Start Date"), {
+        target: { value: "2026-05-05" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+      fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+      fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+      expect(screen.getByText(expectedPlanningWindowLabel)).toBeInTheDocument();
+      expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(
+        expectedVisibleDayCount,
+      );
+    },
+  );
 
   it("uses the current preferred window values when generating preview placements", () => {
     render(
@@ -584,6 +632,11 @@ describe("DayFrameApp", () => {
           frequency: "daily",
         },
       ],
+      previewRange: {
+        preset: "custom",
+        startDate: "2026-05-05",
+        endDate: "2026-05-07",
+      },
     });
 
     render(
@@ -603,7 +656,7 @@ describe("DayFrameApp", () => {
 
     expect(screen.queryByText("Finish setup before generating a preview:")).not.toBeInTheDocument();
     expect(screen.getByText("Generated")).toBeInTheDocument();
-    expect(screen.getByText("May 5-8, 2026")).toBeInTheDocument();
+    expect(screen.getByText("May 5-7, 2026")).toBeInTheDocument();
     expect(screen.getByText("Tuesday, 2026-05-05")).toBeInTheDocument();
     expect(screen.getByText("Wednesday, 2026-05-06")).toBeInTheDocument();
     expect(screen.getByText("Thursday, 2026-05-07")).toBeInTheDocument();
@@ -1186,7 +1239,7 @@ describe("DayFrameApp", () => {
           previewRange: {
             preset: "threeDays",
             startDate: "2026-05-04",
-            endDate: "2026-05-05",
+            endDate: "2026-05-06",
           },
           shiftDefinitions: [
             {

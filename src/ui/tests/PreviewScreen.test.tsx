@@ -235,6 +235,8 @@ function buildPreview(
         },
       ],
     },
+    rangeStartDate: "2026-05-05",
+    rangeEndDate: "2026-05-06",
     planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
     planningWindowEnd: new Date(2026, 4, 6, 0, 0, 0, 0),
     generatedAt: "2026-05-03T13:00:00-05:00",

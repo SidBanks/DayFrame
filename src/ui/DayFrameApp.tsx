@@ -6,12 +6,7 @@ import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import { parseDayFrameBackupJson, type DayFrameBackupV1 } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
-import type {
-  DayFramePreviewRange,
-  DayFrameState,
-  DayFrameStore,
-  GeneratePreviewActionInput,
-} from "../state/types.js";
+import type { DayFrameState, DayFrameStore, GeneratePreviewActionInput } from "../state/types.js";
 import { PreviewScreen } from "./PreviewScreen.js";
 import { SetupScreen, buildSetupDraft, type SetupDraft } from "./SetupScreen.js";
 import "./dayFrameUi.css";
@@ -416,9 +411,11 @@ export function DayFrameApp({
 
                     const previewWindow =
                       getPreviewWindow?.() ??
-                      createPreviewWindowFromRange(storeRef.current.getState().previewRange);
+                      createPreviewWindowFromRange(storeRef.current.getState());
 
                     storeRef.current.generatePreview({
+                      rangeStartDate: storeRef.current.getState().previewRange.startDate,
+                      rangeEndDate: storeRef.current.getState().previewRange.endDate,
                       planningWindowStart: previewWindow.planningWindowStart,
                       planningWindowEnd: previewWindow.planningWindowEnd,
                       generatedAt: getGeneratedAt(),
@@ -706,22 +703,48 @@ function getMissingPreviewSetupItems(state: DayFrameState): string[] {
 }
 
 function createPreviewWindowFromRange(
-  previewRange: DayFramePreviewRange,
+  state: Pick<DayFrameState, "previewRange" | "shiftCycle" | "schedulingPreferences">,
 ): Pick<GeneratePreviewActionInput, "planningWindowStart" | "planningWindowEnd"> {
+  const startDate = state.previewRange.startDate;
+  const exclusiveEndUserDayDate = addDaysToLocalDate(state.previewRange.endDate, 1);
+
   return {
-    planningWindowStart: createDateAtStartOfDay(previewRange.startDate),
-    planningWindowEnd: createDateAtEndOfDay(previewRange.endDate),
+    planningWindowStart: createUserDayBoundaryDate({
+      userDayDate: startDate,
+      shiftCycle: state.shiftCycle,
+      schedulingPreferences: state.schedulingPreferences,
+    }),
+    planningWindowEnd: createUserDayBoundaryDate({
+      userDayDate: exclusiveEndUserDayDate,
+      shiftCycle: state.shiftCycle,
+      schedulingPreferences: state.schedulingPreferences,
+    }),
   };
 }
 
-function createDateAtStartOfDay(localDate: LocalDateString): Date {
-  const [year, month, day] = localDate.split("-").map(Number);
+function createUserDayBoundaryDate(input: {
+  userDayDate: LocalDateString;
+  shiftCycle: ShiftCycle | null;
+  schedulingPreferences: DayFrameState["schedulingPreferences"];
+}): Date {
+  const [year, month, day] = input.userDayDate.split("-").map(Number);
+  const effectivePreferences = resolveEffectiveSchedulePreferencesForUserDayDate({
+    shiftCycle: input.shiftCycle,
+    defaultSchedulingPreferences: input.schedulingPreferences,
+    userDayDate: input.userDayDate,
+  });
+  const [hours, minutes] = effectivePreferences.dayBoundaryStartTime.split(":").map(Number);
 
-  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 0, 0, 0, 0);
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
 }
 
-function createDateAtEndOfDay(localDate: LocalDateString): Date {
+function addDaysToLocalDate(localDate: LocalDateString, days: number): LocalDateString {
   const [year, month, day] = localDate.split("-").map(Number);
+  const nextDate = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
 
-  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 23, 59, 0, 0);
+  nextDate.setDate(nextDate.getDate() + days);
+
+  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(
+    nextDate.getDate(),
+  ).padStart(2, "0")}` as LocalDateString;
 }

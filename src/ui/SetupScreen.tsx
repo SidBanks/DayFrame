@@ -2038,7 +2038,7 @@ function calculatePreviewRangeEndDate(
     case "twoWeeks":
       return createLocalDateString(addDays(start, 13));
     case "oneMonth":
-      return createLocalDateString(addDays(start, 29));
+      return createLocalDateString(subtractDays(addMonths(start, 1), 1));
     case "custom":
       return startDate;
   }
@@ -2054,6 +2054,18 @@ function addDays(date: Date, days: number): Date {
   const nextDate = new Date(date);
 
   nextDate.setDate(nextDate.getDate() + days);
+
+  return nextDate;
+}
+
+function subtractDays(date: Date, days: number): Date {
+  return addDays(date, -days);
+}
+
+function addMonths(date: Date, months: number): Date {
+  const nextDate = new Date(date);
+
+  nextDate.setMonth(nextDate.getMonth() + months);
 
   return nextDate;
 }

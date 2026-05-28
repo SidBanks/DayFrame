@@ -190,7 +190,7 @@ function buildState(partialState: Partial<DayFrameState>): DayFrameState {
     previewRange: {
       preset: "threeDays",
       startDate: "2026-05-04",
-      endDate: "2026-05-05",
+      endDate: "2026-05-06",
     },
     shiftDefinitions: [],
     shiftCycle: null,
@@ -276,6 +276,8 @@ function buildPreview(suggestedFixes: SuggestedFix[] = [buildSuggestedFix()]): D
         },
       ],
     },
+    rangeStartDate: "2026-05-05",
+    rangeEndDate: "2026-05-06",
     planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
     planningWindowEnd: new Date(2026, 4, 6, 0, 0, 0, 0),
     generatedAt: "2026-05-03T13:00:00-05:00",

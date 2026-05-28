@@ -81,7 +81,10 @@ export function PreviewScreen({
           <div className="df-summary-item">
             <strong>Planning Window</strong>
             <span>
-              {formatPlanningWindow(preview.planningWindowStart, preview.planningWindowEnd)}
+              {formatPlanningWindow(
+                createDateFromLocalDate(preview.rangeStartDate),
+                createDateFromLocalDate(preview.rangeEndDate),
+              )}
             </span>
           </div>
           <div className="df-summary-item">
@@ -325,6 +328,12 @@ function createSuggestedFixHandler(
       selectedSuggestedFixId,
     });
   };
+}
+
+function createDateFromLocalDate(userDayDate: string): Date {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
 }
 
 function formatScheduledBlockDetails(

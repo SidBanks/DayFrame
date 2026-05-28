@@ -26,6 +26,8 @@ export type DayFramePreviewRange = {
 
 export type DayFramePreview = {
   result: GenerateSchedulePreviewResult;
+  rangeStartDate: LocalDateString;
+  rangeEndDate: LocalDateString;
   planningWindowStart: Date;
   planningWindowEnd: Date;
   generatedAt: string;
@@ -63,6 +65,8 @@ export type DayFrameAuthoredSetup = Pick<
 >;
 
 export type GeneratePreviewActionInput = {
+  rangeStartDate: LocalDateString;
+  rangeEndDate: LocalDateString;
   planningWindowStart: Date;
   planningWindowEnd: Date;
   generatedAt: string;
