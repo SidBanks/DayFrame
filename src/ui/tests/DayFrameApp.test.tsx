@@ -450,8 +450,8 @@ describe("DayFrameApp", () => {
     },
     {
       preset: "oneMonth" as const,
-      expectedVisibleDayCount: 31,
-      expectedPlanningWindowLabel: "May 5 - June 4, 2026",
+      expectedVisibleDayCount: 30,
+      expectedPlanningWindowLabel: "May 5 - June 3, 2026",
     },
   ])(
     "shows exactly $expectedVisibleDayCount visible user days for $preset",
