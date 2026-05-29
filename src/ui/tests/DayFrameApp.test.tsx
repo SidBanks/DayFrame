@@ -70,6 +70,11 @@ describe("DayFrameApp", () => {
   it("renders the shell and opens on setup", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
+    expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
     expect(screen.getByRole("heading", { name: "DayFrame" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Setup" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
@@ -108,6 +113,7 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeInTheDocument();
     expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
   });
@@ -401,14 +407,41 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("Generated")).toBeInTheDocument();
-    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+    expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
     expect(screen.getByText("Friction Counts")).toBeInTheDocument();
     expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM")).toHaveLength(6);
     expect(screen.getByText("Errands 2:30 PM - 3:30 PM")).toBeInTheDocument();
     expect(screen.getByLabelText("Day visualizer for 2026-05-04")).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+    expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
+    expect(screen.getByText("Visible Days")).toBeInTheDocument();
+    expect(screen.getByText("Open Full Preview")).toBeInTheDocument();
+    expect(screen.getByText("Mon")).toBeInTheDocument();
+    expect(screen.getByText("Tue")).toBeInTheDocument();
+    expect(screen.getByText("Wed")).toBeInTheDocument();
+  });
+
+  it("opens the full preview when the compact header preview is clicked", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+
+    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open compact preview summary" }));
+
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { name: "Preview" })).toBeInTheDocument();
+    expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
   });
 
   it("generates preview using the saved preview range instead of the old hardcoded window", () => {
@@ -429,7 +462,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("May 5-11, 2026")).toBeInTheDocument();
+    expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
   });
 
   it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", () => {
@@ -513,7 +546,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("May 5-11, 2026")).toBeInTheDocument();
+    expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(7);
     expect(screen.getAllByText("Sleep 12:15 PM - 8:45 PM")).toHaveLength(7);
     expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(7);
@@ -588,7 +621,7 @@ describe("DayFrameApp", () => {
       fireEvent.click(screen.getByRole("button", { name: "Preview" }));
       fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-      expect(screen.getByText(expectedPlanningWindowLabel)).toBeInTheDocument();
+      expect(screen.getAllByText(expectedPlanningWindowLabel).length).toBeGreaterThan(0);
       expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(
         expectedVisibleDayCount,
       );
@@ -770,8 +803,8 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
     expect(screen.queryByText("Finish setup before generating a preview:")).not.toBeInTheDocument();
-    expect(screen.getByText("Generated")).toBeInTheDocument();
-    expect(screen.getByText("May 5-7, 2026")).toBeInTheDocument();
+    expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("May 5-7, 2026").length).toBeGreaterThan(0);
     expect(screen.getByText("Tuesday, 2026-05-05")).toBeInTheDocument();
     expect(screen.getByText("Wednesday, 2026-05-06")).toBeInTheDocument();
     expect(screen.getByText("Thursday, 2026-05-07")).toBeInTheDocument();
@@ -895,7 +928,7 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
-    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+    expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
     fireEvent.change(screen.getByLabelText("Name"), {
@@ -928,7 +961,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
+    expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM")).toHaveLength(6);
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
@@ -953,9 +986,11 @@ describe("DayFrameApp", () => {
         screen.queryByText("Setup changed. Generate a new preview to see updates."),
       ).not.toBeInTheDocument();
     });
-    expect(screen.getByText("Today at 3:00 PM")).toBeInTheDocument();
+    expect(screen.getAllByText("Today at 3:00 PM").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep Recovery 8:45 PM - 4:45 AM")).toHaveLength(6);
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
+    expect(screen.getAllByText("May 4-6, 2026").length).toBeGreaterThan(0);
   });
 
   it("shows review-fixed-time guidance after clicking Review fixed time", () => {
@@ -1124,7 +1159,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 7:00 PM - 3:00 AM")).toHaveLength(3);
   });
 
@@ -1222,7 +1257,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(screen.getByText("Generated")).toBeInTheDocument();
+    expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getByText("Errands 2:15 PM - 3:15 PM")).toBeInTheDocument();
     expect(screen.queryByText("Sleep 7:00 PM - 3:00 AM")).not.toBeInTheDocument();
   });

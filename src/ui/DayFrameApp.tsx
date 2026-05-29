@@ -9,6 +9,7 @@ import { createDayFrameStore } from "../state/dayFrameStore.js";
 import type { DayFrameState, DayFrameStore, GeneratePreviewActionInput } from "../state/types.js";
 import { PreviewScreen } from "./PreviewScreen.js";
 import { SetupScreen, buildSetupDraft, type SetupDraft } from "./SetupScreen.js";
+import { formatPlanningWindow, formatPreviewTimestamp } from "./timeDisplay.js";
 import "./dayFrameUi.css";
 
 export type DayFrameAppStore = Pick<
@@ -71,6 +72,9 @@ export function DayFrameApp({
   const [profileName, setProfileName] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
+  const previewSummary = stateSnapshot.preview
+    ? buildCompactPreviewSummary(stateSnapshot.preview, getNow())
+    : null;
 
   useEffect(() => {
     return storeRef.current.subscribe((nextState) => {
@@ -89,20 +93,83 @@ export function DayFrameApp({
     stateSnapshot.blockRecurrences,
   ]);
 
+  function resetShellMessages(): void {
+    setSetupSaveMessage("");
+    setPreviewGuardrailMissingItems([]);
+    setIsConfirmingClearLocalData(false);
+    setClearLocalDataMessage("");
+    setBackupMessage("");
+    setBackupErrorMessage("");
+    setProfileMessage("");
+    setProfileErrorMessage("");
+  }
+
+  function openSetupScreen(): void {
+    setCurrentScreen("setup");
+    resetShellMessages();
+  }
+
+  function openPreviewScreen(): void {
+    setCurrentScreen("preview");
+    resetShellMessages();
+  }
+
+  function saveCurrentSetup(): void {
+    const savedAt = createIsoTimestamp();
+
+    storeRef.current.setSchedulingPreferences(setupDraft.schedulingPreferences);
+    storeRef.current.setPreviewRange(setupDraft.previewRange);
+    storeRef.current.setShiftDefinitions(
+      setupDraft.shiftDefinitions.map((shiftDefinition) => ({
+        ...shiftDefinition,
+        updatedAt: savedAt,
+      })),
+    );
+    storeRef.current.setShiftCycle({
+      ...setupDraft.shiftCycle,
+      updatedAt: savedAt,
+    });
+    storeRef.current.setBlockTemplates(
+      setupDraft.templateEntries.map((entry) => ({
+        ...entry.template,
+        updatedAt: savedAt,
+      })),
+    );
+    storeRef.current.setBlockRecurrences(
+      setupDraft.templateEntries.map((entry) => ({
+        ...entry.recurrence,
+      })),
+    );
+    setSetupSaveMessage("Setup saved.");
+  }
+
+  function generatePreviewFromSavedState(): void {
+    const currentState = storeRef.current.getState();
+    const missingItems = getMissingPreviewSetupItems(currentState);
+
+    if (missingItems.length > 0) {
+      setPreviewGuardrailMissingItems(missingItems);
+      return;
+    }
+
+    const previewWindow = getPreviewWindow?.() ?? createPreviewWindowFromRange(currentState);
+
+    storeRef.current.generatePreview({
+      rangeStartDate: currentState.previewRange.startDate,
+      rangeEndDate: currentState.previewRange.endDate,
+      planningWindowStart: previewWindow.planningWindowStart,
+      planningWindowEnd: previewWindow.planningWindowEnd,
+      generatedAt: getGeneratedAt(),
+    });
+    setPreviewGuardrailMissingItems([]);
+  }
+
   return (
     <div className="df-app">
       <div className="df-shell">
         <header className="df-shell-header">
-          <div className="df-shell-toolbar">
-            <div className="df-brand">
-              <h1>DayFrame</h1>
-              <p className="df-shell-subtitle">Built for life that does not run 9 to 5.</p>
-              <p className="df-support">
-                Set up your shifts, connect them to a cycle, add repeatable life blocks, then
-                generate a preview.
-              </p>
-            </div>
-            <div className="df-confirmation">
+          <div className="df-shell-header-grid">
+            <section className="df-confirmation">
               <div className="df-form-stack">
                 <div className="df-screen-header">
                   <h2 className="df-panel-title">Saved Setup Profiles</h2>
@@ -312,76 +379,126 @@ export function DayFrameApp({
                   data is not included.
                 </p>
               )}
-            </div>
-          </div>
+            </section>
 
-          <nav aria-label="App Sections" className="df-nav">
-            <button
-              onClick={() => {
-                setCurrentScreen("setup");
-                setSetupSaveMessage("");
-                setPreviewGuardrailMissingItems([]);
-                setIsConfirmingClearLocalData(false);
-                setClearLocalDataMessage("");
-                setBackupMessage("");
-                setBackupErrorMessage("");
-                setProfileMessage("");
-                setProfileErrorMessage("");
-              }}
-              type="button"
-            >
-              Setup
-            </button>
-            <button
-              onClick={() => {
-                setCurrentScreen("preview");
-                setSetupSaveMessage("");
-                setPreviewGuardrailMissingItems([]);
-                setIsConfirmingClearLocalData(false);
-                setClearLocalDataMessage("");
-                setBackupMessage("");
-                setBackupErrorMessage("");
-                setProfileMessage("");
-                setProfileErrorMessage("");
-              }}
-              type="button"
-            >
-              Preview
-            </button>
-          </nav>
+            <section className="df-workflow-panel">
+              <div className="df-brand">
+                <h1>DayFrame</h1>
+                <p className="df-shell-subtitle">Built for life that does not run 9 to 5.</p>
+                <p className="df-support">
+                  Set up your shifts, connect them to a cycle, add repeatable life blocks, then
+                  generate a preview.
+                </p>
+              </div>
+
+              <div className="df-workflow-status">
+                <p className="df-workflow-eyebrow">Workspace</p>
+                <h2 className="df-panel-title">
+                  {currentScreen === "setup" ? "Setup your schedule inputs" : "Review your preview"}
+                </h2>
+                <p className="df-support">
+                  {currentScreen === "setup"
+                    ? "Save edits in Setup, then switch to Preview when you're ready to generate or review a schedule draft."
+                    : "Use Preview to generate a schedule draft from your saved setup and review any friction that needs attention."}
+                </p>
+              </div>
+
+              <nav aria-label="App Sections" className="df-primary-nav">
+                <button
+                  aria-label="Setup"
+                  aria-pressed={currentScreen === "setup"}
+                  className={
+                    currentScreen === "setup"
+                      ? "df-primary-nav-button is-active"
+                      : "df-primary-nav-button"
+                  }
+                  onClick={openSetupScreen}
+                  type="button"
+                >
+                  <span className="df-primary-nav-title">Setup</span>
+                  <span aria-hidden="true" className="df-primary-nav-detail">
+                    Edit shifts, cycle, templates, and range
+                  </span>
+                </button>
+                <button
+                  aria-label="Preview"
+                  aria-pressed={currentScreen === "preview"}
+                  className={
+                    currentScreen === "preview"
+                      ? "df-primary-nav-button is-active"
+                      : "df-primary-nav-button"
+                  }
+                  onClick={openPreviewScreen}
+                  type="button"
+                >
+                  <span className="df-primary-nav-title">Preview</span>
+                  <span aria-hidden="true" className="df-primary-nav-detail">
+                    Generate and review a draft schedule
+                  </span>
+                </button>
+              </nav>
+
+              {previewSummary ? (
+                <section className="df-compact-preview" aria-labelledby="compact-preview-heading">
+                  <div className="df-compact-preview-header">
+                    <div className="df-screen-header">
+                      <p className="df-workflow-eyebrow">Latest Preview</p>
+                      <h2 className="df-panel-title" id="compact-preview-heading">
+                        {previewSummary.frictionLabel}
+                      </h2>
+                      <p className="df-support">
+                        {previewSummary.rangeLabel} · Generated {previewSummary.generatedLabel}
+                      </p>
+                    </div>
+                    <button className="df-action-button" onClick={openPreviewScreen} type="button">
+                      Open Full Preview
+                    </button>
+                  </div>
+
+                  <button
+                    aria-label="Open compact preview summary"
+                    className="df-compact-preview-card"
+                    onClick={openPreviewScreen}
+                    type="button"
+                  >
+                    <div className="df-compact-preview-metrics">
+                      <div className="df-compact-preview-metric">
+                        <strong>Planning Range</strong>
+                        <span>{previewSummary.rangeLabel}</span>
+                      </div>
+                      <div className="df-compact-preview-metric">
+                        <strong>Generated</strong>
+                        <span>{previewSummary.generatedLabel}</span>
+                      </div>
+                      <div className="df-compact-preview-metric">
+                        <strong>Visible Days</strong>
+                        <span>{previewSummary.visibleDayCount}</span>
+                      </div>
+                      <div className="df-compact-preview-metric">
+                        <strong>Friction</strong>
+                        <span>{previewSummary.frictionLabel}</span>
+                      </div>
+                    </div>
+
+                    <div className="df-compact-preview-days">
+                      {previewSummary.dayItems.map((dayItem) => (
+                        <span className="df-compact-preview-day" key={dayItem.date}>
+                          <strong>{dayItem.weekday}</strong>
+                          <span>{dayItem.dayNumber}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                </section>
+              ) : null}
+            </section>
+          </div>
         </header>
 
         {currentScreen === "setup" ? (
           <SetupScreen
             draft={setupDraft}
-            onSave={() => {
-              const savedAt = createIsoTimestamp();
-
-              storeRef.current.setSchedulingPreferences(setupDraft.schedulingPreferences);
-              storeRef.current.setPreviewRange(setupDraft.previewRange);
-              storeRef.current.setShiftDefinitions(
-                setupDraft.shiftDefinitions.map((shiftDefinition) => ({
-                  ...shiftDefinition,
-                  updatedAt: savedAt,
-                })),
-              );
-              storeRef.current.setShiftCycle({
-                ...setupDraft.shiftCycle,
-                updatedAt: savedAt,
-              });
-              storeRef.current.setBlockTemplates(
-                setupDraft.templateEntries.map((entry) => ({
-                  ...entry.template,
-                  updatedAt: savedAt,
-                })),
-              );
-              storeRef.current.setBlockRecurrences(
-                setupDraft.templateEntries.map((entry) => ({
-                  ...entry.recurrence,
-                })),
-              );
-              setSetupSaveMessage("Setup saved.");
-            }}
+            onSave={saveCurrentSetup}
             saveMessage={setupSaveMessage}
             setDraft={(nextDraft) => {
               setSetupSaveMessage("");
@@ -401,27 +518,7 @@ export function DayFrameApp({
               <div className="df-screen-actions">
                 <button
                   className="df-action-button"
-                  onClick={() => {
-                    const missingItems = getMissingPreviewSetupItems(storeRef.current.getState());
-
-                    if (missingItems.length > 0) {
-                      setPreviewGuardrailMissingItems(missingItems);
-                      return;
-                    }
-
-                    const previewWindow =
-                      getPreviewWindow?.() ??
-                      createPreviewWindowFromRange(storeRef.current.getState());
-
-                    storeRef.current.generatePreview({
-                      rangeStartDate: storeRef.current.getState().previewRange.startDate,
-                      rangeEndDate: storeRef.current.getState().previewRange.endDate,
-                      planningWindowStart: previewWindow.planningWindowStart,
-                      planningWindowEnd: previewWindow.planningWindowEnd,
-                      generatedAt: getGeneratedAt(),
-                    });
-                    setPreviewGuardrailMissingItems([]);
-                  }}
+                  onClick={generatePreviewFromSavedState}
                   type="button"
                 >
                   Generate Schedule Preview
@@ -464,6 +561,79 @@ export function DayFrameApp({
       </div>
     </div>
   );
+}
+
+type CompactPreviewSummary = {
+  rangeLabel: string;
+  generatedLabel: string;
+  visibleDayCount: number;
+  frictionLabel: string;
+  dayItems: Array<{
+    date: string;
+    weekday: string;
+    dayNumber: string;
+  }>;
+};
+
+function buildCompactPreviewSummary(
+  preview: NonNullable<DayFrameState["preview"]>,
+  now: Date,
+): CompactPreviewSummary {
+  const visibleFrictionCount = preview.result.frictionPoints.filter(
+    (frictionPoint) => !frictionPoint.ignored,
+  ).length;
+  const dayItems = buildPreviewDayItems(preview.rangeStartDate, preview.rangeEndDate);
+
+  return {
+    rangeLabel: formatPlanningWindow(
+      createCompactPreviewDateFromLocalDate(preview.rangeStartDate),
+      createCompactPreviewDateFromLocalDate(preview.rangeEndDate),
+    ),
+    generatedLabel: formatPreviewTimestamp(preview.generatedAt, now),
+    visibleDayCount: dayItems.length,
+    frictionLabel: visibleFrictionCount === 0 ? "No friction" : `${visibleFrictionCount} friction`,
+    dayItems,
+  };
+}
+
+function buildPreviewDayItems(
+  startDate: LocalDateString,
+  endDate: LocalDateString,
+): CompactPreviewSummary["dayItems"] {
+  const dayItems: CompactPreviewSummary["dayItems"] = [];
+  let currentDate = startDate;
+
+  while (currentDate <= endDate) {
+    const date = createCompactPreviewDateFromLocalDate(currentDate);
+
+    dayItems.push({
+      date: currentDate,
+      weekday: date.toLocaleDateString("en-US", { weekday: "short" }),
+      dayNumber: String(date.getDate()),
+    });
+    currentDate = addCompactPreviewDaysToLocalDate(currentDate, 1);
+  }
+
+  return dayItems;
+}
+
+function createCompactPreviewDateFromLocalDate(localDate: LocalDateString): Date {
+  const [year, month, day] = localDate.split("-").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+}
+
+function addCompactPreviewDaysToLocalDate(
+  localDate: LocalDateString,
+  days: number,
+): LocalDateString {
+  const nextDate = createCompactPreviewDateFromLocalDate(localDate);
+
+  nextDate.setDate(nextDate.getDate() + days);
+
+  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(
+    nextDate.getDate(),
+  ).padStart(2, "0")}` as LocalDateString;
 }
 
 function createSeededDayFrameStore(): DayFrameStore {
