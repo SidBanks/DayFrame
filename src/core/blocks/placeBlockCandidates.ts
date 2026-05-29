@@ -12,12 +12,18 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
 
   const scheduledBlocks: DraftScheduledBlock[] = [];
+  const deferredSleepCandidates: BlockCandidate[] = [];
   const unplacedCandidates: BlockCandidate[] = [];
 
   for (const blockCandidate of input.blockCandidates) {
     const scheduledBlock = placeBlockCandidate(blockCandidate, input);
 
     if (!scheduledBlock) {
+      if (shouldDeferToSleepAnchorPropagation(blockCandidate, input.generatedWorkBlocks)) {
+        deferredSleepCandidates.push(blockCandidate);
+        continue;
+      }
+
       unplacedCandidates.push(blockCandidate);
       continue;
     }
@@ -31,6 +37,13 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
 
     scheduledBlocks.push(scheduledBlock);
   }
+
+  placeDeferredSleepCandidates({
+    deferredSleepCandidates,
+    scheduledBlocks,
+    unplacedCandidates,
+    input,
+  });
 
   scheduledBlocks.sort(compareScheduledBlocks);
   unplacedCandidates.sort((left, right) => left.id.localeCompare(right.id));
@@ -157,6 +170,37 @@ function placeBlockCandidate(
   }
 }
 
+function placeDeferredSleepCandidates(input: {
+  deferredSleepCandidates: BlockCandidate[];
+  scheduledBlocks: DraftScheduledBlock[];
+  unplacedCandidates: BlockCandidate[];
+  input: PlaceBlockCandidatesInput;
+}): void {
+  for (const blockCandidate of input.deferredSleepCandidates) {
+    const anchor = findNearestSleepAnchor(blockCandidate, input.scheduledBlocks);
+
+    if (!anchor) {
+      input.unplacedCandidates.push(blockCandidate);
+      continue;
+    }
+
+    const propagatedScheduledBlock = buildPropagatedSleepBlock(blockCandidate, anchor, input.input);
+
+    if (
+      !overlapsPlanningWindow(
+        propagatedScheduledBlock,
+        input.input.planningWindowStart,
+        input.input.planningWindowEnd,
+      )
+    ) {
+      input.unplacedCandidates.push(blockCandidate);
+      continue;
+    }
+
+    input.scheduledBlocks.push(propagatedScheduledBlock);
+  }
+}
+
 function buildScheduledBlock(
   blockCandidate: BlockCandidate,
   startsAt: Date,
@@ -191,6 +235,31 @@ function buildScheduledBlock(
     status: "planned",
     externalResources: blockCandidate.externalResources,
   };
+}
+
+function buildPropagatedSleepBlock(
+  blockCandidate: BlockCandidate,
+  anchor: DraftScheduledBlock,
+  input: PlaceBlockCandidatesInput,
+): DraftScheduledBlock {
+  const targetDayBoundaryStartTime =
+    input.getDayBoundaryStartTimeForUserDayDate?.(blockCandidate.userDayDate) ??
+    input.dayBoundaryStartTime;
+  const targetUserDayStart = getUserDayStartFromDateString(
+    blockCandidate.userDayDate,
+    targetDayBoundaryStartTime,
+  );
+  const anchorDayBoundaryStartTime =
+    input.getDayBoundaryStartTimeForUserDayDate?.(anchor.userDayDate) ?? input.dayBoundaryStartTime;
+  const anchorUserDayStart = getUserDayStartFromDateString(
+    anchor.userDayDate,
+    anchorDayBoundaryStartTime,
+  );
+  const startsAtOffsetMinutes = differenceInMinutes(anchorUserDayStart, anchor.startsAt);
+  const startsAt = addMinutes(targetUserDayStart, startsAtOffsetMinutes);
+  const endsAt = addMinutes(startsAt, blockCandidate.durationMinutes);
+
+  return buildScheduledBlock(blockCandidate, startsAt, endsAt);
 }
 
 function getUserDayStartFromDateString(
@@ -272,6 +341,10 @@ function addMinutes(date: Date, minutes: number): Date {
   return new Date(date.getTime() + minutes * 60_000);
 }
 
+function differenceInMinutes(start: Date, end: Date): number {
+  return Math.round((end.getTime() - start.getTime()) / 60_000);
+}
+
 function getBufferBeforeMinutes(blockCandidate: BlockCandidate): number {
   return blockCandidate.bufferBeforeMinutes ?? 0;
 }
@@ -307,4 +380,57 @@ function compareScheduledBlocks(left: DraftScheduledBlock, right: DraftScheduled
   }
 
   return left.id.localeCompare(right.id);
+}
+
+function shouldDeferToSleepAnchorPropagation(
+  blockCandidate: BlockCandidate,
+  generatedWorkBlocks: PlaceBlockCandidatesInput["generatedWorkBlocks"],
+): boolean {
+  return (
+    blockCandidate.category === "sleep" &&
+    blockCandidate.preferredWindow === "beforeWork" &&
+    blockCandidate.recurrenceFrequency === "daily" &&
+    blockCandidate.placementType === "flexible" &&
+    getFirstWorkBlockForUserDay(generatedWorkBlocks, blockCandidate.userDayDate) === null
+  );
+}
+
+function findNearestSleepAnchor(
+  blockCandidate: BlockCandidate,
+  scheduledBlocks: DraftScheduledBlock[],
+): DraftScheduledBlock | null {
+  const matchingAnchors = scheduledBlocks
+    .filter((scheduledBlock) => isMatchingSleepAnchor(blockCandidate, scheduledBlock))
+    .sort((left, right) => left.userDayDate.localeCompare(right.userDayDate));
+
+  if (matchingAnchors.length === 0) {
+    return null;
+  }
+
+  const previousAnchor =
+    [...matchingAnchors]
+      .reverse()
+      .find((scheduledBlock) => scheduledBlock.userDayDate < blockCandidate.userDayDate) ?? null;
+
+  if (previousAnchor) {
+    return previousAnchor;
+  }
+
+  return (
+    matchingAnchors.find(
+      (scheduledBlock) => scheduledBlock.userDayDate > blockCandidate.userDayDate,
+    ) ?? null
+  );
+}
+
+function isMatchingSleepAnchor(
+  blockCandidate: BlockCandidate,
+  scheduledBlock: DraftScheduledBlock,
+): boolean {
+  return (
+    scheduledBlock.templateId === blockCandidate.templateId &&
+    scheduledBlock.category === "sleep" &&
+    scheduledBlock.placementType === "flexible" &&
+    scheduledBlock.anchorType === "flexibleTemplate"
+  );
 }

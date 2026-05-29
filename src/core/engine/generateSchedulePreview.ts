@@ -119,28 +119,63 @@ export function generateSchedulePreview(
         userDayDate,
       }).dayBoundaryStartTime,
   });
-  const filteredGeneratedWorkBlocks = generatedWorkBlocks.filter((workBlock) =>
-    overlapsVisiblePlanningWindow(
-      workBlock.startsAt,
-      workBlock.endsAt,
-      input.planningWindowStart,
-      input.planningWindowEnd,
-    ),
+  const filteredGeneratedWorkBlocks = generatedWorkBlocks.filter(
+    (workBlock) =>
+      visibleUserDayDates.has(workBlock.userDayDate) &&
+      overlapsVisiblePlanningWindow(
+        workBlock.startsAt,
+        workBlock.endsAt,
+        input.planningWindowStart,
+        input.planningWindowEnd,
+      ),
   );
   const filteredBlockCandidates = blockCandidates.filter((candidate) =>
     visibleUserDayDates.has(candidate.userDayDate),
   );
+  const getDayBoundaryStartTimeForUserDayDate = (userDayDate: LocalDateString) =>
+    resolveEffectiveSchedulePreferencesForUserDayDate({
+      shiftCycle: input.shiftCycle,
+      defaultSchedulingPreferences: {
+        dayBoundaryStartTime: input.dayBoundaryStartTime,
+        weekStartsOn: input.weekStartsOn,
+      },
+      userDayDate,
+    }).dayBoundaryStartTime;
   const filteredScheduledBlocks = placementResult.scheduledBlocks.filter((scheduledBlock) =>
-    visibleUserDayDates.has(scheduledBlock.userDayDate),
+    overlapsVisibleUserDay(
+      scheduledBlock.startsAt,
+      scheduledBlock.endsAt,
+      visibleUserDayDates,
+      getDayBoundaryStartTimeForUserDayDate,
+    ),
   );
   const filteredUnplacedCandidates = placementResult.unplacedCandidates.filter((candidate) =>
     visibleUserDayDates.has(candidate.userDayDate),
   );
-  const filteredFrictionPoints = suggestedFixesResult.frictionPoints.filter((frictionPoint) =>
-    frictionPoint.affectedUserDayDate
-      ? visibleUserDayDates.has(frictionPoint.affectedUserDayDate)
-      : true,
+  const visibleScheduledBlockIds = new Set(
+    filteredScheduledBlocks.map((scheduledBlock) => scheduledBlock.id),
   );
+  const visibleGeneratedWorkBlockIds = new Set(
+    filteredGeneratedWorkBlocks.map((generatedWorkBlock) => generatedWorkBlock.id),
+  );
+  const visibleUnplacedCandidateIds = new Set(
+    filteredUnplacedCandidates.map((candidate) => candidate.id),
+  );
+  const filteredFrictionPoints = suggestedFixesResult.frictionPoints.filter((frictionPoint) => {
+    if (
+      frictionPoint.affectedUserDayDate &&
+      visibleUserDayDates.has(frictionPoint.affectedUserDayDate)
+    ) {
+      return true;
+    }
+
+    return frictionPoint.affectedBlockIds.some(
+      (blockId) =>
+        visibleScheduledBlockIds.has(blockId) ||
+        visibleGeneratedWorkBlockIds.has(blockId) ||
+        visibleUnplacedCandidateIds.has(blockId),
+    );
+  });
 
   return {
     generatedWorkBlocks: filteredGeneratedWorkBlocks,
@@ -263,4 +298,23 @@ function overlapsVisiblePlanningWindow(
     startsAt.getTime() < planningWindowEnd.getTime() &&
     endsAt.getTime() > planningWindowStart.getTime()
   );
+}
+
+function overlapsVisibleUserDay(
+  startsAt: Date,
+  endsAt: Date,
+  visibleUserDayDates: Set<LocalDateString>,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: LocalDateString) => TimeString,
+): boolean {
+  for (const userDayDate of visibleUserDayDates) {
+    const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
+    const userDayStart = getUserDayStart(new Date(`${userDayDate}T12:00:00`), dayBoundaryStartTime);
+    const userDayEnd = addDays(userDayStart, 1);
+
+    if (startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime()) {
+      return true;
+    }
+  }
+
+  return false;
 }

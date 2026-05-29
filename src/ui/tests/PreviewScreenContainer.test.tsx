@@ -245,6 +245,7 @@ function buildPreview(suggestedFixes: SuggestedFix[] = [buildSuggestedFix()]): D
           userId: "user_001",
           templateId: "template_review",
           recurrenceId: "rec_review",
+          recurrenceFrequency: "specificWeekdays",
           title: "Schedule Review",
           category: "review",
           placementType: "flexible",

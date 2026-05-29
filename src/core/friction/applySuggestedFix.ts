@@ -74,8 +74,7 @@ export function applySuggestedFix(input: ApplySuggestedFixInput): ApplySuggested
     case "changeFixedTime":
       didApplyChange = false;
       actionFeedback = {
-        message:
-          "Edit this block's fixed start time in Template Editor, then generate a new preview.",
+        message: "Edit this block's fixed start time in Setup, then generate a new preview.",
         tone: "info",
       };
       break;

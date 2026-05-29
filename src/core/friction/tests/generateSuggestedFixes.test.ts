@@ -450,6 +450,7 @@ describe("generateSuggestedFixes", () => {
         userId: "user_001",
         templateId: "template_workout",
         recurrenceId: "rec_workout",
+        recurrenceFrequency: "specificWeekdays",
         title: "Workout",
         category: "fitness",
         placementType: "flexible",

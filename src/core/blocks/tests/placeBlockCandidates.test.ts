@@ -9,6 +9,7 @@ const baseCandidate: BlockCandidate = {
   userId: "user_001",
   templateId: "template_review",
   recurrenceId: "rec_review",
+  recurrenceFrequency: "daily",
   title: "Schedule Review",
   category: "review",
   placementType: "flexible",
@@ -388,6 +389,144 @@ describe("placeBlockCandidates", () => {
     );
   });
 
+  it("propagates daily before-work sleep onto a non-work day using the nearest previous anchor", () => {
+    const workBlocks: GeneratedWorkBlock[] = [
+      {
+        id: "work_shift_night_2026-05-05",
+        shiftDefinitionId: "shift_night",
+        userId: "user_001",
+        title: "Night Shift",
+        startsAt: new Date(2026, 4, 5, 21, 45, 0, 0),
+        endsAt: new Date(2026, 4, 6, 6, 15, 0, 0),
+        startDate: "2026-05-05",
+        endDate: "2026-05-06",
+        userDayDate: "2026-05-05",
+        crossesMidnight: true,
+      },
+    ];
+
+    const result = placeBlockCandidates({
+      blockCandidates: [
+        {
+          ...baseCandidate,
+          id: "candidate_sleep_anchor",
+          templateId: "default_sleep",
+          recurrenceId: "rec_sleep",
+          recurrenceFrequency: "daily",
+          title: "Sleep",
+          category: "sleep",
+          durationMinutes: 510,
+          preferredWindow: "beforeWork",
+          bufferBeforeMinutes: 60,
+          bufferAfterMinutes: 60,
+          userDayDate: "2026-05-05",
+        },
+        {
+          ...baseCandidate,
+          id: "candidate_sleep_off_day",
+          templateId: "default_sleep",
+          recurrenceId: "rec_sleep",
+          recurrenceFrequency: "daily",
+          title: "Sleep",
+          category: "sleep",
+          durationMinutes: 510,
+          preferredWindow: "beforeWork",
+          bufferBeforeMinutes: 60,
+          bufferAfterMinutes: 60,
+          userDayDate: "2026-05-06",
+        },
+      ],
+      generatedWorkBlocks: workBlocks,
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 7, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(result.unplacedCandidates).toHaveLength(0);
+    expect(result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+    ]);
+    expect(result.scheduledBlocks[0]).toMatchObject({
+      userDayDate: "2026-05-05",
+      startsAt: new Date(2026, 4, 5, 12, 15, 0, 0),
+      endsAt: new Date(2026, 4, 5, 20, 45, 0, 0),
+    });
+    expect(result.scheduledBlocks[1]).toMatchObject({
+      userDayDate: "2026-05-06",
+      startsAt: new Date(2026, 4, 6, 12, 15, 0, 0),
+      endsAt: new Date(2026, 4, 6, 20, 45, 0, 0),
+      bufferBeforeMinutes: 60,
+      bufferAfterMinutes: 60,
+      templateId: "default_sleep",
+      priority: 2,
+      category: "sleep",
+    });
+  });
+
+  it("propagates daily before-work sleep onto the first visible non-work day using the nearest future anchor", () => {
+    const workBlocks: GeneratedWorkBlock[] = [
+      {
+        id: "work_shift_night_2026-05-06",
+        shiftDefinitionId: "shift_night",
+        userId: "user_001",
+        title: "Night Shift",
+        startsAt: new Date(2026, 4, 6, 21, 45, 0, 0),
+        endsAt: new Date(2026, 4, 7, 6, 15, 0, 0),
+        startDate: "2026-05-06",
+        endDate: "2026-05-07",
+        userDayDate: "2026-05-06",
+        crossesMidnight: true,
+      },
+    ];
+
+    const result = placeBlockCandidates({
+      blockCandidates: [
+        {
+          ...baseCandidate,
+          id: "candidate_sleep_first_visible_off_day",
+          templateId: "default_sleep",
+          recurrenceId: "rec_sleep",
+          recurrenceFrequency: "daily",
+          title: "Sleep",
+          category: "sleep",
+          durationMinutes: 480,
+          preferredWindow: "beforeWork",
+          userDayDate: "2026-05-05",
+        },
+        {
+          ...baseCandidate,
+          id: "candidate_sleep_future_anchor",
+          templateId: "default_sleep",
+          recurrenceId: "rec_sleep",
+          recurrenceFrequency: "daily",
+          title: "Sleep",
+          category: "sleep",
+          durationMinutes: 480,
+          preferredWindow: "beforeWork",
+          userDayDate: "2026-05-06",
+        },
+      ],
+      generatedWorkBlocks: workBlocks,
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 7, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(result.unplacedCandidates).toHaveLength(0);
+    expect(result.scheduledBlocks).toHaveLength(2);
+    expect(result.scheduledBlocks[0]).toMatchObject({
+      userDayDate: "2026-05-05",
+      startsAt: new Date(2026, 4, 5, 13, 45, 0, 0),
+      endsAt: new Date(2026, 4, 5, 21, 45, 0, 0),
+    });
+    expect(result.scheduledBlocks[1]).toMatchObject({
+      userDayDate: "2026-05-06",
+      startsAt: new Date(2026, 4, 6, 13, 45, 0, 0),
+      endsAt: new Date(2026, 4, 6, 21, 45, 0, 0),
+    });
+  });
+
   it("keeps no-buffer placement behavior unchanged", () => {
     const workBlocks: GeneratedWorkBlock[] = [
       {
@@ -518,6 +657,7 @@ describe("placeBlockCandidates", () => {
     const candidate = {
       ...baseCandidate,
       id: "candidate_before_work",
+      recurrenceFrequency: "weekly" as const,
       preferredWindow: "beforeWork" as const,
     };
 

@@ -51,11 +51,11 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Friction Counts")).toBeInTheDocument();
     expect(screen.getByText("1 total, 0 critical, 1 warning")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Work" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Scheduled" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Unplaced" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Friction" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Day Visualizer" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Work" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Scheduled" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Unplaced" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Friction" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(2);
     expect(screen.getByLabelText("Day visualizer for 2026-05-05")).toBeInTheDocument();
     expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
     expect(screen.getByText("Workout 2:15 PM - 3:15 PM")).toBeInTheDocument();
@@ -91,8 +91,7 @@ describe("PreviewScreen", () => {
         getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
         now={new Date(2026, 4, 3, 16, 0, 0, 0)}
         preview={buildPreview(undefined, {
-          message:
-            "Edit this block's fixed start time in Template Editor, then generate a new preview.",
+          message: "Edit this block's fixed start time in Setup, then generate a new preview.",
           tone: "info",
         })}
         onApplySuggestedFix={vi.fn()}
@@ -100,10 +99,47 @@ describe("PreviewScreen", () => {
     );
 
     expect(
-      screen.getByText(
-        "Edit this block's fixed start time in Template Editor, then generate a new preview.",
-      ),
+      screen.getByText("Edit this block's fixed start time in Setup, then generate a new preview."),
     ).toBeInTheDocument();
+  });
+
+  it("keeps a scheduled block visible on each visible day it overlaps across a user-day boundary", () => {
+    const preview = buildPreview();
+
+    preview.result.generatedWorkBlocks = [];
+    preview.result.scheduledBlocks = [
+      {
+        id: "scheduled_sleep",
+        userId: "user_001",
+        templateId: "default_sleep",
+        source: "template",
+        title: "Sleep",
+        category: "sleep",
+        startsAt: new Date(2026, 4, 5, 22, 0, 0, 0),
+        endsAt: new Date(2026, 4, 6, 6, 0, 0, 0),
+        userDayDate: "2026-05-05",
+        userWeekStartDate: "2026-05-02",
+        priority: 1,
+        status: "planned",
+        externalResources: [],
+      },
+    ];
+    preview.result.unplacedCandidates = [];
+    preview.result.frictionPoints = [];
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
+    expect(screen.getAllByText("Sleep 10:00 PM - 6:00 AM")).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(2);
   });
 
   it("shows updated priority and rescheduled state in the visible preview", () => {
@@ -148,7 +184,86 @@ describe("PreviewScreen", () => {
 
     expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
-    expect(screen.getByText("No friction detected.")).toBeInTheDocument();
+    expect(screen.getAllByText("No friction detected.")).toHaveLength(2);
+  });
+
+  it("shows cross-boundary conflict friction on a visible day without adding an out-of-range day card", () => {
+    const preview = buildPreview();
+
+    preview.rangeStartDate = "2026-05-05";
+    preview.rangeEndDate = "2026-05-05";
+    preview.result.generatedWorkBlocks = [
+      {
+        id: "work_shift_early_2026-05-05",
+        shiftDefinitionId: "shift_early",
+        shiftCycleId: "cycle_001",
+        shiftSegmentId: "segment_early",
+        userId: "user_001",
+        title: "Early Shift",
+        startsAt: new Date(2026, 4, 5, 3, 30, 0, 0),
+        endsAt: new Date(2026, 4, 5, 11, 30, 0, 0),
+        startDate: "2026-05-05",
+        endDate: "2026-05-05",
+        userDayDate: "2026-05-05",
+        crossesMidnight: false,
+      },
+    ];
+    preview.result.scheduledBlocks = [
+      {
+        id: "scheduled_maintenance",
+        userId: "user_001",
+        templateId: "template_maintenance",
+        source: "template",
+        title: "Maintenance",
+        category: "maintenance",
+        startsAt: new Date(2026, 4, 5, 2, 30, 0, 0),
+        endsAt: new Date(2026, 4, 5, 4, 30, 0, 0),
+        userDayDate: "2026-05-04",
+        userWeekStartDate: "2026-05-02",
+        priority: 2,
+        status: "planned",
+        externalResources: [],
+      },
+    ];
+    preview.result.unplacedCandidates = [];
+    preview.result.frictionPoints = [
+      {
+        id: "friction_conflict_cross_boundary",
+        userId: "user_001",
+        severity: "warning",
+        title: "Maintenance conflicts with Early Shift",
+        message: "Maintenance overlaps the visible work block and still needs review.",
+        affectedBlockIds: ["scheduled_maintenance", "work_shift_early_2026-05-05"],
+        affectedUserDayDate: "2026-05-04",
+        affectedUserWeekStartDate: "2026-05-02",
+        suggestedFixes: [
+          {
+            id: "fix_review_cross_boundary",
+            label: "Review fixed time",
+            action: "changeFixedTime",
+          },
+        ],
+        canIgnore: true,
+        ignored: false,
+        resolved: false,
+        createdAt: "2026-05-03T13:00:00-05:00",
+        updatedAt: "2026-05-03T14:00:00-05:00",
+      },
+    ];
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Monday, 2026-05-04" })).not.toBeInTheDocument();
+    expect(screen.getByText("Maintenance conflicts with Early Shift")).toBeInTheDocument();
+    expect(screen.getByText("Maintenance 2:30 AM - 4:30 AM")).toBeInTheDocument();
   });
 });
 
@@ -204,6 +319,7 @@ function buildPreview(
           userId: "user_001",
           templateId: "template_review",
           recurrenceId: "rec_review",
+          recurrenceFrequency: "specificWeekdays",
           title: "Schedule Review",
           category: "review",
           placementType: "flexible",

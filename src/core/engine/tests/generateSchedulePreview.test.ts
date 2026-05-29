@@ -1045,4 +1045,360 @@ describe("generateSchedulePreview", () => {
       ),
     ).toBe(true);
   });
+
+  it("propagates daily before-work sleep onto visible off-days using the nearest previous work-day anchor", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["tuesday", "thursday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Night Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_night",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_night",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 510,
+          bufferBeforeMinutes: 60,
+          bufferAfterMinutes: 60,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 9, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.generatedWorkBlocks.map((block) => block.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-07",
+    ]);
+    expect(result.scheduledBlocks.map((block) => block.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+    ]);
+    expect(result.scheduledBlocks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userDayDate: "2026-05-05",
+          startsAt: new Date(2026, 4, 5, 12, 15, 0, 0),
+          endsAt: new Date(2026, 4, 5, 20, 45, 0, 0),
+        }),
+        expect.objectContaining({
+          userDayDate: "2026-05-06",
+          startsAt: new Date(2026, 4, 6, 12, 15, 0, 0),
+          endsAt: new Date(2026, 4, 6, 20, 45, 0, 0),
+        }),
+        expect.objectContaining({
+          userDayDate: "2026-05-07",
+          startsAt: new Date(2026, 4, 7, 12, 15, 0, 0),
+          endsAt: new Date(2026, 4, 7, 20, 45, 0, 0),
+        }),
+        expect.objectContaining({
+          userDayDate: "2026-05-08",
+          startsAt: new Date(2026, 4, 8, 12, 15, 0, 0),
+          endsAt: new Date(2026, 4, 8, 20, 45, 0, 0),
+        }),
+      ]),
+    );
+  });
+
+  it("uses the nearest future work-day anchor for the first visible off-day before any work day", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["wednesday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Night Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_night",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_night",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 7, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.generatedWorkBlocks.map((block) => block.userDayDate)).toEqual(["2026-05-06"]);
+    expect(result.scheduledBlocks.map((block) => block.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+    ]);
+    expect(result.scheduledBlocks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userDayDate: "2026-05-05",
+          startsAt: new Date(2026, 4, 5, 13, 45, 0, 0),
+          endsAt: new Date(2026, 4, 5, 21, 45, 0, 0),
+        }),
+        expect.objectContaining({
+          userDayDate: "2026-05-06",
+          startsAt: new Date(2026, 4, 6, 13, 45, 0, 0),
+          endsAt: new Date(2026, 4, 6, 21, 45, 0, 0),
+        }),
+      ]),
+    );
+  });
+
+  it("filters cross-midnight work blocks to the visible user-day range for one-week previews", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Night Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_night",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_night",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 510,
+          bufferBeforeMinutes: 30,
+          bufferAfterMinutes: 60,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 12, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.generatedWorkBlocks.map((block) => block.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+      "2026-05-09",
+      "2026-05-10",
+      "2026-05-11",
+    ]);
+    expect(result.scheduledBlocks.map((block) => block.userDayDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+      "2026-05-09",
+      "2026-05-10",
+      "2026-05-11",
+    ]);
+    expect(
+      result.scheduledBlocks.every(
+        (block) => block.endsAt.getTime() - block.startsAt.getTime() === 510 * 60_000,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps a scheduled block and its conflict friction visible when it crosses into the first visible user day", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_early",
+          userId: "user_001",
+          name: "Early Shift",
+          startTime: "03:30",
+          endTime: "11:30",
+          workDays: ["tuesday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Early Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_early",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_early",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "template_maintenance",
+          userId: "user_001",
+          title: "Maintenance",
+          category: "maintenance",
+          placementType: "fixed",
+          fixedStartTime: "02:30",
+          durationMinutes: 120,
+          priority: 2,
+          preferredWindow: "afterWaking",
+          rescheduleBehavior: "askUser",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_maintenance",
+          blockTemplateId: "template_maintenance",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 6, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.scheduledBlocks).toEqual([
+      expect.objectContaining({
+        title: "Maintenance",
+        userDayDate: "2026-05-04",
+        startsAt: new Date(2026, 4, 5, 2, 30, 0, 0),
+        endsAt: new Date(2026, 4, 5, 4, 30, 0, 0),
+      }),
+    ]);
+    expect(result.frictionPoints).toEqual([
+      expect.objectContaining({
+        title: expect.stringContaining("Maintenance"),
+        affectedUserDayDate: "2026-05-04",
+      }),
+    ]);
+  });
 });

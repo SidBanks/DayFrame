@@ -105,6 +105,7 @@ export type BlockCandidate = {
   userId: string;
   templateId: string;
   recurrenceId: string;
+  recurrenceFrequency: RecurrenceFrequency;
   title: string;
   category: BlockCategory;
   anchorType?: AnchorType;

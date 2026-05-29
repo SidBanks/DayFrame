@@ -395,6 +395,7 @@ describe("applySuggestedFix", () => {
         userId: "user_001",
         templateId: "template_workout",
         recurrenceId: "rec_workout",
+        recurrenceFrequency: "specificWeekdays",
         title: "Workout",
         category: "fitness",
         placementType: "flexible",
@@ -640,8 +641,7 @@ describe("applySuggestedFix", () => {
       updatedAt: revisedAt,
     });
     expect(result.actionFeedback).toEqual({
-      message:
-        "Edit this block's fixed start time in Template Editor, then generate a new preview.",
+      message: "Edit this block's fixed start time in Setup, then generate a new preview.",
       tone: "info",
     });
     expect(result.didRevise).toBe(false);

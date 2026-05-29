@@ -739,8 +739,7 @@ describe("dayFrameStore", () => {
       action: "changeFixedTime",
     });
     expect(state.preview?.actionFeedback).toEqual({
-      message:
-        "Edit this block's fixed start time in Template Editor, then generate a new preview.",
+      message: "Edit this block's fixed start time in Setup, then generate a new preview.",
       tone: "info",
     });
   });

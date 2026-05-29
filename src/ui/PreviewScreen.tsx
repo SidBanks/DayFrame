@@ -49,7 +49,7 @@ export function PreviewScreen({
   }
 
   const visibleFrictionPoints = getVisibleFrictionPoints(preview.result.frictionPoints);
-  const dayGroups = buildDayGroups(preview);
+  const dayGroups = buildDayGroups(preview, getDayBoundaryStartTimeForUserDayDate);
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
 
   return (
@@ -236,15 +236,34 @@ export function PreviewScreen({
   );
 }
 
-function buildDayGroups(preview: DayFramePreview): PreviewDayGroup[] {
+function buildDayGroups(
+  preview: DayFramePreview,
+  getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
+): PreviewDayGroup[] {
   const groups = new Map<string, PreviewDayGroup>();
+  const visibleUserDayDates = getVisibleUserDayDates(preview.rangeStartDate, preview.rangeEndDate);
+
+  for (const userDayDate of visibleUserDayDates) {
+    getOrCreateDayGroup(groups, userDayDate);
+  }
 
   for (const workBlock of preview.result.generatedWorkBlocks) {
     getOrCreateDayGroup(groups, workBlock.userDayDate).workBlocks.push(workBlock);
   }
 
   for (const scheduledBlock of preview.result.scheduledBlocks) {
-    getOrCreateDayGroup(groups, scheduledBlock.userDayDate).scheduledBlocks.push(scheduledBlock);
+    for (const userDayDate of visibleUserDayDates) {
+      if (
+        overlapsUserDay(
+          scheduledBlock.startsAt,
+          scheduledBlock.endsAt,
+          userDayDate,
+          getDayBoundaryStartTimeForUserDayDate(userDayDate),
+        )
+      ) {
+        getOrCreateDayGroup(groups, userDayDate).scheduledBlocks.push(scheduledBlock);
+      }
+    }
   }
 
   for (const candidate of preview.result.unplacedCandidates) {
@@ -254,13 +273,30 @@ function buildDayGroups(preview: DayFramePreview): PreviewDayGroup[] {
   for (const frictionPoint of getVisibleFrictionPoints(preview.result.frictionPoints)) {
     getOrCreateDayGroup(
       groups,
-      frictionPoint.affectedUserDayDate ?? "unassigned",
+      resolveFrictionGroupUserDayDate(
+        frictionPoint,
+        preview,
+        visibleUserDayDates,
+        getDayBoundaryStartTimeForUserDayDate,
+      ),
     ).frictionPoints.push(frictionPoint);
   }
 
   return [...groups.values()].sort((left, right) =>
     left.userDayDate.localeCompare(right.userDayDate),
   );
+}
+
+function getVisibleUserDayDates(startDate: string, endDate: string): string[] {
+  const visibleUserDayDates: string[] = [];
+  let currentDate = startDate;
+
+  while (currentDate <= endDate) {
+    visibleUserDayDates.push(currentDate);
+    currentDate = addDaysToLocalDate(currentDate, 1);
+  }
+
+  return visibleUserDayDates;
 }
 
 function getOrCreateDayGroup(groups: Map<string, PreviewDayGroup>, userDayDate: string) {
@@ -334,6 +370,96 @@ function createDateFromLocalDate(userDayDate: string): Date {
   const [year, month, day] = userDayDate.split("-").map(Number);
 
   return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+}
+
+function resolveFrictionGroupUserDayDate(
+  frictionPoint: DayFramePreview["result"]["frictionPoints"][number],
+  preview: DayFramePreview,
+  visibleUserDayDates: string[],
+  getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
+): string {
+  for (const userDayDate of visibleUserDayDates) {
+    const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
+
+    const overlapsScheduledBlock = preview.result.scheduledBlocks.some(
+      (scheduledBlock) =>
+        frictionPoint.affectedBlockIds.includes(scheduledBlock.id) &&
+        overlapsUserDay(
+          scheduledBlock.startsAt,
+          scheduledBlock.endsAt,
+          userDayDate,
+          dayBoundaryStartTime,
+        ),
+    );
+
+    if (overlapsScheduledBlock) {
+      return userDayDate;
+    }
+
+    const overlapsWorkBlock = preview.result.generatedWorkBlocks.some(
+      (workBlock) =>
+        frictionPoint.affectedBlockIds.includes(workBlock.id) &&
+        overlapsUserDay(workBlock.startsAt, workBlock.endsAt, userDayDate, dayBoundaryStartTime),
+    );
+
+    if (overlapsWorkBlock) {
+      return userDayDate;
+    }
+
+    const containsUnplacedCandidate = preview.result.unplacedCandidates.some(
+      (candidate) =>
+        frictionPoint.affectedBlockIds.includes(candidate.id) &&
+        candidate.userDayDate === userDayDate,
+    );
+
+    if (containsUnplacedCandidate) {
+      return userDayDate;
+    }
+  }
+
+  if (
+    frictionPoint.affectedUserDayDate &&
+    visibleUserDayDates.includes(frictionPoint.affectedUserDayDate)
+  ) {
+    return frictionPoint.affectedUserDayDate;
+  }
+
+  return frictionPoint.affectedUserDayDate ?? "unassigned";
+}
+
+function overlapsUserDay(
+  startsAt: Date,
+  endsAt: Date,
+  userDayDate: string,
+  dayBoundaryStartTime: TimeString,
+): boolean {
+  const userDayStart = getUserDayStartFromDateString(userDayDate, dayBoundaryStartTime);
+  const userDayEnd = new Date(userDayStart);
+
+  userDayEnd.setDate(userDayEnd.getDate() + 1);
+
+  return startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime();
+}
+
+function getUserDayStartFromDateString(
+  userDayDate: string,
+  dayBoundaryStartTime: TimeString,
+): Date {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const [hours, minutes] = dayBoundaryStartTime.split(":").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
+}
+
+function addDaysToLocalDate(localDate: string, days: number): string {
+  const [year, month, day] = localDate.split("-").map(Number);
+  const nextDate = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+
+  nextDate.setDate(nextDate.getDate() + days);
+
+  return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(
+    nextDate.getDate(),
+  ).padStart(2, "0")}`;
 }
 
 function formatScheduledBlockDetails(

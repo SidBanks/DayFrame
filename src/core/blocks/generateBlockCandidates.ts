@@ -251,6 +251,7 @@ function buildBlockCandidate(
     userId: blockTemplate.userId,
     templateId: blockTemplate.id,
     recurrenceId: recurrence.id,
+    recurrenceFrequency: recurrence.frequency,
     title: blockTemplate.title,
     category: blockTemplate.category,
     anchorType: blockTemplate.placementType === "fixed" ? "fixedTemplate" : "flexibleTemplate",
