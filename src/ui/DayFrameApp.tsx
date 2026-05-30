@@ -136,9 +136,13 @@ export function DayFrameApp({
   }
 
   function openFullPreviewScreen(): void {
+    clearPreviewSelection();
+    openPreviewScreen();
+  }
+
+  function clearPreviewSelection(): void {
     setSelectedPreviewDayRange(null);
     setPendingPreviewRangeStartDate(null);
-    openPreviewScreen();
   }
 
   function saveCurrentSetup(): void {
@@ -189,8 +193,7 @@ export function DayFrameApp({
       planningWindowEnd: previewWindow.planningWindowEnd,
       generatedAt: getGeneratedAt(),
     });
-    setSelectedPreviewDayRange(null);
-    setPendingPreviewRangeStartDate(null);
+    clearPreviewSelection();
     setPreviewGuardrailMissingItems([]);
   }
 
@@ -248,7 +251,11 @@ export function DayFrameApp({
     );
 
     if (selectedSuggestedFix?.action === "changeFixedTime") {
-      const fixedTimeTemplateId = findFixedTimeTemplateId(preview, input.selectedFrictionPointId);
+      const fixedTimeTemplateId = findFixedTimeTemplateId(
+        preview,
+        input.selectedFrictionPointId,
+        input.selectedSuggestedFixId,
+      );
 
       if (fixedTimeTemplateId) {
         openSetupForFixedTime(fixedTimeTemplateId);
@@ -328,6 +335,7 @@ export function DayFrameApp({
                             onClick={() => {
                               storeRef.current.loadProfile(savedProfile.id);
                               setCurrentScreen("setup");
+                              clearPreviewSelection();
                               setSetupSaveMessage("");
                               setProfileMessage(`Loaded profile "${savedProfile.name}".`);
                               setProfileErrorMessage("");
@@ -416,6 +424,7 @@ export function DayFrameApp({
                     setProfileErrorMessage,
                     setClearLocalDataMessage,
                     setCurrentScreen,
+                    clearPreviewSelection,
                     setPreviewGuardrailMissingItems,
                     setIsConfirmingClearLocalData,
                   );
@@ -434,6 +443,7 @@ export function DayFrameApp({
                       onClick={() => {
                         storeRef.current.clearLocalData();
                         setCurrentScreen("setup");
+                        clearPreviewSelection();
                         setSetupSaveMessage("");
                         setPreviewGuardrailMissingItems([]);
                         setIsConfirmingClearLocalData(false);
@@ -948,6 +958,7 @@ function findPreviewSuggestedFix(
 function findFixedTimeTemplateId(
   preview: NonNullable<DayFrameState["preview"]>,
   frictionPointId: string,
+  suggestedFixId: string,
 ): string | null {
   const frictionPoint = preview.result.frictionPoints.find(
     (currentFrictionPoint) => currentFrictionPoint.id === frictionPointId,
@@ -955,6 +966,17 @@ function findFixedTimeTemplateId(
 
   if (!frictionPoint) {
     return null;
+  }
+
+  const targetedScheduledBlock = preview.result.scheduledBlocks.find(
+    (currentScheduledBlock) =>
+      currentScheduledBlock.placementType === "fixed" &&
+      currentScheduledBlock.templateId !== undefined &&
+      suggestedFixId === `fix_change_fixed_time_${currentScheduledBlock.id}`,
+  );
+
+  if (targetedScheduledBlock?.templateId) {
+    return targetedScheduledBlock.templateId;
   }
 
   const scheduledBlock = preview.result.scheduledBlocks.find(
@@ -1090,6 +1112,7 @@ async function handleBackupFileSelection(
   setProfileErrorMessage: (message: string) => void,
   setClearLocalDataMessage: (message: string) => void,
   setCurrentScreen: (screen: DayFrameScreen) => void,
+  clearPreviewSelection: () => void,
   setPreviewGuardrailMissingItems: (items: string[]) => void,
   setIsConfirmingClearLocalData: (value: boolean) => void,
 ): Promise<void> {
@@ -1113,6 +1136,7 @@ async function handleBackupFileSelection(
     setProfileMessage("");
     setProfileErrorMessage("");
     setCurrentScreen("setup");
+    clearPreviewSelection();
     setPreviewGuardrailMissingItems([]);
     setIsConfirmingClearLocalData(false);
   } catch (error) {

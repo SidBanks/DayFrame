@@ -451,6 +451,31 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
   });
 
+  it("keeps the selected compact-preview day stable when switching between Setup and Preview", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
+
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+  });
+
   it("marks compact calendar friction days and restores the full visible range", () => {
     const store = createDayFrameStore({
       shiftDefinitions: [
@@ -557,6 +582,45 @@ describe("DayFrameApp", () => {
 
     expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+  });
+
+  it("clears the selected compact-preview range when a loaded profile replaces the preview", async () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Profile Name"), {
+      target: { value: "Saved Setup" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
+
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Temporary Shift" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Load Profile" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
+    });
+    expect(screen.queryByRole("button", { name: "Tuesday, May 5, 2026" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
   it("generates preview using the saved preview range instead of the old hardcoded window", () => {
@@ -1187,6 +1251,219 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
     expect(screen.getAllByLabelText("Fixed Start Time")[0]).toHaveFocus();
+  });
+
+  it("focuses the fixed-time input for the selected friction when multiple fixed templates exist", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "template_breakfast",
+          userId: "user_001",
+          title: "Breakfast",
+          category: "meal",
+          placementType: "fixed",
+          fixedStartTime: "06:00",
+          durationMinutes: 30,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "askUser",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "fixed",
+          fixedStartTime: "06:30",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "askUser",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_breakfast",
+          blockTemplateId: "template_breakfast",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+      preview: {
+        result: {
+          generatedWorkBlocks: [
+            {
+              id: "work_shift_day_2026-05-05",
+              shiftDefinitionId: "shift_day",
+              shiftCycleId: "cycle_001",
+              shiftSegmentId: "segment_day",
+              userId: "user_001",
+              title: "Day Shift",
+              startsAt: new Date(2026, 4, 5, 5, 45, 0, 0),
+              endsAt: new Date(2026, 4, 5, 14, 15, 0, 0),
+              startDate: "2026-05-05",
+              endDate: "2026-05-05",
+              userDayDate: "2026-05-05",
+              crossesMidnight: false,
+            },
+          ],
+          blockCandidates: [],
+          scheduledBlocks: [
+            {
+              id: "scheduled_breakfast",
+              userId: "user_001",
+              templateId: "template_breakfast",
+              source: "template",
+              title: "Breakfast",
+              category: "meal",
+              anchorType: "fixedTemplate",
+              placementType: "fixed",
+              fixedStartTime: "06:00",
+              startsAt: new Date(2026, 4, 5, 6, 0, 0, 0),
+              endsAt: new Date(2026, 4, 5, 6, 30, 0, 0),
+              userDayDate: "2026-05-05",
+              userWeekStartDate: "2026-05-02",
+              priority: 2,
+              status: "planned",
+              externalResources: [],
+            },
+            {
+              id: "scheduled_workout",
+              userId: "user_001",
+              templateId: "template_workout",
+              source: "template",
+              title: "Workout",
+              category: "fitness",
+              anchorType: "fixedTemplate",
+              placementType: "fixed",
+              fixedStartTime: "06:30",
+              startsAt: new Date(2026, 4, 5, 6, 30, 0, 0),
+              endsAt: new Date(2026, 4, 5, 7, 30, 0, 0),
+              userDayDate: "2026-05-05",
+              userWeekStartDate: "2026-05-02",
+              priority: 2,
+              status: "planned",
+              externalResources: [],
+            },
+          ],
+          unplacedCandidates: [],
+          frictionPoints: [
+            {
+              id: "friction_conflict_work_breakfast",
+              userId: "user_001",
+              severity: "warning",
+              title: "Day Shift conflicts with Breakfast",
+              message: "Needs review.",
+              affectedBlockIds: ["work_shift_day_2026-05-05", "scheduled_breakfast"],
+              affectedUserDayDate: "2026-05-05",
+              affectedUserWeekStartDate: "2026-05-02",
+              suggestedFixes: [
+                {
+                  id: "fix_change_fixed_time_scheduled_breakfast",
+                  label: "Review fixed time",
+                  action: "changeFixedTime",
+                },
+              ],
+              canIgnore: true,
+              ignored: false,
+              resolved: false,
+              createdAt: "2026-05-03T10:00:00-05:00",
+              updatedAt: "2026-05-03T10:00:00-05:00",
+            },
+            {
+              id: "friction_conflict_work_workout",
+              userId: "user_001",
+              severity: "warning",
+              title: "Day Shift conflicts with Workout",
+              message: "Needs review.",
+              affectedBlockIds: ["work_shift_day_2026-05-05", "scheduled_workout"],
+              affectedUserDayDate: "2026-05-05",
+              affectedUserWeekStartDate: "2026-05-02",
+              suggestedFixes: [
+                {
+                  id: "fix_change_fixed_time_scheduled_workout",
+                  label: "Review fixed time",
+                  action: "changeFixedTime",
+                },
+              ],
+              canIgnore: true,
+              ignored: false,
+              resolved: false,
+              createdAt: "2026-05-03T10:00:00-05:00",
+              updatedAt: "2026-05-03T10:00:00-05:00",
+            },
+          ],
+        },
+        rangeStartDate: "2026-05-05",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 6, 0, 0, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+        isStale: false,
+      },
+    });
+
+    render(
+      <DayFrameApp
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        getRevisedAt={() => "2026-05-03T14:00:00-05:00"}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Review fixed time" })[1]!);
+
+    expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByLabelText("Fixed Start Time")[1]).toHaveFocus();
   });
 
   it("re-enables persisted untouched default sleep and generates preview", () => {
