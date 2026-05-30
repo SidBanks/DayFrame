@@ -16,6 +16,8 @@ export type PreviewScreenProps = {
     selectedFrictionPointId: string;
     selectedSuggestedFixId: string;
   }) => void;
+  visibleRangeStartDate?: string | null;
+  visibleRangeEndDate?: string | null;
   now?: Date;
 };
 
@@ -31,6 +33,8 @@ export function PreviewScreen({
   preview,
   getDayBoundaryStartTimeForUserDayDate,
   onApplySuggestedFix,
+  visibleRangeStartDate = null,
+  visibleRangeEndDate = null,
   now = new Date(),
 }: PreviewScreenProps): ReactElement {
   if (!preview) {
@@ -49,7 +53,12 @@ export function PreviewScreen({
   }
 
   const visibleFrictionPoints = getVisibleFrictionPoints(preview.result.frictionPoints);
-  const dayGroups = buildDayGroups(preview, getDayBoundaryStartTimeForUserDayDate);
+  const dayGroups = buildDayGroups(
+    preview,
+    getDayBoundaryStartTimeForUserDayDate,
+    visibleRangeStartDate,
+    visibleRangeEndDate,
+  );
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
 
   return (
@@ -239,16 +248,23 @@ export function PreviewScreen({
 function buildDayGroups(
   preview: DayFramePreview,
   getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
+  visibleRangeStartDate: PreviewScreenProps["visibleRangeStartDate"],
+  visibleRangeEndDate: PreviewScreenProps["visibleRangeEndDate"],
 ): PreviewDayGroup[] {
   const groups = new Map<string, PreviewDayGroup>();
-  const visibleUserDayDates = getVisibleUserDayDates(preview.rangeStartDate, preview.rangeEndDate);
+  const visibleUserDayDates = getVisibleUserDayDates(
+    visibleRangeStartDate ?? preview.rangeStartDate,
+    visibleRangeEndDate ?? preview.rangeEndDate,
+  );
 
   for (const userDayDate of visibleUserDayDates) {
     getOrCreateDayGroup(groups, userDayDate);
   }
 
   for (const workBlock of preview.result.generatedWorkBlocks) {
-    getOrCreateDayGroup(groups, workBlock.userDayDate).workBlocks.push(workBlock);
+    if (visibleUserDayDates.includes(workBlock.userDayDate)) {
+      getOrCreateDayGroup(groups, workBlock.userDayDate).workBlocks.push(workBlock);
+    }
   }
 
   for (const scheduledBlock of preview.result.scheduledBlocks) {
@@ -267,7 +283,9 @@ function buildDayGroups(
   }
 
   for (const candidate of preview.result.unplacedCandidates) {
-    getOrCreateDayGroup(groups, candidate.userDayDate).unplacedCandidates.push(candidate);
+    if (visibleUserDayDates.includes(candidate.userDayDate)) {
+      getOrCreateDayGroup(groups, candidate.userDayDate).unplacedCandidates.push(candidate);
+    }
   }
 
   for (const frictionPoint of getVisibleFrictionPoints(preview.result.frictionPoints)) {

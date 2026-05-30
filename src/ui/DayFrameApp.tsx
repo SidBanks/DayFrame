@@ -33,6 +33,10 @@ export type DayFrameAppStore = Pick<
 >;
 
 type DayFrameScreen = "setup" | "preview";
+type SelectedPreviewDayRange = {
+  startDate: LocalDateString;
+  endDate: LocalDateString;
+} | null;
 
 export type DayFrameAppProps = {
   store?: DayFrameAppStore;
@@ -56,6 +60,7 @@ export function DayFrameApp({
 }: DayFrameAppProps): ReactElement {
   const storeRef = useRef<DayFrameAppStore>(store ?? createSeededDayFrameStore());
   const importInputRef = useRef<FileInputLike | null>(null);
+  const now = getNow();
   const [stateSnapshot, setStateSnapshot] = useState<DayFrameState>(() =>
     storeRef.current.getState(),
   );
@@ -72,8 +77,22 @@ export function DayFrameApp({
   const [profileName, setProfileName] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
+  const [selectedPreviewDayRange, setSelectedPreviewDayRange] =
+    useState<SelectedPreviewDayRange>(null);
+  const [pendingPreviewRangeStartDate, setPendingPreviewRangeStartDate] =
+    useState<LocalDateString | null>(null);
+  const [focusedTemplateField, setFocusedTemplateField] = useState<{
+    templateId: string;
+    field: "fixedStartTime";
+  } | null>(null);
+  const getDayBoundaryStartTimeForUserDayDate = (userDayDate: string) =>
+    resolveEffectiveSchedulePreferencesForUserDayDate({
+      shiftCycle: stateSnapshot.shiftCycle,
+      defaultSchedulingPreferences: stateSnapshot.schedulingPreferences,
+      userDayDate: userDayDate as `${number}-${number}-${number}`,
+    }).dayBoundaryStartTime;
   const previewSummary = stateSnapshot.preview
-    ? buildCompactPreviewSummary(stateSnapshot.preview, getNow())
+    ? buildCompactPreviewSummary(stateSnapshot.preview, now, getDayBoundaryStartTimeForUserDayDate)
     : null;
 
   useEffect(() => {
@@ -106,12 +125,20 @@ export function DayFrameApp({
 
   function openSetupScreen(): void {
     setCurrentScreen("setup");
+    setFocusedTemplateField(null);
     resetShellMessages();
   }
 
   function openPreviewScreen(): void {
     setCurrentScreen("preview");
+    setFocusedTemplateField(null);
     resetShellMessages();
+  }
+
+  function openFullPreviewScreen(): void {
+    setSelectedPreviewDayRange(null);
+    setPendingPreviewRangeStartDate(null);
+    openPreviewScreen();
   }
 
   function saveCurrentSetup(): void {
@@ -140,6 +167,7 @@ export function DayFrameApp({
         ...entry.recurrence,
       })),
     );
+    setFocusedTemplateField(null);
     setSetupSaveMessage("Setup saved.");
   }
 
@@ -161,7 +189,77 @@ export function DayFrameApp({
       planningWindowEnd: previewWindow.planningWindowEnd,
       generatedAt: getGeneratedAt(),
     });
+    setSelectedPreviewDayRange(null);
+    setPendingPreviewRangeStartDate(null);
     setPreviewGuardrailMissingItems([]);
+  }
+
+  function openSetupForFixedTime(templateId: string): void {
+    setCurrentScreen("setup");
+    setFocusedTemplateField({
+      templateId,
+      field: "fixedStartTime",
+    });
+    resetShellMessages();
+  }
+
+  function handleCompactPreviewDayClick(userDayDate: LocalDateString): void {
+    const currentSelection = selectedPreviewDayRange;
+
+    if (
+      currentSelection === null ||
+      currentSelection.startDate !== currentSelection.endDate ||
+      pendingPreviewRangeStartDate === null
+    ) {
+      setSelectedPreviewDayRange({
+        startDate: userDayDate,
+        endDate: userDayDate,
+      });
+      setPendingPreviewRangeStartDate(userDayDate);
+    } else if (pendingPreviewRangeStartDate === userDayDate) {
+      setSelectedPreviewDayRange({
+        startDate: userDayDate,
+        endDate: userDayDate,
+      });
+    } else {
+      setSelectedPreviewDayRange(orderPreviewDayRange(pendingPreviewRangeStartDate, userDayDate));
+      setPendingPreviewRangeStartDate(null);
+    }
+
+    setCurrentScreen("preview");
+    setFocusedTemplateField(null);
+    resetShellMessages();
+  }
+
+  function handlePreviewSuggestedFix(input: {
+    selectedFrictionPointId: string;
+    selectedSuggestedFixId: string;
+  }): void {
+    const preview = stateSnapshot.preview;
+
+    if (!preview) {
+      return;
+    }
+
+    const selectedSuggestedFix = findPreviewSuggestedFix(
+      preview,
+      input.selectedFrictionPointId,
+      input.selectedSuggestedFixId,
+    );
+
+    if (selectedSuggestedFix?.action === "changeFixedTime") {
+      const fixedTimeTemplateId = findFixedTimeTemplateId(preview, input.selectedFrictionPointId);
+
+      if (fixedTimeTemplateId) {
+        openSetupForFixedTime(fixedTimeTemplateId);
+        return;
+      }
+    }
+
+    storeRef.current.applySuggestedFixToPreview({
+      ...input,
+      revisedAt: getRevisedAt(),
+    });
   }
 
   return (
@@ -450,17 +548,16 @@ export function DayFrameApp({
                         {previewSummary.rangeLabel} · Generated {previewSummary.generatedLabel}
                       </p>
                     </div>
-                    <button className="df-action-button" onClick={openPreviewScreen} type="button">
+                    <button
+                      className="df-action-button"
+                      onClick={openFullPreviewScreen}
+                      type="button"
+                    >
                       Open Full Preview
                     </button>
                   </div>
 
-                  <button
-                    aria-label="Open compact preview summary"
-                    className="df-compact-preview-card"
-                    onClick={openPreviewScreen}
-                    type="button"
-                  >
+                  <div className="df-compact-preview-card">
                     <div className="df-compact-preview-metrics">
                       <div className="df-compact-preview-metric">
                         <strong>Planning Range</strong>
@@ -482,13 +579,34 @@ export function DayFrameApp({
 
                     <div className="df-compact-preview-days">
                       {previewSummary.dayItems.map((dayItem) => (
-                        <span className="df-compact-preview-day" key={dayItem.date}>
+                        <button
+                          aria-current={dayItem.isToday ? "date" : undefined}
+                          aria-label={buildCompactPreviewDayAriaLabel(dayItem)}
+                          aria-pressed={isUserDayDateWithinSelection(
+                            dayItem.date,
+                            selectedPreviewDayRange,
+                          )}
+                          className={buildCompactPreviewDayClassName(
+                            dayItem,
+                            selectedPreviewDayRange,
+                          )}
+                          key={dayItem.date}
+                          onClick={() => {
+                            handleCompactPreviewDayClick(dayItem.date);
+                          }}
+                          type="button"
+                        >
                           <strong>{dayItem.weekday}</strong>
                           <span>{dayItem.dayNumber}</span>
-                        </span>
+                          {dayItem.hasFriction ? (
+                            <span aria-hidden="true" className="df-compact-preview-day-marker">
+                              !
+                            </span>
+                          ) : null}
+                        </button>
                       ))}
                     </div>
-                  </button>
+                  </div>
                 </section>
               ) : null}
             </section>
@@ -498,9 +616,11 @@ export function DayFrameApp({
         {currentScreen === "setup" ? (
           <SetupScreen
             draft={setupDraft}
+            focusedTemplateField={focusedTemplateField}
             onSave={saveCurrentSetup}
             saveMessage={setupSaveMessage}
             setDraft={(nextDraft) => {
+              setFocusedTemplateField(null);
               setSetupSaveMessage("");
               setSetupDraft(nextDraft);
             }}
@@ -540,21 +660,12 @@ export function DayFrameApp({
               ) : null}
             </div>
             <PreviewScreen
-              getDayBoundaryStartTimeForUserDayDate={(userDayDate) =>
-                resolveEffectiveSchedulePreferencesForUserDayDate({
-                  shiftCycle: stateSnapshot.shiftCycle,
-                  defaultSchedulingPreferences: stateSnapshot.schedulingPreferences,
-                  userDayDate: userDayDate as `${number}-${number}-${number}`,
-                }).dayBoundaryStartTime
-              }
-              now={getNow()}
-              onApplySuggestedFix={(input) => {
-                storeRef.current.applySuggestedFixToPreview({
-                  ...input,
-                  revisedAt: getRevisedAt(),
-                });
-              }}
+              getDayBoundaryStartTimeForUserDayDate={getDayBoundaryStartTimeForUserDayDate}
+              now={now}
+              onApplySuggestedFix={handlePreviewSuggestedFix}
               preview={stateSnapshot.preview}
+              visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
+              visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
             />
           </div>
         ) : null}
@@ -569,20 +680,23 @@ type CompactPreviewSummary = {
   visibleDayCount: number;
   frictionLabel: string;
   dayItems: Array<{
-    date: string;
+    date: LocalDateString;
     weekday: string;
     dayNumber: string;
+    hasFriction: boolean;
+    isToday: boolean;
   }>;
 };
 
 function buildCompactPreviewSummary(
   preview: NonNullable<DayFrameState["preview"]>,
   now: Date,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => string,
 ): CompactPreviewSummary {
   const visibleFrictionCount = preview.result.frictionPoints.filter(
     (frictionPoint) => !frictionPoint.ignored,
   ).length;
-  const dayItems = buildPreviewDayItems(preview.rangeStartDate, preview.rangeEndDate);
+  const dayItems = buildPreviewDayItems(preview, now, getDayBoundaryStartTimeForUserDayDate);
 
   return {
     rangeLabel: formatPlanningWindow(
@@ -597,19 +711,27 @@ function buildCompactPreviewSummary(
 }
 
 function buildPreviewDayItems(
-  startDate: LocalDateString,
-  endDate: LocalDateString,
+  preview: NonNullable<DayFrameState["preview"]>,
+  now: Date,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => string,
 ): CompactPreviewSummary["dayItems"] {
   const dayItems: CompactPreviewSummary["dayItems"] = [];
-  let currentDate = startDate;
+  const frictionDates = getCompactPreviewFrictionDates(
+    preview,
+    getDayBoundaryStartTimeForUserDayDate,
+  );
+  const todayDateString = toLocalDateString(now);
+  let currentDate = preview.rangeStartDate;
 
-  while (currentDate <= endDate) {
+  while (currentDate <= preview.rangeEndDate) {
     const date = createCompactPreviewDateFromLocalDate(currentDate);
 
     dayItems.push({
       date: currentDate,
       weekday: date.toLocaleDateString("en-US", { weekday: "short" }),
       dayNumber: String(date.getDate()),
+      hasFriction: frictionDates.has(currentDate),
+      isToday: currentDate === todayDateString,
     });
     currentDate = addCompactPreviewDaysToLocalDate(currentDate, 1);
   }
@@ -634,6 +756,215 @@ function addCompactPreviewDaysToLocalDate(
   return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(
     nextDate.getDate(),
   ).padStart(2, "0")}` as LocalDateString;
+}
+
+function getCompactPreviewFrictionDates(
+  preview: NonNullable<DayFrameState["preview"]>,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => string,
+): Set<LocalDateString> {
+  const visibleUserDayDates = new Set<LocalDateString>();
+  const frictionDates = new Set<LocalDateString>();
+  let currentDate = preview.rangeStartDate;
+
+  while (currentDate <= preview.rangeEndDate) {
+    visibleUserDayDates.add(currentDate);
+    currentDate = addCompactPreviewDaysToLocalDate(currentDate, 1);
+  }
+
+  for (const frictionPoint of preview.result.frictionPoints.filter(
+    (currentFrictionPoint) => !currentFrictionPoint.ignored,
+  )) {
+    const resolvedDate = resolveCompactPreviewFrictionDate(
+      frictionPoint,
+      preview,
+      visibleUserDayDates,
+      getDayBoundaryStartTimeForUserDayDate,
+    );
+
+    if (resolvedDate) {
+      frictionDates.add(resolvedDate);
+    }
+  }
+
+  return frictionDates;
+}
+
+function resolveCompactPreviewFrictionDate(
+  frictionPoint: NonNullable<DayFrameState["preview"]>["result"]["frictionPoints"][number],
+  preview: NonNullable<DayFrameState["preview"]>,
+  visibleUserDayDates: Set<LocalDateString>,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => string,
+): LocalDateString | null {
+  for (const userDayDate of visibleUserDayDates) {
+    const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
+
+    const overlapsScheduledBlock = preview.result.scheduledBlocks.some(
+      (scheduledBlock) =>
+        frictionPoint.affectedBlockIds.includes(scheduledBlock.id) &&
+        overlapsCompactPreviewUserDay(
+          scheduledBlock.startsAt,
+          scheduledBlock.endsAt,
+          userDayDate,
+          dayBoundaryStartTime,
+        ),
+    );
+
+    if (overlapsScheduledBlock) {
+      return userDayDate;
+    }
+
+    const overlapsWorkBlock = preview.result.generatedWorkBlocks.some(
+      (workBlock) =>
+        frictionPoint.affectedBlockIds.includes(workBlock.id) &&
+        overlapsCompactPreviewUserDay(
+          workBlock.startsAt,
+          workBlock.endsAt,
+          userDayDate,
+          dayBoundaryStartTime,
+        ),
+    );
+
+    if (overlapsWorkBlock) {
+      return userDayDate;
+    }
+
+    const containsUnplacedCandidate = preview.result.unplacedCandidates.some(
+      (candidate) =>
+        frictionPoint.affectedBlockIds.includes(candidate.id) &&
+        candidate.userDayDate === userDayDate,
+    );
+
+    if (containsUnplacedCandidate) {
+      return userDayDate;
+    }
+  }
+
+  if (
+    frictionPoint.affectedUserDayDate &&
+    visibleUserDayDates.has(frictionPoint.affectedUserDayDate)
+  ) {
+    return frictionPoint.affectedUserDayDate;
+  }
+
+  return null;
+}
+
+function overlapsCompactPreviewUserDay(
+  startsAt: Date,
+  endsAt: Date,
+  userDayDate: LocalDateString,
+  dayBoundaryStartTime: string,
+): boolean {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const [hours, minutes] = dayBoundaryStartTime.split(":").map(Number);
+  const userDayStart = new Date(
+    year ?? 2026,
+    (month ?? 1) - 1,
+    day ?? 1,
+    hours ?? 0,
+    minutes ?? 0,
+    0,
+    0,
+  );
+  const userDayEnd = new Date(userDayStart);
+
+  userDayEnd.setDate(userDayEnd.getDate() + 1);
+
+  return startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime();
+}
+
+function toLocalDateString(date: Date): LocalDateString {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}` as LocalDateString;
+}
+
+function orderPreviewDayRange(
+  leftDate: LocalDateString,
+  rightDate: LocalDateString,
+): NonNullable<SelectedPreviewDayRange> {
+  return leftDate <= rightDate
+    ? { startDate: leftDate, endDate: rightDate }
+    : { startDate: rightDate, endDate: leftDate };
+}
+
+function isUserDayDateWithinSelection(
+  userDayDate: LocalDateString,
+  selection: SelectedPreviewDayRange,
+): boolean {
+  return (
+    selection !== null && userDayDate >= selection.startDate && userDayDate <= selection.endDate
+  );
+}
+
+function buildCompactPreviewDayClassName(
+  dayItem: CompactPreviewSummary["dayItems"][number],
+  selection: SelectedPreviewDayRange,
+): string {
+  return [
+    "df-compact-preview-day",
+    isUserDayDateWithinSelection(dayItem.date, selection) ? "is-selected" : "",
+    dayItem.hasFriction ? "is-conflict" : "",
+    dayItem.isToday ? "is-today" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function buildCompactPreviewDayAriaLabel(
+  dayItem: CompactPreviewSummary["dayItems"][number],
+): string {
+  const date = createCompactPreviewDateFromLocalDate(dayItem.date);
+  const labelParts = [
+    date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+  ];
+
+  if (dayItem.hasFriction) {
+    labelParts.push("has friction");
+  }
+
+  if (dayItem.isToday) {
+    labelParts.push("today");
+  }
+
+  return labelParts.join(", ");
+}
+
+function findPreviewSuggestedFix(
+  preview: NonNullable<DayFrameState["preview"]>,
+  frictionPointId: string,
+  suggestedFixId: string,
+) {
+  return preview.result.frictionPoints
+    .find((frictionPoint) => frictionPoint.id === frictionPointId)
+    ?.suggestedFixes.find((suggestedFix) => suggestedFix.id === suggestedFixId);
+}
+
+function findFixedTimeTemplateId(
+  preview: NonNullable<DayFrameState["preview"]>,
+  frictionPointId: string,
+): string | null {
+  const frictionPoint = preview.result.frictionPoints.find(
+    (currentFrictionPoint) => currentFrictionPoint.id === frictionPointId,
+  );
+
+  if (!frictionPoint) {
+    return null;
+  }
+
+  const scheduledBlock = preview.result.scheduledBlocks.find(
+    (currentScheduledBlock) =>
+      frictionPoint.affectedBlockIds.includes(currentScheduledBlock.id) &&
+      currentScheduledBlock.placementType === "fixed" &&
+      currentScheduledBlock.templateId,
+  );
+
+  return scheduledBlock?.templateId ?? null;
 }
 
 function createSeededDayFrameStore(): DayFrameStore {

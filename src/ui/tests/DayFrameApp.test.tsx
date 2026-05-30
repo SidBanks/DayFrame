@@ -418,12 +418,12 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
     expect(screen.getByText("Visible Days")).toBeInTheDocument();
     expect(screen.getByText("Open Full Preview")).toBeInTheDocument();
-    expect(screen.getByText("Mon")).toBeInTheDocument();
-    expect(screen.getByText("Tue")).toBeInTheDocument();
-    expect(screen.getByText("Wed")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Monday, May 4, 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Wednesday, May 6, 2026" })).toBeInTheDocument();
   });
 
-  it("opens the full preview when the compact header preview is clicked", () => {
+  it("filters the full preview to a selected day and range from the compact calendar", () => {
     render(
       <DayFrameApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
@@ -433,15 +433,130 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
 
-    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Open compact preview summary" }));
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Monday, 2026-05-04" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Wednesday, May 6, 2026" }));
+
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
+  });
+
+  it("marks compact calendar friction days and restores the full visible range", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+        {
+          id: "template_errands",
+          userId: "user_001",
+          title: "Errands",
+          category: "admin",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 3,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameDay",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+        {
+          id: "rec_errands",
+          blockTemplateId: "template_errands",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(
+      screen.getByRole("button", { name: "Monday, May 4, 2026, has friction" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Monday, May 4, 2026, has friction" }));
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
 
     expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("heading", { name: "Preview" })).toBeInTheDocument();
-    expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
   });
 
   it("generates preview using the saved preview range instead of the old hardcoded window", () => {
@@ -993,7 +1108,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByText("May 4-6, 2026").length).toBeGreaterThan(0);
   });
 
-  it("shows review-fixed-time guidance after clicking Review fixed time", () => {
+  it("switches to setup and focuses the matching fixed start time after clicking Review fixed time", () => {
     const store = createDayFrameStore({
       shiftDefinitions: [
         {
@@ -1069,15 +1184,9 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
 
-    expect(
-      screen.getByText("Edit this block's fixed start time in Setup, then generate a new preview."),
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
-
-    expect(
-      screen.getByText("Edit this block's fixed start time in Setup, then generate a new preview."),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Fixed Start Time")[0]).toHaveFocus();
   });
 
   it("re-enables persisted untouched default sleep and generates preview", () => {

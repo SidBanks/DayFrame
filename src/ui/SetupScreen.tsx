@@ -16,7 +16,7 @@ import type {
 } from "../state/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 
 const blockCategories: BlockCategory[] = [
@@ -94,6 +94,10 @@ export type SetupScreenProps = {
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
   saveMessage: string;
+  focusedTemplateField?: {
+    templateId: string;
+    field: "fixedStartTime";
+  } | null;
 };
 
 export function SetupScreen({
@@ -101,6 +105,7 @@ export function SetupScreen({
   setDraft,
   onSave,
   saveMessage,
+  focusedTemplateField = null,
 }: SetupScreenProps): ReactElement {
   const [confirmingDeleteShiftIndex, setConfirmingDeleteShiftIndex] = useState<number | null>(null);
   const [confirmingDeleteSegmentIndex, setConfirmingDeleteSegmentIndex] = useState<number | null>(
@@ -109,6 +114,25 @@ export function SetupScreen({
   const [confirmingDeleteTemplateIndex, setConfirmingDeleteTemplateIndex] = useState<number | null>(
     null,
   );
+  const fixedStartTimeInputRefs = useRef(new Map<string, HTMLInputElement>());
+
+  useEffect(() => {
+    if (!focusedTemplateField || focusedTemplateField.field !== "fixedStartTime") {
+      return;
+    }
+
+    const input = fixedStartTimeInputRefs.current.get(focusedTemplateField.templateId);
+
+    if (!input) {
+      return;
+    }
+
+    input.focus();
+    input.scrollIntoView?.({
+      block: "center",
+      behavior: "smooth",
+    });
+  }, [focusedTemplateField]);
 
   return (
     <main className="df-screen">
@@ -1366,10 +1390,25 @@ export function SetupScreen({
                       </select>
                     </div>
                   ) : (
-                    <div className="df-field">
+                    <div
+                      className={
+                        focusedTemplateField?.templateId === entry.template.id &&
+                        focusedTemplateField.field === "fixedStartTime"
+                          ? "df-field is-highlighted"
+                          : "df-field"
+                      }
+                    >
                       <label>Fixed Start Time</label>
                       <input
                         aria-label="Fixed Start Time"
+                        ref={(node) => {
+                          if (node) {
+                            fixedStartTimeInputRefs.current.set(entry.template.id, node);
+                            return;
+                          }
+
+                          fixedStartTimeInputRefs.current.delete(entry.template.id);
+                        }}
                         onChange={(event) => {
                           const nextValue = (event.target as { value: string }).value;
 

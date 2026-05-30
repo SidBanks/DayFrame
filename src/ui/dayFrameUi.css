@@ -290,6 +290,13 @@ textarea {
   padding: 10px 12px;
 }
 
+.df-field.is-highlighted input,
+.df-field.is-highlighted select,
+.df-field.is-highlighted textarea {
+  border-color: var(--df-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--df-accent) 18%, transparent);
+}
+
 .df-fieldset {
   margin: 0;
   border: 1px solid var(--df-border);
@@ -576,31 +583,12 @@ textarea {
 }
 
 .df-compact-preview-card {
-  appearance: none;
-  width: 100%;
   display: grid;
   gap: 14px;
   padding: 16px;
   border-radius: 18px;
   border: 1px solid var(--df-border);
   background: var(--df-panel-alt);
-  color: var(--df-text);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 120ms ease,
-    transform 120ms ease,
-    box-shadow 120ms ease;
-}
-
-.df-compact-preview-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgb(15 23 42 / 0.1);
-}
-
-.df-compact-preview-card:focus-visible {
-  outline: 2px solid var(--df-accent);
-  outline-offset: 2px;
 }
 
 .df-compact-preview-metrics {
@@ -630,6 +618,7 @@ textarea {
 }
 
 .df-compact-preview-day {
+  appearance: none;
   min-width: 58px;
   padding: 10px 12px;
   border-radius: 14px;
@@ -638,6 +627,24 @@ textarea {
   display: grid;
   gap: 3px;
   justify-items: center;
+  color: var(--df-text);
+  cursor: pointer;
+  position: relative;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.df-compact-preview-day:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgb(15 23 42 / 0.08);
+}
+
+.df-compact-preview-day:focus-visible {
+  outline: 2px solid var(--df-accent);
+  outline-offset: 2px;
 }
 
 .df-compact-preview-day strong {
@@ -647,6 +654,42 @@ textarea {
 .df-compact-preview-day span {
   font-size: 0.95rem;
   color: var(--df-muted);
+}
+
+.df-compact-preview-day.is-selected {
+  background: var(--df-accent);
+  border-color: var(--df-accent);
+  box-shadow: 0 14px 26px rgb(37 99 235 / 0.18);
+}
+
+.df-compact-preview-day.is-selected strong,
+.df-compact-preview-day.is-selected span {
+  color: var(--df-accent-text);
+}
+
+.df-compact-preview-day.is-conflict {
+  border-color: color-mix(in srgb, var(--df-danger) 55%, var(--df-border));
+}
+
+.df-compact-preview-day.is-today {
+  outline: 1px dashed color-mix(in srgb, var(--df-accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.df-compact-preview-day-marker {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--df-danger);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 .df-confirmation-actions {
