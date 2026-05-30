@@ -52,13 +52,13 @@ export function PreviewScreen({
     );
   }
 
-  const visibleFrictionPoints = getVisibleFrictionPoints(preview.result.frictionPoints);
   const dayGroups = buildDayGroups(
     preview,
     getDayBoundaryStartTimeForUserDayDate,
     visibleRangeStartDate,
     visibleRangeEndDate,
   );
+  const visibleFrictionPoints = dayGroups.flatMap((dayGroup) => dayGroup.frictionPoints);
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
 
   return (
@@ -289,15 +289,16 @@ function buildDayGroups(
   }
 
   for (const frictionPoint of getVisibleFrictionPoints(preview.result.frictionPoints)) {
-    getOrCreateDayGroup(
-      groups,
-      resolveFrictionGroupUserDayDate(
-        frictionPoint,
-        preview,
-        visibleUserDayDates,
-        getDayBoundaryStartTimeForUserDayDate,
-      ),
-    ).frictionPoints.push(frictionPoint);
+    const resolvedUserDayDate = resolveFrictionGroupUserDayDate(
+      frictionPoint,
+      preview,
+      visibleUserDayDates,
+      getDayBoundaryStartTimeForUserDayDate,
+    );
+
+    if (resolvedUserDayDate) {
+      getOrCreateDayGroup(groups, resolvedUserDayDate).frictionPoints.push(frictionPoint);
+    }
   }
 
   return [...groups.values()].sort((left, right) =>
@@ -395,7 +396,7 @@ function resolveFrictionGroupUserDayDate(
   preview: DayFramePreview,
   visibleUserDayDates: string[],
   getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
-): string {
+): string | null {
   for (const userDayDate of visibleUserDayDates) {
     const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
 
@@ -442,7 +443,7 @@ function resolveFrictionGroupUserDayDate(
     return frictionPoint.affectedUserDayDate;
   }
 
-  return frictionPoint.affectedUserDayDate ?? "unassigned";
+  return null;
 }
 
 function overlapsUserDay(

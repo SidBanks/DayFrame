@@ -265,6 +265,24 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Maintenance conflicts with Early Shift")).toBeInTheDocument();
     expect(screen.getByText("Maintenance 2:30 AM - 4:30 AM")).toBeInTheDocument();
   });
+
+  it("limits preview summary friction counts to the selected visible day range", () => {
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        onApplySuggestedFix={vi.fn()}
+        preview={buildPreview()}
+        visibleRangeEndDate="2026-05-06"
+        visibleRangeStartDate="2026-05-06"
+      />,
+    );
+
+    expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
+    expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
+    expect(screen.getByText("No friction detected.")).toBeInTheDocument();
+  });
 });
 
 function buildPreview(
