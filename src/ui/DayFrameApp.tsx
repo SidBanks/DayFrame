@@ -274,7 +274,7 @@ export function DayFrameApp({
       <div className="df-shell">
         <header className="df-shell-header">
           <div className="df-shell-header-grid">
-            <section className="df-confirmation">
+            <section className="df-confirmation df-workflow-block df-workflow-block--profiles">
               <div className="df-form-stack">
                 <div className="df-screen-header">
                   <h2 className="df-panel-title">Saved Setup Profiles</h2>
@@ -489,7 +489,7 @@ export function DayFrameApp({
               )}
             </section>
 
-            <section className="df-workflow-panel">
+            <section className="df-workflow-panel df-workflow-block df-workflow-block--summary">
               <div className="df-brand">
                 <h1>DayFrame</h1>
                 <p className="df-shell-subtitle">Built for life that does not run 9 to 5.</p>
@@ -591,7 +591,10 @@ export function DayFrameApp({
                       {previewSummary.dayItems.map((dayItem) => (
                         <button
                           aria-current={dayItem.isToday ? "date" : undefined}
-                          aria-label={buildCompactPreviewDayAriaLabel(dayItem)}
+                          aria-label={buildCompactPreviewDayAriaLabel(
+                            dayItem,
+                            selectedPreviewDayRange,
+                          )}
                           aria-pressed={isUserDayDateWithinSelection(
                             dayItem.date,
                             selectedPreviewDayRange,
@@ -624,20 +627,22 @@ export function DayFrameApp({
         </header>
 
         {currentScreen === "setup" ? (
-          <SetupScreen
-            draft={setupDraft}
-            focusedTemplateField={focusedTemplateField}
-            onSave={saveCurrentSetup}
-            saveMessage={setupSaveMessage}
-            setDraft={(nextDraft) => {
-              setFocusedTemplateField(null);
-              setSetupSaveMessage("");
-              setSetupDraft(nextDraft);
-            }}
-          />
+          <div className="df-workflow-block df-workflow-block--setup">
+            <SetupScreen
+              draft={setupDraft}
+              focusedTemplateField={focusedTemplateField}
+              onSave={saveCurrentSetup}
+              saveMessage={setupSaveMessage}
+              setDraft={(nextDraft) => {
+                setFocusedTemplateField(null);
+                setSetupSaveMessage("");
+                setSetupDraft(nextDraft);
+              }}
+            />
+          </div>
         ) : null}
         {currentScreen === "preview" ? (
-          <div className="df-screen">
+          <div className="df-screen df-workflow-block df-workflow-block--preview">
             <div className="df-panel">
               <div className="df-screen-header">
                 <h1 className="df-screen-title">Preview</h1>
@@ -911,9 +916,14 @@ function buildCompactPreviewDayClassName(
   dayItem: CompactPreviewSummary["dayItems"][number],
   selection: SelectedPreviewDayRange,
 ): string {
+  const selectionPosition = getCompactPreviewSelectionPosition(dayItem.date, selection);
+
   return [
     "df-compact-preview-day",
-    isUserDayDateWithinSelection(dayItem.date, selection) ? "is-selected" : "",
+    selectionPosition !== "none" ? "is-selected" : "",
+    selectionPosition === "single" || selectionPosition === "start" ? "is-range-start" : "",
+    selectionPosition === "single" || selectionPosition === "end" ? "is-range-end" : "",
+    selectionPosition === "middle" ? "is-range-middle" : "",
     dayItem.hasFriction ? "is-conflict" : "",
     dayItem.isToday ? "is-today" : "",
   ]
@@ -923,8 +933,10 @@ function buildCompactPreviewDayClassName(
 
 function buildCompactPreviewDayAriaLabel(
   dayItem: CompactPreviewSummary["dayItems"][number],
+  selection: SelectedPreviewDayRange,
 ): string {
   const date = createCompactPreviewDateFromLocalDate(dayItem.date);
+  const selectionPosition = getCompactPreviewSelectionPosition(dayItem.date, selection);
   const labelParts = [
     date.toLocaleDateString("en-US", {
       weekday: "long",
@@ -933,6 +945,16 @@ function buildCompactPreviewDayAriaLabel(
       year: "numeric",
     }),
   ];
+
+  if (selectionPosition === "single") {
+    labelParts.push("selected day");
+  } else if (selectionPosition === "start") {
+    labelParts.push("selected range start");
+  } else if (selectionPosition === "middle") {
+    labelParts.push("selected range");
+  } else if (selectionPosition === "end") {
+    labelParts.push("selected range end");
+  }
 
   if (dayItem.hasFriction) {
     labelParts.push("has friction");
@@ -943,6 +965,29 @@ function buildCompactPreviewDayAriaLabel(
   }
 
   return labelParts.join(", ");
+}
+
+function getCompactPreviewSelectionPosition(
+  userDayDate: LocalDateString,
+  selection: SelectedPreviewDayRange,
+): "none" | "single" | "start" | "middle" | "end" {
+  if (!selection || !isUserDayDateWithinSelection(userDayDate, selection)) {
+    return "none";
+  }
+
+  if (selection.startDate === selection.endDate && selection.startDate === userDayDate) {
+    return "single";
+  }
+
+  if (selection.startDate === userDayDate) {
+    return "start";
+  }
+
+  if (selection.endDate === userDayDate) {
+    return "end";
+  }
+
+  return "middle";
 }
 
 function findPreviewSuggestedFix(

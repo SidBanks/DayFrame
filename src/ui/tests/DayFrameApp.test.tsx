@@ -418,9 +418,9 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
     expect(screen.getByText("Visible Days")).toBeInTheDocument();
     expect(screen.getByText("Open Full Preview")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Monday, May 4, 2026" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Wednesday, May 6, 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ })).toBeInTheDocument();
   });
 
   it("filters the full preview to a selected day and range from the compact calendar", () => {
@@ -434,21 +434,26 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
-    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
+    ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Monday, 2026-05-04" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Wednesday, May 6, 2026" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected range start" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Wednesday, May 6, 2026, selected range end" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("keeps the selected compact-preview day stable when switching between Setup and Preview", () => {
@@ -461,17 +466,16 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
-    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
+    ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
   });
@@ -571,17 +575,49 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
-    expect(
-      screen.getByRole("button", { name: "Monday, May 4, 2026, has friction" }),
-    ).toBeInTheDocument();
+    const conflictDayButton = screen.getByRole("button", {
+      name: "Monday, May 4, 2026, has friction",
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Monday, May 4, 2026, has friction" }));
+    expect(conflictDayButton).toBeInTheDocument();
+    expect(conflictDayButton).toHaveAttribute("aria-label", "Monday, May 4, 2026, has friction");
+
+    fireEvent.click(conflictDayButton);
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
 
     expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
+  });
+
+  it("marks today in the compact calendar and keeps setup and preview navigation working", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-05T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 5, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    const todayButton = screen.getByRole("button", {
+      name: "Tuesday, May 5, 2026, today",
+    });
+
+    expect(todayButton).toHaveAttribute("aria-current", "date");
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Setup" }));
+
+    expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026, today" })).toBeInTheDocument();
   });
 
   it("clears the selected compact-preview range when a loaded profile replaces the preview", async () => {
@@ -598,7 +634,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
@@ -611,13 +647,15 @@ describe("DayFrameApp", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
     });
-    expect(screen.queryByRole("button", { name: "Tuesday, May 5, 2026" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Tuesday, May 5, 2026, selected day/ }),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
-    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
