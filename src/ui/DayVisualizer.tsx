@@ -19,7 +19,7 @@ type VisualizerBlock = {
   title: string;
   startsAt: Date;
   endsAt: Date;
-  kind: "work" | "scheduled";
+  kind: "work" | "scheduled" | "manual";
   startMinutes: number;
   endMinutes: number;
   lane: number;
@@ -139,7 +139,7 @@ function buildVisualizerBlocks(
         block.title,
         block.startsAt,
         block.endsAt,
-        "scheduled",
+        block.source === "manual" ? "manual" : "scheduled",
         dayStart,
         dayEnd,
       ),
@@ -173,7 +173,9 @@ function buildVisualizerBlocks(
     }
 
     if (left.kind !== right.kind) {
-      return left.kind === "work" ? -1 : 1;
+      const rank = { work: 0, scheduled: 1, manual: 2 };
+
+      return rank[left.kind] - rank[right.kind];
     }
 
     return left.endMinutes - right.endMinutes;

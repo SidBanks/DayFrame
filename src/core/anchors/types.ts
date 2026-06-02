@@ -1,1 +1,1 @@
-export type AnchorType = "work" | "fixedTemplate" | "flexibleTemplate";
+export type AnchorType = "work" | "fixedTemplate" | "flexibleTemplate" | "manual";

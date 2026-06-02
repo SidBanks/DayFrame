@@ -25,7 +25,7 @@ type SchedulableBlock = {
   userDayDate?: LocalDateString;
   userWeekStartDate?: LocalDateString;
   priority: number;
-  source: "shift" | "template";
+  source: "shift" | "template" | "manual";
 };
 
 const WORK_BLOCK_PRIORITY = 1;
@@ -144,6 +144,13 @@ function buildConflictMessage(
   right: SchedulableBlock,
   severity: FrictionSeverity,
 ): string {
+  if (containsManualEvent(left, right)) {
+    const manualBlock = left.source === "manual" ? left : right;
+    const otherBlock = manualBlock === left ? right : left;
+
+    return `${manualBlock.title} is a manual calendar event. ${otherBlock.title} should be reviewed, moved, reduced, or accepted around it.`;
+  }
+
   if (isSleepShiftConflict(left, right)) {
     return "Work is locked by your shift setup. Sleep is flexible and can be moved. Try moving Sleep before work or reducing its buffer.";
   }
@@ -182,6 +189,34 @@ function buildConflictSuggestedFixes(
   right: SchedulableBlock,
   severity: FrictionSeverity,
 ): SuggestedFix[] {
+  if (containsManualEvent(left, right)) {
+    const adjustableBlock = left.source === "manual" ? right : left;
+    const fixes: SuggestedFix[] = [];
+
+    if (adjustableBlock.anchorType === "flexibleTemplate") {
+      fixes.push({
+        id: `fix_move_${adjustableBlock.id}`,
+        label: "Move block",
+        action: "moveBlock",
+      });
+      fixes.push({
+        id: `fix_reduce_${adjustableBlock.id}`,
+        label: "Reduce duration",
+        action: "reduceDuration",
+      });
+    }
+
+    if (severity !== "critical") {
+      fixes.push({
+        id: `fix_accept_${left.id}_${right.id}`,
+        label: "Accept conflict",
+        action: "acceptConflict",
+      });
+    }
+
+    return fixes;
+  }
+
   if (isWorkFixedTemplateConflict(left, right) || areBothFixedTemplateBlocks(left, right)) {
     const fixedBlock = left.anchorType === "fixedTemplate" ? left : right;
 
@@ -280,7 +315,7 @@ function toSchedulableDraftBlock(scheduledBlock: DraftScheduledBlock): Schedulab
     userDayDate: scheduledBlock.userDayDate,
     userWeekStartDate: scheduledBlock.userWeekStartDate,
     priority: scheduledBlock.priority,
-    source: "template",
+    source: scheduledBlock.source === "manual" ? "manual" : "template",
   };
 }
 
@@ -306,6 +341,10 @@ function isSleepShiftConflict(left: SchedulableBlock, right: SchedulableBlock): 
       (right.category === "sleep" && left.source === "shift")) &&
     (left.title.includes("Shift") || right.title.includes("Shift"))
   );
+}
+
+function containsManualEvent(left: SchedulableBlock, right: SchedulableBlock): boolean {
+  return left.source === "manual" || right.source === "manual";
 }
 
 function areBothFixedTemplateBlocks(left: SchedulableBlock, right: SchedulableBlock): boolean {

@@ -17,6 +17,7 @@ import type {
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
+import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 
 const blockCategories: BlockCategory[] = [
@@ -94,6 +95,7 @@ export type SetupScreenProps = {
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
   saveMessage: string;
+  rangeWarnings?: PreviewRangeWarning[];
   focusedTemplateField?: {
     templateId: string;
     field: "fixedStartTime";
@@ -105,6 +107,7 @@ export function SetupScreen({
   setDraft,
   onSave,
   saveMessage,
+  rangeWarnings = [],
   focusedTemplateField = null,
 }: SetupScreenProps): ReactElement {
   const [confirmingDeleteShiftIndex, setConfirmingDeleteShiftIndex] = useState<number | null>(null);
@@ -114,6 +117,11 @@ export function SetupScreen({
   const [confirmingDeleteTemplateIndex, setConfirmingDeleteTemplateIndex] = useState<number | null>(
     null,
   );
+  const [isSchedulePreferencesOpen, setIsSchedulePreferencesOpen] = useState(true);
+  const [isShiftsOpen, setIsShiftsOpen] = useState(true);
+  const [isCyclesOpen, setIsCyclesOpen] = useState(false);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+  const [isPreviewRangeOpen, setIsPreviewRangeOpen] = useState(false);
   const fixedStartTimeInputRefs = useRef(new Map<string, HTMLInputElement>());
 
   useEffect(() => {
@@ -142,7 +150,7 @@ export function SetupScreen({
           Edit your authored setup in one place, then save before generating a preview.
         </p>
         <p className="df-support">
-          Setup includes schedule preferences, shifts, schedule periods, templates, and recurrences.
+          Setup includes schedule preferences, shifts, cycles, templates, and recurrences.
         </p>
       </header>
 
@@ -153,14 +161,42 @@ export function SetupScreen({
       </div>
 
       {saveMessage ? <p className="df-success-message">{saveMessage}</p> : null}
+      {rangeWarnings.length > 0 ? (
+        <section aria-labelledby="setup-warning-heading" className="df-panel df-form-stack">
+          <div className="df-screen-header">
+            <h2 className="df-panel-title" id="setup-warning-heading">
+              Preview Range Warnings
+            </h2>
+            <p className="df-support">
+              These warnings do not block preview generation, but they may explain missing or sparse
+              preview results.
+            </p>
+          </div>
+          <ul className="df-plain-list">
+            {rangeWarnings.map((warning) => (
+              <li className="df-warning-item" key={warning.id}>
+                {warning.message}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
-      <section aria-labelledby="setup-preferences-heading" className="df-panel df-form-stack">
+      <CollapsibleSetupSection
+        helperText="Controls how DayFrame interprets days, weeks, and schedule boundaries."
+        isOpen={isSchedulePreferencesOpen}
+        onToggle={() => {
+          setIsSchedulePreferencesOpen((currentValue) => !currentValue);
+        }}
+        sectionId="setup-preferences"
+        title="Schedule Preferences"
+      >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-preferences-heading">
             Schedule Preferences
           </h2>
           <p className="df-support">
-            Global preferences apply by default and can be overridden by schedule periods.
+            Global preferences apply by default and can be overridden by cycle segments.
           </p>
         </div>
         <div className="df-grid">
@@ -208,9 +244,17 @@ export function SetupScreen({
             </select>
           </div>
         </div>
-      </section>
+      </CollapsibleSetupSection>
 
-      <section aria-labelledby="setup-preview-range-heading" className="df-panel df-form-stack">
+      <CollapsibleSetupSection
+        helperText="Controls how far ahead DayFrame generates a preview."
+        isOpen={isPreviewRangeOpen}
+        onToggle={() => {
+          setIsPreviewRangeOpen((currentValue) => !currentValue);
+        }}
+        sectionId="setup-preview-range"
+        title="Preview Range"
+      >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-preview-range-heading">
             Preview Range
@@ -221,9 +265,49 @@ export function SetupScreen({
         </div>
         <div className="df-grid">
           <div className="df-field">
+            <label htmlFor="setup-preview-range-source">Range Source</label>
+            <select
+              id="setup-preview-range-source"
+              onChange={(event) => {
+                const nextSource = (
+                  event.target as { value: NonNullable<DayFramePreviewRange["source"]> }
+                ).value;
+
+                setDraft((currentDraft) => ({
+                  ...currentDraft,
+                  previewRange:
+                    nextSource === "cycle"
+                      ? {
+                          ...currentDraft.previewRange,
+                          source: "cycle",
+                          startDate: currentDraft.shiftCycle.startsOnDate,
+                          endDate:
+                            currentDraft.shiftCycle.endsOnDate ??
+                            currentDraft.shiftCycle.startsOnDate,
+                        }
+                      : {
+                          ...currentDraft.previewRange,
+                          ...(nextSource === "preset"
+                            ? { source: "preset" as const }
+                            : { source: "custom" as const }),
+                          preset:
+                            nextSource === "custom" ? "custom" : currentDraft.previewRange.preset,
+                        },
+                }));
+              }}
+              value={getPreviewRangeSource(draft.previewRange)}
+            >
+              <option value="preset">Preset</option>
+              <option value="custom">Custom</option>
+              <option value="cycle">Preview This Cycle</option>
+            </select>
+          </div>
+
+          <div className="df-field">
             <label htmlFor="setup-preview-range-preset">Range Preset</label>
             <select
               id="setup-preview-range-preset"
+              disabled={getPreviewRangeSource(draft.previewRange) !== "preset"}
               onChange={(event) => {
                 const nextPreset = (event.target as { value: DayFramePreviewRangePreset }).value;
 
@@ -231,6 +315,7 @@ export function SetupScreen({
                   ...currentDraft,
                   previewRange: {
                     ...currentDraft.previewRange,
+                    source: nextPreset === "custom" ? "custom" : "preset",
                     preset: nextPreset,
                     ...(nextPreset === "custom"
                       ? {}
@@ -256,6 +341,7 @@ export function SetupScreen({
           <div className="df-field">
             <label htmlFor="setup-preview-range-start-date">Start Date</label>
             <input
+              disabled={getPreviewRangeSource(draft.previewRange) === "cycle"}
               id="setup-preview-range-start-date"
               onChange={(event) => {
                 const nextStartDate = (event.target as { value: string }).value as LocalDateString;
@@ -264,6 +350,10 @@ export function SetupScreen({
                   ...currentDraft,
                   previewRange: {
                     ...currentDraft.previewRange,
+                    source:
+                      getPreviewRangeSource(currentDraft.previewRange) === "preset"
+                        ? "preset"
+                        : "custom",
                     startDate: nextStartDate,
                     ...(currentDraft.previewRange.preset === "custom"
                       ? {}
@@ -284,6 +374,7 @@ export function SetupScreen({
           <div className="df-field">
             <label htmlFor="setup-preview-range-end-date">End Date</label>
             <input
+              disabled={getPreviewRangeSource(draft.previewRange) === "cycle"}
               id="setup-preview-range-end-date"
               onChange={(event) => {
                 const nextEndDate = (event.target as { value: string }).value as LocalDateString;
@@ -292,6 +383,7 @@ export function SetupScreen({
                   ...currentDraft,
                   previewRange: {
                     ...currentDraft.previewRange,
+                    source: "custom",
                     preset:
                       currentDraft.previewRange.preset === "custom"
                         ? currentDraft.previewRange.preset
@@ -305,9 +397,17 @@ export function SetupScreen({
             />
           </div>
         </div>
-      </section>
+      </CollapsibleSetupSection>
 
-      <section aria-labelledby="setup-shifts-heading" className="df-panel df-form-stack">
+      <CollapsibleSetupSection
+        helperText="Define your work shifts and workday patterns."
+        isOpen={isShiftsOpen}
+        onToggle={() => {
+          setIsShiftsOpen((currentValue) => !currentValue);
+        }}
+        sectionId="setup-shifts"
+        title="Shifts"
+      >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-shifts-heading">
             Shift Definitions
@@ -556,16 +656,22 @@ export function SetupScreen({
             ))}
           </ul>
         )}
-      </section>
+      </CollapsibleSetupSection>
 
-      <section aria-labelledby="setup-cycle-heading" className="df-panel df-form-stack">
+      <CollapsibleSetupSection
+        helperText="Connect shifts to date ranges and rotating schedules."
+        isOpen={isCyclesOpen}
+        onToggle={() => {
+          setIsCyclesOpen((currentValue) => !currentValue);
+        }}
+        sectionId="setup-cycle"
+        title="Cycles"
+      >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-cycle-heading">
-            Schedule Periods
+            Schedule Cycle
           </h2>
-          <p className="df-support">
-            Map date-bounded schedule periods to the shift definitions above.
-          </p>
+          <p className="df-support">Map cycle segments to the shift definitions above.</p>
         </div>
         <div className="df-grid">
           <div className="df-field">
@@ -601,6 +707,14 @@ export function SetupScreen({
                     ...currentDraft.shiftCycle,
                     startsOnDate: nextValue,
                   },
+                  previewRange:
+                    getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                      ? {
+                          ...currentDraft.previewRange,
+                          startDate: nextValue,
+                          endDate: currentDraft.shiftCycle.endsOnDate ?? nextValue,
+                        }
+                      : currentDraft.previewRange,
                 }));
               }}
               type="date"
@@ -630,6 +744,16 @@ export function SetupScreen({
                           endsOnDate: nextValue as LocalDateString,
                         }
                       : nextShiftCycle,
+                    previewRange:
+                      getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                        ? {
+                            ...currentDraft.previewRange,
+                            startDate: currentDraft.shiftCycle.startsOnDate,
+                            endDate:
+                              (nextValue as LocalDateString | "") ||
+                              currentDraft.shiftCycle.startsOnDate,
+                          }
+                        : currentDraft.previewRange,
                   };
                 });
               }}
@@ -660,14 +784,14 @@ export function SetupScreen({
             }}
             type="button"
           >
-            Add Schedule Period
+            Add Cycle Segment
           </button>
         </div>
 
         {draft.shiftCycle.segments.length === 0 ? (
           <div>
             <p className="df-empty">
-              No schedule periods yet. Add your first period to get started.
+              No cycle segments yet. Add your first segment to get started.
             </p>
           </div>
         ) : (
@@ -675,7 +799,7 @@ export function SetupScreen({
             {draft.shiftCycle.segments.map((segment, index) => (
               <li className="df-list-card" key={segment.id}>
                 <div className="df-screen-actions">
-                  <h3 className="df-item-title">Schedule Period {index + 1}</h3>
+                  <h3 className="df-item-title">Cycle Segment {index + 1}</h3>
                   <button
                     className="df-secondary-button"
                     onClick={() => {
@@ -683,14 +807,14 @@ export function SetupScreen({
                     }}
                     type="button"
                   >
-                    Delete Schedule Period
+                    Delete Cycle Segment
                   </button>
                 </div>
 
                 {confirmingDeleteSegmentIndex === index ? (
                   <div className="df-confirmation">
                     <p className="df-danger-message">
-                      Delete this schedule period from the current setup draft?
+                      Delete this cycle segment from the current setup draft?
                     </p>
                     <div className="df-confirmation-actions">
                       <button
@@ -709,7 +833,7 @@ export function SetupScreen({
                         }}
                         type="button"
                       >
-                        Confirm Delete Schedule Period
+                        Confirm Delete Cycle Segment
                       </button>
                       <button
                         className="df-secondary-button"
@@ -762,9 +886,9 @@ export function SetupScreen({
                   </div>
 
                   <div className="df-field">
-                    <label>Period Start Date</label>
+                    <label>Segment Start Date</label>
                     <input
-                      aria-label="Period Start Date"
+                      aria-label="Segment Start Date"
                       onChange={(event) => {
                         const nextValue = (event.target as { value: string }).value;
 
@@ -790,9 +914,9 @@ export function SetupScreen({
                   </div>
 
                   <div className="df-field">
-                    <label>Period End Date</label>
+                    <label>Segment End Date</label>
                     <input
-                      aria-label="Period End Date"
+                      aria-label="Segment End Date"
                       onChange={(event) => {
                         const nextValue = (event.target as { value: string }).value;
 
@@ -889,9 +1013,9 @@ export function SetupScreen({
                   {segment.schedulePreferences ? (
                     <>
                       <div className="df-field">
-                        <label>Period Day Boundary</label>
+                        <label>Segment Day Boundary</label>
                         <input
-                          aria-label="Period Day Boundary"
+                          aria-label="Segment Day Boundary"
                           onChange={(event) => {
                             const nextValue = (event.target as { value: string }).value;
 
@@ -918,9 +1042,9 @@ export function SetupScreen({
                       </div>
 
                       <div className="df-field">
-                        <label>Period Week Starts On</label>
+                        <label>Segment Week Starts On</label>
                         <select
-                          aria-label="Period Week Starts On"
+                          aria-label="Segment Week Starts On"
                           onChange={(event) => {
                             const nextValue = (event.target as { value: string }).value;
 
@@ -956,9 +1080,17 @@ export function SetupScreen({
             ))}
           </ul>
         )}
-      </section>
+      </CollapsibleSetupSection>
 
-      <section aria-labelledby="setup-templates-heading" className="df-panel df-form-stack">
+      <CollapsibleSetupSection
+        helperText="Reusable activities DayFrame can place into your schedule."
+        isOpen={isTemplatesOpen}
+        onToggle={() => {
+          setIsTemplatesOpen((currentValue) => !currentValue);
+        }}
+        sectionId="setup-templates"
+        title="Templates"
+      >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-templates-heading">
             Templates And Recurrences
@@ -1683,8 +1815,58 @@ export function SetupScreen({
             ))}
           </ul>
         )}
-      </section>
+      </CollapsibleSetupSection>
     </main>
+  );
+}
+
+type CollapsibleSetupSectionProps = {
+  sectionId: string;
+  title: string;
+  helperText: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: ReactElement | ReactElement[];
+};
+
+function CollapsibleSetupSection({
+  sectionId,
+  title,
+  helperText,
+  isOpen,
+  onToggle,
+  children,
+}: CollapsibleSetupSectionProps): ReactElement {
+  return (
+    <section
+      aria-labelledby={`${sectionId}-toggle`}
+      className="df-panel df-form-stack df-collapsible-section"
+    >
+      <div className="df-collapsible-section-header">
+        <p className="df-support">{helperText}</p>
+        <button
+          aria-controls={`${sectionId}-content`}
+          aria-expanded={isOpen}
+          className="df-secondary-button df-section-toggle"
+          id={`${sectionId}-toggle`}
+          onClick={onToggle}
+          type="button"
+        >
+          {title}: {isOpen ? "Collapse" : "Expand"}
+        </button>
+      </div>
+      <div
+        aria-hidden={!isOpen}
+        className={
+          isOpen
+            ? "df-form-stack df-collapsible-section-content"
+            : "df-form-stack df-collapsible-section-content is-collapsed"
+        }
+        id={`${sectionId}-content`}
+      >
+        {children}
+      </div>
+    </section>
   );
 }
 
@@ -2041,6 +2223,16 @@ function formatPreviewRangePresetLabel(preset: DayFramePreviewRangePreset): stri
     case "custom":
       return "Custom";
   }
+}
+
+function getPreviewRangeSource(
+  previewRange: DayFramePreviewRange,
+): NonNullable<DayFramePreviewRange["source"]> {
+  if (previewRange.source) {
+    return previewRange.source;
+  }
+
+  return previewRange.preset === "custom" ? "custom" : "preset";
 }
 
 function formatWeekdayLabel(weekday: Weekday): string {

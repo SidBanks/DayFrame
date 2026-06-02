@@ -100,6 +100,7 @@ describe("dayFrameStore", () => {
         startDate: "2026-05-04",
         endDate: "2026-05-06",
       },
+      manualEvents: [],
       shiftDefinitions: [],
       shiftCycle: null,
       blockTemplates: [],
@@ -107,6 +108,51 @@ describe("dayFrameStore", () => {
       savedProfiles: [],
       preview: null,
     });
+  });
+
+  it("stores manual events in authored state and includes them in saved profiles", () => {
+    const localStorage = createLocalStorageMock();
+
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+
+    store.setManualEvents([
+      {
+        id: "manual_event_1",
+        title: "Doctor Appointment",
+        userDayDate: "2026-05-06",
+        startsAt: "09:30",
+        endsAt: "10:30",
+        allDay: false,
+        notes: "Bring insurance card",
+        ...baseTimestamps,
+      },
+    ]);
+    store.saveProfile({
+      name: "With Appointment",
+      savedAt: "2026-05-05T09:00:00-05:00",
+    });
+
+    expect(store.getState().manualEvents).toEqual([
+      {
+        id: "manual_event_1",
+        title: "Doctor Appointment",
+        userDayDate: "2026-05-06",
+        startsAt: "09:30",
+        endsAt: "10:30",
+        allDay: false,
+        notes: "Bring insurance card",
+        ...baseTimestamps,
+      },
+    ]);
+
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+      manualEvents: store.getState().manualEvents,
+    });
+    expect(store.getState().savedProfiles[0]?.data.manualEvents).toEqual(
+      store.getState().manualEvents,
+    );
   });
 
   it("re-enables untouched default sleep templates from persisted state", () => {
@@ -249,6 +295,7 @@ describe("dayFrameStore", () => {
       shiftCycle,
       blockTemplates: [],
       blockRecurrences: [],
+      manualEvents: [],
     });
   });
 
@@ -383,6 +430,7 @@ describe("dayFrameStore", () => {
             startDate: "2026-05-04",
             endDate: "2026-05-06",
           },
+          manualEvents: [],
           shiftDefinitions: buildShiftDefinitions(),
           shiftCycle: buildShiftCycle(),
           blockTemplates: buildBlockTemplates(),
@@ -428,6 +476,7 @@ describe("dayFrameStore", () => {
             startDate: "2026-05-07",
             endDate: "2026-05-09",
           },
+          manualEvents: [],
           shiftDefinitions: buildShiftDefinitions(),
           shiftCycle: buildShiftCycle(),
           blockTemplates: [],
@@ -463,6 +512,7 @@ describe("dayFrameStore", () => {
       shiftCycle: buildShiftCycle(),
       blockTemplates: [],
       blockRecurrences: [],
+      manualEvents: [],
     });
   });
 
@@ -645,6 +695,7 @@ describe("dayFrameStore", () => {
       shiftCycle,
       blockTemplates,
       blockRecurrences,
+      manualEvents: [],
     });
   });
 

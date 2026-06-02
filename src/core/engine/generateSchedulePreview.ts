@@ -1,6 +1,7 @@
 import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../cycles/resolveEffectiveSchedulePreferences.js";
 import { generateBlockCandidates } from "../blocks/generateBlockCandidates.js";
 import { placeBlockCandidates } from "../blocks/placeBlockCandidates.js";
+import type { ManualCalendarEvent } from "../calendar/types.js";
 import type {
   BlockCandidate,
   BlockRecurrence,
@@ -24,6 +25,7 @@ export type GenerateSchedulePreviewInput = {
   shiftCycle: ShiftCycle;
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
+  manualEvents?: ManualCalendarEvent[];
   planningWindowStart: Date;
   planningWindowEnd: Date;
   dayBoundaryStartTime: TimeString;
@@ -95,10 +97,17 @@ export function generateSchedulePreview(
         userDayDate,
       }).dayBoundaryStartTime,
   });
+  const manualScheduledBlocks = buildManualEventScheduledBlocks(
+    input.manualEvents ?? [],
+    visibleUserDayDates,
+    input.shiftCycle,
+    input.dayBoundaryStartTime,
+    input.weekStartsOn,
+  );
 
   const frictionDetectionResult = detectScheduleFriction({
     generatedWorkBlocks,
-    scheduledBlocks: placementResult.scheduledBlocks,
+    scheduledBlocks: [...placementResult.scheduledBlocks, ...manualScheduledBlocks],
     unplacedCandidates: placementResult.unplacedCandidates,
     detectedAt: input.generatedAt,
   });
@@ -106,7 +115,7 @@ export function generateSchedulePreview(
   const suggestedFixesResult = generateSuggestedFixes({
     frictionPoints: frictionDetectionResult.frictionPoints,
     generatedWorkBlocks,
-    scheduledBlocks: placementResult.scheduledBlocks,
+    scheduledBlocks: [...placementResult.scheduledBlocks, ...manualScheduledBlocks],
     unplacedCandidates: placementResult.unplacedCandidates,
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     getDayBoundaryStartTimeForUserDayDate: (userDayDate) =>
@@ -141,7 +150,8 @@ export function generateSchedulePreview(
       },
       userDayDate,
     }).dayBoundaryStartTime;
-  const filteredScheduledBlocks = placementResult.scheduledBlocks.filter((scheduledBlock) =>
+  const allScheduledBlocks = [...placementResult.scheduledBlocks, ...manualScheduledBlocks];
+  const filteredScheduledBlocks = allScheduledBlocks.filter((scheduledBlock) =>
     overlapsVisibleUserDay(
       scheduledBlock.startsAt,
       scheduledBlock.endsAt,
@@ -184,6 +194,120 @@ export function generateSchedulePreview(
     unplacedCandidates: filteredUnplacedCandidates,
     frictionPoints: filteredFrictionPoints,
   };
+}
+
+function buildManualEventScheduledBlocks(
+  manualEvents: ManualCalendarEvent[],
+  visibleUserDayDates: Set<LocalDateString>,
+  shiftCycle: ShiftCycle,
+  dayBoundaryStartTime: TimeString,
+  weekStartsOn: Weekday,
+): DraftScheduledBlock[] {
+  return manualEvents
+    .filter((manualEvent) => visibleUserDayDates.has(manualEvent.userDayDate))
+    .map((manualEvent) => {
+      const effectiveDayBoundaryStartTime = resolveEffectiveSchedulePreferencesForUserDayDate({
+        shiftCycle,
+        defaultSchedulingPreferences: {
+          dayBoundaryStartTime,
+          weekStartsOn,
+        },
+        userDayDate: manualEvent.userDayDate,
+      }).dayBoundaryStartTime;
+      const userDayStart = getUserDayStartFromLocalDateString(
+        manualEvent.userDayDate,
+        effectiveDayBoundaryStartTime,
+      );
+      const startsAt =
+        manualEvent.allDay || !manualEvent.startsAt
+          ? userDayStart
+          : createDateTimeFromUserDay(manualEvent.userDayDate, manualEvent.startsAt);
+      const endsAt =
+        manualEvent.allDay || !manualEvent.endsAt
+          ? addCalendarDays(userDayStart, 1)
+          : createDateTimeFromUserDay(
+              manualEvent.userDayDate,
+              manualEvent.endsAt,
+              manualEvent.endsAt <= (manualEvent.startsAt ?? manualEvent.endsAt),
+            );
+
+      return {
+        id: manualEvent.id,
+        userId: "user_001",
+        source: "manual",
+        title: manualEvent.title,
+        category: "optional",
+        anchorType: "manual",
+        placementType: "fixed",
+        startsAt,
+        endsAt,
+        userDayDate: manualEvent.userDayDate,
+        userWeekStartDate: getUserWeekStartDate(manualEvent.userDayDate, weekStartsOn),
+        priority: 2,
+        status: "planned",
+        externalResources: [],
+      };
+    });
+}
+
+function createDateTimeFromUserDay(
+  userDayDate: LocalDateString,
+  time: TimeString,
+  nextDay = false,
+): Date {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+
+  return new Date(
+    year ?? 2026,
+    (month ?? 1) - 1,
+    (day ?? 1) + (nextDay ? 1 : 0),
+    hours ?? 0,
+    minutes ?? 0,
+    0,
+    0,
+  );
+}
+
+function getUserDayStartFromLocalDateString(
+  userDayDate: LocalDateString,
+  dayBoundaryStartTime: TimeString,
+): Date {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const [hours, minutes] = dayBoundaryStartTime.split(":").map(Number);
+
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
+}
+
+function addCalendarDays(date: Date, days: number): Date {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+}
+
+function getUserWeekStartDate(
+  userDayDate: LocalDateString,
+  weekStartsOn: Weekday,
+): LocalDateString {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const date = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+  const weekdayIndex = date.getDay();
+  const weekStartsOnIndex = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  }[weekStartsOn];
+  const offset = (weekdayIndex - weekStartsOnIndex + 7) % 7;
+
+  date.setDate(date.getDate() - offset);
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}` as LocalDateString;
 }
 
 function validatePlanningWindow(planningWindowStart: Date, planningWindowEnd: Date): void {

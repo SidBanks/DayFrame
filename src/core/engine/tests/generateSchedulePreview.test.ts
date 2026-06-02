@@ -1401,4 +1401,76 @@ describe("generateSchedulePreview", () => {
       }),
     ]);
   });
+
+  it("includes manual calendar events in scheduled blocks and friction without changing placement", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "09:00",
+          endTime: "17:00",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [],
+      blockRecurrences: [],
+      manualEvents: [
+        {
+          id: "manual_event_doctor",
+          title: "Doctor Appointment",
+          userDayDate: "2026-05-04",
+          startsAt: "10:00",
+          endsAt: "11:00",
+          allDay: false,
+          notes: "Annual checkup",
+          ...baseTimestamps,
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 4, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.blockCandidates).toEqual([]);
+    expect(result.scheduledBlocks).toEqual([
+      expect.objectContaining({
+        id: "manual_event_doctor",
+        source: "manual",
+        title: "Doctor Appointment",
+        startsAt: new Date(2026, 4, 4, 10, 0, 0, 0),
+        endsAt: new Date(2026, 4, 4, 11, 0, 0, 0),
+      }),
+    ]);
+    expect(result.frictionPoints).toEqual([
+      expect.objectContaining({
+        title: "Day Shift conflicts with Doctor Appointment",
+        message: expect.stringContaining("manual calendar event"),
+        suggestedFixes: [expect.objectContaining({ label: "Accept conflict" })],
+      }),
+    ]);
+  });
 });

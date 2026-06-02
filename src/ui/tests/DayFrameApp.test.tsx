@@ -93,6 +93,14 @@ describe("DayFrameApp", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Preview Range: Expand" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.getByRole("button", { name: "Cycles: Expand" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
   });
 
@@ -100,9 +108,12 @@ describe("DayFrameApp", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Preview Range" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Schedule Periods" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Preview Range: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    expect(screen.getByRole("heading", { name: "Preview Range" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule Cycle" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
     expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
@@ -174,6 +185,7 @@ describe("DayFrameApp", () => {
 
     expect(store.getState().previewRange).toEqual({
       preset: "oneWeek",
+      source: "preset",
       startDate: "2026-05-05",
       endDate: "2026-05-11",
     });
@@ -439,6 +451,11 @@ describe("DayFrameApp", () => {
     expect(
       screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
     ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" })).toHaveClass(
+      "is-selected",
+      "is-range-start",
+      "is-range-end",
+    );
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Monday, 2026-05-04" })).not.toBeInTheDocument();
@@ -454,6 +471,12 @@ describe("DayFrameApp", () => {
     expect(
       screen.getByRole("button", { name: "Wednesday, May 6, 2026, selected range end" }),
     ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected range start" }),
+    ).toHaveClass("is-selected", "is-range-start");
+    expect(
+      screen.getByRole("button", { name: "Wednesday, May 6, 2026, selected range end" }),
+    ).toHaveClass("is-selected", "is-range-end");
   });
 
   it("keeps the selected compact-preview day stable when switching between Setup and Preview", () => {
@@ -478,6 +501,24 @@ describe("DayFrameApp", () => {
     ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
+  });
+
+  it("uses a lighter interior style for selected preview ranges", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ }));
+
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected range" }),
+    ).toHaveClass("is-selected", "is-range-middle");
   });
 
   it("marks compact calendar friction days and restores the full visible range", () => {
@@ -583,6 +624,9 @@ describe("DayFrameApp", () => {
     expect(conflictDayButton).toHaveAttribute("aria-label", "Monday, May 4, 2026, has friction");
 
     fireEvent.click(conflictDayButton);
+    expect(
+      screen.getByRole("button", { name: "Monday, May 4, 2026, selected day, has friction" }),
+    ).toHaveClass("is-selected", "is-conflict");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
@@ -618,6 +662,39 @@ describe("DayFrameApp", () => {
 
     expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026, today" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026, today" }));
+    expect(
+      screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day, today" }),
+    ).toHaveClass("is-selected", "is-today");
+  });
+
+  it("collapses setup sections by default and preserves draft edits when sections are reopened", () => {
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+
+    expect(screen.getByRole("button", { name: "Schedule Preferences: Collapse" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Shifts: Collapse" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Cycles: Expand" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(
+      screen.getByText("Connect shifts to date ranges and rotating schedules."),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
+      target: { value: "Sleep Buffer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Templates: Collapse" }));
+    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+
+    expect(screen.getByDisplayValue("Sleep Buffer")).toBeInTheDocument();
   });
 
   it("clears the selected compact-preview range when a loaded profile replaces the preview", async () => {
@@ -680,6 +757,89 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
+  });
+
+  it("can save a cycle-based preview range and generate the full authored cycle", () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview Range: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.change(screen.getByLabelText("Cycle Start Date"), {
+      target: { value: "2026-05-10" },
+    });
+    fireEvent.change(screen.getByLabelText("Cycle End Date"), {
+      target: { value: "2026-05-12" },
+    });
+    fireEvent.change(screen.getByLabelText("Range Source"), {
+      target: { value: "cycle" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(screen.getAllByText("May 10-12, 2026").length).toBeGreaterThan(0);
+  });
+
+  it("creates, edits, and deletes a manual event from the compact preview day details", async () => {
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
+
+    expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Doctor Appointment" },
+    });
+    fireEvent.change(screen.getByLabelText("Start Time"), {
+      target: { value: "10:00" },
+    });
+    fireEvent.change(screen.getByLabelText("End Time"), {
+      target: { value: "11:00" },
+    });
+    fireEvent.change(screen.getByLabelText("Notes"), {
+      target: { value: "Bring forms" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Event" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Day Details" })).toBeInTheDocument();
+    });
+    expect(screen.getAllByText("Doctor Appointment").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("Day Shift conflicts with Doctor Appointment").length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Edit Event" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit Event" }));
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Updated Appointment" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Event" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Updated Appointment").length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete Event" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Delete Event" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Updated Appointment")).not.toBeInTheDocument();
   });
 
   it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", () => {
@@ -1208,6 +1368,66 @@ describe("DayFrameApp", () => {
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
     expect(screen.getAllByText("May 4-6, 2026").length).toBeGreaterThan(0);
+  });
+
+  it("shows non-blocking preview range mismatch warnings in setup and preview", () => {
+    const store = createDayFrameStore({
+      previewRange: {
+        preset: "custom",
+        startDate: "2026-06-01",
+        endDate: "2026-06-03",
+      },
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday", "tuesday", "wednesday"],
+          crossesMidnight: false,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+    });
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    expect(screen.getByRole("heading", { name: "Preview Range Warnings" })).toBeInTheDocument();
+    expect(
+      screen.getByText("This preview range does not overlap the active cycle."),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+    expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+
+    expect(
+      screen.getByText("This preview range does not overlap the active cycle."),
+    ).toBeInTheDocument();
   });
 
   it("switches to setup and focuses the matching fixed start time after clicking Review fixed time", () => {
@@ -1819,6 +2039,7 @@ describe("DayFrameApp", () => {
             startDate: "2026-05-04",
             endDate: "2026-05-06",
           },
+          manualEvents: [],
           shiftDefinitions: [
             {
               id: "shift_day",
@@ -1933,6 +2154,7 @@ describe("DayFrameApp", () => {
                       startDate: "2026-05-08",
                       endDate: "2026-05-12",
                     },
+                    manualEvents: [],
                     shiftDefinitions: [
                       {
                         id: "shift_night",

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactElement } from "react";
 
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
+import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../core/cycles/resolveEffectiveSchedulePreferences.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
@@ -8,6 +9,7 @@ import { parseDayFrameBackupJson, type DayFrameBackupV1 } from "../state/dayFram
 import { createDayFrameStore } from "../state/dayFrameStore.js";
 import type { DayFrameState, DayFrameStore, GeneratePreviewActionInput } from "../state/types.js";
 import { PreviewScreen } from "./PreviewScreen.js";
+import { getPreviewRangeWarnings } from "./previewRangeWarnings.js";
 import { SetupScreen, buildSetupDraft, type SetupDraft } from "./SetupScreen.js";
 import { formatPlanningWindow, formatPreviewTimestamp } from "./timeDisplay.js";
 import "./dayFrameUi.css";
@@ -28,6 +30,7 @@ export type DayFrameAppStore = Pick<
   | "setShiftCycle"
   | "setBlockTemplates"
   | "setBlockRecurrences"
+  | "setManualEvents"
   | "generatePreview"
   | "applySuggestedFixToPreview"
 >;
@@ -85,6 +88,19 @@ export function DayFrameApp({
     templateId: string;
     field: "fixedStartTime";
   } | null>(null);
+  const [activeManualEventDate, setActiveManualEventDate] = useState<LocalDateString | null>(null);
+  const [editingManualEventId, setEditingManualEventId] = useState<string | null>(null);
+  const [manualEventDraft, setManualEventDraft] = useState<{
+    title: string;
+    userDayDate: LocalDateString;
+    allDay: boolean;
+    startsAt: string;
+    endsAt: string;
+    notes: string;
+  } | null>(null);
+  const [confirmingDeleteManualEventId, setConfirmingDeleteManualEventId] = useState<string | null>(
+    null,
+  );
   const getDayBoundaryStartTimeForUserDayDate = (userDayDate: string) =>
     resolveEffectiveSchedulePreferencesForUserDayDate({
       shiftCycle: stateSnapshot.shiftCycle,
@@ -94,6 +110,33 @@ export function DayFrameApp({
   const previewSummary = stateSnapshot.preview
     ? buildCompactPreviewSummary(stateSnapshot.preview, now, getDayBoundaryStartTimeForUserDayDate)
     : null;
+  const activePreviewDayDetails =
+    stateSnapshot.preview && activeManualEventDate
+      ? buildPreviewDayDetails(
+          stateSnapshot.preview,
+          activeManualEventDate,
+          getDayBoundaryStartTimeForUserDayDate,
+        )
+      : null;
+  const manualEventsForActiveDate = activeManualEventDate
+    ? stateSnapshot.manualEvents.filter(
+        (manualEvent) => manualEvent.userDayDate === activeManualEventDate,
+      )
+    : [];
+  const setupRangeWarnings = getPreviewRangeWarnings({
+    previewRange: setupDraft.previewRange,
+    shiftCycle: setupDraft.shiftCycle,
+    shiftDefinitions: setupDraft.shiftDefinitions,
+    blockTemplates: setupDraft.templateEntries.map((entry) => entry.template),
+    blockRecurrences: setupDraft.templateEntries.map((entry) => entry.recurrence),
+  });
+  const savedRangeWarnings = getPreviewRangeWarnings({
+    previewRange: stateSnapshot.previewRange,
+    shiftCycle: stateSnapshot.shiftCycle,
+    shiftDefinitions: stateSnapshot.shiftDefinitions,
+    blockTemplates: stateSnapshot.blockTemplates,
+    blockRecurrences: stateSnapshot.blockRecurrences,
+  });
 
   useEffect(() => {
     return storeRef.current.subscribe((nextState) => {
@@ -147,9 +190,10 @@ export function DayFrameApp({
 
   function saveCurrentSetup(): void {
     const savedAt = createIsoTimestamp();
+    const resolvedPreviewRange = resolvePreviewRangeFromSetupDraft(setupDraft);
 
     storeRef.current.setSchedulingPreferences(setupDraft.schedulingPreferences);
-    storeRef.current.setPreviewRange(setupDraft.previewRange);
+    storeRef.current.setPreviewRange(resolvedPreviewRange);
     storeRef.current.setShiftDefinitions(
       setupDraft.shiftDefinitions.map((shiftDefinition) => ({
         ...shiftDefinition,
@@ -231,7 +275,99 @@ export function DayFrameApp({
 
     setCurrentScreen("preview");
     setFocusedTemplateField(null);
+    openManualEventPanel(userDayDate);
     resetShellMessages();
+  }
+
+  function openManualEventPanel(userDayDate: LocalDateString): void {
+    setActiveManualEventDate(userDayDate);
+    const existingManualEvent = stateSnapshot.manualEvents.find(
+      (manualEvent) => manualEvent.userDayDate === userDayDate,
+    );
+
+    if (existingManualEvent) {
+      setEditingManualEventId(existingManualEvent.id);
+      setManualEventDraft({
+        title: existingManualEvent.title,
+        userDayDate: existingManualEvent.userDayDate,
+        allDay: existingManualEvent.allDay,
+        startsAt: existingManualEvent.startsAt ?? "",
+        endsAt: existingManualEvent.endsAt ?? "",
+        notes: existingManualEvent.notes ?? "",
+      });
+      return;
+    }
+
+    setEditingManualEventId(null);
+    setManualEventDraft({
+      title: "",
+      userDayDate,
+      allDay: false,
+      startsAt: "09:00",
+      endsAt: "10:00",
+      notes: "",
+    });
+  }
+
+  function saveManualEvent(): void {
+    if (!manualEventDraft) {
+      return;
+    }
+
+    const timestamp = createIsoTimestamp();
+    const nextManualEvent: ManualCalendarEvent = {
+      id: editingManualEventId ?? `manual_event_${timestamp}`,
+      title: manualEventDraft.title.trim() || "Untitled Event",
+      userDayDate: manualEventDraft.userDayDate,
+      allDay: manualEventDraft.allDay,
+      ...(manualEventDraft.allDay
+        ? {}
+        : { startsAt: manualEventDraft.startsAt as `${number}:${number}` }),
+      ...(manualEventDraft.allDay
+        ? {}
+        : { endsAt: manualEventDraft.endsAt as `${number}:${number}` }),
+      ...(manualEventDraft.notes.trim() ? { notes: manualEventDraft.notes.trim() } : {}),
+      createdAt:
+        stateSnapshot.manualEvents.find(
+          (manualEvent) => manualEvent.id === (editingManualEventId ?? ""),
+        )?.createdAt ?? timestamp,
+      updatedAt: timestamp,
+    };
+    const remainingManualEvents = stateSnapshot.manualEvents.filter(
+      (manualEvent) => manualEvent.id !== nextManualEvent.id,
+    );
+
+    storeRef.current.setManualEvents([...remainingManualEvents, nextManualEvent]);
+    setEditingManualEventId(nextManualEvent.id);
+    setManualEventDraft({
+      title: nextManualEvent.title,
+      userDayDate: nextManualEvent.userDayDate,
+      allDay: nextManualEvent.allDay,
+      startsAt: nextManualEvent.startsAt ?? "",
+      endsAt: nextManualEvent.endsAt ?? "",
+      notes: nextManualEvent.notes ?? "",
+    });
+    regeneratePreviewIfPresent();
+  }
+
+  function deleteManualEvent(eventId: string): void {
+    storeRef.current.setManualEvents(
+      stateSnapshot.manualEvents.filter((manualEvent) => manualEvent.id !== eventId),
+    );
+    setConfirmingDeleteManualEventId(null);
+    setEditingManualEventId(null);
+    if (activeManualEventDate) {
+      openManualEventPanel(activeManualEventDate);
+    }
+    regeneratePreviewIfPresent();
+  }
+
+  function regeneratePreviewIfPresent(): void {
+    if (!storeRef.current.getState().preview) {
+      return;
+    }
+
+    generatePreviewFromSavedState();
   }
 
   function handlePreviewSuggestedFix(input: {
@@ -622,6 +758,263 @@ export function DayFrameApp({
                   </div>
                 </section>
               ) : null}
+
+              {activeManualEventDate && manualEventDraft ? (
+                <section className="df-compact-preview" aria-labelledby="manual-event-heading">
+                  <div className="df-screen-header">
+                    <p className="df-workflow-eyebrow">Calendar Day</p>
+                    <h2 className="df-panel-title" id="manual-event-heading">
+                      {manualEventsForActiveDate.length === 0 ? "Add Event" : "Day Details"}
+                    </h2>
+                    <p className="df-support">{formatPreviewDayHeading(activeManualEventDate)}</p>
+                  </div>
+
+                  {activePreviewDayDetails ? (
+                    <div className="df-form-stack">
+                      <p className="df-support">
+                        Work {activePreviewDayDetails.workBlocks.length} · Generated{" "}
+                        {activePreviewDayDetails.generatedScheduledBlocks.length} · Manual{" "}
+                        {activePreviewDayDetails.manualScheduledBlocks.length} · Friction{" "}
+                        {activePreviewDayDetails.frictionPoints.length}
+                      </p>
+                      <div className="df-day-groups">
+                        <section className="df-day-group">
+                          <h3 className="df-group-title">Work</h3>
+                          {activePreviewDayDetails.workBlocks.length === 0 ? (
+                            <p className="df-empty">No work blocks.</p>
+                          ) : (
+                            <ul className="df-plain-list">
+                              {activePreviewDayDetails.workBlocks.map((workBlock) => (
+                                <li key={workBlock.id}>{workBlock.title}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </section>
+                        <section className="df-day-group">
+                          <h3 className="df-group-title">Generated</h3>
+                          {activePreviewDayDetails.generatedScheduledBlocks.length === 0 ? (
+                            <p className="df-empty">No generated blocks.</p>
+                          ) : (
+                            <ul className="df-plain-list">
+                              {activePreviewDayDetails.generatedScheduledBlocks.map(
+                                (scheduledBlock) => (
+                                  <li key={scheduledBlock.id}>{scheduledBlock.title}</li>
+                                ),
+                              )}
+                            </ul>
+                          )}
+                        </section>
+                        <section className="df-day-group">
+                          <h3 className="df-group-title">Friction</h3>
+                          {activePreviewDayDetails.frictionPoints.length === 0 ? (
+                            <p className="df-empty">No friction.</p>
+                          ) : (
+                            <ul className="df-plain-list">
+                              {activePreviewDayDetails.frictionPoints.map((frictionPoint) => (
+                                <li key={frictionPoint.id}>{frictionPoint.title}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </section>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="df-grid">
+                    <div className="df-field">
+                      <label htmlFor="manual-event-title">Title</label>
+                      <input
+                        id="manual-event-title"
+                        onChange={(event) => {
+                          setManualEventDraft({
+                            ...manualEventDraft,
+                            title: (event.target as { value: string }).value,
+                          });
+                        }}
+                        type="text"
+                        value={manualEventDraft.title}
+                      />
+                    </div>
+                    <div className="df-field">
+                      <label htmlFor="manual-event-date">Date</label>
+                      <input
+                        id="manual-event-date"
+                        onChange={(event) => {
+                          setManualEventDraft({
+                            ...manualEventDraft,
+                            userDayDate: (event.target as { value: LocalDateString }).value,
+                          });
+                        }}
+                        type="date"
+                        value={manualEventDraft.userDayDate}
+                      />
+                    </div>
+                    <label className="df-checkbox">
+                      <input
+                        checked={manualEventDraft.allDay}
+                        onChange={(event) => {
+                          setManualEventDraft({
+                            ...manualEventDraft,
+                            allDay: (event.target as { checked: boolean }).checked,
+                          });
+                        }}
+                        type="checkbox"
+                      />
+                      All Day
+                    </label>
+                    {!manualEventDraft.allDay ? (
+                      <>
+                        <div className="df-field">
+                          <label htmlFor="manual-event-start-time">Start Time</label>
+                          <input
+                            id="manual-event-start-time"
+                            onChange={(event) => {
+                              setManualEventDraft({
+                                ...manualEventDraft,
+                                startsAt: (event.target as { value: string }).value,
+                              });
+                            }}
+                            type="time"
+                            value={manualEventDraft.startsAt}
+                          />
+                        </div>
+                        <div className="df-field">
+                          <label htmlFor="manual-event-end-time">End Time</label>
+                          <input
+                            id="manual-event-end-time"
+                            onChange={(event) => {
+                              setManualEventDraft({
+                                ...manualEventDraft,
+                                endsAt: (event.target as { value: string }).value,
+                              });
+                            }}
+                            type="time"
+                            value={manualEventDraft.endsAt}
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                    <div className="df-field">
+                      <label htmlFor="manual-event-notes">Notes</label>
+                      <textarea
+                        id="manual-event-notes"
+                        onChange={(event) => {
+                          setManualEventDraft({
+                            ...manualEventDraft,
+                            notes: (event.target as { value: string }).value,
+                          });
+                        }}
+                        rows={3}
+                        value={manualEventDraft.notes}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="df-screen-actions">
+                    <button className="df-action-button" onClick={saveManualEvent} type="button">
+                      Save Event
+                    </button>
+                    <button
+                      className="df-secondary-button"
+                      onClick={() => {
+                        setEditingManualEventId(null);
+                        setManualEventDraft({
+                          title: "",
+                          userDayDate: activeManualEventDate,
+                          allDay: false,
+                          startsAt: "09:00",
+                          endsAt: "10:00",
+                          notes: "",
+                        });
+                      }}
+                      type="button"
+                    >
+                      Add Another Event
+                    </button>
+                    <button
+                      className="df-secondary-button"
+                      onClick={() => {
+                        setActiveManualEventDate(null);
+                        setManualEventDraft(null);
+                        setEditingManualEventId(null);
+                        setConfirmingDeleteManualEventId(null);
+                      }}
+                      type="button"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  {manualEventsForActiveDate.length > 0 ? (
+                    <ul className="df-plain-list">
+                      {manualEventsForActiveDate.map((manualEvent) => (
+                        <li key={manualEvent.id}>
+                          <div>
+                            <strong>{manualEvent.title}</strong>
+                            <span className="df-muted">
+                              {" "}
+                              {manualEvent.allDay
+                                ? "All day"
+                                : `${manualEvent.startsAt ?? ""} - ${manualEvent.endsAt ?? ""}`}
+                            </span>
+                          </div>
+                          <div className="df-screen-actions">
+                            <button
+                              className="df-secondary-button"
+                              onClick={() => {
+                                setEditingManualEventId(manualEvent.id);
+                                setManualEventDraft({
+                                  title: manualEvent.title,
+                                  userDayDate: manualEvent.userDayDate,
+                                  allDay: manualEvent.allDay,
+                                  startsAt: manualEvent.startsAt ?? "",
+                                  endsAt: manualEvent.endsAt ?? "",
+                                  notes: manualEvent.notes ?? "",
+                                });
+                              }}
+                              type="button"
+                            >
+                              Edit Event
+                            </button>
+                            {confirmingDeleteManualEventId === manualEvent.id ? (
+                              <>
+                                <button
+                                  className="df-danger-button"
+                                  onClick={() => {
+                                    deleteManualEvent(manualEvent.id);
+                                  }}
+                                  type="button"
+                                >
+                                  Confirm Delete Event
+                                </button>
+                                <button
+                                  className="df-secondary-button"
+                                  onClick={() => {
+                                    setConfirmingDeleteManualEventId(null);
+                                  }}
+                                  type="button"
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                className="df-secondary-button"
+                                onClick={() => {
+                                  setConfirmingDeleteManualEventId(manualEvent.id);
+                                }}
+                                type="button"
+                              >
+                                Delete Event
+                              </button>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </section>
+              ) : null}
             </section>
           </div>
         </header>
@@ -632,6 +1025,7 @@ export function DayFrameApp({
               draft={setupDraft}
               focusedTemplateField={focusedTemplateField}
               onSave={saveCurrentSetup}
+              rangeWarnings={setupRangeWarnings}
               saveMessage={setupSaveMessage}
               setDraft={(nextDraft) => {
                 setFocusedTemplateField(null);
@@ -673,12 +1067,23 @@ export function DayFrameApp({
                   </ul>
                 </div>
               ) : null}
+              {savedRangeWarnings.length > 0 ? (
+                <div className="df-form-stack">
+                  <p className="df-warning-message">Preview range warnings:</p>
+                  <ul className="df-plain-list">
+                    {savedRangeWarnings.map((warning) => (
+                      <li key={warning.id}>{warning.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
             <PreviewScreen
               getDayBoundaryStartTimeForUserDayDate={getDayBoundaryStartTimeForUserDayDate}
               now={now}
               onApplySuggestedFix={handlePreviewSuggestedFix}
               preview={stateSnapshot.preview}
+              rangeWarnings={savedRangeWarnings}
               visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
               visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
             />
@@ -1290,6 +1695,92 @@ function createPreviewWindowFromRange(
       schedulingPreferences: state.schedulingPreferences,
     }),
   };
+}
+
+function resolvePreviewRangeFromSetupDraft(setupDraft: SetupDraft): DayFrameState["previewRange"] {
+  if (
+    (setupDraft.previewRange.source ??
+      (setupDraft.previewRange.preset === "custom" ? "custom" : "preset")) !== "cycle"
+  ) {
+    return {
+      ...setupDraft.previewRange,
+    };
+  }
+
+  return {
+    ...setupDraft.previewRange,
+    startDate: setupDraft.shiftCycle.startsOnDate,
+    endDate: setupDraft.shiftCycle.endsOnDate ?? setupDraft.shiftCycle.startsOnDate,
+  };
+}
+
+function buildPreviewDayDetails(
+  preview: NonNullable<DayFrameState["preview"]>,
+  userDayDate: LocalDateString,
+  getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => string,
+): {
+  workBlocks: NonNullable<DayFrameState["preview"]>["result"]["generatedWorkBlocks"];
+  generatedScheduledBlocks: NonNullable<DayFrameState["preview"]>["result"]["scheduledBlocks"];
+  manualScheduledBlocks: NonNullable<DayFrameState["preview"]>["result"]["scheduledBlocks"];
+  frictionPoints: NonNullable<DayFrameState["preview"]>["result"]["frictionPoints"];
+} {
+  const workBlocks = preview.result.generatedWorkBlocks.filter(
+    (workBlock) => workBlock.userDayDate === userDayDate,
+  );
+  const scheduledBlocks = preview.result.scheduledBlocks.filter((scheduledBlock) =>
+    doesScheduledBlockOverlapUserDay(
+      scheduledBlock.startsAt,
+      scheduledBlock.endsAt,
+      userDayDate,
+      getDayBoundaryStartTimeForUserDayDate(userDayDate),
+    ),
+  );
+
+  return {
+    workBlocks,
+    generatedScheduledBlocks: scheduledBlocks.filter(
+      (scheduledBlock) => scheduledBlock.source !== "manual",
+    ),
+    manualScheduledBlocks: scheduledBlocks.filter(
+      (scheduledBlock) => scheduledBlock.source === "manual",
+    ),
+    frictionPoints: preview.result.frictionPoints.filter(
+      (frictionPoint) => frictionPoint.affectedUserDayDate === userDayDate,
+    ),
+  };
+}
+
+function doesScheduledBlockOverlapUserDay(
+  startsAt: Date,
+  endsAt: Date,
+  userDayDate: LocalDateString,
+  dayBoundaryStartTime: string,
+): boolean {
+  const userDayStart = createUserDayBoundaryDate({
+    userDayDate,
+    shiftCycle: null,
+    schedulingPreferences: {
+      dayBoundaryStartTime: dayBoundaryStartTime as `${number}:${number}`,
+      weekStartsOn: "saturday",
+    },
+  });
+  const userDayEnd = new Date(userDayStart);
+
+  userDayEnd.setDate(userDayEnd.getDate() + 1);
+
+  return startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime();
+}
+
+function formatPreviewDayHeading(userDayDate: LocalDateString): string {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const date = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function createUserDayBoundaryDate(input: {

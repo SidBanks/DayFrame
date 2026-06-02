@@ -1,4 +1,5 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
+import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type { LocalDateString } from "../core/shifts/types.js";
 import type { DayFramePreviewRange, DayFramePreviewRangePreset, DayFrameState } from "./types.js";
 
@@ -10,6 +11,7 @@ export type PersistedDayFrameState = Pick<
   | "shiftCycle"
   | "blockTemplates"
   | "blockRecurrences"
+  | "manualEvents"
 >;
 
 export function createInitialDayFrameState(
@@ -20,6 +22,7 @@ export function createInitialDayFrameState(
     shiftCycle: persistedState?.shiftCycle ?? null,
     blockTemplates: persistedState?.blockTemplates ?? [],
     blockRecurrences: persistedState?.blockRecurrences ?? [],
+    manualEvents: persistedState?.manualEvents ?? [],
   });
 
   return {
@@ -33,6 +36,7 @@ export function createInitialDayFrameState(
     shiftCycle: normalizedAuthoredSetup.shiftCycle,
     blockTemplates: normalizedAuthoredSetup.blockTemplates,
     blockRecurrences: normalizedAuthoredSetup.blockRecurrences,
+    manualEvents: normalizedAuthoredSetup.manualEvents,
     savedProfiles: [],
     preview: null,
   };
@@ -56,6 +60,7 @@ export function normalizePersistedPreviewRange(
   }
 
   return {
+    ...(previewRange.source ? { source: previewRange.source } : {}),
     preset: isPreviewRangePreset(previewRange.preset)
       ? previewRange.preset
       : defaultPreviewRange.preset,
@@ -73,9 +78,12 @@ export function normalizePersistedPreviewRange(
 export function normalizePersistedAuthoredSetup(
   authoredSetup: Pick<
     DayFrameState,
-    "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences"
+    "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences" | "manualEvents"
   >,
-): Pick<DayFrameState, "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences"> {
+): Pick<
+  DayFrameState,
+  "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences" | "manualEvents"
+> {
   return {
     shiftDefinitions: authoredSetup.shiftDefinitions,
     shiftCycle: authoredSetup.shiftCycle,
@@ -84,7 +92,14 @@ export function normalizePersistedAuthoredSetup(
       authoredSetup.blockRecurrences,
     ),
     blockRecurrences: authoredSetup.blockRecurrences,
+    manualEvents: normalizePersistedManualEvents(authoredSetup.manualEvents),
   };
+}
+
+function normalizePersistedManualEvents(
+  manualEvents: ManualCalendarEvent[],
+): ManualCalendarEvent[] {
+  return manualEvents.map((manualEvent) => ({ ...manualEvent }));
 }
 
 function normalizePersistedBlockTemplates(

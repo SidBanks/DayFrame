@@ -83,6 +83,7 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
       startDate: "2026-05-04",
       endDate: "2026-05-11",
     },
+    manualEvents: [],
     shiftDefinitions: [
       {
         id: "shift_day",

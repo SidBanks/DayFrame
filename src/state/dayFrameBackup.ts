@@ -102,6 +102,9 @@ export function cloneDayFrameAuthoredSetup(
       ...blockRecurrence,
       ...(blockRecurrence.weekdays ? { weekdays: [...blockRecurrence.weekdays] } : {}),
     })),
+    manualEvents: authoredSetup.manualEvents.map((manualEvent) => ({
+      ...manualEvent,
+    })),
   };
 }
 
@@ -137,6 +140,10 @@ function validateAuthoredSetup(value: Record<string, unknown>): void {
   if (!Array.isArray(value.blockRecurrences)) {
     throw new RangeError("Backup file must include blockRecurrences.");
   }
+
+  if (value.manualEvents !== undefined && !Array.isArray(value.manualEvents)) {
+    throw new RangeError("Backup file manualEvents must be a valid array.");
+  }
 }
 
 function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthoredSetup {
@@ -157,6 +164,7 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
     shiftCycle: value.shiftCycle as DayFrameAuthoredSetup["shiftCycle"],
     blockTemplates: value.blockTemplates as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: value.blockRecurrences as DayFrameAuthoredSetup["blockRecurrences"],
+    manualEvents: (value.manualEvents ?? []) as DayFrameAuthoredSetup["manualEvents"],
   };
 }
 

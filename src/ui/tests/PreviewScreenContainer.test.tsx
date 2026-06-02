@@ -196,6 +196,7 @@ function buildState(partialState: Partial<DayFrameState>): DayFrameState {
     shiftCycle: null,
     blockTemplates: [],
     blockRecurrences: [],
+    manualEvents: [],
     savedProfiles: [],
     preview: null,
     ...partialState,

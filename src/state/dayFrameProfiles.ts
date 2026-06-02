@@ -98,5 +98,6 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
     shiftCycle: (value.shiftCycle ?? null) as DayFrameAuthoredSetup["shiftCycle"],
     blockTemplates: (value.blockTemplates ?? []) as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: (value.blockRecurrences ?? []) as DayFrameAuthoredSetup["blockRecurrences"],
+    manualEvents: (value.manualEvents ?? []) as DayFrameAuthoredSetup["manualEvents"],
   };
 }

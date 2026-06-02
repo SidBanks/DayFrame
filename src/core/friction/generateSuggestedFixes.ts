@@ -16,7 +16,7 @@ type SchedulableContextBlock = {
   category?: DraftScheduledBlock["category"] | BlockCandidate["category"];
   anchorType: AnchorType;
   placementType?: DraftScheduledBlock["placementType"] | BlockCandidate["placementType"];
-  source: "shift" | "template" | "candidate";
+  source: "shift" | "template" | "candidate" | "manual";
 };
 
 type SuggestedFixContext = {
@@ -88,7 +88,7 @@ function getContextBlock(
       category: scheduledBlock.category,
       anchorType: getTemplateAnchorType(scheduledBlock),
       placementType: scheduledBlock.placementType,
-      source: "template",
+      source: scheduledBlock.source === "manual" ? "manual" : "template",
     };
   }
 
@@ -303,7 +303,7 @@ function selectPriorityTargetBlock(
   contextBlocks: SchedulableContextBlock[],
 ): SchedulableContextBlock | null {
   const adjustableBlocks = contextBlocks
-    .filter((block) => block.source !== "shift")
+    .filter((block) => block.source !== "shift" && block.source !== "manual")
     .sort(compareTargetsForAdjustment);
 
   return adjustableBlocks[0] ?? null;
@@ -332,6 +332,10 @@ function getAnchorStrength(block: SchedulableContextBlock): number {
     return 3;
   }
 
+  if (block.anchorType === "manual") {
+    return 2.5;
+  }
+
   if (block.anchorType === "fixedTemplate") {
     return 2;
   }
@@ -348,8 +352,12 @@ function getMovableRank(block: SchedulableContextBlock): number {
     return 1;
   }
 
-  if (block.anchorType === "work") {
+  if (block.anchorType === "manual") {
     return 2;
+  }
+
+  if (block.anchorType === "work") {
+    return 3;
   }
 
   return 3;

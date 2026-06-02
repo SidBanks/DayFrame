@@ -1,7 +1,11 @@
+import type { LocalDateString } from "../core/shifts/types.js";
 import type { TimeString } from "../core/time/types.js";
 import type { MouseEventHandler, ReactElement } from "react";
 
+import { getStaticHolidays } from "../core/calendar/getStaticHolidays.js";
+import type { CalendarHoliday } from "../core/calendar/types.js";
 import type { DayFramePreview } from "../state/types.js";
+import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { DayVisualizer } from "./DayVisualizer.js";
 import {
   formatHumanTimeRange,
@@ -16,23 +20,37 @@ export type PreviewScreenProps = {
     selectedFrictionPointId: string;
     selectedSuggestedFixId: string;
   }) => void;
-  visibleRangeStartDate?: string | null;
-  visibleRangeEndDate?: string | null;
+  rangeWarnings?: PreviewRangeWarning[];
+  visibleRangeStartDate?: LocalDateString | null;
+  visibleRangeEndDate?: LocalDateString | null;
   now?: Date;
 };
 
 type PreviewDayGroup = {
   userDayDate: string;
+  holidays: CalendarHoliday[];
   workBlocks: DayFramePreview["result"]["generatedWorkBlocks"];
   scheduledBlocks: DayFramePreview["result"]["scheduledBlocks"];
   unplacedCandidates: DayFramePreview["result"]["unplacedCandidates"];
   frictionPoints: DayFramePreview["result"]["frictionPoints"];
 };
 
+type GroupedFrictionPattern = {
+  key: string;
+  title: string;
+  message: string;
+  severity: DayFramePreview["result"]["frictionPoints"][number]["severity"];
+  occurrences: Array<{
+    userDayDate: string;
+    frictionPoint: DayFramePreview["result"]["frictionPoints"][number];
+  }>;
+};
+
 export function PreviewScreen({
   preview,
   getDayBoundaryStartTimeForUserDayDate,
   onApplySuggestedFix,
+  rangeWarnings = [],
   visibleRangeStartDate = null,
   visibleRangeEndDate = null,
   now = new Date(),
@@ -60,6 +78,7 @@ export function PreviewScreen({
   );
   const visibleFrictionPoints = dayGroups.flatMap((dayGroup) => dayGroup.frictionPoints);
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
+  const groupedFrictionPatterns = buildGroupedFrictionPatterns(dayGroups);
 
   return (
     <main className="df-preview-layout">
@@ -79,6 +98,16 @@ export function PreviewScreen({
           >
             {preview.actionFeedback.message}
           </p>
+        ) : null}
+        {rangeWarnings.length > 0 ? (
+          <div className="df-form-stack">
+            <p className="df-warning-message">Preview range warnings:</p>
+            <ul className="df-plain-list">
+              {rangeWarnings.map((warning) => (
+                <li key={warning.id}>{warning.message}</li>
+              ))}
+            </ul>
+          </div>
         ) : null}
       </header>
 
@@ -118,6 +147,48 @@ export function PreviewScreen({
         </div>
       </section>
 
+      {groupedFrictionPatterns.length > 0 ? (
+        <section aria-labelledby="grouped-friction-heading" className="df-summary-bar">
+          <h2 className="df-panel-title" id="grouped-friction-heading">
+            Repeated Friction Patterns
+          </h2>
+          <div className="df-form-stack">
+            {groupedFrictionPatterns.map((pattern) => (
+              <details className="df-grouped-friction" key={pattern.key}>
+                <summary>
+                  <strong>{pattern.title}</strong>
+                  <span className="df-muted"> Appears on {pattern.occurrences.length} days</span>
+                </summary>
+                <p className="df-muted">{pattern.message}</p>
+                <ul className="df-plain-list">
+                  {pattern.occurrences.map((occurrence) => (
+                    <li key={`${pattern.key}-${occurrence.frictionPoint.id}`}>
+                      <div>{formatDayHeading(occurrence.userDayDate)}</div>
+                      <div className="df-fix-list">
+                        {occurrence.frictionPoint.suggestedFixes.map((suggestedFix) => (
+                          <button
+                            className="df-fix-button"
+                            key={suggestedFix.id}
+                            onClick={createSuggestedFixHandler(
+                              occurrence.frictionPoint.id,
+                              suggestedFix.id,
+                              onApplySuggestedFix,
+                            )}
+                            type="button"
+                          >
+                            {suggestedFix.label}
+                          </button>
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="df-day-list">
         {dayGroups.map((dayGroup) => (
           <section
@@ -128,6 +199,22 @@ export function PreviewScreen({
             <h2 className="df-panel-title" id={`day-group-${dayGroup.userDayDate}`}>
               {formatDayHeading(dayGroup.userDayDate)}
             </h2>
+            {dayGroup.holidays.length > 0 ? (
+              <div
+                aria-label={`Holiday annotations for ${dayGroup.userDayDate}`}
+                className="df-day-holiday-list"
+              >
+                {dayGroup.holidays.map((holiday) => (
+                  <span className="df-day-holiday-chip" key={holiday.id}>
+                    {holiday.name}
+                    <span className="df-day-holiday-type">
+                      {" "}
+                      {formatHolidayTypeLabel(holiday.type)}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
 
             <DayVisualizer
               dayBoundaryStartTime={getDayBoundaryStartTimeForUserDayDate(dayGroup.userDayDate)}
@@ -137,6 +224,29 @@ export function PreviewScreen({
             />
 
             <div className="df-day-groups">
+              <section aria-labelledby={`manual-${dayGroup.userDayDate}`} className="df-day-group">
+                <h3 className="df-group-title" id={`manual-${dayGroup.userDayDate}`}>
+                  Manual Events
+                </h3>
+                {dayGroup.scheduledBlocks.filter(
+                  (scheduledBlock) => scheduledBlock.source === "manual",
+                ).length === 0 ? (
+                  <p className="df-empty">No manual events.</p>
+                ) : (
+                  <ul className="df-plain-list">
+                    {dayGroup.scheduledBlocks
+                      .filter((scheduledBlock) => scheduledBlock.source === "manual")
+                      .map((scheduledBlock) => (
+                        <li className="df-manual-event-item" key={scheduledBlock.id}>
+                          {scheduledBlock.title}{" "}
+                          {formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
+                          <span className="df-muted"> (Manual event)</span>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </section>
+
               <section aria-labelledby={`work-${dayGroup.userDayDate}`} className="df-day-group">
                 <h3 className="df-group-title" id={`work-${dayGroup.userDayDate}`}>
                   Work
@@ -162,20 +272,24 @@ export function PreviewScreen({
                 <h3 className="df-group-title" id={`scheduled-${dayGroup.userDayDate}`}>
                   Scheduled
                 </h3>
-                {dayGroup.scheduledBlocks.length === 0 ? (
+                {dayGroup.scheduledBlocks.filter(
+                  (scheduledBlock) => scheduledBlock.source !== "manual",
+                ).length === 0 ? (
                   <p className="df-empty">No scheduled blocks.</p>
                 ) : (
                   <ul className="df-plain-list">
-                    {dayGroup.scheduledBlocks.map((scheduledBlock) => (
-                      <li key={scheduledBlock.id}>
-                        {scheduledBlock.title}{" "}
-                        {formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
-                        <span className="df-muted">
-                          {" "}
-                          {formatScheduledBlockDetails(scheduledBlock)}
-                        </span>
-                      </li>
-                    ))}
+                    {dayGroup.scheduledBlocks
+                      .filter((scheduledBlock) => scheduledBlock.source !== "manual")
+                      .map((scheduledBlock) => (
+                        <li key={scheduledBlock.id}>
+                          {scheduledBlock.title}{" "}
+                          {formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
+                          <span className="df-muted">
+                            {" "}
+                            {formatScheduledBlockDetails(scheduledBlock)}
+                          </span>
+                        </li>
+                      ))}
                   </ul>
                 )}
               </section>
@@ -261,6 +375,13 @@ function buildDayGroups(
     getOrCreateDayGroup(groups, userDayDate);
   }
 
+  for (const holiday of getStaticHolidays({
+    startDate: visibleRangeStartDate ?? preview.rangeStartDate,
+    endDate: visibleRangeEndDate ?? preview.rangeEndDate,
+  })) {
+    getOrCreateDayGroup(groups, holiday.date).holidays.push(holiday);
+  }
+
   for (const workBlock of preview.result.generatedWorkBlocks) {
     if (visibleUserDayDates.includes(workBlock.userDayDate)) {
       getOrCreateDayGroup(groups, workBlock.userDayDate).workBlocks.push(workBlock);
@@ -306,8 +427,11 @@ function buildDayGroups(
   );
 }
 
-function getVisibleUserDayDates(startDate: string, endDate: string): string[] {
-  const visibleUserDayDates: string[] = [];
+function getVisibleUserDayDates(
+  startDate: LocalDateString,
+  endDate: LocalDateString,
+): LocalDateString[] {
+  const visibleUserDayDates: LocalDateString[] = [];
   let currentDate = startDate;
 
   while (currentDate <= endDate) {
@@ -327,6 +451,7 @@ function getOrCreateDayGroup(groups: Map<string, PreviewDayGroup>, userDayDate: 
 
   const nextGroup = {
     userDayDate,
+    holidays: [],
     workBlocks: [],
     scheduledBlocks: [],
     unplacedCandidates: [],
@@ -363,6 +488,55 @@ function getVisibleFrictionPoints(
   frictionPoints: DayFramePreview["result"]["frictionPoints"],
 ): DayFramePreview["result"]["frictionPoints"] {
   return frictionPoints.filter((frictionPoint) => !frictionPoint.ignored);
+}
+
+function buildGroupedFrictionPatterns(dayGroups: PreviewDayGroup[]): GroupedFrictionPattern[] {
+  const groups = new Map<string, GroupedFrictionPattern>();
+
+  for (const dayGroup of dayGroups) {
+    for (const frictionPoint of dayGroup.frictionPoints) {
+      const key = createGroupedFrictionKey(frictionPoint);
+      const existingGroup = groups.get(key);
+
+      if (existingGroup) {
+        existingGroup.occurrences.push({
+          userDayDate: dayGroup.userDayDate,
+          frictionPoint,
+        });
+        continue;
+      }
+
+      groups.set(key, {
+        key,
+        title: frictionPoint.title,
+        message: frictionPoint.message,
+        severity: frictionPoint.severity,
+        occurrences: [
+          {
+            userDayDate: dayGroup.userDayDate,
+            frictionPoint,
+          },
+        ],
+      });
+    }
+  }
+
+  return [...groups.values()]
+    .filter((group) => group.occurrences.length > 1)
+    .sort((left, right) => right.occurrences.length - left.occurrences.length);
+}
+
+function createGroupedFrictionKey(
+  frictionPoint: DayFramePreview["result"]["frictionPoints"][number],
+): string {
+  return [
+    frictionPoint.severity,
+    frictionPoint.title,
+    frictionPoint.message,
+    frictionPoint.suggestedFixes
+      .map((suggestedFix) => `${suggestedFix.action}:${suggestedFix.label}`)
+      .join("|"),
+  ].join("::");
 }
 
 function formatDayHeading(userDayDate: string): string {
@@ -470,7 +644,7 @@ function getUserDayStartFromDateString(
   return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
 }
 
-function addDaysToLocalDate(localDate: string, days: number): string {
+function addDaysToLocalDate(localDate: LocalDateString, days: number): LocalDateString {
   const [year, month, day] = localDate.split("-").map(Number);
   const nextDate = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0);
 
@@ -478,7 +652,7 @@ function addDaysToLocalDate(localDate: string, days: number): string {
 
   return `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(
     nextDate.getDate(),
-  ).padStart(2, "0")}`;
+  ).padStart(2, "0")}` as LocalDateString;
 }
 
 function formatScheduledBlockDetails(
@@ -501,4 +675,16 @@ function formatCandidateDetails(
   candidate: DayFramePreview["result"]["unplacedCandidates"][number],
 ): string {
   return `(Priority ${candidate.priority})`;
+}
+
+function formatHolidayTypeLabel(holidayType: CalendarHoliday["type"]): string {
+  if (holidayType === "federal") {
+    return "(Federal holiday)";
+  }
+
+  if (holidayType === "local") {
+    return "(Local holiday)";
+  }
+
+  return "(Observance)";
 }

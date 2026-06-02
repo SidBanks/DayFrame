@@ -15,6 +15,7 @@ import {
   createInitialDayFrameState,
   type PersistedDayFrameState,
 } from "./createInitialDayFrameState.js";
+import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type {
   ApplyPreviewFixActionInput,
   DayFramePreview,
@@ -124,6 +125,18 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return notify();
   }
 
+  function setManualEvents(manualEvents: ManualCalendarEvent[]): DayFrameState {
+    state = {
+      ...state,
+      manualEvents: cloneManualEvents(manualEvents),
+      preview: markPreviewStale(state.preview),
+    };
+
+    persistState(state);
+
+    return notify();
+  }
+
   function saveProfile(input: { name: string; savedAt: string }): DayFrameState {
     const trimmedName = input.name.trim();
 
@@ -221,6 +234,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       shiftCycle: cloneShiftCycle(state.shiftCycle),
       blockTemplates: cloneBlockTemplates(state.blockTemplates),
       blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
+      manualEvents: cloneManualEvents(state.manualEvents),
       planningWindowStart: new Date(input.planningWindowStart),
       planningWindowEnd: new Date(input.planningWindowEnd),
       dayBoundaryStartTime: state.schedulingPreferences.dayBoundaryStartTime,
@@ -300,6 +314,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     setShiftCycle,
     setBlockTemplates,
     setBlockRecurrences,
+    setManualEvents,
     saveProfile,
     loadProfile,
     deleteProfile,
@@ -328,7 +343,7 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
       ...initialState.schedulingPreferences,
     },
     previewRange: initialState.previewRange
-      ? { ...initialState.previewRange }
+      ? { ...baseState.previewRange, ...initialState.previewRange }
       : { ...baseState.previewRange },
     shiftDefinitions: initialState.shiftDefinitions
       ? cloneShiftDefinitions(initialState.shiftDefinitions)
@@ -340,6 +355,9 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
     blockRecurrences: initialState.blockRecurrences
       ? cloneBlockRecurrences(initialState.blockRecurrences)
       : baseState.blockRecurrences,
+    manualEvents: initialState.manualEvents
+      ? cloneManualEvents(initialState.manualEvents)
+      : baseState.manualEvents,
     savedProfiles: initialState.savedProfiles
       ? cloneSavedProfiles(initialState.savedProfiles)
       : savedProfiles,
@@ -385,6 +403,7 @@ function persistState(state: DayFrameState): void {
     shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
+    manualEvents: cloneManualEvents(state.manualEvents),
   };
 
   try {
@@ -424,6 +443,7 @@ function getAuthoredSetup(state: DayFrameState): PersistedDayFrameState {
     shiftCycle: state.shiftCycle,
     blockTemplates: state.blockTemplates,
     blockRecurrences: state.blockRecurrences,
+    manualEvents: state.manualEvents,
   });
 }
 
@@ -498,6 +518,7 @@ function cloneState(state: DayFrameState): DayFrameState {
     shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
+    manualEvents: cloneManualEvents(state.manualEvents),
     savedProfiles: cloneSavedProfiles(state.savedProfiles),
     preview: state.preview ? clonePreview(state.preview) : null,
   };
@@ -612,5 +633,13 @@ function cloneBlockRecurrences(
   return blockRecurrences.map((blockRecurrence) => ({
     ...blockRecurrence,
     ...(blockRecurrence.weekdays ? { weekdays: [...blockRecurrence.weekdays] } : {}),
+  }));
+}
+
+function cloneManualEvents(
+  manualEvents: DayFrameState["manualEvents"],
+): DayFrameState["manualEvents"] {
+  return manualEvents.map((manualEvent) => ({
+    ...manualEvent,
   }));
 }

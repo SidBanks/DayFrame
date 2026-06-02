@@ -1,4 +1,5 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
+import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { GenerateSchedulePreviewResult } from "../core/engine/generateSchedulePreview.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
@@ -18,7 +19,10 @@ export type DayFramePreviewRangePreset =
   | "oneMonth"
   | "custom";
 
+export type DayFramePreviewRangeSource = "preset" | "custom" | "cycle";
+
 export type DayFramePreviewRange = {
+  source?: DayFramePreviewRangeSource;
   preset: DayFramePreviewRangePreset;
   startDate: LocalDateString;
   endDate: LocalDateString;
@@ -50,6 +54,7 @@ export type DayFrameState = {
   shiftCycle: ShiftCycle | null;
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
+  manualEvents: ManualCalendarEvent[];
   savedProfiles: DayFrameSavedProfile[];
   preview: DayFramePreview | null;
 };
@@ -62,6 +67,7 @@ export type DayFrameAuthoredSetup = Pick<
   | "shiftCycle"
   | "blockTemplates"
   | "blockRecurrences"
+  | "manualEvents"
 >;
 
 export type GeneratePreviewActionInput = {
@@ -89,6 +95,7 @@ export type DayFrameStore = {
   setShiftCycle: (shiftCycle: ShiftCycle | null) => DayFrameState;
   setBlockTemplates: (blockTemplates: BlockTemplate[]) => DayFrameState;
   setBlockRecurrences: (blockRecurrences: BlockRecurrence[]) => DayFrameState;
+  setManualEvents: (manualEvents: ManualCalendarEvent[]) => DayFrameState;
   saveProfile: (input: { name: string; savedAt: string }) => DayFrameState;
   loadProfile: (profileId: string) => DayFrameState;
   deleteProfile: (profileId: string) => DayFrameState;

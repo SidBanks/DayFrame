@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PreviewScreen } from "../PreviewScreen.js";
@@ -64,6 +64,40 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Workout conflicts with Work")).toBeInTheDocument();
   });
 
+  it("renders manual events separately from generated scheduled blocks", () => {
+    const preview = buildPreview();
+
+    preview.result.scheduledBlocks.push({
+      id: "manual_event_dinner",
+      userId: "user_001",
+      templateId: "manual_event_dinner",
+      source: "manual",
+      title: "Dinner Reservation",
+      category: "admin",
+      startsAt: new Date(2026, 4, 5, 18, 0, 0, 0),
+      endsAt: new Date(2026, 4, 5, 19, 30, 0, 0),
+      userDayDate: "2026-05-05",
+      userWeekStartDate: "2026-05-02",
+      priority: 2,
+      status: "planned",
+      externalResources: [],
+    });
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByRole("heading", { name: "Manual Events" }).length).toBeGreaterThan(0);
+    expect(screen.getByText("Dinner Reservation 6:00 PM - 7:30 PM")).toBeInTheDocument();
+    expect(screen.getByText("(Manual event)")).toBeInTheDocument();
+    expect(screen.getByText("Workout 2:15 PM - 3:15 PM")).toBeInTheDocument();
+  });
+
   it("calls onApplySuggestedFix when the user clicks a suggested fix", () => {
     const onApplySuggestedFix = vi.fn();
 
@@ -100,6 +134,28 @@ describe("PreviewScreen", () => {
 
     expect(
       screen.getByText("Edit this block's fixed start time in Setup, then generate a new preview."),
+    ).toBeInTheDocument();
+  });
+
+  it("renders preview range warnings after generation", () => {
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        onApplySuggestedFix={vi.fn()}
+        preview={buildPreview()}
+        rangeWarnings={[
+          {
+            id: "previewHasNoWorkSchedule",
+            message: "No work schedule applies to part of this preview range.",
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
+    expect(
+      screen.getByText("No work schedule applies to part of this preview range."),
     ).toBeInTheDocument();
   });
 
@@ -266,6 +322,33 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Maintenance 2:30 AM - 4:30 AM")).toBeInTheDocument();
   });
 
+  it("annotates preview days with local static holidays inside the visible range", () => {
+    const preview = buildPreview();
+
+    preview.rangeStartDate = "2026-05-25";
+    preview.rangeEndDate = "2026-05-26";
+    preview.planningWindowStart = new Date(2026, 4, 25, 0, 0, 0, 0);
+    preview.planningWindowEnd = new Date(2026, 4, 26, 0, 0, 0, 0);
+    preview.result.generatedWorkBlocks = [];
+    preview.result.scheduledBlocks = [];
+    preview.result.unplacedCandidates = [];
+    preview.result.frictionPoints = [];
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 24, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Monday, 2026-05-25" })).toBeInTheDocument();
+    expect(screen.getByText("Memorial Day")).toBeInTheDocument();
+    expect(screen.getByText("(Federal holiday)")).toBeInTheDocument();
+    expect(screen.queryByText("Juneteenth National Independence Day")).not.toBeInTheDocument();
+  });
+
   it("limits preview summary friction counts to the selected visible day range", () => {
     render(
       <PreviewScreen
@@ -282,6 +365,61 @@ describe("PreviewScreen", () => {
     expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
     expect(screen.getByText("No friction detected.")).toBeInTheDocument();
+  });
+
+  it("groups repeated equivalent friction patterns while keeping individual fixes available", () => {
+    const onApplySuggestedFix = vi.fn();
+    const preview = buildPreview([
+      {
+        id: "fix_move_scheduled_workout",
+        label: "Move block",
+        action: "moveBlock" as const,
+      },
+    ]);
+
+    preview.result.frictionPoints.push({
+      id: "friction_conflict_2",
+      userId: "user_001",
+      severity: "warning",
+      title: "Workout conflicts with Work",
+      message: "Workout overlaps work and needs review.",
+      affectedBlockIds: [],
+      affectedUserDayDate: "2026-05-06",
+      affectedUserWeekStartDate: "2026-05-02",
+      suggestedFixes: [
+        {
+          id: "fix_move_scheduled_workout_day_2",
+          label: "Move block",
+          action: "moveBlock",
+        },
+      ],
+      canIgnore: true,
+      ignored: false,
+      resolved: false,
+      createdAt: "2026-05-03T13:00:00-05:00",
+      updatedAt: "2026-05-03T14:00:00-05:00",
+    });
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        onApplySuggestedFix={onApplySuggestedFix}
+        preview={preview}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Repeated Friction Patterns" })).toBeInTheDocument();
+    expect(screen.getByText("Appears on 2 days")).toBeInTheDocument();
+
+    const groupedSection = screen.getByRole("heading", {
+      name: "Repeated Friction Patterns",
+    }).parentElement;
+
+    expect(groupedSection).not.toBeNull();
+    fireEvent.click(within(groupedSection!).getAllByRole("button", { name: "Move block" })[0]!);
+
+    expect(onApplySuggestedFix).toHaveBeenCalled();
   });
 });
 
