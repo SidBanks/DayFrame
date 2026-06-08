@@ -94,8 +94,8 @@ export function DayFrameApp({
     title: string;
     userDayDate: LocalDateString;
     allDay: boolean;
-    startsAt: string;
-    endsAt: string;
+    startTime: string;
+    endTime: string;
     notes: string;
   } | null>(null);
   const [confirmingDeleteManualEventId, setConfirmingDeleteManualEventId] = useState<string | null>(
@@ -123,15 +123,10 @@ export function DayFrameApp({
         (manualEvent) => manualEvent.userDayDate === activeManualEventDate,
       )
     : [];
-  const setupRangeWarnings = getPreviewRangeWarnings({
-    previewRange: setupDraft.previewRange,
-    shiftCycle: setupDraft.shiftCycle,
-    shiftDefinitions: setupDraft.shiftDefinitions,
-    blockTemplates: setupDraft.templateEntries.map((entry) => entry.template),
-    blockRecurrences: setupDraft.templateEntries.map((entry) => entry.recurrence),
-  });
+  const isSetupDirty = hasUnsavedSetupChanges(setupDraft, stateSnapshot);
   const savedRangeWarnings = getPreviewRangeWarnings({
     previewRange: stateSnapshot.previewRange,
+    schedulingPreferences: stateSnapshot.schedulingPreferences,
     shiftCycle: stateSnapshot.shiftCycle,
     shiftDefinitions: stateSnapshot.shiftDefinitions,
     blockTemplates: stateSnapshot.blockTemplates,
@@ -188,7 +183,7 @@ export function DayFrameApp({
     setPendingPreviewRangeStartDate(null);
   }
 
-  function saveCurrentSetup(): void {
+  function saveCurrentSetup(showMessage = true): void {
     const savedAt = createIsoTimestamp();
     const resolvedPreviewRange = resolvePreviewRangeFromSetupDraft(setupDraft);
 
@@ -216,16 +211,16 @@ export function DayFrameApp({
       })),
     );
     setFocusedTemplateField(null);
-    setSetupSaveMessage("Setup saved.");
+    setSetupSaveMessage(showMessage ? "Setup saved." : "");
   }
 
-  function generatePreviewFromSavedState(): void {
+  function generatePreviewFromSavedState(): boolean {
     const currentState = storeRef.current.getState();
     const missingItems = getMissingPreviewSetupItems(currentState);
 
     if (missingItems.length > 0) {
       setPreviewGuardrailMissingItems(missingItems);
-      return;
+      return false;
     }
 
     const previewWindow = getPreviewWindow?.() ?? createPreviewWindowFromRange(currentState);
@@ -237,8 +232,31 @@ export function DayFrameApp({
       planningWindowEnd: previewWindow.planningWindowEnd,
       generatedAt: getGeneratedAt(),
     });
-    clearPreviewSelection();
+    if (
+      selectedPreviewDayRange &&
+      !isPreviewRangeWithinBounds(
+        selectedPreviewDayRange,
+        currentState.previewRange.startDate,
+        currentState.previewRange.endDate,
+      )
+    ) {
+      clearPreviewSelection();
+    }
     setPreviewGuardrailMissingItems([]);
+    return true;
+  }
+
+  function generatePreviewFromCurrentDraft(): void {
+    saveCurrentSetup(false);
+    setCurrentScreen("preview");
+    setFocusedTemplateField(null);
+    setBackupMessage("");
+    setBackupErrorMessage("");
+    setProfileMessage("");
+    setProfileErrorMessage("");
+    setIsConfirmingClearLocalData(false);
+    setClearLocalDataMessage("");
+    generatePreviewFromSavedState();
   }
 
   function openSetupForFixedTime(templateId: string): void {
@@ -291,8 +309,8 @@ export function DayFrameApp({
         title: existingManualEvent.title,
         userDayDate: existingManualEvent.userDayDate,
         allDay: existingManualEvent.allDay,
-        startsAt: existingManualEvent.startsAt ?? "",
-        endsAt: existingManualEvent.endsAt ?? "",
+        startTime: existingManualEvent.startTime ?? "",
+        endTime: existingManualEvent.endTime ?? "",
         notes: existingManualEvent.notes ?? "",
       });
       return;
@@ -303,8 +321,8 @@ export function DayFrameApp({
       title: "",
       userDayDate,
       allDay: false,
-      startsAt: "09:00",
-      endsAt: "10:00",
+      startTime: "09:00",
+      endTime: "10:00",
       notes: "",
     });
   }
@@ -322,10 +340,10 @@ export function DayFrameApp({
       allDay: manualEventDraft.allDay,
       ...(manualEventDraft.allDay
         ? {}
-        : { startsAt: manualEventDraft.startsAt as `${number}:${number}` }),
+        : { startTime: manualEventDraft.startTime as `${number}:${number}` }),
       ...(manualEventDraft.allDay
         ? {}
-        : { endsAt: manualEventDraft.endsAt as `${number}:${number}` }),
+        : { endTime: manualEventDraft.endTime as `${number}:${number}` }),
       ...(manualEventDraft.notes.trim() ? { notes: manualEventDraft.notes.trim() } : {}),
       createdAt:
         stateSnapshot.manualEvents.find(
@@ -343,8 +361,8 @@ export function DayFrameApp({
       title: nextManualEvent.title,
       userDayDate: nextManualEvent.userDayDate,
       allDay: nextManualEvent.allDay,
-      startsAt: nextManualEvent.startsAt ?? "",
-      endsAt: nextManualEvent.endsAt ?? "",
+      startTime: nextManualEvent.startTime ?? "",
+      endTime: nextManualEvent.endTime ?? "",
       notes: nextManualEvent.notes ?? "",
     });
     regeneratePreviewIfPresent();
@@ -665,19 +683,19 @@ export function DayFrameApp({
                   </span>
                 </button>
                 <button
-                  aria-label="Preview"
+                  aria-label="Generate Preview"
                   aria-pressed={currentScreen === "preview"}
                   className={
                     currentScreen === "preview"
                       ? "df-primary-nav-button is-active"
                       : "df-primary-nav-button"
                   }
-                  onClick={openPreviewScreen}
+                  onClick={generatePreviewFromCurrentDraft}
                   type="button"
                 >
-                  <span className="df-primary-nav-title">Preview</span>
+                  <span className="df-primary-nav-title">Generate Preview</span>
                   <span aria-hidden="true" className="df-primary-nav-detail">
-                    Generate and review a draft schedule
+                    Save this draft, generate, and open the preview
                   </span>
                 </button>
               </nav>
@@ -871,11 +889,11 @@ export function DayFrameApp({
                             onChange={(event) => {
                               setManualEventDraft({
                                 ...manualEventDraft,
-                                startsAt: (event.target as { value: string }).value,
+                                startTime: (event.target as { value: string }).value,
                               });
                             }}
                             type="time"
-                            value={manualEventDraft.startsAt}
+                            value={manualEventDraft.startTime}
                           />
                         </div>
                         <div className="df-field">
@@ -885,11 +903,11 @@ export function DayFrameApp({
                             onChange={(event) => {
                               setManualEventDraft({
                                 ...manualEventDraft,
-                                endsAt: (event.target as { value: string }).value,
+                                endTime: (event.target as { value: string }).value,
                               });
                             }}
                             type="time"
-                            value={manualEventDraft.endsAt}
+                            value={manualEventDraft.endTime}
                           />
                         </div>
                       </>
@@ -922,8 +940,8 @@ export function DayFrameApp({
                           title: "",
                           userDayDate: activeManualEventDate,
                           allDay: false,
-                          startsAt: "09:00",
-                          endsAt: "10:00",
+                          startTime: "09:00",
+                          endTime: "10:00",
                           notes: "",
                         });
                       }}
@@ -955,7 +973,7 @@ export function DayFrameApp({
                               {" "}
                               {manualEvent.allDay
                                 ? "All day"
-                                : `${manualEvent.startsAt ?? ""} - ${manualEvent.endsAt ?? ""}`}
+                                : `${manualEvent.startTime ?? ""} - ${manualEvent.endTime ?? ""}`}
                             </span>
                           </div>
                           <div className="df-screen-actions">
@@ -967,8 +985,8 @@ export function DayFrameApp({
                                   title: manualEvent.title,
                                   userDayDate: manualEvent.userDayDate,
                                   allDay: manualEvent.allDay,
-                                  startsAt: manualEvent.startsAt ?? "",
-                                  endsAt: manualEvent.endsAt ?? "",
+                                  startTime: manualEvent.startTime ?? "",
+                                  endTime: manualEvent.endTime ?? "",
                                   notes: manualEvent.notes ?? "",
                                 });
                               }}
@@ -1024,8 +1042,8 @@ export function DayFrameApp({
             <SetupScreen
               draft={setupDraft}
               focusedTemplateField={focusedTemplateField}
+              isDirty={isSetupDirty}
               onSave={saveCurrentSetup}
-              rangeWarnings={setupRangeWarnings}
               saveMessage={setupSaveMessage}
               setDraft={(nextDraft) => {
                 setFocusedTemplateField(null);
@@ -1050,7 +1068,7 @@ export function DayFrameApp({
                   onClick={generatePreviewFromSavedState}
                   type="button"
                 >
-                  Generate Schedule Preview
+                  Regenerate Preview
                 </button>
               </div>
               <p className="df-support">
@@ -1067,7 +1085,7 @@ export function DayFrameApp({
                   </ul>
                 </div>
               ) : null}
-              {savedRangeWarnings.length > 0 ? (
+              {stateSnapshot.preview && savedRangeWarnings.length > 0 ? (
                 <div className="df-form-stack">
                   <p className="df-warning-message">Preview range warnings:</p>
                   <ul className="df-plain-list">
@@ -1083,7 +1101,7 @@ export function DayFrameApp({
               now={now}
               onApplySuggestedFix={handlePreviewSuggestedFix}
               preview={stateSnapshot.preview}
-              rangeWarnings={savedRangeWarnings}
+              rangeWarnings={stateSnapshot.preview ? savedRangeWarnings : []}
               visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
               visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
             />
@@ -1315,6 +1333,14 @@ function isUserDayDateWithinSelection(
   return (
     selection !== null && userDayDate >= selection.startDate && userDayDate <= selection.endDate
   );
+}
+
+function isPreviewRangeWithinBounds(
+  selection: NonNullable<SelectedPreviewDayRange>,
+  startDate: LocalDateString,
+  endDate: LocalDateString,
+): boolean {
+  return selection.startDate >= startDate && selection.endDate <= endDate;
 }
 
 function buildCompactPreviewDayClassName(
@@ -1711,6 +1737,42 @@ function resolvePreviewRangeFromSetupDraft(setupDraft: SetupDraft): DayFrameStat
     ...setupDraft.previewRange,
     startDate: setupDraft.shiftCycle.startsOnDate,
     endDate: setupDraft.shiftCycle.endsOnDate ?? setupDraft.shiftCycle.startsOnDate,
+  };
+}
+
+function hasUnsavedSetupChanges(
+  setupDraft: SetupDraft,
+  stateSnapshot: Pick<
+    DayFrameState,
+    | "schedulingPreferences"
+    | "previewRange"
+    | "shiftDefinitions"
+    | "shiftCycle"
+    | "blockTemplates"
+    | "blockRecurrences"
+  >,
+): boolean {
+  return (
+    JSON.stringify(serializeDraftAuthoredSetup(setupDraft)) !==
+    JSON.stringify({
+      schedulingPreferences: stateSnapshot.schedulingPreferences,
+      previewRange: stateSnapshot.previewRange,
+      shiftDefinitions: stateSnapshot.shiftDefinitions,
+      shiftCycle: stateSnapshot.shiftCycle,
+      blockTemplates: stateSnapshot.blockTemplates,
+      blockRecurrences: stateSnapshot.blockRecurrences,
+    })
+  );
+}
+
+function serializeDraftAuthoredSetup(setupDraft: SetupDraft) {
+  return {
+    schedulingPreferences: setupDraft.schedulingPreferences,
+    previewRange: resolvePreviewRangeFromSetupDraft(setupDraft),
+    shiftDefinitions: setupDraft.shiftDefinitions,
+    shiftCycle: setupDraft.shiftCycle,
+    blockTemplates: setupDraft.templateEntries.map((entry) => entry.template),
+    blockRecurrences: setupDraft.templateEntries.map((entry) => entry.recurrence),
   };
 }
 

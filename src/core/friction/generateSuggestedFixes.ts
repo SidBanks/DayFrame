@@ -217,9 +217,10 @@ function buildConflictFixes(
   }
 
   if (
-    movableTarget === null &&
     fixedTemplateTarget &&
-    (containsWorkBlock(contextBlocks) || areAllFixedTemplateBlocks(contextBlocks))
+    (containsWorkBlock(contextBlocks) ||
+      areAllFixedTemplateBlocks(contextBlocks) ||
+      movableTarget !== null)
   ) {
     fixes.push({
       id: `fix_change_fixed_time_${fixedTemplateTarget.id}`,
@@ -228,11 +229,7 @@ function buildConflictFixes(
     });
   }
 
-  if (
-    priorityTarget &&
-    canChangePriority(priorityTarget, context) &&
-    contextBlocks.every((block) => block.priority === 1)
-  ) {
+  if (priorityTarget && canChangePriority(priorityTarget, context)) {
     fixes.push({
       id: `fix_change_priority_${priorityTarget.id}`,
       label: "Change priority",
@@ -250,6 +247,14 @@ function buildConflictFixes(
       id: `fix_accept_${anchorBlock.id}_${acceptTargetBlockId}`,
       label: "Accept conflict",
       action: "acceptConflict",
+    });
+  }
+
+  if (fixes.length === 0 && fixedTemplateTarget) {
+    fixes.push({
+      id: `fix_change_fixed_time_${fixedTemplateTarget.id}`,
+      label: "Review fixed time",
+      action: "changeFixedTime",
     });
   }
 

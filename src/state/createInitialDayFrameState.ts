@@ -1,7 +1,7 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
-import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type { LocalDateString } from "../core/shifts/types.js";
 import type { DayFramePreviewRange, DayFramePreviewRangePreset, DayFrameState } from "./types.js";
+import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
 
 export type PersistedDayFrameState = Pick<
   DayFrameState,
@@ -96,10 +96,8 @@ export function normalizePersistedAuthoredSetup(
   };
 }
 
-function normalizePersistedManualEvents(
-  manualEvents: ManualCalendarEvent[],
-): ManualCalendarEvent[] {
-  return manualEvents.map((manualEvent) => ({ ...manualEvent }));
+function normalizePersistedManualEvents(manualEvents: unknown): DayFrameState["manualEvents"] {
+  return normalizeManualCalendarEvents(manualEvents);
 }
 
 function normalizePersistedBlockTemplates(

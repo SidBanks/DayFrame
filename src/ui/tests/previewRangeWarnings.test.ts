@@ -134,6 +134,10 @@ function buildInput(overrides?: {
       endDate: "2026-05-06" as const,
       ...overrides?.previewRange,
     },
+    schedulingPreferences: {
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+    },
     shiftCycle: overrides?.shiftCycle ?? {
       id: "cycle_001",
       userId: "user_001",

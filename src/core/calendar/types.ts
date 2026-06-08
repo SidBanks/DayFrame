@@ -13,9 +13,9 @@ export type ManualCalendarEvent = {
   id: string;
   title: string;
   userDayDate: LocalDateString;
-  startsAt?: TimeString;
-  endsAt?: TimeString;
   allDay: boolean;
+  startTime?: TimeString;
+  endTime?: TimeString;
   notes?: string;
   createdAt: string;
   updatedAt: string;

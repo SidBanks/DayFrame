@@ -1,7 +1,10 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
+import { generateCycleWorkBlocks } from "../core/cycles/generateCycleWorkBlocks.js";
+import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../core/cycles/resolveEffectiveSchedulePreferences.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
-import type { DayFramePreviewRange } from "../state/types.js";
+import { parseTimeString } from "../core/time/userDay.js";
+import type { DayFramePreviewRange, DayFrameSchedulingPreferences } from "../state/types.js";
 
 export type PreviewRangeWarning = {
   id:
@@ -14,6 +17,7 @@ export type PreviewRangeWarning = {
 
 export function getPreviewRangeWarnings(input: {
   previewRange: DayFramePreviewRange;
+  schedulingPreferences: DayFrameSchedulingPreferences;
   shiftCycle: ShiftCycle | null;
   shiftDefinitions: ShiftDefinition[];
   blockTemplates: BlockTemplate[];
@@ -49,6 +53,18 @@ export function getPreviewRangeWarnings(input: {
     LocalDateString,
     NonNullable<ShiftCycle["segments"][number]> | null
   >();
+  const visibleUserDayWindows = buildVisibleUserDayWindows(
+    previewDates,
+    input.shiftCycle,
+    input.schedulingPreferences,
+  );
+  const generatedWorkBlocks = generateCycleWorkBlocks({
+    shiftCycle: input.shiftCycle,
+    shiftDefinitions: input.shiftDefinitions,
+    planningWindowStart: visibleUserDayWindows.start,
+    planningWindowEnd: visibleUserDayWindows.end,
+    defaultSchedulingPreferences: input.schedulingPreferences,
+  });
   let hasSegmentCoverageGap = false;
   let hasWorkScheduleGap = false;
   let hasAnyWorkCoverage = false;
@@ -76,10 +92,19 @@ export function getPreviewRangeWarnings(input: {
       hasWorkScheduleGap = true;
       continue;
     }
+    const visibleUserDayWindow = visibleUserDayWindows.byDate.get(previewDate)!;
+    const overlapsWorkBlock = generatedWorkBlocks.some(
+      (workBlock) =>
+        workBlock.userDayDate === previewDate ||
+        overlapsUserDayWindow(
+          workBlock.startsAt,
+          workBlock.endsAt,
+          visibleUserDayWindow.start,
+          visibleUserDayWindow.end,
+        ),
+    );
 
-    const weekday = getWeekdayForLocalDate(previewDate);
-
-    if (!activeShiftDefinition.workDays.includes(weekday)) {
+    if (!overlapsWorkBlock) {
       hasWorkScheduleGap = true;
       continue;
     }
@@ -133,6 +158,49 @@ export function getPreviewRangeWarnings(input: {
   }
 
   return warnings;
+}
+
+function buildVisibleUserDayWindows(
+  previewDates: LocalDateString[],
+  shiftCycle: ShiftCycle,
+  schedulingPreferences: DayFrameSchedulingPreferences,
+): {
+  byDate: Map<LocalDateString, { start: Date; end: Date }>;
+  start: Date;
+  end: Date;
+} {
+  const byDate = new Map<LocalDateString, { start: Date; end: Date }>();
+  let earliestStart: Date | null = null;
+  let latestEnd: Date | null = null;
+
+  for (const previewDate of previewDates) {
+    const dayBoundaryStartTime = resolveEffectiveSchedulePreferencesForUserDayDate({
+      shiftCycle,
+      defaultSchedulingPreferences: schedulingPreferences,
+      userDayDate: previewDate,
+    }).dayBoundaryStartTime;
+    const start = createUserDayStart(previewDate, dayBoundaryStartTime);
+    const end = addDaysToDate(start, 1);
+
+    byDate.set(previewDate, {
+      start,
+      end,
+    });
+
+    if (earliestStart === null || start.getTime() < earliestStart.getTime()) {
+      earliestStart = start;
+    }
+
+    if (latestEnd === null || end.getTime() > latestEnd.getTime()) {
+      latestEnd = end;
+    }
+  }
+
+  return {
+    byDate,
+    start: earliestStart ?? new Date(),
+    end: latestEnd ?? new Date(),
+  };
 }
 
 function findActiveSegmentForDate(
@@ -193,11 +261,35 @@ function addDays(localDate: LocalDateString, days: number): LocalDateString {
   ).padStart(2, "0")}` as LocalDateString;
 }
 
-function getWeekdayForLocalDate(localDate: LocalDateString): ShiftDefinition["workDays"][number] {
-  const [year, month, day] = localDate.split("-").map(Number);
-  const weekday = new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, 12, 0, 0, 0).getDay();
+function createUserDayStart(
+  userDayDate: LocalDateString,
+  dayBoundaryStartTime: DayFrameSchedulingPreferences["dayBoundaryStartTime"],
+): Date {
+  const [year, month, day] = userDayDate.split("-").map(Number);
+  const parsedBoundary = parseTimeString(dayBoundaryStartTime);
 
-  return ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][
-    weekday
-  ] as ShiftDefinition["workDays"][number];
+  return new Date(
+    year ?? 2026,
+    (month ?? 1) - 1,
+    day ?? 1,
+    parsedBoundary.hours,
+    parsedBoundary.minutes,
+    0,
+    0,
+  );
+}
+
+function overlapsUserDayWindow(
+  startsAt: Date,
+  endsAt: Date,
+  userDayStart: Date,
+  userDayEnd: Date,
+): boolean {
+  return startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime();
+}
+
+function addDaysToDate(date: Date, days: number): Date {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
 }

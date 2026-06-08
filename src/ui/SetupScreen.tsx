@@ -17,7 +17,6 @@ import type {
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 
 const blockCategories: BlockCategory[] = [
@@ -95,7 +94,7 @@ export type SetupScreenProps = {
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
   saveMessage: string;
-  rangeWarnings?: PreviewRangeWarning[];
+  isDirty?: boolean;
   focusedTemplateField?: {
     templateId: string;
     field: "fixedStartTime";
@@ -107,7 +106,7 @@ export function SetupScreen({
   setDraft,
   onSave,
   saveMessage,
-  rangeWarnings = [],
+  isDirty = false,
   focusedTemplateField = null,
 }: SetupScreenProps): ReactElement {
   const [confirmingDeleteShiftIndex, setConfirmingDeleteShiftIndex] = useState<number | null>(null);
@@ -123,6 +122,7 @@ export function SetupScreen({
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isPreviewRangeOpen, setIsPreviewRangeOpen] = useState(false);
   const fixedStartTimeInputRefs = useRef(new Map<string, HTMLInputElement>());
+  const setupStatusMessage = saveMessage || (isDirty ? "Unsaved changes" : "All changes saved");
 
   useEffect(() => {
     if (!focusedTemplateField || focusedTemplateField.field !== "fixedStartTime") {
@@ -147,40 +147,54 @@ export function SetupScreen({
       <header className="df-panel df-screen-header">
         <h1 className="df-screen-title">Setup</h1>
         <p className="df-screen-subtitle">
-          Edit your authored setup in one place, then save before generating a preview.
+          Edit your authored setup in one place. Generate Preview will save the current draft
+          automatically.
         </p>
         <p className="df-support">
           Setup includes schedule preferences, shifts, cycles, templates, and recurrences.
         </p>
       </header>
 
-      <div className="df-panel df-screen-actions">
-        <button className="df-action-button" onClick={onSave} type="button">
-          Save Setup
-        </button>
+      <div className="df-panel df-setup-action-bar" role="toolbar" aria-label="Setup actions">
+        <div className="df-screen-actions">
+          <button className="df-action-button" onClick={onSave} type="button">
+            Save Setup
+          </button>
+          <button
+            className="df-secondary-button"
+            onClick={() => {
+              setIsSchedulePreferencesOpen(true);
+              setIsPreviewRangeOpen(true);
+              setIsShiftsOpen(true);
+              setIsCyclesOpen(true);
+              setIsTemplatesOpen(true);
+            }}
+            type="button"
+          >
+            Expand All
+          </button>
+          <button
+            className="df-secondary-button"
+            onClick={() => {
+              setIsSchedulePreferencesOpen(false);
+              setIsPreviewRangeOpen(false);
+              setIsShiftsOpen(false);
+              setIsCyclesOpen(false);
+              setIsTemplatesOpen(false);
+            }}
+            type="button"
+          >
+            Collapse All
+          </button>
+        </div>
+        <p
+          className={
+            saveMessage ? "df-success-message" : isDirty ? "df-warning-message" : "df-support"
+          }
+        >
+          {setupStatusMessage}
+        </p>
       </div>
-
-      {saveMessage ? <p className="df-success-message">{saveMessage}</p> : null}
-      {rangeWarnings.length > 0 ? (
-        <section aria-labelledby="setup-warning-heading" className="df-panel df-form-stack">
-          <div className="df-screen-header">
-            <h2 className="df-panel-title" id="setup-warning-heading">
-              Preview Range Warnings
-            </h2>
-            <p className="df-support">
-              These warnings do not block preview generation, but they may explain missing or sparse
-              preview results.
-            </p>
-          </div>
-          <ul className="df-plain-list">
-            {rangeWarnings.map((warning) => (
-              <li className="df-warning-item" key={warning.id}>
-                {warning.message}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       <CollapsibleSetupSection
         helperText="Controls how DayFrame interprets days, weeks, and schedule boundaries."
@@ -1842,7 +1856,7 @@ function CollapsibleSetupSection({
       aria-labelledby={`${sectionId}-toggle`}
       className="df-panel df-form-stack df-collapsible-section"
     >
-      <div className="df-collapsible-section-header">
+      <div className="df-collapsible-section-header df-collapsible-section-header--sticky">
         <p className="df-support">{helperText}</p>
         <button
           aria-controls={`${sectionId}-content`}

@@ -71,13 +71,13 @@ describe("DayFrameApp", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
     expect(screen.getByRole("heading", { name: "DayFrame" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Setup" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save Setup" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Save Current Setup as Profile" }),
@@ -122,11 +122,15 @@ describe("DayFrameApp", () => {
     expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Include in Preview")[0]).toBeChecked();
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeInTheDocument();
-    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "DayFrame Preview" })).toBeInTheDocument();
+    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
   });
 
   it("keeps unified setup draft edits when switching to preview and back", () => {
@@ -145,7 +149,7 @@ describe("DayFrameApp", () => {
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Baseline" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
 
     expect(screen.getByDisplayValue("Sleep Baseline")).toBeInTheDocument();
@@ -416,8 +420,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
@@ -443,8 +446,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
@@ -487,14 +489,13 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(
       screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
@@ -511,8 +512,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ }));
     fireEvent.click(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ }));
 
@@ -613,8 +613,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     const conflictDayButton = screen.getByRole("button", {
       name: "Monday, May 4, 2026, has friction",
@@ -631,7 +630,10 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
 
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
   });
 
@@ -643,24 +645,29 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     const todayButton = screen.getByRole("button", {
       name: "Tuesday, May 5, 2026, today",
     });
 
     expect(todayButton).toHaveAttribute("aria-current", "date");
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
 
     expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
-    expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Generate Preview" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(screen.getByRole("button", { name: "Tuesday, May 5, 2026, today" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Tuesday, May 5, 2026, today" }));
     expect(
@@ -709,8 +716,7 @@ describe("DayFrameApp", () => {
       target: { value: "Saved Setup" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
@@ -728,8 +734,7 @@ describe("DayFrameApp", () => {
       screen.queryByRole("button", { name: /Tuesday, May 5, 2026, selected day/ }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
     expect(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ })).toHaveAttribute(
@@ -753,8 +758,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
   });
@@ -780,8 +784,7 @@ describe("DayFrameApp", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("May 10-12, 2026").length).toBeGreaterThan(0);
   });
@@ -794,8 +797,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
 
     expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
@@ -920,8 +922,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(7);
@@ -995,8 +996,7 @@ describe("DayFrameApp", () => {
         target: { value: "2026-05-05" },
       });
       fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-      fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-      fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+      fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
       expect(screen.getAllByText(expectedPlanningWindowLabel).length).toBeGreaterThan(0);
       expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(
@@ -1018,8 +1018,7 @@ describe("DayFrameApp", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getByText("Sleep 2:15 PM - 10:15 PM")).toBeInTheDocument();
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
@@ -1030,16 +1029,14 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
     expect(screen.getByText("Add at least one shift definition.")).toBeInTheDocument();
-    expect(screen.getByText("Add an active shift cycle.")).toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
   });
 
@@ -1062,16 +1059,14 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
     expect(screen.queryByText("Add at least one shift definition.")).not.toBeInTheDocument();
-    expect(screen.getByText("Add an active shift cycle.")).toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
   });
 
@@ -1176,8 +1171,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.queryByText("Finish setup before generating a preview:")).not.toBeInTheDocument();
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
@@ -1285,8 +1279,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Move block" }));
 
     expect(screen.getByText("Revised")).toBeInTheDocument();
@@ -1303,8 +1296,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Setup" }));
@@ -1312,7 +1304,7 @@ describe("DayFrameApp", () => {
       target: { value: "Updated Day Shift" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
 
     await waitFor(() => {
       expect(
@@ -1335,8 +1327,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM")).toHaveLength(6);
@@ -1346,17 +1337,17 @@ describe("DayFrameApp", () => {
       target: { value: "Sleep Recovery" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
 
     await waitFor(() => {
       expect(
         screen.getByText("Setup changed. Generate a new preview to see updates."),
       ).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeEnabled();
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM")).toHaveLength(6);
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
 
     await waitFor(() => {
       expect(
@@ -1370,7 +1361,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByText("May 4-6, 2026").length).toBeGreaterThan(0);
   });
 
-  it("shows non-blocking preview range mismatch warnings in setup and preview", () => {
+  it("shows non-blocking preview range mismatch warnings only after preview generation", () => {
     const store = createDayFrameStore({
       previewRange: {
         preset: "custom",
@@ -1409,25 +1400,52 @@ describe("DayFrameApp", () => {
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
       },
+      blockTemplates: [
+        {
+          id: "template_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeSleep",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "template_sleep",
+          frequency: "daily",
+        },
+      ],
     });
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    expect(screen.getByRole("heading", { name: "Preview Range Warnings" })).toBeInTheDocument();
     expect(
-      screen.getByText("This preview range does not overlap the active cycle."),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: "Preview Range Warnings" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("This preview range does not overlap the active cycle."),
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
-    expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Generate Schedule Preview" })).toBeEnabled();
+    expect(screen.getAllByText("Preview range warnings:").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeEnabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
 
     expect(
-      screen.getByText("This preview range does not overlap the active cycle."),
-    ).toBeInTheDocument();
+      screen.getAllByText("This preview range does not overlap the active cycle.").length,
+    ).toBeGreaterThan(0);
   });
 
   it("switches to setup and focuses the matching fixed start time after clicking Review fixed time", () => {
@@ -1502,8 +1520,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
 
     expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
@@ -1717,7 +1734,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
     fireEvent.click(screen.getAllByRole("button", { name: "Review fixed time" })[1]!);
 
     expect(screen.getByRole("button", { name: "Setup" })).toHaveAttribute("aria-pressed", "true");
@@ -1800,8 +1817,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 7:00 PM - 3:00 AM")).toHaveLength(3);
@@ -1898,8 +1914,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getByText("Errands 2:15 PM - 3:15 PM")).toBeInTheDocument();
@@ -1969,8 +1984,7 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
 
     expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();

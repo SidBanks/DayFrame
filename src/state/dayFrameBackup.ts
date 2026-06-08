@@ -1,4 +1,5 @@
 import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js";
+import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 
 export type DayFrameBackupV1 = {
@@ -164,7 +165,7 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
     shiftCycle: value.shiftCycle as DayFrameAuthoredSetup["shiftCycle"],
     blockTemplates: value.blockTemplates as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: value.blockRecurrences as DayFrameAuthoredSetup["blockRecurrences"],
-    manualEvents: (value.manualEvents ?? []) as DayFrameAuthoredSetup["manualEvents"],
+    manualEvents: normalizeManualCalendarEvents(value.manualEvents),
   };
 }
 

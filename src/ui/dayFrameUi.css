@@ -228,6 +228,17 @@ textarea {
   justify-content: space-between;
 }
 
+.df-collapsible-section-header--sticky {
+  position: sticky;
+  top: 94px;
+  z-index: 2;
+  padding: 10px 12px;
+  margin: -4px -4px 0;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--df-panel) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
 .df-collapsible-section-content.is-collapsed {
   display: none;
 }
@@ -330,6 +341,25 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.df-setup-action-bar {
+  position: sticky;
+  top: 12px;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--df-accent) 5%, var(--df-panel)),
+      color-mix(in srgb, var(--df-panel) 94%, transparent)
+    ),
+    var(--df-panel);
+  backdrop-filter: blur(10px);
 }
 
 .df-success-message {

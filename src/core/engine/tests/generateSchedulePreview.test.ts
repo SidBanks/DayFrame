@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { generateSchedulePreview } from "../generateSchedulePreview.js";
 import type { BlockRecurrence, BlockTemplate } from "../../blocks/types.js";
+import type { ManualCalendarEvent } from "../../calendar/types.js";
 import type { ShiftCycle } from "../../cycles/types.js";
 import type { ShiftDefinition } from "../../shifts/types.js";
 
@@ -309,7 +310,7 @@ describe("generateSchedulePreview", () => {
     expect(result.frictionPoints[0]?.title).toContain("Workout");
     expect(
       result.frictionPoints[0]?.suggestedFixes.map((suggestedFix) => suggestedFix.action),
-    ).toEqual(["moveBlock", "reduceDuration", "acceptConflict"]);
+    ).toEqual(["moveBlock", "reduceDuration", "changePriority", "acceptConflict"]);
   });
 
   it("does not mutate the input arrays", () => {
@@ -564,6 +565,244 @@ describe("generateSchedulePreview", () => {
       createdAt: generatedAt,
       updatedAt: generatedAt,
     });
+  });
+
+  it("keeps timed and all-day manual events in the preview even without friction", () => {
+    const manualEvents: ManualCalendarEvent[] = [
+      {
+        id: "manual_event_doctor",
+        title: "Doctor Appointment",
+        userDayDate: "2026-05-05",
+        allDay: false,
+        startTime: "21:00",
+        endTime: "22:00",
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+      {
+        id: "manual_event_birthday",
+        title: "Birthday",
+        userDayDate: "2026-05-06",
+        allDay: true,
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+      },
+    ];
+
+    const result = generateSchedulePreview({
+      shiftDefinitions: [],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Empty Cycle",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [],
+        ...baseTimestamps,
+      },
+      blockTemplates: [],
+      blockRecurrences: [],
+      manualEvents,
+      planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 6, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.scheduledBlocks).toHaveLength(2);
+    expect(result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.id)).toEqual([
+      "manual_event_doctor",
+      "manual_event_birthday",
+    ]);
+    expect(result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.source)).toEqual([
+      "manual",
+      "manual",
+    ]);
+    expect(result.frictionPoints).toEqual([]);
+  });
+
+  it("keeps conflicting manual events in the preview while still surfacing friction", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Empty Cycle",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeSleep",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+      ],
+      manualEvents: [
+        {
+          id: "manual_event_late_call",
+          title: "Late Call",
+          userDayDate: "2026-05-05",
+          allDay: false,
+          startTime: "23:00",
+          endTime: "23:30",
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.id === "manual_event_late_call")).toBe(true);
+    expect(result.frictionPoints).toHaveLength(1);
+    expect(result.frictionPoints[0]?.title).toContain("Late Call");
+  });
+
+  it("treats non-work days as downtime days for flexible templates without generating friction", () => {
+    const shiftDefinitions: ShiftDefinition[] = [
+      {
+        id: "shift_day",
+        userId: "user_001",
+        name: "Day Shift",
+        startTime: "05:45",
+        endTime: "14:15",
+        workDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+        crossesMidnight: false,
+        ...baseTimestamps,
+      },
+    ];
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_001",
+      userId: "user_001",
+      name: "Weekday Rotation",
+      type: "fixedSegments",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [
+        {
+          id: "segment_day",
+          shiftCycleId: "cycle_001",
+          shiftDefinitionId: "shift_day",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+        },
+      ],
+      ...baseTimestamps,
+    };
+
+    const result = generateSchedulePreview({
+      shiftDefinitions,
+      shiftCycle,
+      blockTemplates: [
+        {
+          id: "default_sleep",
+          userId: "user_001",
+          title: "Sleep",
+          category: "sleep",
+          placementType: "flexible",
+          durationMinutes: 480,
+          priority: 1,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+        {
+          id: "template_laundry",
+          userId: "user_001",
+          title: "Laundry",
+          category: "maintenance",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 3,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_sleep",
+          blockTemplateId: "default_sleep",
+          frequency: "daily",
+        },
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["saturday"],
+        },
+        {
+          id: "rec_laundry",
+          blockTemplateId: "template_laundry",
+          frequency: "specificWeekdays",
+          weekdays: ["saturday"],
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 9, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 10, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.unplacedCandidates).toEqual([]);
+    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Workout")).toBe(
+      true,
+    );
+    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Laundry")).toBe(
+      true,
+    );
+    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Sleep")).toBe(
+      true,
+    );
+    expect(result.frictionPoints).toEqual([]);
   });
 
   it("resolves effective schedule preferences from the active segment", () => {
@@ -1441,8 +1680,8 @@ describe("generateSchedulePreview", () => {
           id: "manual_event_doctor",
           title: "Doctor Appointment",
           userDayDate: "2026-05-04",
-          startsAt: "10:00",
-          endsAt: "11:00",
+          startTime: "10:00",
+          endTime: "11:00",
           allDay: false,
           notes: "Annual checkup",
           ...baseTimestamps,

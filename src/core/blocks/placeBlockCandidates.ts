@@ -13,9 +13,15 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
 
   const scheduledBlocks: DraftScheduledBlock[] = [];
   const deferredSleepCandidates: BlockCandidate[] = [];
+  const deferredDowntimeCandidates: BlockCandidate[] = [];
   const unplacedCandidates: BlockCandidate[] = [];
 
   for (const blockCandidate of input.blockCandidates) {
+    if (shouldDeferToDowntimePlacement(blockCandidate, input.generatedWorkBlocks)) {
+      deferredDowntimeCandidates.push(blockCandidate);
+      continue;
+    }
+
     const scheduledBlock = placeBlockCandidate(blockCandidate, input);
 
     if (!scheduledBlock) {
@@ -40,6 +46,12 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
 
   placeDeferredSleepCandidates({
     deferredSleepCandidates,
+    scheduledBlocks,
+    unplacedCandidates,
+    input,
+  });
+  placeDeferredDowntimeCandidates({
+    deferredDowntimeCandidates,
     scheduledBlocks,
     unplacedCandidates,
     input,
@@ -170,6 +182,41 @@ function placeBlockCandidate(
   }
 }
 
+function placeOnDowntimeDay(
+  blockCandidate: BlockCandidate,
+  userDayStart: Date,
+  userDayEnd: Date,
+  scheduledBlocks: DraftScheduledBlock[],
+): DraftScheduledBlock | null {
+  const bufferBeforeMinutes = getBufferBeforeMinutes(blockCandidate);
+  const bufferAfterMinutes = getBufferAfterMinutes(blockCandidate);
+  const occupiedWindows = getOccupiedWindowsForUserDay(scheduledBlocks, userDayStart, userDayEnd);
+  let startsAt = addMinutes(userDayStart, bufferBeforeMinutes);
+
+  for (const occupiedWindow of occupiedWindows) {
+    const endsAt = addMinutes(startsAt, blockCandidate.durationMinutes);
+
+    if (
+      addMinutes(endsAt, bufferAfterMinutes).getTime() <= occupiedWindow.occupiedStartsAt.getTime()
+    ) {
+      return buildScheduledBlock(blockCandidate, startsAt, endsAt);
+    }
+
+    startsAt = addMinutes(
+      new Date(Math.max(startsAt.getTime(), occupiedWindow.occupiedEndsAt.getTime())),
+      bufferBeforeMinutes,
+    );
+  }
+
+  const endsAt = addMinutes(startsAt, blockCandidate.durationMinutes);
+
+  if (addMinutes(endsAt, bufferAfterMinutes).getTime() > userDayEnd.getTime()) {
+    return null;
+  }
+
+  return buildScheduledBlock(blockCandidate, startsAt, endsAt);
+}
+
 function placeDeferredSleepCandidates(input: {
   deferredSleepCandidates: BlockCandidate[];
   scheduledBlocks: DraftScheduledBlock[];
@@ -198,6 +245,48 @@ function placeDeferredSleepCandidates(input: {
     }
 
     input.scheduledBlocks.push(propagatedScheduledBlock);
+  }
+}
+
+function placeDeferredDowntimeCandidates(input: {
+  deferredDowntimeCandidates: BlockCandidate[];
+  scheduledBlocks: DraftScheduledBlock[];
+  unplacedCandidates: BlockCandidate[];
+  input: PlaceBlockCandidatesInput;
+}): void {
+  for (const blockCandidate of input.deferredDowntimeCandidates) {
+    const dayBoundaryStartTime =
+      input.input.getDayBoundaryStartTimeForUserDayDate?.(blockCandidate.userDayDate) ??
+      input.input.dayBoundaryStartTime;
+    const userDayStart = getUserDayStartFromDateString(
+      blockCandidate.userDayDate,
+      dayBoundaryStartTime,
+    );
+    const userDayEnd = addMinutes(userDayStart, 24 * 60);
+    const scheduledBlock = placeOnDowntimeDay(
+      blockCandidate,
+      userDayStart,
+      userDayEnd,
+      input.scheduledBlocks,
+    );
+
+    if (!scheduledBlock) {
+      input.unplacedCandidates.push(blockCandidate);
+      continue;
+    }
+
+    if (
+      !overlapsPlanningWindow(
+        scheduledBlock,
+        input.input.planningWindowStart,
+        input.input.planningWindowEnd,
+      )
+    ) {
+      input.unplacedCandidates.push(blockCandidate);
+      continue;
+    }
+
+    input.scheduledBlocks.push(scheduledBlock);
   }
 }
 
@@ -364,6 +453,41 @@ function overlapsPlanningWindow(
   );
 }
 
+function getOccupiedWindowsForUserDay(
+  scheduledBlocks: DraftScheduledBlock[],
+  userDayStart: Date,
+  userDayEnd: Date,
+): Array<{ occupiedStartsAt: Date; occupiedEndsAt: Date }> {
+  return scheduledBlocks
+    .map((scheduledBlock) => {
+      const occupiedStartsAt = addMinutes(
+        scheduledBlock.startsAt,
+        -(scheduledBlock.bufferBeforeMinutes ?? 0),
+      );
+      const occupiedEndsAt = addMinutes(scheduledBlock.endsAt, scheduledBlock.bufferAfterMinutes ?? 0);
+      const clippedStartsAt =
+        occupiedStartsAt.getTime() < userDayStart.getTime() ? userDayStart : occupiedStartsAt;
+      const clippedEndsAt =
+        occupiedEndsAt.getTime() > userDayEnd.getTime() ? userDayEnd : occupiedEndsAt;
+
+      if (clippedStartsAt.getTime() >= clippedEndsAt.getTime()) {
+        return null;
+      }
+
+      return {
+        occupiedStartsAt: clippedStartsAt,
+        occupiedEndsAt: clippedEndsAt,
+      };
+    })
+    .filter(
+      (
+        occupiedWindow,
+      ): occupiedWindow is { occupiedStartsAt: Date; occupiedEndsAt: Date } =>
+        occupiedWindow !== null,
+    )
+    .sort((left, right) => left.occupiedStartsAt.getTime() - right.occupiedStartsAt.getTime());
+}
+
 function validatePlanningWindow(planningWindowStart: Date, planningWindowEnd: Date): void {
   if (planningWindowStart.getTime() >= planningWindowEnd.getTime()) {
     throw new RangeError("planningWindowStart must be before planningWindowEnd");
@@ -391,6 +515,22 @@ function shouldDeferToSleepAnchorPropagation(
     blockCandidate.preferredWindow === "beforeWork" &&
     blockCandidate.recurrenceFrequency === "daily" &&
     blockCandidate.placementType === "flexible" &&
+    getFirstWorkBlockForUserDay(generatedWorkBlocks, blockCandidate.userDayDate) === null
+  );
+}
+
+function shouldUseDowntimePlacementFallback(blockCandidate: BlockCandidate): boolean {
+  return blockCandidate.placementType === "flexible" && blockCandidate.category !== "sleep";
+}
+
+function shouldDeferToDowntimePlacement(
+  blockCandidate: BlockCandidate,
+  generatedWorkBlocks: PlaceBlockCandidatesInput["generatedWorkBlocks"],
+): boolean {
+  return (
+    shouldUseDowntimePlacementFallback(blockCandidate) &&
+    (blockCandidate.preferredWindow === "beforeWork" ||
+      blockCandidate.preferredWindow === "afterWork") &&
     getFirstWorkBlockForUserDay(generatedWorkBlocks, blockCandidate.userDayDate) === null
   );
 }

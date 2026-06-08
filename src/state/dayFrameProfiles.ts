@@ -1,5 +1,6 @@
 import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js";
 import { cloneDayFrameAuthoredSetup } from "./dayFrameBackup.js";
+import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
 import type { DayFrameAuthoredSetup, DayFrameSavedProfile } from "./types.js";
 
 export type DayFrameProfilesStorageV1 = {
@@ -98,6 +99,6 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
     shiftCycle: (value.shiftCycle ?? null) as DayFrameAuthoredSetup["shiftCycle"],
     blockTemplates: (value.blockTemplates ?? []) as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: (value.blockRecurrences ?? []) as DayFrameAuthoredSetup["blockRecurrences"],
-    manualEvents: (value.manualEvents ?? []) as DayFrameAuthoredSetup["manualEvents"],
+    manualEvents: normalizeManualCalendarEvents(value.manualEvents),
   };
 }

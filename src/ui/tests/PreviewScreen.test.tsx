@@ -64,8 +64,9 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Workout conflicts with Work")).toBeInTheDocument();
   });
 
-  it("renders manual events separately from generated scheduled blocks", () => {
+  it("renders manual events separately from generated scheduled blocks even without friction", () => {
     const preview = buildPreview();
+    preview.result.frictionPoints = [];
 
     preview.result.scheduledBlocks.push({
       id: "manual_event_dinner",
@@ -96,6 +97,39 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Dinner Reservation 6:00 PM - 7:30 PM")).toBeInTheDocument();
     expect(screen.getByText("(Manual event)")).toBeInTheDocument();
     expect(screen.getByText("Workout 2:15 PM - 3:15 PM")).toBeInTheDocument();
+    expect(screen.getByLabelText("Manual block: Dinner Reservation, 6:00 PM - 7:30 PM")).toBeInTheDocument();
+  });
+
+  it("renders all-day manual events without a synthetic time range", () => {
+    const preview = buildPreview();
+
+    preview.result.scheduledBlocks.push({
+      id: "manual_event_birthday",
+      userId: "user_001",
+      templateId: "manual_event_birthday",
+      source: "manual",
+      isAllDay: true,
+      title: "Birthday",
+      category: "optional",
+      startsAt: new Date(2026, 4, 5, 3, 0, 0, 0),
+      endsAt: new Date(2026, 4, 6, 3, 0, 0, 0),
+      userDayDate: "2026-05-05",
+      userWeekStartDate: "2026-05-02",
+      priority: 2,
+      status: "planned",
+      externalResources: [],
+    });
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Birthday All day")).toBeInTheDocument();
   });
 
   it("calls onApplySuggestedFix when the user clicks a suggested fix", () => {

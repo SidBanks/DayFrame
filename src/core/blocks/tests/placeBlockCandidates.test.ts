@@ -657,6 +657,8 @@ describe("placeBlockCandidates", () => {
     const candidate = {
       ...baseCandidate,
       id: "candidate_before_work",
+      category: "sleep" as const,
+      title: "Sleep",
       recurrenceFrequency: "weekly" as const,
       preferredWindow: "beforeWork" as const,
     };
@@ -671,6 +673,50 @@ describe("placeBlockCandidates", () => {
 
     expect(result.scheduledBlocks).toHaveLength(0);
     expect(result.unplacedCandidates).toEqual([candidate]);
+  });
+
+  it("places flexible beforeWork and afterWork candidates on downtime days without work", () => {
+    const result = placeBlockCandidates({
+      blockCandidates: [
+        {
+          ...baseCandidate,
+          id: "candidate_laundry",
+          templateId: "template_laundry",
+          title: "Laundry",
+          category: "maintenance",
+          preferredWindow: "beforeWork",
+          priority: 2,
+          userDayDate: "2026-05-09",
+        },
+        {
+          ...baseCandidate,
+          id: "candidate_workout",
+          templateId: "template_workout",
+          title: "Workout",
+          category: "fitness",
+          preferredWindow: "afterWork",
+          priority: 3,
+          userDayDate: "2026-05-09",
+        },
+      ],
+      generatedWorkBlocks: [],
+      planningWindowStart: new Date(2026, 4, 9, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 10, 0, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(result.unplacedCandidates).toEqual([]);
+    expect(result.scheduledBlocks).toHaveLength(2);
+    expect(result.scheduledBlocks[0]).toMatchObject({
+      title: "Laundry",
+      startsAt: new Date(2026, 4, 9, 3, 0, 0, 0),
+      endsAt: new Date(2026, 4, 9, 4, 0, 0, 0),
+    });
+    expect(result.scheduledBlocks[1]).toMatchObject({
+      title: "Workout",
+      startsAt: new Date(2026, 4, 9, 4, 0, 0, 0),
+      endsAt: new Date(2026, 4, 9, 5, 0, 0, 0),
+    });
   });
 
   it("leaves custom candidates unplaced when the duration does not fit in the window", () => {

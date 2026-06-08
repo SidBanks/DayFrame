@@ -77,6 +77,11 @@ describe("generateSuggestedFixes", () => {
         action: "reduceDuration",
       },
       {
+        id: "fix_change_priority_scheduled_workout",
+        label: "Change priority",
+        action: "changePriority",
+      },
+      {
         id: "fix_accept_work_shift_day_2026-05-05_scheduled_workout",
         label: "Accept conflict",
         action: "acceptConflict",
@@ -293,6 +298,11 @@ describe("generateSuggestedFixes", () => {
         id: "fix_reduce_scheduled_sleep",
         label: "Reduce duration",
         action: "reduceDuration",
+      },
+      {
+        id: "fix_change_priority_scheduled_sleep",
+        label: "Change priority",
+        action: "changePriority",
       },
       {
         id: "fix_accept_work_shift_night_2026-05-05_scheduled_sleep",

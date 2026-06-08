@@ -122,8 +122,8 @@ describe("dayFrameStore", () => {
         id: "manual_event_1",
         title: "Doctor Appointment",
         userDayDate: "2026-05-06",
-        startsAt: "09:30",
-        endsAt: "10:30",
+        startTime: "09:30",
+        endTime: "10:30",
         allDay: false,
         notes: "Bring insurance card",
         ...baseTimestamps,
@@ -139,8 +139,8 @@ describe("dayFrameStore", () => {
         id: "manual_event_1",
         title: "Doctor Appointment",
         userDayDate: "2026-05-06",
-        startsAt: "09:30",
-        endsAt: "10:30",
+        startTime: "09:30",
+        endTime: "10:30",
         allDay: false,
         notes: "Bring insurance card",
         ...baseTimestamps,
@@ -153,6 +153,54 @@ describe("dayFrameStore", () => {
     expect(store.getState().savedProfiles[0]?.data.manualEvents).toEqual(
       store.getState().manualEvents,
     );
+  });
+
+  it("migrates persisted manual events from legacy startsAt and endsAt fields", () => {
+    const localStorage = createLocalStorageMock();
+
+    localStorage.setItem(
+      DAYFRAME_STORAGE_KEY,
+      JSON.stringify({
+        schedulingPreferences: {
+          dayBoundaryStartTime: "03:00",
+          weekStartsOn: "saturday",
+        },
+        previewRange: {
+          preset: "threeDays",
+          startDate: "2026-05-04",
+          endDate: "2026-05-06",
+        },
+        shiftDefinitions: [],
+        shiftCycle: null,
+        blockTemplates: [],
+        blockRecurrences: [],
+        manualEvents: [
+          {
+            id: "manual_event_legacy",
+            title: "Legacy Appointment",
+            userDayDate: "2026-05-06",
+            startsAt: "09:30",
+            endsAt: "10:30",
+            allDay: false,
+            ...baseTimestamps,
+          },
+        ],
+      }),
+    );
+
+    installLocalStorageMock(localStorage);
+
+    expect(createDayFrameStore().getState().manualEvents).toEqual([
+      {
+        id: "manual_event_legacy",
+        title: "Legacy Appointment",
+        userDayDate: "2026-05-06",
+        startTime: "09:30",
+        endTime: "10:30",
+        allDay: false,
+        ...baseTimestamps,
+      },
+    ]);
   });
 
   it("re-enables untouched default sleep templates from persisted state", () => {

@@ -219,22 +219,23 @@ function buildManualEventScheduledBlocks(
         effectiveDayBoundaryStartTime,
       );
       const startsAt =
-        manualEvent.allDay || !manualEvent.startsAt
+        manualEvent.allDay || !manualEvent.startTime
           ? userDayStart
-          : createDateTimeFromUserDay(manualEvent.userDayDate, manualEvent.startsAt);
+          : createDateTimeFromUserDay(manualEvent.userDayDate, manualEvent.startTime);
       const endsAt =
-        manualEvent.allDay || !manualEvent.endsAt
+        manualEvent.allDay || !manualEvent.endTime
           ? addCalendarDays(userDayStart, 1)
           : createDateTimeFromUserDay(
               manualEvent.userDayDate,
-              manualEvent.endsAt,
-              manualEvent.endsAt <= (manualEvent.startsAt ?? manualEvent.endsAt),
+              manualEvent.endTime,
+              manualEvent.endTime <= (manualEvent.startTime ?? manualEvent.endTime),
             );
 
       return {
         id: manualEvent.id,
         userId: "user_001",
         source: "manual",
+        isAllDay: manualEvent.allDay,
         title: manualEvent.title,
         category: "optional",
         anchorType: "manual",

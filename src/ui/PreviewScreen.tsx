@@ -165,20 +165,27 @@ export function PreviewScreen({
                     <li key={`${pattern.key}-${occurrence.frictionPoint.id}`}>
                       <div>{formatDayHeading(occurrence.userDayDate)}</div>
                       <div className="df-fix-list">
-                        {occurrence.frictionPoint.suggestedFixes.map((suggestedFix) => (
-                          <button
-                            className="df-fix-button"
-                            key={suggestedFix.id}
-                            onClick={createSuggestedFixHandler(
-                              occurrence.frictionPoint.id,
-                              suggestedFix.id,
-                              onApplySuggestedFix,
-                            )}
-                            type="button"
-                          >
-                            {suggestedFix.label}
-                          </button>
-                        ))}
+                        {occurrence.frictionPoint.suggestedFixes.length > 0 ? (
+                          occurrence.frictionPoint.suggestedFixes.map((suggestedFix) => (
+                            <button
+                              className="df-fix-button"
+                              key={suggestedFix.id}
+                              onClick={createSuggestedFixHandler(
+                                occurrence.frictionPoint.id,
+                                suggestedFix.id,
+                                onApplySuggestedFix,
+                              )}
+                              type="button"
+                            >
+                              {suggestedFix.label}
+                            </button>
+                          ))
+                        ) : (
+                          <span className="df-muted">
+                            No automatic fix is available. Review the related setup and regenerate
+                            the preview.
+                          </span>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -239,7 +246,9 @@ export function PreviewScreen({
                       .map((scheduledBlock) => (
                         <li className="df-manual-event-item" key={scheduledBlock.id}>
                           {scheduledBlock.title}{" "}
-                          {formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
+                          {scheduledBlock.isAllDay
+                            ? "All day"
+                            : formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
                           <span className="df-muted"> (Manual event)</span>
                         </li>
                       ))}
@@ -331,20 +340,27 @@ export function PreviewScreen({
                         <div>{frictionPoint.title}</div>
                         <div className="df-muted">{frictionPoint.message}</div>
                         <div className="df-fix-list">
-                          {frictionPoint.suggestedFixes.map((suggestedFix) => (
-                            <button
-                              className="df-fix-button"
-                              key={suggestedFix.id}
-                              onClick={createSuggestedFixHandler(
-                                frictionPoint.id,
-                                suggestedFix.id,
-                                onApplySuggestedFix,
-                              )}
-                              type="button"
-                            >
-                              {suggestedFix.label}
-                            </button>
-                          ))}
+                          {frictionPoint.suggestedFixes.length > 0 ? (
+                            frictionPoint.suggestedFixes.map((suggestedFix) => (
+                              <button
+                                className="df-fix-button"
+                                key={suggestedFix.id}
+                                onClick={createSuggestedFixHandler(
+                                  frictionPoint.id,
+                                  suggestedFix.id,
+                                  onApplySuggestedFix,
+                                )}
+                                type="button"
+                              >
+                                {suggestedFix.label}
+                              </button>
+                            ))
+                          ) : (
+                            <span className="df-muted">
+                              No automatic fix is available. Review the related setup and regenerate
+                              the preview.
+                            </span>
+                          )}
                         </div>
                       </li>
                     ))}

@@ -150,6 +150,7 @@ export type DraftScheduledBlock = {
   userId: string;
   templateId?: string;
   source: ScheduledBlockSource;
+  isAllDay?: boolean;
   title: string;
   category: BlockCategory;
   anchorType?: AnchorType;
