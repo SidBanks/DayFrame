@@ -10,7 +10,6 @@ export type PreviewRangeWarning = {
   id:
     | "previewOutsideCycle"
     | "previewOutsideSegmentCoverage"
-    | "previewHasNoWorkSchedule"
     | "previewMayBeEmpty";
   message: string;
 };
@@ -66,7 +65,6 @@ export function getPreviewRangeWarnings(input: {
     defaultSchedulingPreferences: input.schedulingPreferences,
   });
   let hasSegmentCoverageGap = false;
-  let hasWorkScheduleGap = false;
   let hasAnyWorkCoverage = false;
 
   for (const previewDate of previewDates) {
@@ -89,7 +87,6 @@ export function getPreviewRangeWarnings(input: {
     }
 
     if (!activeSegment || !activeShiftDefinition) {
-      hasWorkScheduleGap = true;
       continue;
     }
     const visibleUserDayWindow = visibleUserDayWindows.byDate.get(previewDate)!;
@@ -105,7 +102,6 @@ export function getPreviewRangeWarnings(input: {
     );
 
     if (!overlapsWorkBlock) {
-      hasWorkScheduleGap = true;
       continue;
     }
 
@@ -116,13 +112,6 @@ export function getPreviewRangeWarnings(input: {
     warnings.push({
       id: "previewOutsideSegmentCoverage",
       message: "No cycle segment is active during part of this preview range.",
-    });
-  }
-
-  if (hasWorkScheduleGap) {
-    warnings.push({
-      id: "previewHasNoWorkSchedule",
-      message: "No work schedule applies to part of this preview range.",
     });
   }
 

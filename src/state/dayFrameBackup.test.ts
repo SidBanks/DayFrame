@@ -120,9 +120,10 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
       {
         id: "template_review",
         userId: "user_001",
-        title: "Schedule Review",
-        category: "review",
-        placementType: "flexible",
+      title: "Schedule Review",
+      category: "review",
+      requiresWorkAnchor: false,
+      placementType: "flexible",
         durationMinutes: 30,
         priority: 2,
         preferredWindow: "beforeWork",

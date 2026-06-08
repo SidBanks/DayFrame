@@ -78,6 +78,9 @@ export function PreviewScreen({
   );
   const visibleFrictionPoints = dayGroups.flatMap((dayGroup) => dayGroup.frictionPoints);
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
+  const workDependentActivitiesSkipped = visibleFrictionPoints.filter(
+    (frictionPoint) => frictionPoint.kind === "workRequiredSkip",
+  ).length;
   const groupedFrictionPatterns = buildGroupedFrictionPatterns(dayGroups);
 
   return (
@@ -141,8 +144,9 @@ export function PreviewScreen({
             <strong>Friction Counts</strong>
             <span>
               {visibleFrictionPoints.length} total, {frictionCounts.critical} critical,{" "}
-              {frictionCounts.warning} warning
+              {frictionCounts.warning} warning, {frictionCounts.info} info
             </span>
+            <span>Work-dependent activities skipped: {workDependentActivitiesSkipped}</span>
           </div>
         </div>
       </section>
@@ -261,7 +265,10 @@ export function PreviewScreen({
                   Work
                 </h3>
                 {dayGroup.workBlocks.length === 0 ? (
-                  <p className="df-empty">No work blocks.</p>
+                  <div className="df-form-stack">
+                    <p className="df-empty">Downtime Day</p>
+                    <p className="df-muted">No work shift scheduled.</p>
+                  </div>
                 ) : (
                   <ul className="df-plain-list">
                     {dayGroup.workBlocks.map((workBlock) => (
@@ -480,14 +487,18 @@ function getOrCreateDayGroup(groups: Map<string, PreviewDayGroup>, userDayDate: 
 }
 
 function countFrictionBySeverity(frictionPoints: DayFramePreview["result"]["frictionPoints"]): {
+  info: number;
   critical: number;
   warning: number;
 } {
+  let info = 0;
   let critical = 0;
   let warning = 0;
 
   for (const frictionPoint of frictionPoints) {
-    if (frictionPoint.severity === "critical") {
+    if (frictionPoint.severity === "info") {
+      info += 1;
+    } else if (frictionPoint.severity === "critical") {
       critical += 1;
     } else if (frictionPoint.severity === "warning") {
       warning += 1;
@@ -495,6 +506,7 @@ function countFrictionBySeverity(frictionPoints: DayFramePreview["result"]["fric
   }
 
   return {
+    info,
     critical,
     warning,
   };

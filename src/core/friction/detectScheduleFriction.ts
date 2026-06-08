@@ -77,11 +77,38 @@ function detectUnplacedCandidateFrictionPoints(
   detectedAt: string,
 ): FrictionPoint[] {
   return unplacedCandidates.map((candidate) => {
+    if (candidate.requiresWorkAnchor === true) {
+      return {
+        id: `friction_unplaced_${candidate.id}`,
+        userId: candidate.userId,
+        kind: "workRequiredSkip",
+        severity: "info",
+        title: `${candidate.title} could not be scheduled`,
+        message: `This activity requires a work shift, but none exists on ${candidate.userDayDate}.`,
+        affectedBlockIds: [candidate.id],
+        affectedUserDayDate: candidate.userDayDate,
+        affectedUserWeekStartDate: candidate.userWeekStartDate,
+        suggestedFixes: [
+          {
+            id: `fix_skip_${candidate.id}`,
+            label: "Skip block",
+            action: "skipBlock",
+          },
+        ],
+        canIgnore: true,
+        ignored: false,
+        resolved: false,
+        createdAt: detectedAt,
+        updatedAt: detectedAt,
+      };
+    }
+
     const severity: FrictionSeverity = candidate.priority === 1 ? "critical" : "warning";
 
     return {
       id: `friction_unplaced_${candidate.id}`,
       userId: candidate.userId,
+      kind: "unplaced",
       severity,
       title: `${candidate.title} could not be placed`,
       message: `${candidate.title} did not receive a valid draft placement in this planning window.`,
@@ -125,6 +152,7 @@ function buildConflictFrictionPoint(
   return {
     id: `friction_conflict_${left.id}_${right.id}`,
     userId: left.userId,
+    kind: "conflict",
     severity,
     title: `${left.title} conflicts with ${right.title}`,
     message: buildConflictMessage(left, right, severity),

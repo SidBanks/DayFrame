@@ -254,6 +254,7 @@ function buildBlockCandidate(
     recurrenceFrequency: recurrence.frequency,
     title: blockTemplate.title,
     category: blockTemplate.category,
+    requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
     anchorType: blockTemplate.placementType === "fixed" ? "fixedTemplate" : "flexibleTemplate",
     placementType: blockTemplate.placementType,
     durationMinutes: blockTemplate.durationMinutes,

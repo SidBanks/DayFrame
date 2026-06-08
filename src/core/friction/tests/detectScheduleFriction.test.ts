@@ -337,6 +337,45 @@ describe("detectScheduleFriction", () => {
     });
   });
 
+  it("uses informational friction for work-required candidates skipped on downtime days", () => {
+    const unplacedCandidates: BlockCandidate[] = [
+      {
+        id: "candidate_commute",
+        userId: "user_001",
+        templateId: "template_commute",
+        recurrenceId: "rec_commute",
+        recurrenceFrequency: "specificWeekdays",
+        title: "Commute",
+        category: "admin",
+        requiresWorkAnchor: true,
+        placementType: "flexible",
+        durationMinutes: 30,
+        priority: 2,
+        preferredWindow: "beforeWork",
+        rescheduleBehavior: "autoSameUserWeek",
+        externalResources: [],
+        userDayDate: "2026-05-10",
+        userWeekStartDate: "2026-05-09",
+      },
+    ];
+
+    const result = detectScheduleFriction({
+      generatedWorkBlocks: [],
+      scheduledBlocks: [],
+      unplacedCandidates,
+      detectedAt,
+    });
+
+    expect(result.frictionPoints).toEqual([
+      expect.objectContaining({
+        kind: "workRequiredSkip",
+        severity: "info",
+        title: "Commute could not be scheduled",
+        message: "This activity requires a work shift, but none exists on 2026-05-10.",
+      }),
+    ]);
+  });
+
   it("treats transition buffers as occupied time during overlap detection", () => {
     const generatedWorkBlocks: GeneratedWorkBlock[] = [
       {

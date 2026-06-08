@@ -110,29 +110,35 @@ function normalizePersistedBlockTemplates(
   );
 
   return blockTemplates.map((blockTemplate) => {
+    const normalizedBlockTemplate = {
+      ...blockTemplate,
+      requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
+    };
+
     if (
-      blockTemplate.id === "default_sleep" &&
-      blockTemplate.enabled === false &&
+      normalizedBlockTemplate.id === "default_sleep" &&
+      normalizedBlockTemplate.enabled === false &&
       hasDefaultSleepDailyRecurrence &&
-      blockTemplate.title === "Sleep" &&
-      blockTemplate.category === "sleep" &&
-      blockTemplate.durationMinutes === 480 &&
-      (blockTemplate.preferredWindow === "beforeSleep" ||
-        blockTemplate.preferredWindow === "beforeWork") &&
-      blockTemplate.rescheduleBehavior === "autoSameUserWeek" &&
-      blockTemplate.priority === 1 &&
-      blockTemplate.requiresResource === false &&
-      blockTemplate.externalResources.length === 0 &&
-      (blockTemplate.bufferAfterMinutes === undefined || blockTemplate.bufferAfterMinutes === 60) &&
-      blockTemplate.createdAt === blockTemplate.updatedAt
+      normalizedBlockTemplate.title === "Sleep" &&
+      normalizedBlockTemplate.category === "sleep" &&
+      normalizedBlockTemplate.durationMinutes === 480 &&
+      (normalizedBlockTemplate.preferredWindow === "beforeSleep" ||
+        normalizedBlockTemplate.preferredWindow === "beforeWork") &&
+      normalizedBlockTemplate.rescheduleBehavior === "autoSameUserWeek" &&
+      normalizedBlockTemplate.priority === 1 &&
+      normalizedBlockTemplate.requiresResource === false &&
+      normalizedBlockTemplate.externalResources.length === 0 &&
+      (normalizedBlockTemplate.bufferAfterMinutes === undefined ||
+        normalizedBlockTemplate.bufferAfterMinutes === 60) &&
+      normalizedBlockTemplate.createdAt === normalizedBlockTemplate.updatedAt
     ) {
       return {
-        ...blockTemplate,
+        ...normalizedBlockTemplate,
         enabled: true,
       };
     }
 
-    return blockTemplate;
+    return normalizedBlockTemplate;
   });
 }
 

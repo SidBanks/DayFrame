@@ -207,6 +207,33 @@ describe("generateBlockCandidates", () => {
     expect(candidates).toHaveLength(0);
   });
 
+  it("carries requiresWorkAnchor onto generated candidates", () => {
+    const recurrence: BlockRecurrence = {
+      id: "rec_commute",
+      blockTemplateId: "template_commute",
+      frequency: "daily",
+    };
+
+    const candidates = generateBlockCandidates({
+      blockTemplates: [
+        {
+          ...baseTemplate,
+          id: "template_commute",
+          title: "Commute",
+          requiresWorkAnchor: true,
+          preferredWindow: "beforeWork",
+        },
+      ],
+      blockRecurrences: [recurrence],
+      planningWindowStart: new Date(2026, 4, 4, 12, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 5, 12, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+    });
+
+    expect(candidates.every((candidate) => candidate.requiresWorkAnchor === true)).toBe(true);
+  });
+
   it("rejects specificWeekdays without weekdays", () => {
     const recurrence: BlockRecurrence = {
       id: "rec_bad_weekdays",

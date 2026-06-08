@@ -17,6 +17,14 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
   const unplacedCandidates: BlockCandidate[] = [];
 
   for (const blockCandidate of input.blockCandidates) {
+    if (
+      blockCandidate.requiresWorkAnchor === true &&
+      !hasWorkBlockForUserDay(input.generatedWorkBlocks, blockCandidate.userDayDate)
+    ) {
+      unplacedCandidates.push(blockCandidate);
+      continue;
+    }
+
     if (shouldDeferToDowntimePlacement(blockCandidate, input.generatedWorkBlocks)) {
       deferredDowntimeCandidates.push(blockCandidate);
       continue;
@@ -389,6 +397,13 @@ function getLastWorkBlockForUserDay<T extends { userDayDate: LocalDateString; en
     .sort((left, right) => left.endsAt.getTime() - right.endsAt.getTime());
 
   return matchingBlocks.at(-1) ?? null;
+}
+
+function hasWorkBlockForUserDay<T extends { userDayDate: LocalDateString }>(
+  generatedWorkBlocks: T[],
+  userDayDate: LocalDateString,
+): boolean {
+  return generatedWorkBlocks.some((workBlock) => workBlock.userDayDate === userDayDate);
 }
 
 function parseLocalDate(value: LocalDateString): Date {

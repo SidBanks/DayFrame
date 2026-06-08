@@ -1502,39 +1502,41 @@ export function SetupScreen({
                   </div>
 
                   {entry.template.placementType === "flexible" ? (
-                    <div className="df-field">
-                      <label>Preferred Window</label>
-                      <select
-                        aria-label="Preferred Window"
-                        onChange={(event) => {
-                          const nextValue = (event.target as { value: string }).value;
+                    <>
+                      <div className="df-field">
+                        <label>Preferred Window</label>
+                        <select
+                          aria-label="Preferred Window"
+                          onChange={(event) => {
+                            const nextValue = (event.target as { value: string }).value;
 
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            templateEntries: currentDraft.templateEntries.map(
-                              (currentEntry, currentIndex) =>
-                                currentIndex === index
-                                  ? {
-                                      ...currentEntry,
-                                      template: {
-                                        ...currentEntry.template,
-                                        preferredWindow:
-                                          nextValue as BlockTemplate["preferredWindow"],
-                                      },
-                                    }
-                                  : currentEntry,
-                            ),
-                          }));
-                        }}
-                        value={entry.template.preferredWindow}
-                      >
-                        {preferredWindows.map((preferredWindow) => (
-                          <option key={preferredWindow} value={preferredWindow}>
-                            {formatPreferredWindowLabel(preferredWindow)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              templateEntries: currentDraft.templateEntries.map(
+                                (currentEntry, currentIndex) =>
+                                  currentIndex === index
+                                    ? {
+                                        ...currentEntry,
+                                        template: {
+                                          ...currentEntry.template,
+                                          preferredWindow:
+                                            nextValue as BlockTemplate["preferredWindow"],
+                                        },
+                                      }
+                                    : currentEntry,
+                              ),
+                            }));
+                          }}
+                          value={entry.template.preferredWindow}
+                        >
+                          {preferredWindows.map((preferredWindow) => (
+                            <option key={preferredWindow} value={preferredWindow}>
+                              {formatPreferredWindowLabel(preferredWindow)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
                   ) : (
                     <div
                       className={
@@ -1580,6 +1582,38 @@ export function SetupScreen({
                       />
                     </div>
                   )}
+                  <div className="df-field">
+                    <label>
+                      <input
+                        aria-label="Requires Work Shift"
+                        checked={entry.template.requiresWorkAnchor ?? false}
+                        onChange={(event) => {
+                          const nextChecked = (event.target as { checked: boolean }).checked;
+
+                          setDraft((currentDraft) => ({
+                            ...currentDraft,
+                            templateEntries: currentDraft.templateEntries.map(
+                              (currentEntry, currentIndex) =>
+                                currentIndex === index
+                                  ? {
+                                      ...currentEntry,
+                                      template: {
+                                        ...currentEntry.template,
+                                        requiresWorkAnchor: nextChecked,
+                                      },
+                                    }
+                                  : currentEntry,
+                            ),
+                          }));
+                        }}
+                        type="checkbox"
+                      />{" "}
+                      Requires Work Shift
+                    </label>
+                    <p className="df-support">
+                      Only schedule this activity on days that contain a work shift.
+                    </p>
+                  </div>
                 </div>
 
                 {entry.template.placementType === "flexible" &&
@@ -1907,6 +1941,7 @@ function buildDraftEntries(state: DayFrameState): SetupDraftEntry[] {
   return state.blockTemplates.map((template) => ({
     template: {
       ...template,
+      requiresWorkAnchor: template.requiresWorkAnchor ?? false,
       externalResources: [...template.externalResources],
     },
     recurrence: normalizeRecurrence(
@@ -2050,6 +2085,7 @@ function createDraftTemplateEntry(
       userId,
       title: `Template ${nextIndex}`,
       category: "optional",
+      requiresWorkAnchor: false,
       placementType: "flexible",
       durationMinutes: 60,
       priority: 3,

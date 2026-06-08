@@ -719,6 +719,30 @@ describe("placeBlockCandidates", () => {
     });
   });
 
+  it("leaves work-required candidates unplaced on downtime days", () => {
+    const candidate = {
+      ...baseCandidate,
+      id: "candidate_commute",
+      templateId: "template_commute",
+      title: "Commute",
+      category: "admin" as const,
+      requiresWorkAnchor: true,
+      preferredWindow: "beforeWork" as const,
+      userDayDate: "2026-05-09" as const,
+    };
+
+    const result = placeBlockCandidates({
+      blockCandidates: [candidate],
+      generatedWorkBlocks: [],
+      planningWindowStart: new Date(2026, 4, 9, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 10, 0, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(result.scheduledBlocks).toEqual([]);
+    expect(result.unplacedCandidates).toEqual([candidate]);
+  });
+
   it("leaves custom candidates unplaced when the duration does not fit in the window", () => {
     const candidate = {
       ...baseCandidate,

@@ -1024,6 +1024,56 @@ describe("DayFrameApp", () => {
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
   });
 
+  it("persists the requires-work-shift setting from the template editor", () => {
+    const store = createDayFrameStore({
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          requiresWorkAnchor: false,
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+    });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+
+    const requiresWorkShift = screen.getAllByLabelText("Requires Work Shift")[0]!;
+
+    expect(requiresWorkShift).not.toBeChecked();
+    fireEvent.click(requiresWorkShift);
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().blockTemplates[0]?.requiresWorkAnchor).toBe(true);
+  });
+
   it("shows a clear setup message when preview data is incomplete", () => {
     const store = createDayFrameStore();
 
@@ -1285,7 +1335,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Revised")).toBeInTheDocument();
     expect(screen.getByText("Today at 2:00 PM")).toBeInTheDocument();
     expect(screen.getByText("Friction Counts")).toBeInTheDocument();
-    expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
+    expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
   });
 
   it("marks an existing preview as stale after setup changes", async () => {

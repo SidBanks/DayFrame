@@ -805,6 +805,183 @@ describe("generateSchedulePreview", () => {
     expect(result.frictionPoints).toEqual([]);
   });
 
+  it("leaves work-required templates unplaced on downtime days with informational friction", () => {
+    const shiftDefinitions: ShiftDefinition[] = [
+      {
+        id: "shift_day",
+        userId: "user_001",
+        name: "Day Shift",
+        startTime: "05:45",
+        endTime: "14:15",
+        workDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+        crossesMidnight: false,
+        ...baseTimestamps,
+      },
+    ];
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_001",
+      userId: "user_001",
+      name: "Weekday Rotation",
+      type: "fixedSegments",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [
+        {
+          id: "segment_day",
+          shiftCycleId: "cycle_001",
+          shiftDefinitionId: "shift_day",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+        },
+      ],
+      ...baseTimestamps,
+    };
+
+    const result = generateSchedulePreview({
+      shiftDefinitions,
+      shiftCycle,
+      blockTemplates: [
+        {
+          id: "template_commute",
+          userId: "user_001",
+          title: "Commute",
+          category: "admin",
+          requiresWorkAnchor: true,
+          placementType: "flexible",
+          durationMinutes: 30,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_commute",
+          blockTemplateId: "template_commute",
+          frequency: "specificWeekdays",
+          weekdays: ["saturday"],
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 9, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 9, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.scheduledBlocks).toEqual([]);
+    expect(result.unplacedCandidates).toHaveLength(1);
+    expect(result.unplacedCandidates[0]?.title).toBe("Commute");
+    expect(result.frictionPoints).toEqual([
+      expect.objectContaining({
+        kind: "workRequiredSkip",
+        severity: "info",
+        title: "Commute could not be scheduled",
+      }),
+    ]);
+  });
+
+  it("places both lifestyle and work-required templates when work exists", () => {
+    const shiftDefinitions: ShiftDefinition[] = [
+      {
+        id: "shift_day",
+        userId: "user_001",
+        name: "Day Shift",
+        startTime: "05:45",
+        endTime: "14:15",
+        workDays: ["monday"],
+        crossesMidnight: false,
+        ...baseTimestamps,
+      },
+    ];
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_001",
+      userId: "user_001",
+      name: "Weekday Rotation",
+      type: "fixedSegments",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [
+        {
+          id: "segment_day",
+          shiftCycleId: "cycle_001",
+          shiftDefinitionId: "shift_day",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+        },
+      ],
+      ...baseTimestamps,
+    };
+
+    const result = generateSchedulePreview({
+      shiftDefinitions,
+      shiftCycle,
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          requiresWorkAnchor: false,
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+        {
+          id: "template_commute",
+          userId: "user_001",
+          title: "Commute",
+          category: "admin",
+          requiresWorkAnchor: true,
+          placementType: "flexible",
+          durationMinutes: 30,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_workout",
+          blockTemplateId: "template_workout",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+        {
+          id: "rec_commute",
+          blockTemplateId: "template_commute",
+          frequency: "specificWeekdays",
+          weekdays: ["monday"],
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 4, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.unplacedCandidates).toEqual([]);
+    expect(result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.title)).toEqual([
+      "Commute",
+      "Workout",
+    ]);
+  });
+
   it("resolves effective schedule preferences from the active segment", () => {
     const shiftDefinitions: ShiftDefinition[] = [
       {

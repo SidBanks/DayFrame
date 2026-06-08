@@ -49,7 +49,8 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Revised")).toBeInTheDocument();
     expect(screen.getByText("Today at 2:00 PM")).toBeInTheDocument();
     expect(screen.getByText("Friction Counts")).toBeInTheDocument();
-    expect(screen.getByText("1 total, 0 critical, 1 warning")).toBeInTheDocument();
+    expect(screen.getByText("1 total, 0 critical, 1 warning, 0 info")).toBeInTheDocument();
+    expect(screen.getByText("Work-dependent activities skipped: 0")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Work" })).toHaveLength(2);
     expect(screen.getAllByRole("heading", { name: "Scheduled" })).toHaveLength(2);
@@ -180,17 +181,15 @@ describe("PreviewScreen", () => {
         preview={buildPreview()}
         rangeWarnings={[
           {
-            id: "previewHasNoWorkSchedule",
-            message: "No work schedule applies to part of this preview range.",
+            id: "previewOutsideSegmentCoverage",
+            message: "No cycle segment is active during part of this preview range.",
           },
         ]}
       />,
     );
 
     expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
-    expect(
-      screen.getByText("No work schedule applies to part of this preview range."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("No cycle segment is active during part of this preview range.")).toBeInTheDocument();
   });
 
   it("keeps a scheduled block visible on each visible day it overlaps across a user-day boundary", () => {
@@ -254,6 +253,73 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("(Priority 4, rescheduled)")).toBeInTheDocument();
   });
 
+  it("shows work-required skips as info friction and marks off days as downtime days", () => {
+    const preview = buildPreview();
+
+    preview.result.generatedWorkBlocks = [];
+    preview.result.scheduledBlocks = [];
+    preview.result.unplacedCandidates = [
+      {
+        id: "candidate_commute",
+        userId: "user_001",
+        templateId: "template_commute",
+        recurrenceId: "rec_commute",
+        recurrenceFrequency: "specificWeekdays",
+        title: "Commute",
+        category: "admin",
+        requiresWorkAnchor: true,
+        placementType: "flexible",
+        durationMinutes: 30,
+        priority: 2,
+        preferredWindow: "beforeWork",
+        rescheduleBehavior: "autoSameUserWeek",
+        externalResources: [],
+        userDayDate: "2026-05-05",
+        userWeekStartDate: "2026-05-02",
+      },
+    ];
+    preview.result.frictionPoints = [
+      {
+        id: "friction_unplaced_candidate_commute",
+        userId: "user_001",
+        kind: "workRequiredSkip",
+        severity: "info",
+        title: "Commute could not be scheduled",
+        message: "This activity requires a work shift, but none exists on 2026-05-05.",
+        affectedBlockIds: ["candidate_commute"],
+        affectedUserDayDate: "2026-05-05",
+        affectedUserWeekStartDate: "2026-05-02",
+        suggestedFixes: [
+          {
+            id: "fix_skip_candidate_commute",
+            label: "Skip block",
+            action: "skipBlock",
+          },
+        ],
+        canIgnore: true,
+        ignored: false,
+        resolved: false,
+        createdAt: "2026-05-03T13:00:00-05:00",
+        updatedAt: "2026-05-03T14:00:00-05:00",
+      },
+    ];
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("1 total, 0 critical, 0 warning, 1 info")).toBeInTheDocument();
+    expect(screen.getByText("Work-dependent activities skipped: 1")).toBeInTheDocument();
+    expect(screen.getAllByText("Downtime Day").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("No work shift scheduled.").length).toBeGreaterThan(0);
+    expect(screen.getByText("Commute could not be scheduled")).toBeInTheDocument();
+  });
+
   it("hides ignored friction from the visible preview summary and day groups", () => {
     const preview = buildPreview();
 
@@ -272,7 +338,7 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
+    expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
     expect(screen.getAllByText("No friction detected.")).toHaveLength(2);
   });
@@ -395,7 +461,7 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    expect(screen.getByText("0 total, 0 critical, 0 warning")).toBeInTheDocument();
+    expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
     expect(screen.getByText("No friction detected.")).toBeInTheDocument();

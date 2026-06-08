@@ -14,6 +14,7 @@ type SchedulableContextBlock = {
   title: string;
   priority: number;
   category?: DraftScheduledBlock["category"] | BlockCandidate["category"];
+  requiresWorkAnchor?: boolean;
   anchorType: AnchorType;
   placementType?: DraftScheduledBlock["placementType"] | BlockCandidate["placementType"];
   source: "shift" | "template" | "candidate" | "manual";
@@ -112,6 +113,9 @@ function getContextBlock(
       title: candidate.title,
       priority: candidate.priority,
       category: candidate.category,
+      ...(candidate.requiresWorkAnchor !== undefined
+        ? { requiresWorkAnchor: candidate.requiresWorkAnchor }
+        : {}),
       anchorType:
         candidate.anchorType ?? deriveAnchorTypeFromPlacementType(candidate.placementType),
       placementType: candidate.placementType,
@@ -142,6 +146,25 @@ function buildUnplacedCandidateFixes(
   candidate: SchedulableContextBlock,
   canIgnore: boolean,
 ): SuggestedFix[] {
+  if (candidate.requiresWorkAnchor === true) {
+    const fixes: SuggestedFix[] = [];
+    fixes.push({
+      id: `fix_skip_${candidate.id}`,
+      label: "Skip block",
+      action: "skipBlock",
+    });
+
+    if (canIgnore) {
+      fixes.push({
+        id: `fix_accept_${candidate.id}`,
+        label: "Accept conflict",
+        action: "acceptConflict",
+      });
+    }
+
+    return fixes;
+  }
+
   const fixes: SuggestedFix[] = [
     {
       id: `fix_move_${candidate.id}`,

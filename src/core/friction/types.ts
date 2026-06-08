@@ -29,6 +29,7 @@ export type SuggestedFixFeedback = {
 export type FrictionPoint = {
   id: string;
   userId: string;
+  kind?: "conflict" | "unplaced" | "workRequiredSkip";
   severity: FrictionSeverity;
   title: string;
   message: string;

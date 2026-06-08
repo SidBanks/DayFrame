@@ -57,7 +57,7 @@ describe("getPreviewRangeWarnings", () => {
     });
   });
 
-  it("warns when no work schedule applies to part of the preview range", () => {
+  it("does not warn when part of the preview range is a downtime day", () => {
     expect(
       getPreviewRangeWarnings(
         buildInput({
@@ -81,9 +81,9 @@ describe("getPreviewRangeWarnings", () => {
           ],
         }),
       ),
-    ).toContainEqual({
-      id: "previewHasNoWorkSchedule",
-      message: "No work schedule applies to part of this preview range.",
+    ).not.toContainEqual({
+      id: "previewOutsideSegmentCoverage",
+      message: "No cycle segment is active during part of this preview range.",
     });
   });
 
@@ -181,6 +181,7 @@ function buildInput(overrides?: {
         priority: 1 as const,
         preferredWindow: "beforeWork" as const,
         rescheduleBehavior: "autoSameUserWeek" as const,
+        requiresWorkAnchor: false,
         requiresResource: false,
         externalResources: [],
         enabled: true,

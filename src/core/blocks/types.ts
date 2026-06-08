@@ -60,6 +60,7 @@ export type BlockTemplate = {
   userId: string;
   title: string;
   category: BlockCategory;
+  requiresWorkAnchor?: boolean;
   placementType: BlockPlacementType;
   durationMinutes: number;
   bufferBeforeMinutes?: number;
@@ -108,6 +109,7 @@ export type BlockCandidate = {
   recurrenceFrequency: RecurrenceFrequency;
   title: string;
   category: BlockCategory;
+  requiresWorkAnchor?: boolean;
   anchorType?: AnchorType;
   placementType: BlockPlacementType;
   durationMinutes: number;

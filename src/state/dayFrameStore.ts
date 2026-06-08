@@ -620,6 +620,7 @@ function cloneBlockTemplates(
 ): DayFrameState["blockTemplates"] {
   return blockTemplates.map((blockTemplate) => ({
     ...blockTemplate,
+    requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
     externalResources: blockTemplate.externalResources.map((externalResource) => ({
       ...externalResource,
       ...(externalResource.metadata ? { metadata: { ...externalResource.metadata } } : {}),

@@ -203,6 +203,31 @@ describe("dayFrameStore", () => {
     ]);
   });
 
+  it("migrates persisted templates without requiresWorkAnchor to false", () => {
+    const state = createInitialDayFrameState({
+      blockTemplates: [
+        {
+          id: "template_workout",
+          userId: "user_001",
+          title: "Workout",
+          category: "fitness",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [],
+    });
+
+    expect(state.blockTemplates[0]?.requiresWorkAnchor).toBe(false);
+  });
+
   it("re-enables untouched default sleep templates from persisted state", () => {
     const state = createInitialDayFrameState({
       blockTemplates: [
@@ -741,7 +766,10 @@ describe("dayFrameStore", () => {
       },
       shiftDefinitions,
       shiftCycle,
-      blockTemplates,
+      blockTemplates: blockTemplates.map((blockTemplate) => ({
+        ...blockTemplate,
+        requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
+      })),
       blockRecurrences,
       manualEvents: [],
     });
@@ -949,6 +977,7 @@ function buildBlockTemplates(): BlockTemplate[] {
       userId: "user_001",
       title: "Schedule Review",
       category: "review",
+      requiresWorkAnchor: false,
       placementType: "flexible",
       durationMinutes: 60,
       bufferBeforeMinutes: 15,
