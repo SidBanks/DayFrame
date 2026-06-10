@@ -1317,6 +1317,41 @@ export function SetupScreen({
                   </div>
 
                   <div className="df-field">
+                    <div className="df-checkbox-card">
+                      <label className="df-checkbox-card-label">
+                        <input
+                          aria-label="Requires Work Shift"
+                          checked={entry.template.requiresWorkAnchor ?? false}
+                          onChange={(event) => {
+                            const nextChecked = (event.target as { checked: boolean }).checked;
+
+                            setDraft((currentDraft) => ({
+                              ...currentDraft,
+                              templateEntries: currentDraft.templateEntries.map(
+                                (currentEntry, currentIndex) =>
+                                  currentIndex === index
+                                    ? {
+                                        ...currentEntry,
+                                        template: {
+                                          ...currentEntry.template,
+                                          requiresWorkAnchor: nextChecked,
+                                        },
+                                      }
+                                    : currentEntry,
+                              ),
+                            }));
+                          }}
+                          type="checkbox"
+                        />
+                        <span>Requires Work Shift</span>
+                      </label>
+                      <p className="df-support">
+                        Only schedule this activity on days that contain a work shift.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="df-field">
                     <label>Duration Hours</label>
                     <input
                       aria-label="Duration Hours"
@@ -1582,38 +1617,6 @@ export function SetupScreen({
                       />
                     </div>
                   )}
-                  <div className="df-field">
-                    <label>
-                      <input
-                        aria-label="Requires Work Shift"
-                        checked={entry.template.requiresWorkAnchor ?? false}
-                        onChange={(event) => {
-                          const nextChecked = (event.target as { checked: boolean }).checked;
-
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            templateEntries: currentDraft.templateEntries.map(
-                              (currentEntry, currentIndex) =>
-                                currentIndex === index
-                                  ? {
-                                      ...currentEntry,
-                                      template: {
-                                        ...currentEntry.template,
-                                        requiresWorkAnchor: nextChecked,
-                                      },
-                                    }
-                                  : currentEntry,
-                            ),
-                          }));
-                        }}
-                        type="checkbox"
-                      />{" "}
-                      Requires Work Shift
-                    </label>
-                    <p className="df-support">
-                      Only schedule this activity on days that contain a work shift.
-                    </p>
-                  </div>
                 </div>
 
                 {entry.template.placementType === "flexible" &&

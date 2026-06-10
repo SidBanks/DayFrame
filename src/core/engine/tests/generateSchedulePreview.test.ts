@@ -211,7 +211,7 @@ describe("generateSchedulePreview", () => {
     );
   });
 
-  it("returns friction with suggested fixes when the preview contains conflicts", () => {
+  it("places same-window flexible blocks sequentially before generating friction", () => {
     const shiftDefinitions: ShiftDefinition[] = [
       {
         id: "shift_day",
@@ -301,16 +301,21 @@ describe("generateSchedulePreview", () => {
       generatedAt: "2026-05-03T09:00:00-05:00",
     });
 
-    expect(result.frictionPoints).toHaveLength(1);
-    expect(result.frictionPoints[0]).toMatchObject({
-      severity: "warning",
-      affectedUserDayDate: "2026-05-04",
+    expect(result.frictionPoints).toEqual([]);
+    expect(result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.title)).toEqual([
+      "Workout",
+      "Errands",
+    ]);
+    expect(result.scheduledBlocks[0]).toMatchObject({
+      title: "Workout",
+      startsAt: new Date(2026, 4, 4, 14, 15, 0, 0),
+      endsAt: new Date(2026, 4, 4, 15, 15, 0, 0),
     });
-    expect(result.frictionPoints[0]?.title).toContain("Errands");
-    expect(result.frictionPoints[0]?.title).toContain("Workout");
-    expect(
-      result.frictionPoints[0]?.suggestedFixes.map((suggestedFix) => suggestedFix.action),
-    ).toEqual(["moveBlock", "reduceDuration", "changePriority", "acceptConflict"]);
+    expect(result.scheduledBlocks[1]).toMatchObject({
+      title: "Errands",
+      startsAt: new Date(2026, 4, 4, 15, 15, 0, 0),
+      endsAt: new Date(2026, 4, 4, 16, 15, 0, 0),
+    });
   });
 
   it("does not mutate the input arrays", () => {
@@ -504,30 +509,16 @@ describe("generateSchedulePreview", () => {
     };
     const blockTemplates: BlockTemplate[] = [
       {
-        id: "template_workout",
+        id: "template_breakfast",
         userId: "user_001",
-        title: "Workout",
-        category: "fitness",
-        placementType: "flexible",
+        title: "Breakfast",
+        category: "meal",
+        placementType: "fixed",
         durationMinutes: 60,
         priority: 2,
-        preferredWindow: "afterWork",
+        preferredWindow: "afterWaking",
+        fixedStartTime: "06:00",
         rescheduleBehavior: "autoSameUserWeek",
-        requiresResource: false,
-        externalResources: [],
-        enabled: true,
-        ...baseTimestamps,
-      },
-      {
-        id: "template_errands",
-        userId: "user_001",
-        title: "Errands",
-        category: "admin",
-        placementType: "flexible",
-        durationMinutes: 60,
-        priority: 3,
-        preferredWindow: "afterWork",
-        rescheduleBehavior: "autoSameDay",
         requiresResource: false,
         externalResources: [],
         enabled: true,
@@ -542,14 +533,8 @@ describe("generateSchedulePreview", () => {
       blockTemplates,
       blockRecurrences: [
         {
-          id: "rec_workout",
-          blockTemplateId: "template_workout",
-          frequency: "specificWeekdays",
-          weekdays: ["monday"],
-        },
-        {
-          id: "rec_errands",
-          blockTemplateId: "template_errands",
+          id: "rec_breakfast",
+          blockTemplateId: "template_breakfast",
           frequency: "specificWeekdays",
           weekdays: ["monday"],
         },
@@ -679,7 +664,11 @@ describe("generateSchedulePreview", () => {
       generatedAt: "2026-05-03T09:00:00-05:00",
     });
 
-    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.id === "manual_event_late_call")).toBe(true);
+    expect(
+      result.scheduledBlocks.some(
+        (scheduledBlock) => scheduledBlock.id === "manual_event_late_call",
+      ),
+    ).toBe(true);
     expect(result.frictionPoints).toHaveLength(1);
     expect(result.frictionPoints[0]?.title).toContain("Late Call");
   });
@@ -793,19 +782,19 @@ describe("generateSchedulePreview", () => {
     });
 
     expect(result.unplacedCandidates).toEqual([]);
-    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Workout")).toBe(
-      true,
-    );
-    expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Laundry")).toBe(
-      true,
-    );
+    expect(
+      result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Workout"),
+    ).toBe(true);
+    expect(
+      result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Laundry"),
+    ).toBe(true);
     expect(result.scheduledBlocks.some((scheduledBlock) => scheduledBlock.title === "Sleep")).toBe(
       true,
     );
     expect(result.frictionPoints).toEqual([]);
   });
 
-  it("leaves work-required templates unplaced on downtime days with informational friction", () => {
+  it("skips work-required templates on downtime days without generating friction", () => {
     const shiftDefinitions: ShiftDefinition[] = [
       {
         id: "shift_day",
@@ -874,15 +863,8 @@ describe("generateSchedulePreview", () => {
     });
 
     expect(result.scheduledBlocks).toEqual([]);
-    expect(result.unplacedCandidates).toHaveLength(1);
-    expect(result.unplacedCandidates[0]?.title).toBe("Commute");
-    expect(result.frictionPoints).toEqual([
-      expect.objectContaining({
-        kind: "workRequiredSkip",
-        severity: "info",
-        title: "Commute could not be scheduled",
-      }),
-    ]);
+    expect(result.unplacedCandidates).toEqual([]);
+    expect(result.frictionPoints).toEqual([]);
   });
 
   it("places both lifestyle and work-required templates when work exists", () => {
@@ -1460,6 +1442,81 @@ describe("generateSchedulePreview", () => {
         (block) => block.endsAt.getTime() - block.startsAt.getTime() === 510 * 60_000,
       ),
     ).toBe(true);
+  });
+
+  it("keeps last visible-day before-sleep placement out of overnight work spillover", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["tuesday", "wednesday", "thursday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Night Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_night",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_night",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "template_wind_down",
+          userId: "user_001",
+          title: "Wind Down",
+          category: "recovery",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "beforeSleep",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_wind_down",
+          blockTemplateId: "template_wind_down",
+          frequency: "specificWeekdays",
+          weekdays: ["thursday"],
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 5, 3, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 8, 3, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.scheduledBlocks).toEqual([
+      expect.objectContaining({
+        userDayDate: "2026-05-07",
+        title: "Wind Down",
+        startsAt: new Date(2026, 4, 7, 20, 45, 0, 0),
+        endsAt: new Date(2026, 4, 7, 21, 45, 0, 0),
+      }),
+    ]);
+    expect(result.frictionPoints).toEqual([]);
   });
 
   it("propagates daily before-work sleep onto visible off-days using the nearest previous work-day anchor", () => {

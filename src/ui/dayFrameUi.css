@@ -455,6 +455,30 @@ textarea {
   margin: 0;
 }
 
+.df-checkbox-card {
+  display: grid;
+  gap: 8px;
+  min-height: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--df-border);
+  border-radius: 16px;
+  background: var(--df-panel-alt);
+}
+
+.df-checkbox-card-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.df-checkbox-card-label input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--df-accent);
+}
+
 .df-preview-layout {
   display: grid;
   gap: 20px;

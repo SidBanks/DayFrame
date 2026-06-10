@@ -714,12 +714,12 @@ describe("placeBlockCandidates", () => {
     });
     expect(result.scheduledBlocks[1]).toMatchObject({
       title: "Workout",
-      startsAt: new Date(2026, 4, 9, 4, 0, 0, 0),
-      endsAt: new Date(2026, 4, 9, 5, 0, 0, 0),
+      startsAt: new Date(2026, 4, 9, 19, 0, 0, 0),
+      endsAt: new Date(2026, 4, 9, 20, 0, 0, 0),
     });
   });
 
-  it("leaves work-required candidates unplaced on downtime days", () => {
+  it("skips work-required candidates on downtime days without surfacing them as unplaced", () => {
     const candidate = {
       ...baseCandidate,
       id: "candidate_commute",
@@ -740,7 +740,7 @@ describe("placeBlockCandidates", () => {
     });
 
     expect(result.scheduledBlocks).toEqual([]);
-    expect(result.unplacedCandidates).toEqual([candidate]);
+    expect(result.unplacedCandidates).toEqual([]);
   });
 
   it("leaves custom candidates unplaced when the duration does not fit in the window", () => {

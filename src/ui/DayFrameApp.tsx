@@ -183,7 +183,7 @@ export function DayFrameApp({
     setPendingPreviewRangeStartDate(null);
   }
 
-  function saveCurrentSetup(showMessage = true): void {
+  function saveCurrentSetup(showMessage = true): DayFrameState {
     const savedAt = createIsoTimestamp();
     const resolvedPreviewRange = resolvePreviewRangeFromSetupDraft(setupDraft);
 
@@ -211,11 +211,13 @@ export function DayFrameApp({
       })),
     );
     setFocusedTemplateField(null);
+    setPreviewGuardrailMissingItems([]);
     setSetupSaveMessage(showMessage ? "Setup saved." : "");
+
+    return storeRef.current.getState();
   }
 
-  function generatePreviewFromSavedState(): boolean {
-    const currentState = storeRef.current.getState();
+  function generatePreviewFromState(currentState: DayFrameState): boolean {
     const missingItems = getMissingPreviewSetupItems(currentState);
 
     if (missingItems.length > 0) {
@@ -246,8 +248,12 @@ export function DayFrameApp({
     return true;
   }
 
+  function generatePreviewFromSavedState(): boolean {
+    return generatePreviewFromState(storeRef.current.getState());
+  }
+
   function generatePreviewFromCurrentDraft(): void {
-    saveCurrentSetup(false);
+    const savedState = saveCurrentSetup(false);
     setCurrentScreen("preview");
     setFocusedTemplateField(null);
     setBackupMessage("");
@@ -256,7 +262,7 @@ export function DayFrameApp({
     setProfileErrorMessage("");
     setIsConfirmingClearLocalData(false);
     setClearLocalDataMessage("");
-    generatePreviewFromSavedState();
+    generatePreviewFromState(savedState);
   }
 
   function openSetupForFixedTime(templateId: string): void {

@@ -7,10 +7,7 @@ import { parseTimeString } from "../core/time/userDay.js";
 import type { DayFramePreviewRange, DayFrameSchedulingPreferences } from "../state/types.js";
 
 export type PreviewRangeWarning = {
-  id:
-    | "previewOutsideCycle"
-    | "previewOutsideSegmentCoverage"
-    | "previewMayBeEmpty";
+  id: "previewOutsideCycle" | "previewOutsideSegmentCoverage" | "previewMayBeEmpty";
   message: string;
 };
 

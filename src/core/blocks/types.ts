@@ -176,6 +176,8 @@ export type PlaceBlockCandidatesInput = {
   planningWindowEnd: Date;
   dayBoundaryStartTime: TimeString;
   getDayBoundaryStartTimeForUserDayDate?: (userDayDate: LocalDateString) => TimeString;
+  visiblePlanningWindowStart?: Date;
+  visiblePlanningWindowEnd?: Date;
 };
 
 export type PlaceBlockCandidatesResult = {

@@ -98,7 +98,9 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Dinner Reservation 6:00 PM - 7:30 PM")).toBeInTheDocument();
     expect(screen.getByText("(Manual event)")).toBeInTheDocument();
     expect(screen.getByText("Workout 2:15 PM - 3:15 PM")).toBeInTheDocument();
-    expect(screen.getByLabelText("Manual block: Dinner Reservation, 6:00 PM - 7:30 PM")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Manual block: Dinner Reservation, 6:00 PM - 7:30 PM"),
+    ).toBeInTheDocument();
   });
 
   it("renders all-day manual events without a synthetic time range", () => {
@@ -189,7 +191,9 @@ describe("PreviewScreen", () => {
     );
 
     expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
-    expect(screen.getByText("No cycle segment is active during part of this preview range.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No cycle segment is active during part of this preview range."),
+    ).toBeInTheDocument();
   });
 
   it("keeps a scheduled block visible on each visible day it overlaps across a user-day boundary", () => {

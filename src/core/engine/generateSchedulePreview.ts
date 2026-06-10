@@ -86,6 +86,8 @@ export function generateSchedulePreview(
     generatedWorkBlocks,
     planningWindowStart: new Date(expandedPlanningWindow.start),
     planningWindowEnd: new Date(expandedPlanningWindow.end),
+    visiblePlanningWindowStart: new Date(input.planningWindowStart),
+    visiblePlanningWindowEnd: new Date(input.planningWindowEnd),
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     getDayBoundaryStartTimeForUserDayDate: (userDayDate) =>
       resolveEffectiveSchedulePreferencesForUserDayDate({
