@@ -89,16 +89,20 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return notify();
   }
 
-  function setShiftCycle(shiftCycle: DayFrameState["shiftCycle"]): DayFrameState {
+  function setShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): DayFrameState {
     state = {
       ...state,
-      shiftCycle: shiftCycle ? cloneShiftCycle(shiftCycle) : null,
+      shiftCycles: cloneShiftCycles(shiftCycles),
       preview: markPreviewStale(state.preview),
     };
 
     persistState(state);
 
     return notify();
+  }
+
+  function setShiftCycle(shiftCycle: DayFrameState["shiftCycle"]): DayFrameState {
+    return setShiftCycles(shiftCycle ? [shiftCycle] : []);
   }
 
   function setBlockTemplates(blockTemplates: DayFrameState["blockTemplates"]): DayFrameState {
@@ -225,13 +229,13 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   }
 
   function generatePreview(input: GeneratePreviewActionInput): DayFrameState {
-    if (!state.shiftCycle) {
-      throw new RangeError("Cannot generate preview without a shiftCycle");
+    if (state.shiftCycles.length === 0) {
+      throw new RangeError("Cannot generate preview without shiftCycles");
     }
 
     const previewResult = generateSchedulePreview({
       shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
-      shiftCycle: cloneShiftCycle(state.shiftCycle),
+      shiftCycles: cloneShiftCycles(state.shiftCycles),
       blockTemplates: cloneBlockTemplates(state.blockTemplates),
       blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
       manualEvents: cloneManualEvents(state.manualEvents),
@@ -312,6 +316,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     setPreviewRange,
     setShiftDefinitions,
     setShiftCycle,
+    setShiftCycles,
     setBlockTemplates,
     setBlockRecurrences,
     setManualEvents,
@@ -348,7 +353,11 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
     shiftDefinitions: initialState.shiftDefinitions
       ? cloneShiftDefinitions(initialState.shiftDefinitions)
       : baseState.shiftDefinitions,
-    shiftCycle: initialState.shiftCycle ? cloneShiftCycle(initialState.shiftCycle) : null,
+    shiftCycles: initialState.shiftCycles
+      ? cloneShiftCycles(initialState.shiftCycles)
+      : initialState.shiftCycle
+        ? cloneShiftCycles([initialState.shiftCycle])
+      : baseState.shiftCycles,
     blockTemplates: initialState.blockTemplates
       ? cloneBlockTemplates(initialState.blockTemplates)
       : baseState.blockTemplates,
@@ -400,11 +409,17 @@ function persistState(state: DayFrameState): void {
       ...state.previewRange,
     },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
-    shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,
+    shiftCycles: cloneShiftCycles(state.shiftCycles),
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
     manualEvents: cloneManualEvents(state.manualEvents),
   };
+
+  if (state.shiftCycles[0]) {
+    persistedState.shiftCycle = cloneShiftCycles([state.shiftCycles[0]])[0]!;
+  } else {
+    persistedState.shiftCycle = null;
+  }
 
   try {
     storage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(persistedState));
@@ -435,12 +450,12 @@ function loadPersistedProfiles(): DayFrameSavedProfile[] {
   }
 }
 
-function getAuthoredSetup(state: DayFrameState): PersistedDayFrameState {
+function getAuthoredSetup(state: DayFrameState) {
   return cloneDayFrameAuthoredSetup({
     schedulingPreferences: state.schedulingPreferences,
     previewRange: state.previewRange,
     shiftDefinitions: state.shiftDefinitions,
-    shiftCycle: state.shiftCycle,
+    shiftCycles: state.shiftCycles,
     blockTemplates: state.blockTemplates,
     blockRecurrences: state.blockRecurrences,
     manualEvents: state.manualEvents,
@@ -507,6 +522,8 @@ type StorageLike = {
 };
 
 function cloneState(state: DayFrameState): DayFrameState {
+  const shiftCycles = cloneShiftCycles(state.shiftCycles);
+
   return {
     schedulingPreferences: {
       ...state.schedulingPreferences,
@@ -515,7 +532,8 @@ function cloneState(state: DayFrameState): DayFrameState {
       ...state.previewRange,
     },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
-    shiftCycle: state.shiftCycle ? cloneShiftCycle(state.shiftCycle) : null,
+    shiftCycles,
+    shiftCycle: shiftCycles[0] ?? null,
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
     manualEvents: cloneManualEvents(state.manualEvents),
@@ -597,10 +615,8 @@ function cloneShiftDefinitions(
   }));
 }
 
-function cloneShiftCycle(
-  shiftCycle: NonNullable<DayFrameState["shiftCycle"]>,
-): NonNullable<DayFrameState["shiftCycle"]> {
-  return {
+function cloneShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): DayFrameState["shiftCycles"] {
+  return shiftCycles.map((shiftCycle) => ({
     ...shiftCycle,
     segments: shiftCycle.segments.map((segment) => ({
       ...segment,
@@ -612,7 +628,7 @@ function cloneShiftCycle(
           }
         : {}),
     })),
-  };
+  }));
 }
 
 function cloneBlockTemplates(

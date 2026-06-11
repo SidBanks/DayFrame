@@ -10,6 +10,7 @@ import type {
 export function generateCycleWorkBlocks(
   input: GenerateCycleWorkBlocksInput,
 ): GeneratedCycleWorkBlock[] {
+  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   const defaultSchedulingPreferences = input.defaultSchedulingPreferences ?? {
     dayBoundaryStartTime: input.dayBoundaryStartTime ?? "03:00",
@@ -21,42 +22,44 @@ export function generateCycleWorkBlocks(
   );
   const cycleBlocks: GeneratedCycleWorkBlock[] = [];
 
-  for (const segment of input.shiftCycle.segments) {
-    const shiftDefinition = shiftDefinitionsById.get(segment.shiftDefinitionId);
+  for (const shiftCycle of shiftCycles) {
+    for (const segment of shiftCycle.segments) {
+      const shiftDefinition = shiftDefinitionsById.get(segment.shiftDefinitionId);
 
-    if (!shiftDefinition) {
-      throw new RangeError(
-        `Missing shift definition for segment ${segment.id}: ${segment.shiftDefinitionId}`,
+      if (!shiftDefinition) {
+        throw new RangeError(
+          `Missing shift definition for segment ${segment.id}: ${segment.shiftDefinitionId}`,
+        );
+      }
+
+      const segmentWindow = getSegmentPlanningWindow(
+        segment,
+        input.planningWindowStart,
+        input.planningWindowEnd,
       );
-    }
 
-    const segmentWindow = getSegmentPlanningWindow(
-      segment,
-      input.planningWindowStart,
-      input.planningWindowEnd,
-    );
+      if (!segmentWindow) {
+        continue;
+      }
 
-    if (!segmentWindow) {
-      continue;
-    }
-
-    const workBlocks = generateWorkBlocks({
-      shiftDefinition,
-      planningWindowStart: segmentWindow.start,
-      planningWindowEnd: segmentWindow.end,
-      dayBoundaryStartTime: resolveEffectiveSchedulePreferencesForDate({
-        shiftCycle: input.shiftCycle,
-        defaultSchedulingPreferences,
-        date: new Date(`${segment.startsOnDate}T12:00:00`),
-      }).dayBoundaryStartTime,
-    });
-
-    for (const workBlock of workBlocks) {
-      cycleBlocks.push({
-        ...workBlock,
-        shiftCycleId: input.shiftCycle.id,
-        shiftSegmentId: segment.id,
+      const workBlocks = generateWorkBlocks({
+        shiftDefinition,
+        planningWindowStart: segmentWindow.start,
+        planningWindowEnd: segmentWindow.end,
+        dayBoundaryStartTime: resolveEffectiveSchedulePreferencesForDate({
+          shiftCycles,
+          defaultSchedulingPreferences,
+          date: new Date(`${segment.startsOnDate}T12:00:00`),
+        }).dayBoundaryStartTime,
       });
+
+      for (const workBlock of workBlocks) {
+        cycleBlocks.push({
+          ...workBlock,
+          shiftCycleId: shiftCycle.id,
+          shiftSegmentId: segment.id,
+        });
+      }
     }
   }
 

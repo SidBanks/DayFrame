@@ -133,6 +133,7 @@ export type GenerateBlockCandidatesInput = {
   planningWindowEnd: Date;
   dayBoundaryStartTime?: TimeString;
   weekStartsOn?: Weekday;
+  shiftCycles?: ShiftCycle[];
   shiftCycle?: ShiftCycle;
   defaultSchedulingPreferences?: UserTimePreferences;
 };

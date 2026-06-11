@@ -96,7 +96,11 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
       value.previewRange as Partial<DayFrameAuthoredSetup["previewRange"]> | undefined,
     ),
     shiftDefinitions: (value.shiftDefinitions ?? []) as DayFrameAuthoredSetup["shiftDefinitions"],
-    shiftCycle: (value.shiftCycle ?? null) as DayFrameAuthoredSetup["shiftCycle"],
+    shiftCycles: Array.isArray(value.shiftCycles)
+      ? (value.shiftCycles as DayFrameAuthoredSetup["shiftCycles"])
+      : value.shiftCycle
+        ? ([value.shiftCycle] as DayFrameAuthoredSetup["shiftCycles"])
+        : [],
     blockTemplates: (value.blockTemplates ?? []) as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: (value.blockRecurrences ?? []) as DayFrameAuthoredSetup["blockRecurrences"],
     manualEvents: normalizeManualCalendarEvents(value.manualEvents),

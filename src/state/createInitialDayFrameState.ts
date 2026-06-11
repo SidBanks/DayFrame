@@ -8,18 +8,26 @@ export type PersistedDayFrameState = Pick<
   | "schedulingPreferences"
   | "previewRange"
   | "shiftDefinitions"
-  | "shiftCycle"
+  | "shiftCycles"
   | "blockTemplates"
   | "blockRecurrences"
   | "manualEvents"
+> & {
+  shiftCycle?: DayFrameState["shiftCycles"][number] | null;
+};
+
+type LegacyPersistedDayFrameState = Partial<
+  PersistedDayFrameState & {
+    shiftCycle?: DayFrameState["shiftCycles"][number] | null;
+  }
 >;
 
 export function createInitialDayFrameState(
-  persistedState?: Partial<PersistedDayFrameState>,
+  persistedState?: LegacyPersistedDayFrameState,
 ): DayFrameState {
   const normalizedAuthoredSetup = normalizePersistedAuthoredSetup({
     shiftDefinitions: persistedState?.shiftDefinitions ?? [],
-    shiftCycle: persistedState?.shiftCycle ?? null,
+    shiftCycles: normalizePersistedShiftCycles(persistedState),
     blockTemplates: persistedState?.blockTemplates ?? [],
     blockRecurrences: persistedState?.blockRecurrences ?? [],
     manualEvents: persistedState?.manualEvents ?? [],
@@ -33,7 +41,8 @@ export function createInitialDayFrameState(
     },
     previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
     shiftDefinitions: normalizedAuthoredSetup.shiftDefinitions,
-    shiftCycle: normalizedAuthoredSetup.shiftCycle,
+    shiftCycles: normalizedAuthoredSetup.shiftCycles,
+    shiftCycle: normalizedAuthoredSetup.shiftCycles[0] ?? null,
     blockTemplates: normalizedAuthoredSetup.blockTemplates,
     blockRecurrences: normalizedAuthoredSetup.blockRecurrences,
     manualEvents: normalizedAuthoredSetup.manualEvents,
@@ -78,15 +87,15 @@ export function normalizePersistedPreviewRange(
 export function normalizePersistedAuthoredSetup(
   authoredSetup: Pick<
     DayFrameState,
-    "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences" | "manualEvents"
+    "shiftDefinitions" | "shiftCycles" | "blockTemplates" | "blockRecurrences" | "manualEvents"
   >,
 ): Pick<
   DayFrameState,
-  "shiftDefinitions" | "shiftCycle" | "blockTemplates" | "blockRecurrences" | "manualEvents"
+  "shiftDefinitions" | "shiftCycles" | "blockTemplates" | "blockRecurrences" | "manualEvents"
 > {
   return {
     shiftDefinitions: authoredSetup.shiftDefinitions,
-    shiftCycle: authoredSetup.shiftCycle,
+    shiftCycles: authoredSetup.shiftCycles,
     blockTemplates: normalizePersistedBlockTemplates(
       authoredSetup.blockTemplates,
       authoredSetup.blockRecurrences,
@@ -98,6 +107,16 @@ export function normalizePersistedAuthoredSetup(
 
 function normalizePersistedManualEvents(manualEvents: unknown): DayFrameState["manualEvents"] {
   return normalizeManualCalendarEvents(manualEvents);
+}
+
+function normalizePersistedShiftCycles(
+  persistedState?: LegacyPersistedDayFrameState,
+): DayFrameState["shiftCycles"] {
+  if (Array.isArray(persistedState?.shiftCycles)) {
+    return persistedState.shiftCycles;
+  }
+
+  return persistedState?.shiftCycle ? [persistedState.shiftCycle] : [];
 }
 
 function normalizePersistedBlockTemplates(

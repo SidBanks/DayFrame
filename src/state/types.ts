@@ -51,7 +51,8 @@ export type DayFrameState = {
   schedulingPreferences: DayFrameSchedulingPreferences;
   previewRange: DayFramePreviewRange;
   shiftDefinitions: ShiftDefinition[];
-  shiftCycle: ShiftCycle | null;
+  shiftCycles: ShiftCycle[];
+  shiftCycle?: ShiftCycle | null;
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
   manualEvents: ManualCalendarEvent[];
@@ -64,11 +65,13 @@ export type DayFrameAuthoredSetup = Pick<
   | "schedulingPreferences"
   | "previewRange"
   | "shiftDefinitions"
-  | "shiftCycle"
+  | "shiftCycles"
   | "blockTemplates"
   | "blockRecurrences"
   | "manualEvents"
->;
+> & {
+  shiftCycle?: ShiftCycle | null;
+};
 
 export type GeneratePreviewActionInput = {
   rangeStartDate: LocalDateString;
@@ -93,6 +96,7 @@ export type DayFrameStore = {
   setPreviewRange: (previewRange: DayFramePreviewRange) => DayFrameState;
   setShiftDefinitions: (shiftDefinitions: ShiftDefinition[]) => DayFrameState;
   setShiftCycle: (shiftCycle: ShiftCycle | null) => DayFrameState;
+  setShiftCycles: (shiftCycles: ShiftCycle[]) => DayFrameState;
   setBlockTemplates: (blockTemplates: BlockTemplate[]) => DayFrameState;
   setBlockRecurrences: (blockRecurrences: BlockRecurrence[]) => DayFrameState;
   setManualEvents: (manualEvents: ManualCalendarEvent[]) => DayFrameState;

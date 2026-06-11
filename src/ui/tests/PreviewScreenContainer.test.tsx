@@ -193,6 +193,7 @@ function buildState(partialState: Partial<DayFrameState>): DayFrameState {
       endDate: "2026-05-06",
     },
     shiftDefinitions: [],
+    shiftCycles: [],
     shiftCycle: null,
     blockTemplates: [],
     blockRecurrences: [],

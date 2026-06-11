@@ -4,18 +4,18 @@ import { getActiveShiftSegment } from "./getActiveShiftSegment.js";
 import type { ShiftCycle } from "./types.js";
 
 export function resolveEffectiveSchedulePreferencesForDate(input: {
-  shiftCycle: ShiftCycle | null;
+  shiftCycles: ShiftCycle[];
   defaultSchedulingPreferences: UserTimePreferences;
   date: Date;
 }): UserTimePreferences {
-  if (!input.shiftCycle) {
+  if (input.shiftCycles.length === 0) {
     return {
       ...input.defaultSchedulingPreferences,
     };
   }
 
   const activeSegment = getActiveShiftSegment({
-    shiftCycle: input.shiftCycle,
+    shiftCycles: input.shiftCycles,
     date: input.date,
   });
 
@@ -30,12 +30,12 @@ export function resolveEffectiveSchedulePreferencesForDate(input: {
 }
 
 export function resolveEffectiveSchedulePreferencesForUserDayDate(input: {
-  shiftCycle: ShiftCycle | null;
+  shiftCycles: ShiftCycle[];
   defaultSchedulingPreferences: UserTimePreferences;
   userDayDate: LocalDateString;
 }): UserTimePreferences {
   return resolveEffectiveSchedulePreferencesForDate({
-    shiftCycle: input.shiftCycle,
+    shiftCycles: input.shiftCycles,
     defaultSchedulingPreferences: input.defaultSchedulingPreferences,
     date: new Date(`${input.userDayDate}T12:00:00`),
   });

@@ -77,6 +77,19 @@ export function cloneDayFrameAuthoredSetup(
     shiftDefinitions: authoredSetup.shiftDefinitions.map((shiftDefinition) => ({
       ...shiftDefinition,
     })),
+    shiftCycles: authoredSetup.shiftCycles.map((shiftCycle) => ({
+      ...shiftCycle,
+      segments: shiftCycle.segments.map((segment) => ({
+        ...segment,
+        ...(segment.schedulePreferences
+          ? {
+              schedulePreferences: {
+                ...segment.schedulePreferences,
+              },
+            }
+          : {}),
+      })),
+    })),
     shiftCycle: authoredSetup.shiftCycle
       ? {
           ...authoredSetup.shiftCycle,
@@ -131,8 +144,12 @@ function validateAuthoredSetup(value: Record<string, unknown>): void {
     throw new RangeError("Backup file must include shiftDefinitions.");
   }
 
-  if (!(value.shiftCycle === null || isRecord(value.shiftCycle))) {
-    throw new RangeError("Backup file must include a valid shiftCycle.");
+  if (
+    value.shiftCycles !== undefined &&
+    !Array.isArray(value.shiftCycles) &&
+    !(value.shiftCycle === null || isRecord(value.shiftCycle))
+  ) {
+    throw new RangeError("Backup file must include valid shiftCycles.");
   }
 
   if (!Array.isArray(value.blockTemplates)) {
@@ -163,11 +180,21 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
       value.previewRange as Partial<DayFrameAuthoredSetup["previewRange"]> | undefined,
     ),
     shiftDefinitions: value.shiftDefinitions as DayFrameAuthoredSetup["shiftDefinitions"],
-    shiftCycle: value.shiftCycle as DayFrameAuthoredSetup["shiftCycle"],
+    shiftCycles: normalizeShiftCycles(value),
     blockTemplates: value.blockTemplates as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: value.blockRecurrences as DayFrameAuthoredSetup["blockRecurrences"],
     manualEvents: normalizeManualCalendarEvents(value.manualEvents),
   };
+}
+
+function normalizeShiftCycles(value: Record<string, unknown>): DayFrameAuthoredSetup["shiftCycles"] {
+  if (Array.isArray(value.shiftCycles)) {
+    return value.shiftCycles as DayFrameAuthoredSetup["shiftCycles"];
+  }
+
+  return value.shiftCycle && isRecord(value.shiftCycle)
+    ? [value.shiftCycle as NonNullable<DayFrameAuthoredSetup["shiftCycles"]>[number]]
+    : [];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

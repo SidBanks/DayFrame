@@ -26,7 +26,7 @@ export function PreviewScreenContainer({
     <PreviewScreen
       getDayBoundaryStartTimeForUserDayDate={(userDayDate) =>
         resolveEffectiveSchedulePreferencesForUserDayDate({
-          shiftCycle: state.shiftCycle,
+          shiftCycles: state.shiftCycles,
           defaultSchedulingPreferences: state.schedulingPreferences,
           userDayDate: userDayDate as `${number}-${number}-${number}`,
         }).dayBoundaryStartTime

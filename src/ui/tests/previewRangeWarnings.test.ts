@@ -30,25 +30,27 @@ describe("getPreviewRangeWarnings", () => {
             startDate: "2026-05-04",
             endDate: "2026-05-08",
           },
-          shiftCycle: {
-            id: "cycle_001",
-            userId: "user_001",
-            name: "Day Rotation",
-            type: "fixedSegments",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-            segments: [
-              {
-                id: "segment_day",
-                shiftCycleId: "cycle_001",
-                shiftDefinitionId: "shift_day",
-                startsOnDate: "2026-05-04",
-                endsOnDate: "2026-05-06",
-              },
-            ],
-            createdAt: "2026-05-01T00:00:00-05:00",
-            updatedAt: "2026-05-01T00:00:00-05:00",
-          },
+          shiftCycles: [
+            {
+              id: "cycle_001",
+              userId: "user_001",
+              name: "Day Rotation",
+              type: "fixedSegments",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+              segments: [
+                {
+                  id: "segment_day",
+                  shiftCycleId: "cycle_001",
+                  shiftDefinitionId: "shift_day",
+                  startsOnDate: "2026-05-04",
+                  endsOnDate: "2026-05-06",
+                },
+              ],
+              createdAt: "2026-05-01T00:00:00-05:00",
+              updatedAt: "2026-05-01T00:00:00-05:00",
+            },
+          ],
         }),
       ),
     ).toContainEqual({
@@ -122,7 +124,7 @@ describe("getPreviewRangeWarnings", () => {
 
 function buildInput(overrides?: {
   previewRange?: DayFramePreviewRange;
-  shiftCycle?: Parameters<typeof getPreviewRangeWarnings>[0]["shiftCycle"];
+  shiftCycles?: Parameters<typeof getPreviewRangeWarnings>[0]["shiftCycles"];
   shiftDefinitions?: Parameters<typeof getPreviewRangeWarnings>[0]["shiftDefinitions"];
   blockTemplates?: Parameters<typeof getPreviewRangeWarnings>[0]["blockTemplates"];
   blockRecurrences?: Parameters<typeof getPreviewRangeWarnings>[0]["blockRecurrences"];
@@ -138,25 +140,27 @@ function buildInput(overrides?: {
       dayBoundaryStartTime: "03:00",
       weekStartsOn: "saturday",
     },
-    shiftCycle: overrides?.shiftCycle ?? {
-      id: "cycle_001",
-      userId: "user_001",
-      name: "Day Rotation",
-      type: "fixedSegments" as const,
-      startsOnDate: "2026-05-01",
-      endsOnDate: "2026-05-31",
-      segments: [
-        {
-          id: "segment_day",
-          shiftCycleId: "cycle_001",
-          shiftDefinitionId: "shift_day",
-          startsOnDate: "2026-05-01",
-          endsOnDate: "2026-05-31",
-        },
-      ],
-      createdAt: "2026-05-01T00:00:00-05:00",
-      updatedAt: "2026-05-01T00:00:00-05:00",
-    },
+    shiftCycles: overrides?.shiftCycles ?? [
+      {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments" as const,
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        createdAt: "2026-05-01T00:00:00-05:00",
+        updatedAt: "2026-05-01T00:00:00-05:00",
+      },
+    ],
     shiftDefinitions: overrides?.shiftDefinitions ?? [
       {
         id: "shift_day",

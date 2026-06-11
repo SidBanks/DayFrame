@@ -12,6 +12,7 @@ import { getWeekdayFromDate } from "../time/userWeek.js";
 import type { LocalDateString } from "../shifts/types.js";
 
 export function generateBlockCandidates(input: GenerateBlockCandidatesInput): BlockCandidate[] {
+  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   const defaultSchedulingPreferences = getDefaultSchedulingPreferences(input);
 
@@ -21,7 +22,7 @@ export function generateBlockCandidates(input: GenerateBlockCandidatesInput): Bl
   const userDays = getOverlappingUserDays(
     input.planningWindowStart,
     input.planningWindowEnd,
-    input.shiftCycle,
+    shiftCycles,
     defaultSchedulingPreferences,
   );
   const candidates: BlockCandidate[] = [];
@@ -44,7 +45,7 @@ export function generateBlockCandidates(input: GenerateBlockCandidatesInput): Bl
         blockTemplate,
         recurrence,
         userDays,
-        shiftCycle: input.shiftCycle,
+        shiftCycles,
         defaultSchedulingPreferences,
       }),
     );
@@ -57,7 +58,7 @@ type GenerateCandidatesForRecurrenceInput = {
   blockTemplate: BlockTemplate;
   recurrence: BlockRecurrence;
   userDays: LocalDateString[];
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"];
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"];
   defaultSchedulingPreferences: UserTimePreferences;
 };
 
@@ -75,7 +76,7 @@ function generateCandidatesForRecurrence(
           input.blockTemplate,
           input.recurrence,
           userDayDate,
-          input.shiftCycle,
+          input.shiftCycles,
           input.defaultSchedulingPreferences,
         ),
       );
@@ -84,7 +85,7 @@ function generateCandidatesForRecurrence(
         input.blockTemplate,
         input.recurrence,
         eligibleUserDays,
-        input.shiftCycle,
+        input.shiftCycles,
         input.defaultSchedulingPreferences,
       );
     case "specificWeekdays":
@@ -92,7 +93,7 @@ function generateCandidatesForRecurrence(
         input.blockTemplate,
         input.recurrence,
         eligibleUserDays,
-        input.shiftCycle,
+        input.shiftCycles,
         input.defaultSchedulingPreferences,
       );
     case "timesPerUserWeek":
@@ -100,7 +101,7 @@ function generateCandidatesForRecurrence(
         input.blockTemplate,
         input.recurrence,
         eligibleUserDays,
-        input.shiftCycle,
+        input.shiftCycles,
         input.defaultSchedulingPreferences,
       );
     case "perShiftSegment":
@@ -113,7 +114,7 @@ function generateWeeklyCandidates(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
   eligibleUserDays: LocalDateString[],
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate[] {
   const firstDayByUserWeek = new Map<LocalDateString, LocalDateString>();
@@ -121,7 +122,7 @@ function generateWeeklyCandidates(
   for (const userDayDate of eligibleUserDays) {
     const userWeekStartDate = getUserWeekStartDateForUserDayDate(
       userDayDate,
-      shiftCycle,
+      shiftCycles,
       defaultSchedulingPreferences,
     );
 
@@ -135,7 +136,7 @@ function generateWeeklyCandidates(
       blockTemplate,
       recurrence,
       userDayDate,
-      shiftCycle,
+      shiftCycles,
       defaultSchedulingPreferences,
     ),
   );
@@ -145,7 +146,7 @@ function generateSpecificWeekdayCandidates(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
   eligibleUserDays: LocalDateString[],
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate[] {
   if (!recurrence.weekdays || recurrence.weekdays.length === 0) {
@@ -159,7 +160,7 @@ function generateSpecificWeekdayCandidates(
         blockTemplate,
         recurrence,
         userDayDate,
-        shiftCycle,
+        shiftCycles,
         defaultSchedulingPreferences,
       ),
     );
@@ -169,7 +170,7 @@ function generateTimesPerUserWeekCandidates(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
   eligibleUserDays: LocalDateString[],
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate[] {
   if (
@@ -187,7 +188,7 @@ function generateTimesPerUserWeekCandidates(
   for (const userDayDate of eligibleUserDays) {
     const userWeekStartDate = getUserWeekStartDateForUserDayDate(
       userDayDate,
-      shiftCycle,
+      shiftCycles,
       defaultSchedulingPreferences,
     );
     const weekDays = userDaysByWeek.get(userWeekStartDate) ?? [];
@@ -209,7 +210,7 @@ function generateTimesPerUserWeekCandidates(
           blockTemplate,
           recurrence,
           weekDays[index]!,
-          shiftCycle,
+          shiftCycles,
           defaultSchedulingPreferences,
         ),
       );
@@ -223,12 +224,12 @@ function buildBlockCandidate(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
   userDayDate: LocalDateString,
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate {
   const userWeekStartDate = getUserWeekStartDateForUserDayDate(
     userDayDate,
-    shiftCycle,
+    shiftCycles,
     defaultSchedulingPreferences,
   );
   const customWindowFields =
@@ -278,7 +279,7 @@ function buildBlockCandidate(
 function getOverlappingUserDays(
   planningWindowStart: Date,
   planningWindowEnd: Date,
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): LocalDateString[] {
   const userDays: LocalDateString[] = [];
@@ -304,7 +305,7 @@ function getOverlappingUserDays(
   while (currentDate.getTime() <= lastDate.getTime()) {
     const localDate = getLocalDateString(currentDate);
     const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycle: shiftCycle ?? null,
+      shiftCycles: shiftCycles ?? [],
       defaultSchedulingPreferences,
       userDayDate: localDate,
     });
@@ -350,11 +351,11 @@ function isWithinRecurrenceDateBounds(
 
 function getUserWeekStartDateForUserDayDate(
   userDayDate: LocalDateString,
-  shiftCycle: GenerateBlockCandidatesInput["shiftCycle"],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): LocalDateString {
   const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
-    shiftCycle: shiftCycle ?? null,
+    shiftCycles: shiftCycles ?? [],
     defaultSchedulingPreferences,
     userDayDate,
   });

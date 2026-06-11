@@ -22,7 +22,8 @@ import type { LocalDateString } from "../shifts/types.js";
 
 export type GenerateSchedulePreviewInput = {
   shiftDefinitions: ShiftDefinition[];
-  shiftCycle: ShiftCycle;
+  shiftCycles?: ShiftCycle[];
+  shiftCycle?: ShiftCycle;
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
   manualEvents?: ManualCalendarEvent[];
@@ -44,6 +45,7 @@ export type GenerateSchedulePreviewResult = {
 export function generateSchedulePreview(
   input: GenerateSchedulePreviewInput,
 ): GenerateSchedulePreviewResult {
+  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   validateBlockTemplates(input.blockTemplates);
   const expandedPlanningWindow = expandPlanningWindow(
@@ -53,13 +55,13 @@ export function generateSchedulePreview(
   const visibleUserDayDates = getOverlappingUserDayDates({
     planningWindowStart: input.planningWindowStart,
     planningWindowEnd: input.planningWindowEnd,
-    shiftCycle: input.shiftCycle,
+    shiftCycles,
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     weekStartsOn: input.weekStartsOn,
   });
 
   const generatedWorkBlocks = generateCycleWorkBlocks({
-    shiftCycle: input.shiftCycle,
+    shiftCycles,
     shiftDefinitions: input.shiftDefinitions,
     planningWindowStart: new Date(expandedPlanningWindow.start),
     planningWindowEnd: new Date(expandedPlanningWindow.end),
@@ -74,7 +76,7 @@ export function generateSchedulePreview(
     blockRecurrences: input.blockRecurrences.map(cloneBlockRecurrence),
     planningWindowStart: new Date(expandedPlanningWindow.start),
     planningWindowEnd: new Date(expandedPlanningWindow.end),
-    shiftCycle: input.shiftCycle,
+    shiftCycles,
     defaultSchedulingPreferences: {
       dayBoundaryStartTime: input.dayBoundaryStartTime,
       weekStartsOn: input.weekStartsOn,
@@ -91,7 +93,7 @@ export function generateSchedulePreview(
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     getDayBoundaryStartTimeForUserDayDate: (userDayDate) =>
       resolveEffectiveSchedulePreferencesForUserDayDate({
-        shiftCycle: input.shiftCycle,
+        shiftCycles,
         defaultSchedulingPreferences: {
           dayBoundaryStartTime: input.dayBoundaryStartTime,
           weekStartsOn: input.weekStartsOn,
@@ -102,7 +104,7 @@ export function generateSchedulePreview(
   const manualScheduledBlocks = buildManualEventScheduledBlocks(
     input.manualEvents ?? [],
     visibleUserDayDates,
-    input.shiftCycle,
+    shiftCycles,
     input.dayBoundaryStartTime,
     input.weekStartsOn,
   );
@@ -122,7 +124,7 @@ export function generateSchedulePreview(
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     getDayBoundaryStartTimeForUserDayDate: (userDayDate) =>
       resolveEffectiveSchedulePreferencesForUserDayDate({
-        shiftCycle: input.shiftCycle,
+        shiftCycles,
         defaultSchedulingPreferences: {
           dayBoundaryStartTime: input.dayBoundaryStartTime,
           weekStartsOn: input.weekStartsOn,
@@ -145,7 +147,7 @@ export function generateSchedulePreview(
   );
   const getDayBoundaryStartTimeForUserDayDate = (userDayDate: LocalDateString) =>
     resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycle: input.shiftCycle,
+      shiftCycles,
       defaultSchedulingPreferences: {
         dayBoundaryStartTime: input.dayBoundaryStartTime,
         weekStartsOn: input.weekStartsOn,
@@ -201,7 +203,7 @@ export function generateSchedulePreview(
 function buildManualEventScheduledBlocks(
   manualEvents: ManualCalendarEvent[],
   visibleUserDayDates: Set<LocalDateString>,
-  shiftCycle: ShiftCycle,
+  shiftCycles: ShiftCycle[],
   dayBoundaryStartTime: TimeString,
   weekStartsOn: Weekday,
 ): DraftScheduledBlock[] {
@@ -209,7 +211,7 @@ function buildManualEventScheduledBlocks(
     .filter((manualEvent) => visibleUserDayDates.has(manualEvent.userDayDate))
     .map((manualEvent) => {
       const effectiveDayBoundaryStartTime = resolveEffectiveSchedulePreferencesForUserDayDate({
-        shiftCycle,
+        shiftCycles,
         defaultSchedulingPreferences: {
           dayBoundaryStartTime,
           weekStartsOn,
@@ -358,7 +360,7 @@ function expandPlanningWindow(
 function getOverlappingUserDayDates(input: {
   planningWindowStart: Date;
   planningWindowEnd: Date;
-  shiftCycle: ShiftCycle;
+  shiftCycles: ShiftCycle[];
   dayBoundaryStartTime: TimeString;
   weekStartsOn: Weekday;
 }): Set<LocalDateString> {
@@ -385,7 +387,7 @@ function getOverlappingUserDayDates(input: {
   while (currentDate.getTime() <= lastDate.getTime()) {
     const userDayDate = getUserDayDate(currentDate, "00:00") as LocalDateString;
     const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycle: input.shiftCycle,
+      shiftCycles: input.shiftCycles,
       defaultSchedulingPreferences: {
         dayBoundaryStartTime: input.dayBoundaryStartTime,
         weekStartsOn: input.weekStartsOn,

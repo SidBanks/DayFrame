@@ -113,7 +113,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
     fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
     expect(screen.getByRole("heading", { name: "Preview Range" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Schedule Cycle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule Cycles" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
     expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
@@ -273,7 +273,7 @@ describe("DayFrameApp", () => {
     expect(store.getState().shiftDefinitions[0]).toMatchObject({
       name: "Sunrise Shift",
     });
-    expect(store.getState().shiftCycle).toMatchObject({
+    expect(store.getState().shiftCycles[0]).toMatchObject({
       name: "Weekend Rotation",
     });
     expect(store.getState().previewRange).toMatchObject({
@@ -2226,7 +2226,8 @@ describe("DayFrameApp", () => {
               updatedAt: "2026-05-03T00:00:00-05:00",
             },
           ],
-          shiftCycle: {
+          shiftCycles: [
+            {
             id: "cycle_001",
             userId: "user_001",
             name: "Day Rotation",
@@ -2246,9 +2247,10 @@ describe("DayFrameApp", () => {
                 },
               },
             ],
-            createdAt: "2026-05-03T00:00:00-05:00",
-            updatedAt: "2026-05-03T00:00:00-05:00",
-          },
+              createdAt: "2026-05-03T00:00:00-05:00",
+              updatedAt: "2026-05-03T00:00:00-05:00",
+            },
+          ],
           blockTemplates: [
             {
               id: "default_sleep",
@@ -2341,7 +2343,7 @@ describe("DayFrameApp", () => {
                         updatedAt: "2026-05-03T00:00:00-05:00",
                       },
                     ],
-                    shiftCycle: null,
+                    shiftCycles: [],
                     blockTemplates: [],
                     blockRecurrences: [],
                   },

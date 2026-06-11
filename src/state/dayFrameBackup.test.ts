@@ -28,7 +28,10 @@ describe("dayFrameBackup", () => {
       app: "DayFrame",
       version: 1,
       exportedAt: "2026-05-05T10:00:00-05:00",
-      data: buildAuthoredSetup(),
+      data: {
+        ...buildAuthoredSetup(),
+        shiftCycle: null,
+      },
     });
   });
 
@@ -116,6 +119,27 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
         },
       ],
     },
+    shiftCycles: [
+      {
+        id: "cycle_001",
+        userId: "user_001",
+        name: "Day Rotation",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        createdAt: "2026-05-03T00:00:00-05:00",
+        updatedAt: "2026-05-03T00:00:00-05:00",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_001",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+      },
+    ],
     blockTemplates: [
       {
         id: "template_review",

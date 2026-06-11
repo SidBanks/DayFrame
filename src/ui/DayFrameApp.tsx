@@ -27,7 +27,7 @@ export type DayFrameAppStore = Pick<
   | "setSchedulingPreferences"
   | "setPreviewRange"
   | "setShiftDefinitions"
-  | "setShiftCycle"
+  | "setShiftCycles"
   | "setBlockTemplates"
   | "setBlockRecurrences"
   | "setManualEvents"
@@ -103,7 +103,7 @@ export function DayFrameApp({
   );
   const getDayBoundaryStartTimeForUserDayDate = (userDayDate: string) =>
     resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycle: stateSnapshot.shiftCycle,
+      shiftCycles: stateSnapshot.shiftCycles,
       defaultSchedulingPreferences: stateSnapshot.schedulingPreferences,
       userDayDate: userDayDate as `${number}-${number}-${number}`,
     }).dayBoundaryStartTime;
@@ -127,7 +127,7 @@ export function DayFrameApp({
   const savedRangeWarnings = getPreviewRangeWarnings({
     previewRange: stateSnapshot.previewRange,
     schedulingPreferences: stateSnapshot.schedulingPreferences,
-    shiftCycle: stateSnapshot.shiftCycle,
+    shiftCycles: stateSnapshot.shiftCycles,
     shiftDefinitions: stateSnapshot.shiftDefinitions,
     blockTemplates: stateSnapshot.blockTemplates,
     blockRecurrences: stateSnapshot.blockRecurrences,
@@ -145,7 +145,7 @@ export function DayFrameApp({
     stateSnapshot.schedulingPreferences,
     stateSnapshot.previewRange,
     stateSnapshot.shiftDefinitions,
-    stateSnapshot.shiftCycle,
+    stateSnapshot.shiftCycles,
     stateSnapshot.blockTemplates,
     stateSnapshot.blockRecurrences,
   ]);
@@ -195,10 +195,12 @@ export function DayFrameApp({
         updatedAt: savedAt,
       })),
     );
-    storeRef.current.setShiftCycle({
-      ...setupDraft.shiftCycle,
-      updatedAt: savedAt,
-    });
+    storeRef.current.setShiftCycles(
+      setupDraft.shiftCycles.map((shiftCycle) => ({
+        ...shiftCycle,
+        updatedAt: savedAt,
+      })),
+    );
     storeRef.current.setBlockTemplates(
       setupDraft.templateEntries.map((entry) => ({
         ...entry.template,
@@ -1475,7 +1477,7 @@ function createSeededDayFrameStore(): DayFrameStore {
   const seededStore = createDayFrameStore();
 
   seededStore.setShiftDefinitions(createDemoShiftDefinitions());
-  seededStore.setShiftCycle(createDemoShiftCycle());
+  seededStore.setShiftCycles([createDemoShiftCycle()]);
   seededStore.setBlockTemplates(createDemoBlockTemplates());
   seededStore.setBlockRecurrences(createDemoBlockRecurrences());
 
@@ -1696,8 +1698,8 @@ function getMissingPreviewSetupItems(state: DayFrameState): string[] {
     missingItems.push("Add at least one shift definition.");
   }
 
-  if (state.shiftCycle === null) {
-    missingItems.push("Add an active shift cycle.");
+  if (state.shiftCycles.length === 0) {
+    missingItems.push("Add at least one shift cycle.");
   }
 
   if (enabledTemplates.length === 0) {
@@ -1712,7 +1714,7 @@ function getMissingPreviewSetupItems(state: DayFrameState): string[] {
 }
 
 function createPreviewWindowFromRange(
-  state: Pick<DayFrameState, "previewRange" | "shiftCycle" | "schedulingPreferences">,
+  state: Pick<DayFrameState, "previewRange" | "shiftCycles" | "schedulingPreferences">,
 ): Pick<GeneratePreviewActionInput, "planningWindowStart" | "planningWindowEnd"> {
   const startDate = state.previewRange.startDate;
   const exclusiveEndUserDayDate = addDaysToLocalDate(state.previewRange.endDate, 1);
@@ -1720,12 +1722,12 @@ function createPreviewWindowFromRange(
   return {
     planningWindowStart: createUserDayBoundaryDate({
       userDayDate: startDate,
-      shiftCycle: state.shiftCycle,
+      shiftCycles: state.shiftCycles,
       schedulingPreferences: state.schedulingPreferences,
     }),
     planningWindowEnd: createUserDayBoundaryDate({
       userDayDate: exclusiveEndUserDayDate,
-      shiftCycle: state.shiftCycle,
+      shiftCycles: state.shiftCycles,
       schedulingPreferences: state.schedulingPreferences,
     }),
   };
@@ -1743,8 +1745,8 @@ function resolvePreviewRangeFromSetupDraft(setupDraft: SetupDraft): DayFrameStat
 
   return {
     ...setupDraft.previewRange,
-    startDate: setupDraft.shiftCycle.startsOnDate,
-    endDate: setupDraft.shiftCycle.endsOnDate ?? setupDraft.shiftCycle.startsOnDate,
+    startDate: getShiftCyclesRange(setupDraft.shiftCycles)?.startDate ?? setupDraft.previewRange.startDate,
+    endDate: getShiftCyclesRange(setupDraft.shiftCycles)?.endDate ?? setupDraft.previewRange.endDate,
   };
 }
 
@@ -1755,7 +1757,7 @@ function hasUnsavedSetupChanges(
     | "schedulingPreferences"
     | "previewRange"
     | "shiftDefinitions"
-    | "shiftCycle"
+    | "shiftCycles"
     | "blockTemplates"
     | "blockRecurrences"
   >,
@@ -1766,7 +1768,7 @@ function hasUnsavedSetupChanges(
       schedulingPreferences: stateSnapshot.schedulingPreferences,
       previewRange: stateSnapshot.previewRange,
       shiftDefinitions: stateSnapshot.shiftDefinitions,
-      shiftCycle: stateSnapshot.shiftCycle,
+      shiftCycles: stateSnapshot.shiftCycles,
       blockTemplates: stateSnapshot.blockTemplates,
       blockRecurrences: stateSnapshot.blockRecurrences,
     })
@@ -1778,7 +1780,7 @@ function serializeDraftAuthoredSetup(setupDraft: SetupDraft) {
     schedulingPreferences: setupDraft.schedulingPreferences,
     previewRange: resolvePreviewRangeFromSetupDraft(setupDraft),
     shiftDefinitions: setupDraft.shiftDefinitions,
-    shiftCycle: setupDraft.shiftCycle,
+    shiftCycles: setupDraft.shiftCycles,
     blockTemplates: setupDraft.templateEntries.map((entry) => entry.template),
     blockRecurrences: setupDraft.templateEntries.map((entry) => entry.recurrence),
   };
@@ -1828,7 +1830,7 @@ function doesScheduledBlockOverlapUserDay(
 ): boolean {
   const userDayStart = createUserDayBoundaryDate({
     userDayDate,
-    shiftCycle: null,
+    shiftCycles: [],
     schedulingPreferences: {
       dayBoundaryStartTime: dayBoundaryStartTime as `${number}:${number}`,
       weekStartsOn: "saturday",
@@ -1855,18 +1857,43 @@ function formatPreviewDayHeading(userDayDate: LocalDateString): string {
 
 function createUserDayBoundaryDate(input: {
   userDayDate: LocalDateString;
-  shiftCycle: ShiftCycle | null;
+  shiftCycles: ShiftCycle[];
   schedulingPreferences: DayFrameState["schedulingPreferences"];
 }): Date {
   const [year, month, day] = input.userDayDate.split("-").map(Number);
   const effectivePreferences = resolveEffectiveSchedulePreferencesForUserDayDate({
-    shiftCycle: input.shiftCycle,
+    shiftCycles: input.shiftCycles,
     defaultSchedulingPreferences: input.schedulingPreferences,
     userDayDate: input.userDayDate,
   });
   const [hours, minutes] = effectivePreferences.dayBoundaryStartTime.split(":").map(Number);
 
   return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
+}
+
+function getShiftCyclesRange(
+  shiftCycles: ShiftCycle[],
+): { startDate: LocalDateString; endDate: LocalDateString } | null {
+  if (shiftCycles.length === 0) {
+    return null;
+  }
+
+  return shiftCycles.reduce(
+    (currentRange, shiftCycle) => ({
+      startDate:
+        shiftCycle.startsOnDate < currentRange.startDate
+          ? shiftCycle.startsOnDate
+          : currentRange.startDate,
+      endDate:
+        (shiftCycle.endsOnDate ?? shiftCycle.startsOnDate) > currentRange.endDate
+          ? (shiftCycle.endsOnDate ?? shiftCycle.startsOnDate)
+          : currentRange.endDate,
+    }),
+    {
+      startDate: shiftCycles[0]!.startsOnDate,
+      endDate: shiftCycles[0]!.endsOnDate ?? shiftCycles[0]!.startsOnDate,
+    },
+  );
 }
 
 function addDaysToLocalDate(localDate: LocalDateString, days: number): LocalDateString {

@@ -14,12 +14,12 @@ export type PreviewRangeWarning = {
 export function getPreviewRangeWarnings(input: {
   previewRange: DayFramePreviewRange;
   schedulingPreferences: DayFrameSchedulingPreferences;
-  shiftCycle: ShiftCycle | null;
+  shiftCycles: ShiftCycle[];
   shiftDefinitions: ShiftDefinition[];
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
 }): PreviewRangeWarning[] {
-  if (!input.shiftCycle) {
+  if (input.shiftCycles.length === 0) {
     return [];
   }
 
@@ -30,12 +30,17 @@ export function getPreviewRangeWarnings(input: {
     return warnings;
   }
 
-  const cycleEndDate = input.shiftCycle.endsOnDate ?? "9999-12-31";
+  const cycleRange = getShiftCyclesRange(input.shiftCycles);
+
+  if (!cycleRange) {
+    return warnings;
+  }
+
   const overlapsCycle = rangesOverlap(
     input.previewRange.startDate,
     input.previewRange.endDate,
-    input.shiftCycle.startsOnDate,
-    cycleEndDate as LocalDateString,
+    cycleRange.startDate,
+    cycleRange.endDate,
   );
 
   if (!overlapsCycle) {
@@ -51,11 +56,11 @@ export function getPreviewRangeWarnings(input: {
   >();
   const visibleUserDayWindows = buildVisibleUserDayWindows(
     previewDates,
-    input.shiftCycle,
+    input.shiftCycles,
     input.schedulingPreferences,
   );
   const generatedWorkBlocks = generateCycleWorkBlocks({
-    shiftCycle: input.shiftCycle,
+    shiftCycles: input.shiftCycles,
     shiftDefinitions: input.shiftDefinitions,
     planningWindowStart: visibleUserDayWindows.start,
     planningWindowEnd: visibleUserDayWindows.end,
@@ -65,7 +70,7 @@ export function getPreviewRangeWarnings(input: {
   let hasAnyWorkCoverage = false;
 
   for (const previewDate of previewDates) {
-    const activeSegment = findActiveSegmentForDate(input.shiftCycle, previewDate);
+    const activeSegment = findActiveSegmentForDate(input.shiftCycles, previewDate);
     const activeShiftDefinition = activeSegment
       ? (input.shiftDefinitions.find(
           (shiftDefinition) => shiftDefinition.id === activeSegment.shiftDefinitionId,
@@ -76,7 +81,7 @@ export function getPreviewRangeWarnings(input: {
 
     if (
       overlapsCycle &&
-      isDateWithinRange(previewDate, input.shiftCycle.startsOnDate, cycleEndDate)
+      isDateWithinRange(previewDate, cycleRange.startDate, cycleRange.endDate)
     ) {
       if (!activeSegment) {
         hasSegmentCoverageGap = true;
@@ -148,7 +153,7 @@ export function getPreviewRangeWarnings(input: {
 
 function buildVisibleUserDayWindows(
   previewDates: LocalDateString[],
-  shiftCycle: ShiftCycle,
+  shiftCycles: ShiftCycle[],
   schedulingPreferences: DayFrameSchedulingPreferences,
 ): {
   byDate: Map<LocalDateString, { start: Date; end: Date }>;
@@ -161,7 +166,7 @@ function buildVisibleUserDayWindows(
 
   for (const previewDate of previewDates) {
     const dayBoundaryStartTime = resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycle,
+      shiftCycles,
       defaultSchedulingPreferences: schedulingPreferences,
       userDayDate: previewDate,
     }).dayBoundaryStartTime;
@@ -190,13 +195,45 @@ function buildVisibleUserDayWindows(
 }
 
 function findActiveSegmentForDate(
-  shiftCycle: ShiftCycle,
+  shiftCycles: ShiftCycle[],
   date: LocalDateString,
 ): ShiftCycle["segments"][number] | null {
-  return (
-    shiftCycle.segments.find(
-      (segment) => segment.startsOnDate <= date && segment.endsOnDate >= date,
-    ) ?? null
+  for (const shiftCycle of shiftCycles) {
+    const activeSegment =
+      shiftCycle.segments.find(
+        (segment) => segment.startsOnDate <= date && segment.endsOnDate >= date,
+      ) ?? null;
+
+    if (activeSegment) {
+      return activeSegment;
+    }
+  }
+
+  return null;
+}
+
+function getShiftCyclesRange(
+  shiftCycles: ShiftCycle[],
+): { startDate: LocalDateString; endDate: LocalDateString } | null {
+  if (shiftCycles.length === 0) {
+    return null;
+  }
+
+  return shiftCycles.reduce(
+    (currentRange, shiftCycle) => ({
+      startDate:
+        shiftCycle.startsOnDate < currentRange.startDate
+          ? shiftCycle.startsOnDate
+          : currentRange.startDate,
+      endDate:
+        (shiftCycle.endsOnDate ?? shiftCycle.startsOnDate) > currentRange.endDate
+          ? (shiftCycle.endsOnDate ?? shiftCycle.startsOnDate)
+          : currentRange.endDate,
+    }),
+    {
+      startDate: shiftCycles[0]!.startsOnDate,
+      endDate: shiftCycles[0]!.endsOnDate ?? shiftCycles[0]!.startsOnDate,
+    },
   );
 }
 

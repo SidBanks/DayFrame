@@ -85,7 +85,8 @@ describe("dayFrameStore", () => {
       endDate: "2026-05-18",
     });
     expect(state.shiftDefinitions).toHaveLength(1);
-    expect(state.shiftCycle?.name).toBe("Day Rotation");
+    expect(state.shiftCycles).toHaveLength(1);
+    expect(state.shiftCycles[0]?.name).toBe("Day Rotation");
     expect(state.preview).toBeNull();
   });
 
@@ -102,6 +103,7 @@ describe("dayFrameStore", () => {
       },
       manualEvents: [],
       shiftDefinitions: [],
+      shiftCycles: [],
       shiftCycle: null,
       blockTemplates: [],
       blockRecurrences: [],
@@ -352,6 +354,7 @@ describe("dayFrameStore", () => {
       endDate: "2026-05-11",
     });
     expect(state.shiftDefinitions).toEqual(shiftDefinitions);
+    expect(state.shiftCycles).toEqual([shiftCycle]);
     expect(state.shiftCycle).toEqual(shiftCycle);
     expect(state.preview).toBeNull();
     expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
@@ -365,6 +368,7 @@ describe("dayFrameStore", () => {
         endDate: "2026-05-11",
       },
       shiftDefinitions,
+      shiftCycles: [shiftCycle],
       shiftCycle,
       blockTemplates: [],
       blockRecurrences: [],
@@ -505,7 +509,7 @@ describe("dayFrameStore", () => {
           },
           manualEvents: [],
           shiftDefinitions: buildShiftDefinitions(),
-          shiftCycle: buildShiftCycle(),
+          shiftCycles: [buildShiftCycle()],
           blockTemplates: buildBlockTemplates(),
           blockRecurrences: buildBlockRecurrences(),
         },
@@ -551,7 +555,7 @@ describe("dayFrameStore", () => {
           },
           manualEvents: [],
           shiftDefinitions: buildShiftDefinitions(),
-          shiftCycle: buildShiftCycle(),
+          shiftCycles: [buildShiftCycle()],
           blockTemplates: [],
           blockRecurrences: [],
         },
@@ -582,6 +586,7 @@ describe("dayFrameStore", () => {
         endDate: "2026-05-09",
       },
       shiftDefinitions: buildShiftDefinitions(),
+      shiftCycles: [buildShiftCycle()],
       shiftCycle: buildShiftCycle(),
       blockTemplates: [],
       blockRecurrences: [],
@@ -768,6 +773,7 @@ describe("dayFrameStore", () => {
         endDate: "2026-05-06",
       },
       shiftDefinitions,
+      shiftCycles: [shiftCycle],
       shiftCycle,
       blockTemplates: blockTemplates.map((blockTemplate) => ({
         ...blockTemplate,
