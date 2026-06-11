@@ -1745,8 +1745,10 @@ function resolvePreviewRangeFromSetupDraft(setupDraft: SetupDraft): DayFrameStat
 
   return {
     ...setupDraft.previewRange,
-    startDate: getShiftCyclesRange(setupDraft.shiftCycles)?.startDate ?? setupDraft.previewRange.startDate,
-    endDate: getShiftCyclesRange(setupDraft.shiftCycles)?.endDate ?? setupDraft.previewRange.endDate,
+    startDate:
+      getShiftCyclesRange(setupDraft.shiftCycles)?.startDate ?? setupDraft.previewRange.startDate,
+    endDate:
+      getShiftCyclesRange(setupDraft.shiftCycles)?.endDate ?? setupDraft.previewRange.endDate,
   };
 }
 

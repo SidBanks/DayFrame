@@ -286,6 +286,113 @@ describe("DayFrameApp", () => {
     });
   });
 
+  it("switches a cycle to repeating sequence, edits sequence days, and saves it", () => {
+    const store = createDayFrameStore();
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    expect(screen.getByLabelText("Cycle Type")).toHaveValue("manualSegments");
+
+    fireEvent.change(screen.getByLabelText("Cycle Type"), {
+      target: { value: "repeatingSequence" },
+    });
+
+    expect(screen.getByLabelText("Sequence Anchor Date")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Sequence Day" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Add Sequence Day" }));
+    fireEvent.change(screen.getByLabelText("Sequence Day 1 Shift"), {
+      target: { value: "off" },
+    });
+    const secondSequenceSelect = screen.getByLabelText("Sequence Day 2 Shift") as HTMLSelectElement;
+    const shiftValue = secondSequenceSelect.options[1]?.value ?? "";
+
+    fireEvent.change(secondSequenceSelect, {
+      target: { value: shiftValue },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().shiftCycles[0]).toMatchObject({
+      mode: "repeatingSequence",
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [
+        { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: null },
+        { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: shiftValue },
+      ],
+    });
+  });
+
+  it("generates preview work from a repeating sequence cycle", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["monday"],
+          crossesMidnight: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      shiftCycles: [
+        {
+          id: "cycle_sequence",
+          userId: "user_001",
+          name: "2 On 1 Off",
+          type: "fixedSegments",
+          mode: "repeatingSequence",
+          startsOnDate: "2026-05-04",
+          endsOnDate: "2026-05-06",
+          segments: [],
+          sequenceAnchorDate: "2026-05-04",
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_night" },
+            { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_night" },
+            { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
+          ],
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockTemplates: [
+        {
+          id: "template_review",
+          userId: "user_001",
+          title: "Schedule Review",
+          category: "review",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "beforeWork",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_review",
+          blockTemplateId: "template_review",
+          frequency: "daily",
+        },
+      ],
+    });
+
+    render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+
+    expect(screen.getByRole("heading", { name: "DayFrame Preview" })).toBeInTheDocument();
+    expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(2);
+  });
+
   it("clears the unified save message when the draft changes again", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
@@ -691,7 +798,7 @@ describe("DayFrameApp", () => {
       "false",
     );
     expect(
-      screen.getByText("Connect shifts to date ranges and rotating schedules."),
+      screen.getByText("Connect shifts to dated manual ranges or repeating day-by-day rotations."),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
@@ -2228,25 +2335,25 @@ describe("DayFrameApp", () => {
           ],
           shiftCycles: [
             {
-            id: "cycle_001",
-            userId: "user_001",
-            name: "Day Rotation",
-            type: "fixedSegments",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-            segments: [
-              {
-                id: "segment_day",
-                shiftCycleId: "cycle_001",
-                shiftDefinitionId: "shift_day",
-                startsOnDate: "2026-05-01",
-                endsOnDate: "2026-05-31",
-                schedulePreferences: {
-                  dayBoundaryStartTime: "03:00",
-                  weekStartsOn: "monday",
+              id: "cycle_001",
+              userId: "user_001",
+              name: "Day Rotation",
+              type: "fixedSegments",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+              segments: [
+                {
+                  id: "segment_day",
+                  shiftCycleId: "cycle_001",
+                  shiftDefinitionId: "shift_day",
+                  startsOnDate: "2026-05-01",
+                  endsOnDate: "2026-05-31",
+                  schedulePreferences: {
+                    dayBoundaryStartTime: "03:00",
+                    weekStartsOn: "monday",
+                  },
                 },
-              },
-            ],
+              ],
               createdAt: "2026-05-03T00:00:00-05:00",
               updatedAt: "2026-05-03T00:00:00-05:00",
             },

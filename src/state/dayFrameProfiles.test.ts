@@ -69,6 +69,51 @@ describe("dayFrameProfiles", () => {
       validateDayFrameProfilesStorage({ app: "Other", version: 1, profiles: [] }),
     ).toBeUndefined();
   });
+
+  it("saves and validates repeating sequence cycles in profiles", () => {
+    const storage = validateDayFrameProfilesStorage({
+      app: "DayFrame",
+      version: 1,
+      profiles: [
+        {
+          id: "profile_sequence",
+          name: "Rig Rotation",
+          savedAt: "2026-05-05T09:00:00-05:00",
+          data: {
+            ...buildAuthoredSetup(),
+            shiftCycles: [
+              {
+                id: "cycle_sequence",
+                userId: "user_001",
+                name: "Rig Rotation",
+                type: "fixedSegments",
+                mode: "repeatingSequence",
+                startsOnDate: "2026-05-01",
+                endsOnDate: "2026-06-30",
+                segments: [],
+                sequenceAnchorDate: "2026-05-01",
+                sequence: [
+                  { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: null },
+                  { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+                ],
+                createdAt: "2026-05-03T00:00:00-05:00",
+                updatedAt: "2026-05-03T00:00:00-05:00",
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(storage?.profiles[0]?.data.shiftCycles[0]).toMatchObject({
+      mode: "repeatingSequence",
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [
+        { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: null },
+        { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+      ],
+    });
+  });
 });
 
 function buildAuthoredSetup(): DayFrameAuthoredSetup {

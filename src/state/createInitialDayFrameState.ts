@@ -1,4 +1,5 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
+import { normalizeShiftCycles } from "../core/cycles/shiftCycleUtils.js";
 import type { LocalDateString } from "../core/shifts/types.js";
 import type { DayFramePreviewRange, DayFramePreviewRangePreset, DayFrameState } from "./types.js";
 import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
@@ -113,10 +114,10 @@ function normalizePersistedShiftCycles(
   persistedState?: LegacyPersistedDayFrameState,
 ): DayFrameState["shiftCycles"] {
   if (Array.isArray(persistedState?.shiftCycles)) {
-    return persistedState.shiftCycles;
+    return normalizeShiftCycles(persistedState.shiftCycles);
   }
 
-  return persistedState?.shiftCycle ? [persistedState.shiftCycle] : [];
+  return persistedState?.shiftCycle ? normalizeShiftCycles([persistedState.shiftCycle]) : [];
 }
 
 function normalizePersistedBlockTemplates(

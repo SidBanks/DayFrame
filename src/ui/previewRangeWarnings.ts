@@ -79,10 +79,7 @@ export function getPreviewRangeWarnings(input: {
 
     activeSegmentsByDate.set(previewDate, activeSegment);
 
-    if (
-      overlapsCycle &&
-      isDateWithinRange(previewDate, cycleRange.startDate, cycleRange.endDate)
-    ) {
+    if (overlapsCycle && isDateWithinRange(previewDate, cycleRange.startDate, cycleRange.endDate)) {
       if (!activeSegment) {
         hasSegmentCoverageGap = true;
       }

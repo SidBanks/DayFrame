@@ -1946,4 +1946,235 @@ describe("generateSchedulePreview", () => {
       }),
     ]);
   });
+
+  it("maps repeating sequence anchor dates to day 1 and repeats with modulo", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "09:00",
+          endTime: "17:00",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["monday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_sequence",
+        userId: "user_001",
+        name: "DDNNOO",
+        type: "fixedSegments",
+        mode: "repeatingSequence",
+        startsOnDate: "2026-05-05",
+        endsOnDate: "2026-05-10",
+        segments: [],
+        sequenceAnchorDate: "2026-05-01",
+        sequence: [
+          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+          { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_night" },
+          { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [],
+      blockRecurrences: [],
+      planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 10, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(
+      result.generatedWorkBlocks.map((workBlock) => ({
+        startDate: workBlock.startDate,
+        shiftDefinitionId: workBlock.shiftDefinitionId,
+        shiftSegmentId: workBlock.shiftSegmentId,
+      })),
+    ).toEqual([
+      {
+        startDate: "2026-05-05",
+        shiftDefinitionId: "shift_night",
+        shiftSegmentId: "sequence_day_2",
+      },
+      {
+        startDate: "2026-05-07",
+        shiftDefinitionId: "shift_day",
+        shiftSegmentId: "sequence_day_1",
+      },
+      {
+        startDate: "2026-05-08",
+        shiftDefinitionId: "shift_night",
+        shiftSegmentId: "sequence_day_2",
+      },
+      {
+        startDate: "2026-05-10",
+        shiftDefinitionId: "shift_day",
+        shiftSegmentId: "sequence_day_1",
+      },
+    ]);
+  });
+
+  it("supports previews that cross from a manual cycle into a repeating sequence cycle", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "09:00",
+          endTime: "17:00",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+        {
+          id: "shift_night",
+          userId: "user_001",
+          name: "Night Shift",
+          startTime: "21:45",
+          endTime: "06:15",
+          workDays: ["monday"],
+          crossesMidnight: true,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycles: [
+        {
+          id: "cycle_manual",
+          userId: "user_001",
+          name: "Q1",
+          type: "fixedSegments",
+          mode: "manualSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-05",
+          segments: [
+            {
+              id: "segment_day",
+              shiftCycleId: "cycle_manual",
+              shiftDefinitionId: "shift_day",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-05",
+            },
+          ],
+          sequence: [],
+          sequenceAnchorDate: "2026-05-01",
+          ...baseTimestamps,
+        },
+        {
+          id: "cycle_sequence",
+          userId: "user_001",
+          name: "Q2",
+          type: "fixedSegments",
+          mode: "repeatingSequence",
+          startsOnDate: "2026-05-06",
+          endsOnDate: "2026-05-08",
+          segments: [],
+          sequenceAnchorDate: "2026-05-06",
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_night" },
+            { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+          ],
+          ...baseTimestamps,
+        },
+      ],
+      blockTemplates: [],
+      blockRecurrences: [],
+      planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 8, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.generatedWorkBlocks.map((workBlock) => workBlock.startDate)).toEqual([
+      "2026-05-04",
+      "2026-05-06",
+      "2026-05-08",
+    ]);
+  });
+
+  it("still places downtime templates on explicit repeating-sequence off days", () => {
+    const result = generateSchedulePreview({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "09:00",
+          endTime: "17:00",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_off_days",
+        userId: "user_001",
+        name: "4 On 4 Off",
+        type: "fixedSegments",
+        mode: "repeatingSequence",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-04",
+        segments: [],
+        sequenceAnchorDate: "2026-05-01",
+        sequence: [
+          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+          { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [
+        {
+          id: "template_read",
+          userId: "user_001",
+          title: "Reading",
+          category: "optional",
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 2,
+          preferredWindow: "afterWaking",
+          rescheduleBehavior: "autoSameUserWeek",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          ...baseTimestamps,
+        },
+      ],
+      blockRecurrences: [
+        {
+          id: "rec_read",
+          blockTemplateId: "template_read",
+          frequency: "daily",
+        },
+      ],
+      planningWindowStart: new Date(2026, 4, 1, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 4, 23, 59, 0, 0),
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      generatedAt: "2026-05-03T09:00:00-05:00",
+    });
+
+    expect(result.generatedWorkBlocks.map((workBlock) => workBlock.startDate)).toEqual([
+      "2026-05-01",
+      "2026-05-03",
+    ]);
+    expect(
+      result.scheduledBlocks
+        .filter((scheduledBlock) => scheduledBlock.title === "Reading")
+        .map((scheduledBlock) => scheduledBlock.userDayDate),
+    ).toEqual(["2026-04-30", "2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04"]);
+  });
 });

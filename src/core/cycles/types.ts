@@ -2,6 +2,7 @@ import type { TimeString, UserTimePreferences, Weekday } from "../time/types.js"
 import type { GeneratedWorkBlock, LocalDateString, ShiftDefinition } from "../shifts/types.js";
 
 export type ShiftCycleType = "fixedSegments";
+export type ShiftCycleMode = "manualSegments" | "repeatingSequence";
 
 export type ShiftSegmentSchedulePreferences = {
   dayBoundaryStartTime?: TimeString;
@@ -19,14 +20,23 @@ export type ShiftSegment = {
   notes?: string;
 };
 
+export type ShiftCycleSequenceDay = {
+  id: string;
+  dayOffset: number;
+  shiftDefinitionId: string | null;
+};
+
 export type ShiftCycle = {
   id: string;
   userId: string;
   name: string;
   type: ShiftCycleType;
+  mode?: ShiftCycleMode;
   startsOnDate: LocalDateString;
   endsOnDate?: LocalDateString;
   segments: ShiftSegment[];
+  sequence?: ShiftCycleSequenceDay[];
+  sequenceAnchorDate?: LocalDateString;
   createdAt: string;
   updatedAt: string;
 };

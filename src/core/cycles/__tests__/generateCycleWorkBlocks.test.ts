@@ -187,4 +187,116 @@ describe("generateCycleWorkBlocks", () => {
       }),
     ).toThrow(RangeError);
   });
+
+  it("generates repeating-sequence work days and skips explicit off days", () => {
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_002",
+      userId: "user_001",
+      name: "DDNNOO",
+      type: "fixedSegments",
+      mode: "repeatingSequence",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-06",
+      segments: [],
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [
+        { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+        { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_day" },
+        { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: "shift_night" },
+        { id: "sequence_day_4", dayOffset: 3, shiftDefinitionId: "shift_night" },
+        { id: "sequence_day_5", dayOffset: 4, shiftDefinitionId: null },
+        { id: "sequence_day_6", dayOffset: 5, shiftDefinitionId: null },
+      ],
+      ...baseTimestamps,
+    };
+
+    const workBlocks = generateCycleWorkBlocks({
+      shiftCycle,
+      shiftDefinitions,
+      planningWindowStart: new Date(2026, 4, 1, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 7, 0, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(workBlocks.map((workBlock) => workBlock.startDate)).toEqual([
+      "2026-05-01",
+      "2026-05-02",
+      "2026-05-03",
+      "2026-05-04",
+    ]);
+    expect(workBlocks.map((workBlock) => workBlock.shiftDefinitionId)).toEqual([
+      "shift_day",
+      "shift_day",
+      "shift_night",
+      "shift_night",
+    ]);
+  });
+
+  it("repeats sequence days using modulo arithmetic from the anchor date", () => {
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_003",
+      userId: "user_001",
+      name: "4 On 4 Off",
+      type: "fixedSegments",
+      mode: "repeatingSequence",
+      startsOnDate: "2026-05-05",
+      endsOnDate: "2026-05-10",
+      segments: [],
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [
+        { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+        { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_day" },
+        { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
+        { id: "sequence_day_4", dayOffset: 3, shiftDefinitionId: null },
+      ],
+      ...baseTimestamps,
+    };
+
+    const workBlocks = generateCycleWorkBlocks({
+      shiftCycle,
+      shiftDefinitions,
+      planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 11, 0, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(workBlocks.map((workBlock) => workBlock.startDate)).toEqual([
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-09",
+      "2026-05-10",
+    ]);
+  });
+
+  it("includes repeating overnight shifts with sequence day ids as anchors", () => {
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_004",
+      userId: "user_001",
+      name: "Night Rotation",
+      type: "fixedSegments",
+      mode: "repeatingSequence",
+      startsOnDate: "2026-05-16",
+      endsOnDate: "2026-05-18",
+      segments: [],
+      sequenceAnchorDate: "2026-05-16",
+      sequence: [{ id: "sequence_night", dayOffset: 0, shiftDefinitionId: "shift_night" }],
+      ...baseTimestamps,
+    };
+
+    const workBlocks = generateCycleWorkBlocks({
+      shiftCycle,
+      shiftDefinitions,
+      planningWindowStart: new Date(2026, 4, 18, 1, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 18, 2, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+
+    expect(workBlocks).toHaveLength(1);
+    expect(workBlocks[0]).toMatchObject({
+      shiftSegmentId: "sequence_night",
+      startDate: "2026-05-17",
+      endDate: "2026-05-18",
+      crossesMidnight: true,
+    });
+  });
 });

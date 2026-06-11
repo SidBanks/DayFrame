@@ -139,4 +139,27 @@ describe("getActiveShiftSegment", () => {
       }),
     ).toThrow(RangeError);
   });
+
+  it("returns null for repeating-sequence cycles because no manual segment is active", () => {
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_002",
+      userId: "user_001",
+      name: "DDNNOO",
+      type: "fixedSegments",
+      mode: "repeatingSequence",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [],
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [{ id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" }],
+      ...baseTimestamps,
+    };
+
+    expect(
+      getActiveShiftSegment({
+        shiftCycle,
+        date: new Date(2026, 4, 20, 12, 0, 0, 0),
+      }),
+    ).toBeNull();
+  });
 });

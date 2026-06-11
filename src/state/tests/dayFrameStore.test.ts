@@ -112,6 +112,53 @@ describe("dayFrameStore", () => {
     });
   });
 
+  it("normalizes legacy cycles to manualSegments with default sequence fields", () => {
+    const state = createInitialDayFrameState({
+      shiftDefinitions: [
+        {
+          id: "shift_day",
+          userId: "user_001",
+          name: "Day Shift",
+          startTime: "05:45",
+          endTime: "14:15",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+      ],
+      shiftCycle: {
+        id: "cycle_legacy",
+        userId: "user_001",
+        name: "Legacy Cycle",
+        type: "fixedSegments",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+        segments: [
+          {
+            id: "segment_day",
+            shiftCycleId: "cycle_legacy",
+            shiftDefinitionId: "shift_day",
+            startsOnDate: "2026-05-01",
+            endsOnDate: "2026-05-31",
+          },
+        ],
+        ...baseTimestamps,
+      },
+      blockTemplates: [],
+      blockRecurrences: [],
+      manualEvents: [],
+    });
+
+    expect(state.shiftCycles).toEqual([
+      expect.objectContaining({
+        id: "cycle_legacy",
+        mode: "manualSegments",
+        sequence: [],
+        sequenceAnchorDate: "2026-05-01",
+      }),
+    ]);
+  });
+
   it("stores manual events in authored state and includes them in saved profiles", () => {
     const localStorage = createLocalStorageMock();
 
@@ -316,8 +363,11 @@ describe("dayFrameStore", () => {
       userId: "user_001",
       name: "Day Rotation",
       type: "fixedSegments",
+      mode: "manualSegments",
       startsOnDate: "2026-05-01",
       endsOnDate: "2026-05-31",
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [],
       segments: [
         {
           id: "segment_day",
@@ -395,8 +445,11 @@ describe("dayFrameStore", () => {
       userId: "user_001",
       name: "Day Rotation",
       type: "fixedSegments",
+      mode: "manualSegments",
       startsOnDate: "2026-05-01",
       endsOnDate: "2026-05-31",
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [],
       segments: [
         {
           id: "segment_day",
@@ -456,6 +509,46 @@ describe("dayFrameStore", () => {
     expect(state.preview?.result.generatedWorkBlocks).toHaveLength(1);
     expect(state.preview?.result.scheduledBlocks).toHaveLength(1);
     expect(state.preview?.result.frictionPoints).toEqual([]);
+  });
+
+  it("persists repeating sequence cycles in store state and local storage", () => {
+    const localStorage = createLocalStorageMock();
+
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+    const shiftCycle: ShiftCycle = {
+      id: "cycle_sequence",
+      userId: "user_001",
+      name: "14 On 14 Off",
+      type: "fixedSegments",
+      mode: "repeatingSequence",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [],
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [
+        {
+          id: "sequence_day_1",
+          dayOffset: 0,
+          shiftDefinitionId: "shift_day",
+        },
+        {
+          id: "sequence_day_2",
+          dayOffset: 1,
+          shiftDefinitionId: null,
+        },
+      ],
+      ...baseTimestamps,
+    };
+
+    store.setShiftCycles([shiftCycle]);
+
+    expect(store.getState().shiftCycles).toEqual([shiftCycle]);
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+      shiftCycles: [shiftCycle],
+      shiftCycle,
+    });
   });
 
   it("marks the current preview as stale when authored setup changes", () => {
@@ -663,8 +756,11 @@ describe("dayFrameStore", () => {
       userId: "user_001",
       name: "Day Rotation",
       type: "fixedSegments",
+      mode: "manualSegments",
       startsOnDate: "2026-05-01",
       endsOnDate: "2026-05-31",
+      sequenceAnchorDate: "2026-05-01",
+      sequence: [],
       segments: [
         {
           id: "segment_day",
@@ -964,8 +1060,11 @@ function buildShiftCycle(): ShiftCycle {
     userId: "user_001",
     name: "Day Rotation",
     type: "fixedSegments",
+    mode: "manualSegments",
     startsOnDate: "2026-05-01",
     endsOnDate: "2026-05-31",
+    sequenceAnchorDate: "2026-05-01",
+    sequence: [],
     segments: [
       {
         id: "segment_day",

@@ -1,6 +1,11 @@
 import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js";
 import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
+import {
+  cloneShiftCycle,
+  cloneShiftCycles,
+  normalizeShiftCycles as normalizeCycleArray,
+} from "../core/cycles/shiftCycleUtils.js";
 
 export type DayFrameBackupV1 = {
   app: "DayFrame";
@@ -77,34 +82,8 @@ export function cloneDayFrameAuthoredSetup(
     shiftDefinitions: authoredSetup.shiftDefinitions.map((shiftDefinition) => ({
       ...shiftDefinition,
     })),
-    shiftCycles: authoredSetup.shiftCycles.map((shiftCycle) => ({
-      ...shiftCycle,
-      segments: shiftCycle.segments.map((segment) => ({
-        ...segment,
-        ...(segment.schedulePreferences
-          ? {
-              schedulePreferences: {
-                ...segment.schedulePreferences,
-              },
-            }
-          : {}),
-      })),
-    })),
-    shiftCycle: authoredSetup.shiftCycle
-      ? {
-          ...authoredSetup.shiftCycle,
-          segments: authoredSetup.shiftCycle.segments.map((segment) => ({
-            ...segment,
-            ...(segment.schedulePreferences
-              ? {
-                  schedulePreferences: {
-                    ...segment.schedulePreferences,
-                  },
-                }
-              : {}),
-          })),
-        }
-      : null,
+    shiftCycles: cloneShiftCycles(authoredSetup.shiftCycles),
+    shiftCycle: authoredSetup.shiftCycle ? cloneShiftCycle(authoredSetup.shiftCycle) : null,
     blockTemplates: authoredSetup.blockTemplates.map((blockTemplate) => ({
       ...blockTemplate,
       requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
@@ -180,20 +159,24 @@ function normalizeAuthoredSetup(value: Record<string, unknown>): DayFrameAuthore
       value.previewRange as Partial<DayFrameAuthoredSetup["previewRange"]> | undefined,
     ),
     shiftDefinitions: value.shiftDefinitions as DayFrameAuthoredSetup["shiftDefinitions"],
-    shiftCycles: normalizeShiftCycles(value),
+    shiftCycles: normalizeAuthoredShiftCycles(value),
     blockTemplates: value.blockTemplates as DayFrameAuthoredSetup["blockTemplates"],
     blockRecurrences: value.blockRecurrences as DayFrameAuthoredSetup["blockRecurrences"],
     manualEvents: normalizeManualCalendarEvents(value.manualEvents),
   };
 }
 
-function normalizeShiftCycles(value: Record<string, unknown>): DayFrameAuthoredSetup["shiftCycles"] {
+function normalizeAuthoredShiftCycles(
+  value: Record<string, unknown>,
+): DayFrameAuthoredSetup["shiftCycles"] {
   if (Array.isArray(value.shiftCycles)) {
-    return value.shiftCycles as DayFrameAuthoredSetup["shiftCycles"];
+    return normalizeCycleArray(value.shiftCycles as DayFrameAuthoredSetup["shiftCycles"]);
   }
 
   return value.shiftCycle && isRecord(value.shiftCycle)
-    ? [value.shiftCycle as NonNullable<DayFrameAuthoredSetup["shiftCycles"]>[number]]
+    ? normalizeCycleArray([
+        value.shiftCycle as NonNullable<DayFrameAuthoredSetup["shiftCycles"]>[number],
+      ])
     : [];
 }
 

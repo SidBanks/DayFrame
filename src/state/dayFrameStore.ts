@@ -1,5 +1,6 @@
 import { generateSchedulePreview } from "../core/engine/generateSchedulePreview.js";
 import { reviseSchedulePreview } from "../core/engine/reviseSchedulePreview.js";
+import { cloneShiftCycles as cloneNormalizedShiftCycles } from "../core/cycles/shiftCycleUtils.js";
 import {
   cloneDayFrameAuthoredSetup,
   createDayFrameBackup,
@@ -357,7 +358,7 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
       ? cloneShiftCycles(initialState.shiftCycles)
       : initialState.shiftCycle
         ? cloneShiftCycles([initialState.shiftCycle])
-      : baseState.shiftCycles,
+        : baseState.shiftCycles,
     blockTemplates: initialState.blockTemplates
       ? cloneBlockTemplates(initialState.blockTemplates)
       : baseState.blockTemplates,
@@ -616,19 +617,7 @@ function cloneShiftDefinitions(
 }
 
 function cloneShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): DayFrameState["shiftCycles"] {
-  return shiftCycles.map((shiftCycle) => ({
-    ...shiftCycle,
-    segments: shiftCycle.segments.map((segment) => ({
-      ...segment,
-      ...(segment.schedulePreferences
-        ? {
-            schedulePreferences: {
-              ...segment.schedulePreferences,
-            },
-          }
-        : {}),
-    })),
-  }));
+  return cloneNormalizedShiftCycles(shiftCycles);
 }
 
 function cloneBlockTemplates(
