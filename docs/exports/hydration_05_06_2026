@@ -1,0 +1,205 @@
+﻿DayFrame Hydration Snapshot
+Version: Post Phase 1.3.0 + 1.3.1 Prep
+Date: 2026-05-06
+Status: Stable, Visualizer Integrated, Time-Boundary Refinement Next
+
+🧭 Product Identity (LOCKED)
+DayFrame is a:
+Deterministic, user-driven scheduling system
+that helps users:
+    • protect what matters
+    • understand their time
+    • adapt to real-world constraints
+    • learn from their own patterns
+Core Principle
+The system explains — it does not decide.
+Explicit Non-Goals
+    • ❌ AI scheduling / auto-planning
+    • ❌ Black-box decisions
+    • ❌ Opaque behavior
+
+🧱 Current System State
+Engine (Phases 0.3 → 0.12)
+Fully implemented and tested:
+    • Shift definitions + cycle system
+    • Work block generation
+    • Template + recurrence expansion
+    • Deterministic placement layer
+    • Friction detection
+    • Suggested fixes generation
+    • Fix application
+    • Preview orchestration pipeline
+    • Revision loop (apply fix → recompute friction)
+All pure, test-covered, and deterministic.
+
+App Layer (Phase 1.0 → 1.2.2)
+Store
+    • Framework-free state store
+    • Local persistence (dayframe-store-v1)
+    • Profiles system (save/load/delete setups)
+    • Backup / import / export
+    • Preview not persisted (by design)
+UI Screens
+    • Shift Setup
+    • Cycle Setup
+    • Template Editor
+    • Preview Screen
+UX Enhancements
+    • Validation guardrails (itemized checklist)
+    • Microcopy + onboarding improvements
+    • Light/Dark theme foundation
+    • Responsive layout
+    • Clear-local-data UX
+
+New Work (Latest Changes)
+✅ Visualizer (Phase 1.3.0)
+    • 24-hour read-only day visualizer implemented
+    • Displays:
+        ◦ work blocks
+        ◦ scheduled blocks
+    • Overlap styling included
+    • Integrated into Preview screen per day card
+    • Basic tests added and passing
+
+✅ Default Template Fix (Phase 1.3.1 — partial)
+Default seed updated:
+Sleep
+Errands
+    • ❌ Workout removed from defaults
+    • ✔ Work continues to come from shift system
+    • ✔ Sleep template:
+        ◦ id: "default_sleep"
+        ◦ duration: 480 minutes
+        ◦ preferredWindow: beforeSleep
+        ◦ priority: 1
+Tests updated accordingly.
+
+⚠️ Current Known Issues / Active Work
+Time Model Problems (HIGH PRIORITY)
+1. Calendar-day assumption (broken)
+Current behavior:
+Day = 00:00 → 23:59 ❌
+Problem:
+    • Breaks night shifts
+    • Breaks after-work sleep
+    • Creates unrealistic placement constraints
+
+2. User Day Boundary (partially implemented)
+We already have:
+schedulingPreferences.dayBoundaryStartTime
+But:
+    • Not exposed in UI
+    • Not used in visualizer
+    • Not fully respected in placement
+
+3. Night shift placement issue
+Example failure:
+Shift: 21:45 → 06:15
+Sleep after work → blocked ❌
+Cause:
+System thinks day ended at 23:59
+
+4. Shift setup friction
+    • User must manually decide crossesMidnight
+    • Should be automatic
+
+5. Template self-reference risk
+Potential invalid behavior:
+Sleep before Sleep ❌
+Sleep after Sleep ❌
+Needs prevention logic
+
+6. Sleep recurrence incomplete
+Current:
+Sleep not guaranteed all 7 days ❌
+Should be:
+Sleep = every day ✔
+
+🎯 Next Phase (LOCKED)
+Phase 1.3.1 — Time Boundary + Sleep Baseline Fixes
+Goals
+Fix the core time model before expanding UI or features.
+
+Required Work
+1. Auto-detect overnight shifts
+crossesMidnight = endTime <= startTime
+
+2. Add Day Start Time UI
+    • Location: Shift Setup screen
+    • Field: Day Start Time
+    • Persist in:
+        ◦ schedulingPreferences.dayBoundaryStartTime
+
+3. Update Visualizer
+    • Timeline starts at user day boundary
+    • NOT midnight
+    • All block positioning relative to boundary
+
+4. Fix Sleep recurrence
+Default:
+Monday → Sunday (all 7 days)
+
+5. Prevent self-referential templates
+Rule:
+A template cannot reference itself
+
+6. Fix night-shift placement
+Allow:
+After-work blocks to extend into next calendar date
+IF still within user-day window
+
+🚫 Do NOT Build Yet
+Explicitly deferred:
+    • Drag-and-drop editing
+    • Calendar integration
+    • Cloud sync
+    • Week visualizer
+    • Cycle visualizer
+    • Day/week editors
+    • AI features (permanently avoided)
+
+🧪 Testing Discipline
+For each phase:
+npm run format
+npm run test
+npm run typecheck
+npm run lint
+Only run:
+npm run build
+when working on build/dev tooling or major stabilization.
+
+🧭 Phase Roadmap (Condensed)
+Phase 1 — Core Product
+✔ Engine complete
+✔ UI complete
+✔ Persistence + profiles
+✔ Visualizer (day view)
+➡ Time boundary fixes (current)
+➡ Input validation
+➡ Priority system
+➡ Required blocks
+➡ Reflection system
+
+Phase 2 — Integration (LOCKED)
+Order:
+1. Cloud Sync
+2. Calendar Integration
+3. Drag-and-Drop Editing
+Release requirement:
+Product is NOT release-ready until Phase 2 is complete.
+
+🧠 Product Direction (Important)
+You are building:
+A system that helps users:
+- protect what matters
+- see their time clearly
+- adapt to reality
+- learn from patterns
+NOT:
+A tool that tells users what to do
+
+🧾 Current Focus
+Stabilize → Fix time model → Then expand
+
+🔚 End of Hydration Snapshot
+
