@@ -43,13 +43,11 @@ export type ShiftCycle = {
 
 export type GetActiveShiftSegmentInput = {
   shiftCycles?: ShiftCycle[];
-  shiftCycle?: ShiftCycle;
   date: Date;
 };
 
 export type GenerateCycleWorkBlocksInput = {
   shiftCycles?: ShiftCycle[];
-  shiftCycle?: ShiftCycle;
   shiftDefinitions: ShiftDefinition[];
   planningWindowStart: Date;
   planningWindowEnd: Date;

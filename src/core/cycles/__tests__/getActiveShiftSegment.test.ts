@@ -38,7 +38,7 @@ describe("getActiveShiftSegment", () => {
 
     expect(
       getActiveShiftSegment({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         date: new Date(2026, 4, 20, 12, 0, 0, 0),
       }),
     ).toMatchObject({
@@ -69,7 +69,7 @@ describe("getActiveShiftSegment", () => {
 
     expect(
       getActiveShiftSegment({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         date: new Date(2026, 4, 20, 12, 0, 0, 0),
       }),
     ).toBeNull();
@@ -97,7 +97,7 @@ describe("getActiveShiftSegment", () => {
 
     expect(
       getActiveShiftSegment({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         date: new Date(2026, 4, 15, 23, 59, 0, 0),
       }),
     ).toMatchObject({
@@ -134,7 +134,7 @@ describe("getActiveShiftSegment", () => {
 
     expect(() =>
       getActiveShiftSegment({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         date: new Date(2026, 4, 15, 12, 0, 0, 0),
       }),
     ).toThrow(RangeError);
@@ -157,7 +157,7 @@ describe("getActiveShiftSegment", () => {
 
     expect(
       getActiveShiftSegment({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         date: new Date(2026, 4, 20, 12, 0, 0, 0),
       }),
     ).toBeNull();

@@ -134,7 +134,6 @@ export type GenerateBlockCandidatesInput = {
   dayBoundaryStartTime?: TimeString;
   weekStartsOn?: Weekday;
   shiftCycles?: ShiftCycle[];
-  shiftCycle?: ShiftCycle;
   defaultSchedulingPreferences?: UserTimePreferences;
 };
 

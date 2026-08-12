@@ -23,15 +23,14 @@ describe("dayFrameBackup", () => {
     const backupJson = JSON.stringify(
       createDayFrameBackup(buildAuthoredSetup(), "2026-05-05T10:00:00-05:00"),
     );
+    const parsedBackup = parseDayFrameBackupJson(backupJson);
 
-    expect(parseDayFrameBackupJson(backupJson)).toEqual({
+    expect(parsedBackup.data).not.toHaveProperty("shiftCycle");
+    expect(parsedBackup).toEqual({
       app: "DayFrame",
       version: 1,
       exportedAt: "2026-05-05T10:00:00-05:00",
-      data: {
-        ...buildAuthoredSetup(),
-        shiftCycle: null,
-      },
+      data: buildAuthoredSetup(),
     });
   });
 
@@ -69,6 +68,7 @@ describe("dayFrameBackup", () => {
     expect(clonedSetup).toEqual(buildAuthoredSetup());
     expect(clonedSetup).not.toBe(buildAuthoredSetup());
     expect(clonedSetup.shiftDefinitions).not.toBe(buildAuthoredSetup().shiftDefinitions);
+    expect(clonedSetup.shiftCycles).not.toBe(buildAuthoredSetup().shiftCycles);
     expect(clonedSetup.blockTemplates[0]?.externalResources).not.toBe(
       buildAuthoredSetup().blockTemplates[0]?.externalResources,
     );
@@ -76,23 +76,25 @@ describe("dayFrameBackup", () => {
 
   it("exports and parses repeating sequence cycles", () => {
     const authoredSetup = buildAuthoredSetup({
-      shiftCycle: {
-        id: "cycle_sequence",
-        userId: "user_001",
-        name: "Rig Rotation",
-        type: "fixedSegments",
-        mode: "repeatingSequence",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-06-30",
-        segments: [],
-        sequenceAnchorDate: "2026-05-01",
-        sequence: [
-          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
-          { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
-        ],
-        createdAt: "2026-05-03T00:00:00-05:00",
-        updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      shiftCycles: [
+        {
+          id: "cycle_sequence",
+          userId: "user_001",
+          name: "Rig Rotation",
+          type: "fixedSegments",
+          mode: "repeatingSequence",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-06-30",
+          segments: [],
+          sequenceAnchorDate: "2026-05-01",
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+            { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+          ],
+          createdAt: "2026-05-03T00:00:00-05:00",
+          updatedAt: "2026-05-03T00:00:00-05:00",
+        },
+      ],
     });
 
     const parsedBackup = parseDayFrameBackupJson(
@@ -110,33 +112,29 @@ describe("dayFrameBackup", () => {
   });
 });
 
-function buildAuthoredSetup(
-  overrides?: Partial<DayFrameAuthoredSetup> & { shiftCycle?: DayFrameAuthoredSetup["shiftCycle"] },
-): DayFrameAuthoredSetup {
-  const shiftCycle =
-    overrides?.shiftCycle ??
-    ({
-      id: "cycle_001",
-      userId: "user_001",
-      name: "Day Rotation",
-      type: "fixedSegments",
-      mode: "manualSegments",
-      startsOnDate: "2026-05-01",
-      endsOnDate: "2026-05-31",
-      sequenceAnchorDate: "2026-05-01",
-      sequence: [],
-      createdAt: "2026-05-03T00:00:00-05:00",
-      updatedAt: "2026-05-03T00:00:00-05:00",
-      segments: [
-        {
-          id: "segment_day",
-          shiftCycleId: "cycle_001",
-          shiftDefinitionId: "shift_day",
-          startsOnDate: "2026-05-01",
-          endsOnDate: "2026-05-31",
-        },
-      ],
-    } satisfies NonNullable<DayFrameAuthoredSetup["shiftCycle"]>);
+function buildAuthoredSetup(overrides?: Partial<DayFrameAuthoredSetup>): DayFrameAuthoredSetup {
+  const shiftCycle = {
+    id: "cycle_001",
+    userId: "user_001",
+    name: "Day Rotation",
+    type: "fixedSegments",
+    mode: "manualSegments",
+    startsOnDate: "2026-05-01",
+    endsOnDate: "2026-05-31",
+    sequenceAnchorDate: "2026-05-01",
+    sequence: [],
+    createdAt: "2026-05-03T00:00:00-05:00",
+    updatedAt: "2026-05-03T00:00:00-05:00",
+    segments: [
+      {
+        id: "segment_day",
+        shiftCycleId: "cycle_001",
+        shiftDefinitionId: "shift_day",
+        startsOnDate: "2026-05-01",
+        endsOnDate: "2026-05-31",
+      },
+    ],
+  } satisfies DayFrameAuthoredSetup["shiftCycles"][number];
 
   return {
     schedulingPreferences: {
@@ -162,7 +160,6 @@ function buildAuthoredSetup(
         updatedAt: "2026-05-03T00:00:00-05:00",
       },
     ],
-    shiftCycle,
     shiftCycles: [shiftCycle],
     blockTemplates: [
       {

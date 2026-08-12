@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDayFrameBackup } from "../dayFrameBackup.js";
+import { createDayFrameBackup, parseDayFrameBackupJson } from "../dayFrameBackup.js";
 import { createInitialDayFrameState } from "../createInitialDayFrameState.js";
 import {
   createDayFrameStore,
@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe("dayFrameStore", () => {
-  it("loads persisted authored setup state from local storage", () => {
+  it("loads singular-only legacy cycle state and rewrites it using plural cycles only", () => {
     const localStorage = createLocalStorageMock();
 
     localStorage.setItem(
@@ -73,7 +73,8 @@ describe("dayFrameStore", () => {
 
     installLocalStorageMock(localStorage);
 
-    const state = createDayFrameStore().getState();
+    const store = createDayFrameStore();
+    const state = store.getState();
 
     expect(state.schedulingPreferences).toEqual({
       dayBoundaryStartTime: "04:00",
@@ -88,6 +89,13 @@ describe("dayFrameStore", () => {
     expect(state.shiftCycles).toHaveLength(1);
     expect(state.shiftCycles[0]?.name).toBe("Day Rotation");
     expect(state.preview).toBeNull();
+
+    store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+    const rewrittenState = JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}");
+
+    expect(rewrittenState.shiftCycles).toEqual(state.shiftCycles);
+    expect(rewrittenState).not.toHaveProperty("shiftCycle");
   });
 
   it("creates the expected initial state", () => {
@@ -104,7 +112,6 @@ describe("dayFrameStore", () => {
       manualEvents: [],
       shiftDefinitions: [],
       shiftCycles: [],
-      shiftCycle: null,
       blockTemplates: [],
       blockRecurrences: [],
       savedProfiles: [],
@@ -381,7 +388,7 @@ describe("dayFrameStore", () => {
     };
 
     store.setShiftDefinitions(shiftDefinitions);
-    store.setShiftCycle(shiftCycle);
+    store.setShiftCycles([shiftCycle]);
     store.setSchedulingPreferences({
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
@@ -405,7 +412,6 @@ describe("dayFrameStore", () => {
     });
     expect(state.shiftDefinitions).toEqual(shiftDefinitions);
     expect(state.shiftCycles).toEqual([shiftCycle]);
-    expect(state.shiftCycle).toEqual(shiftCycle);
     expect(state.preview).toBeNull();
     expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
       schedulingPreferences: {
@@ -419,11 +425,127 @@ describe("dayFrameStore", () => {
       },
       shiftDefinitions,
       shiftCycles: [shiftCycle],
-      shiftCycle,
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents: [],
     });
+  });
+
+  it("commits the complete authored setup as one cloned, persisted, observable transition", () => {
+    const localStorage = createLocalStorageMock();
+    const setItem = vi.spyOn(localStorage, "setItem");
+
+    installLocalStorageMock(localStorage);
+
+    const existingManualEvents = [
+      {
+        id: "manual_existing",
+        title: "Existing appointment",
+        userDayDate: "2026-05-04" as const,
+        allDay: true,
+        createdAt: baseTimestamps.createdAt,
+        updatedAt: baseTimestamps.updatedAt,
+      },
+    ];
+    const shiftDefinitions = buildShiftDefinitions();
+    const shiftCycles = [buildShiftCycle()];
+    const blockTemplates = buildBlockTemplates();
+    const blockRecurrences = buildBlockRecurrences();
+    const store = createDayFrameStore({
+      shiftDefinitions,
+      shiftCycles,
+      blockTemplates,
+      blockRecurrences,
+      manualEvents: existingManualEvents,
+    });
+    const listener = vi.fn();
+
+    store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-04",
+      planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 4, 23, 59, 59, 999),
+      generatedAt: "2026-05-03T13:00:00-05:00",
+    });
+    setItem.mockClear();
+    store.subscribe(listener);
+
+    const state = store.commitAuthoredSetup({
+      schedulingPreferences: {
+        dayBoundaryStartTime: "04:00",
+        weekStartsOn: "monday",
+      },
+      previewRange: {
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      },
+      shiftDefinitions,
+      shiftCycles,
+      blockTemplates,
+      blockRecurrences,
+    });
+
+    shiftDefinitions[0]!.name = "Mutated after commit";
+    shiftCycles[0]!.name = "Mutated after commit";
+    blockTemplates[0]!.title = "Mutated after commit";
+    blockRecurrences[0]!.frequency = "daily";
+
+    expect(state).toMatchObject({
+      schedulingPreferences: {
+        dayBoundaryStartTime: "04:00",
+        weekStartsOn: "monday",
+      },
+      previewRange: {
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      },
+      shiftDefinitions: [{ name: "Day Shift" }],
+      shiftCycles: [{ name: "Day Rotation" }],
+      blockTemplates: [{ title: "Schedule Review" }],
+      blockRecurrences: [{ frequency: "specificWeekdays" }],
+      manualEvents: existingManualEvents,
+      preview: { isStale: true },
+    });
+    expect(store.getState()).toEqual(state);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith(state);
+    expect(setItem).toHaveBeenCalledTimes(1);
+    expect(setItem).toHaveBeenCalledWith(
+      DAYFRAME_STORAGE_KEY,
+      JSON.stringify({
+        schedulingPreferences: state.schedulingPreferences,
+        previewRange: state.previewRange,
+        shiftDefinitions: state.shiftDefinitions,
+        shiftCycles: state.shiftCycles,
+        blockTemplates: state.blockTemplates,
+        blockRecurrences: state.blockRecurrences,
+        manualEvents: state.manualEvents,
+      }),
+    );
+  });
+
+  it("commits authored setup without creating a preview", () => {
+    const store = createDayFrameStore();
+
+    const state = store.commitAuthoredSetup({
+      schedulingPreferences: {
+        dayBoundaryStartTime: "04:00",
+        weekStartsOn: "monday",
+      },
+      previewRange: {
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      },
+      shiftDefinitions: buildShiftDefinitions(),
+      shiftCycles: [buildShiftCycle()],
+      blockTemplates: buildBlockTemplates(),
+      blockRecurrences: buildBlockRecurrences(),
+    });
+
+    expect(state.preview).toBeNull();
   });
 
   it("generates and stores a preview from the current state", () => {
@@ -488,7 +610,7 @@ describe("dayFrameStore", () => {
     ];
 
     store.setShiftDefinitions(shiftDefinitions);
-    store.setShiftCycle(shiftCycle);
+    store.setShiftCycles([shiftCycle]);
     store.setBlockTemplates(blockTemplates);
     store.setBlockRecurrences(blockRecurrences);
 
@@ -545,17 +667,19 @@ describe("dayFrameStore", () => {
     store.setShiftCycles([shiftCycle]);
 
     expect(store.getState().shiftCycles).toEqual([shiftCycle]);
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+    const persistedState = JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}");
+
+    expect(persistedState).toMatchObject({
       shiftCycles: [shiftCycle],
-      shiftCycle,
     });
+    expect(persistedState).not.toHaveProperty("shiftCycle");
   });
 
   it("marks the current preview as stale when authored setup changes", () => {
     const store = createDayFrameStore();
 
     store.setShiftDefinitions(buildShiftDefinitions());
-    store.setShiftCycle(buildShiftCycle());
+    store.setShiftCycles([buildShiftCycle()]);
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
     store.generatePreview({
@@ -582,12 +706,14 @@ describe("dayFrameStore", () => {
       weekStartsOn: "monday",
     });
     store.setShiftDefinitions(buildShiftDefinitions());
-    store.setShiftCycle(buildShiftCycle());
+    store.setShiftCycles([buildShiftCycle()]);
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
 
     const backup = store.exportBackup("2026-05-05T10:00:00-05:00");
 
+    expect(backup.data.shiftCycles).toEqual([buildShiftCycle()]);
+    expect(backup.data).not.toHaveProperty("shiftCycle");
     expect(backup).toEqual(
       createDayFrameBackup(
         {
@@ -611,6 +737,32 @@ describe("dayFrameStore", () => {
     );
   });
 
+  it("imports a literal singular-only V1 backup into plural runtime authority", () => {
+    const localStorage = createLocalStorageMock();
+    const legacyData = buildLegacySingularAuthoredSetup();
+
+    expect(legacyData).not.toHaveProperty("shiftCycles");
+    installLocalStorageMock(localStorage);
+
+    const backup = parseDayFrameBackupJson(
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        exportedAt: "2026-05-05T10:00:00-05:00",
+        data: legacyData,
+      }),
+    );
+    const state = createDayFrameStore().importBackup(backup);
+
+    expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+      shiftCycles: [buildNormalizedLegacyShiftCycle()],
+    });
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).not.toHaveProperty(
+      "shiftCycle",
+    );
+  });
+
   it("imports authored setup data and clears any current preview", () => {
     const localStorage = createLocalStorageMock();
 
@@ -623,7 +775,7 @@ describe("dayFrameStore", () => {
     });
 
     store.setShiftDefinitions(buildShiftDefinitions());
-    store.setShiftCycle(buildShiftCycle());
+    store.setShiftCycles([buildShiftCycle()]);
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
     store.generatePreview({
@@ -680,7 +832,6 @@ describe("dayFrameStore", () => {
       },
       shiftDefinitions: buildShiftDefinitions(),
       shiftCycles: [buildShiftCycle()],
-      shiftCycle: buildShiftCycle(),
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents: [],
@@ -699,7 +850,7 @@ describe("dayFrameStore", () => {
       weekStartsOn: "monday",
     });
     store.setShiftDefinitions(buildShiftDefinitions());
-    store.setShiftCycle(buildShiftCycle());
+    store.setShiftCycles([buildShiftCycle()]);
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
     store.saveProfile({
@@ -709,6 +860,14 @@ describe("dayFrameStore", () => {
 
     expect(store.getState().savedProfiles).toHaveLength(1);
     expect(store.getState().savedProfiles[0]?.name).toBe("Week A");
+    expect(store.getState().savedProfiles[0]?.data.shiftCycles).toEqual([buildShiftCycle()]);
+    expect(store.getState().savedProfiles[0]?.data).not.toHaveProperty("shiftCycle");
+    const persistedProfileData = JSON.parse(
+      localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "{}",
+    ).profiles?.[0]?.data;
+
+    expect(persistedProfileData.shiftCycles).toEqual([buildShiftCycle()]);
+    expect(persistedProfileData).not.toHaveProperty("shiftCycle");
 
     store.setSchedulingPreferences({
       dayBoundaryStartTime: "05:00",
@@ -730,6 +889,38 @@ describe("dayFrameStore", () => {
       app: "DayFrame",
       version: 1,
       profiles: [],
+    });
+  });
+
+  it("loads a literal singular-only legacy profile into plural runtime authority", () => {
+    const localStorage = createLocalStorageMock();
+    const legacyData = buildLegacySingularAuthoredSetup();
+
+    expect(legacyData).not.toHaveProperty("shiftCycles");
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [
+          {
+            id: "profile_legacy",
+            name: "Legacy Rotation",
+            savedAt: "2026-05-05T09:00:00-05:00",
+            data: legacyData,
+          },
+        ],
+      }),
+    );
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+    const state = store.loadProfile("profile_legacy");
+
+    expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
+    expect(state.preview).toBeNull();
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+      shiftCycles: [buildNormalizedLegacyShiftCycle()],
     });
   });
 
@@ -823,7 +1014,7 @@ describe("dayFrameStore", () => {
     ];
 
     store.setShiftDefinitions(shiftDefinitions);
-    store.setShiftCycle(shiftCycle);
+    store.setShiftCycles([shiftCycle]);
     store.setBlockTemplates(blockTemplates);
     store.setBlockRecurrences(blockRecurrences);
     store.generatePreview({
@@ -870,7 +1061,6 @@ describe("dayFrameStore", () => {
       },
       shiftDefinitions,
       shiftCycles: [shiftCycle],
-      shiftCycle,
       blockTemplates: blockTemplates.map((blockTemplate) => ({
         ...blockTemplate,
         requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
@@ -1075,6 +1265,51 @@ function buildShiftCycle(): ShiftCycle {
       },
     ],
     ...baseTimestamps,
+  };
+}
+
+function buildLegacySingularAuthoredSetup() {
+  return {
+    schedulingPreferences: {
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+    },
+    previewRange: {
+      preset: "threeDays",
+      startDate: "2026-05-04",
+      endDate: "2026-05-06",
+    },
+    shiftDefinitions: buildShiftDefinitions(),
+    shiftCycle: {
+      id: "cycle_legacy",
+      userId: "user_001",
+      name: "Legacy Rotation",
+      type: "fixedSegments",
+      startsOnDate: "2026-05-01",
+      endsOnDate: "2026-05-31",
+      segments: [
+        {
+          id: "segment_legacy",
+          shiftCycleId: "cycle_legacy",
+          shiftDefinitionId: "shift_day",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+        },
+      ],
+      ...baseTimestamps,
+    } satisfies ShiftCycle,
+    blockTemplates: [],
+    blockRecurrences: [],
+    manualEvents: [],
+  };
+}
+
+function buildNormalizedLegacyShiftCycle(): ShiftCycle {
+  return {
+    ...buildLegacySingularAuthoredSetup().shiftCycle,
+    mode: "manualSegments",
+    sequenceAnchorDate: "2026-05-01",
+    sequence: [],
   };
 }
 

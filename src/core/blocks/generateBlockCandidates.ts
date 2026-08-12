@@ -12,7 +12,7 @@ import { getWeekdayFromDate } from "../time/userWeek.js";
 import type { LocalDateString } from "../shifts/types.js";
 
 export function generateBlockCandidates(input: GenerateBlockCandidatesInput): BlockCandidate[] {
-  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
+  const shiftCycles = input.shiftCycles ?? [];
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   const defaultSchedulingPreferences = getDefaultSchedulingPreferences(input);
 

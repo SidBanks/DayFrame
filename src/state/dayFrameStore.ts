@@ -19,6 +19,7 @@ import {
 import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type {
   ApplyPreviewFixActionInput,
+  CommitAuthoredSetupInput,
   DayFramePreview,
   DayFramePreviewRange,
   DayFrameSavedProfile,
@@ -45,6 +46,27 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return () => {
       listeners.delete(listener);
     };
+  }
+
+  function commitAuthoredSetup(authoredSetup: CommitAuthoredSetupInput): DayFrameState {
+    state = {
+      ...state,
+      schedulingPreferences: {
+        ...authoredSetup.schedulingPreferences,
+      },
+      previewRange: {
+        ...authoredSetup.previewRange,
+      },
+      shiftDefinitions: cloneShiftDefinitions(authoredSetup.shiftDefinitions),
+      shiftCycles: cloneShiftCycles(authoredSetup.shiftCycles),
+      blockTemplates: cloneBlockTemplates(authoredSetup.blockTemplates),
+      blockRecurrences: cloneBlockRecurrences(authoredSetup.blockRecurrences),
+      preview: markPreviewStale(state.preview),
+    };
+
+    persistState(state);
+
+    return notify();
   }
 
   function setSchedulingPreferences(
@@ -100,10 +122,6 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     persistState(state);
 
     return notify();
-  }
-
-  function setShiftCycle(shiftCycle: DayFrameState["shiftCycle"]): DayFrameState {
-    return setShiftCycles(shiftCycle ? [shiftCycle] : []);
   }
 
   function setBlockTemplates(blockTemplates: DayFrameState["blockTemplates"]): DayFrameState {
@@ -313,10 +331,10 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   return {
     getState,
     subscribe,
+    commitAuthoredSetup,
     setSchedulingPreferences,
     setPreviewRange,
     setShiftDefinitions,
-    setShiftCycle,
     setShiftCycles,
     setBlockTemplates,
     setBlockRecurrences,
@@ -356,9 +374,7 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
       : baseState.shiftDefinitions,
     shiftCycles: initialState.shiftCycles
       ? cloneShiftCycles(initialState.shiftCycles)
-      : initialState.shiftCycle
-        ? cloneShiftCycles([initialState.shiftCycle])
-        : baseState.shiftCycles,
+      : baseState.shiftCycles,
     blockTemplates: initialState.blockTemplates
       ? cloneBlockTemplates(initialState.blockTemplates)
       : baseState.blockTemplates,
@@ -415,12 +431,6 @@ function persistState(state: DayFrameState): void {
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
     manualEvents: cloneManualEvents(state.manualEvents),
   };
-
-  if (state.shiftCycles[0]) {
-    persistedState.shiftCycle = cloneShiftCycles([state.shiftCycles[0]])[0]!;
-  } else {
-    persistedState.shiftCycle = null;
-  }
 
   try {
     storage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(persistedState));
@@ -523,8 +533,6 @@ type StorageLike = {
 };
 
 function cloneState(state: DayFrameState): DayFrameState {
-  const shiftCycles = cloneShiftCycles(state.shiftCycles);
-
   return {
     schedulingPreferences: {
       ...state.schedulingPreferences,
@@ -533,8 +541,7 @@ function cloneState(state: DayFrameState): DayFrameState {
       ...state.previewRange,
     },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
-    shiftCycles,
-    shiftCycle: shiftCycles[0] ?? null,
+    shiftCycles: cloneShiftCycles(state.shiftCycles),
     blockTemplates: cloneBlockTemplates(state.blockTemplates),
     blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
     manualEvents: cloneManualEvents(state.manualEvents),

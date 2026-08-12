@@ -129,7 +129,6 @@ function buildAuthoredSetup(): DayFrameAuthoredSetup {
     },
     manualEvents: [],
     shiftDefinitions: [],
-    shiftCycle: null,
     shiftCycles: [],
     blockTemplates: [],
     blockRecurrences: [],

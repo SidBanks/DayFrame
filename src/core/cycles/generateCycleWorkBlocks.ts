@@ -20,9 +20,7 @@ import { getUserDayDate, parseTimeString } from "../time/userDay.js";
 export function generateCycleWorkBlocks(
   input: GenerateCycleWorkBlocksInput,
 ): GeneratedCycleWorkBlock[] {
-  const shiftCycles = normalizeShiftCycles(
-    input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []),
-  );
+  const shiftCycles = normalizeShiftCycles(input.shiftCycles ?? []);
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   validateShiftCycles(shiftCycles);
   const defaultSchedulingPreferences = input.defaultSchedulingPreferences ?? {

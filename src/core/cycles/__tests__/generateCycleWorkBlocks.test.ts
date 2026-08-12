@@ -61,7 +61,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 14, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 19, 0, 0, 0, 0),
@@ -110,7 +110,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 15, 20, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 16, 12, 0, 0, 0),
@@ -141,7 +141,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 18, 1, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 18, 2, 0, 0, 0),
@@ -179,7 +179,7 @@ describe("generateCycleWorkBlocks", () => {
 
     expect(() =>
       generateCycleWorkBlocks({
-        shiftCycle,
+        shiftCycles: [shiftCycle],
         shiftDefinitions,
         planningWindowStart: new Date(2026, 4, 16, 0, 0, 0, 0),
         planningWindowEnd: new Date(2026, 4, 17, 0, 0, 0, 0),
@@ -211,7 +211,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 1, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 7, 0, 0, 0, 0),
@@ -253,7 +253,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 11, 0, 0, 0, 0),
@@ -284,7 +284,7 @@ describe("generateCycleWorkBlocks", () => {
     };
 
     const workBlocks = generateCycleWorkBlocks({
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       shiftDefinitions,
       planningWindowStart: new Date(2026, 4, 18, 1, 0, 0, 0),
       planningWindowEnd: new Date(2026, 4, 18, 2, 0, 0, 0),

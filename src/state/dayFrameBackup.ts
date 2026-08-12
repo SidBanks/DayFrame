@@ -2,7 +2,6 @@ import { normalizePersistedPreviewRange } from "./createInitialDayFrameState.js"
 import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 import {
-  cloneShiftCycle,
   cloneShiftCycles,
   normalizeShiftCycles as normalizeCycleArray,
 } from "../core/cycles/shiftCycleUtils.js";
@@ -83,7 +82,6 @@ export function cloneDayFrameAuthoredSetup(
       ...shiftDefinition,
     })),
     shiftCycles: cloneShiftCycles(authoredSetup.shiftCycles),
-    shiftCycle: authoredSetup.shiftCycle ? cloneShiftCycle(authoredSetup.shiftCycle) : null,
     blockTemplates: authoredSetup.blockTemplates.map((blockTemplate) => ({
       ...blockTemplate,
       requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,

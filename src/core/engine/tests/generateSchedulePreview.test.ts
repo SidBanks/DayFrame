@@ -92,7 +92,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates,
       blockRecurrences,
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
@@ -116,7 +116,7 @@ describe("generateSchedulePreview", () => {
   it("does not generate sleep when the sleep template is disabled", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Empty Cycle",
@@ -125,7 +125,7 @@ describe("generateSchedulePreview", () => {
         endsOnDate: "2026-05-31",
         segments: [],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -164,7 +164,7 @@ describe("generateSchedulePreview", () => {
   it("does generate sleep when the sleep template is enabled", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Empty Cycle",
@@ -173,7 +173,7 @@ describe("generateSchedulePreview", () => {
         endsOnDate: "2026-05-31",
         segments: [],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -291,7 +291,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates,
       blockRecurrences,
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
@@ -381,7 +381,7 @@ describe("generateSchedulePreview", () => {
 
     generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates,
       blockRecurrences,
       planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
@@ -448,7 +448,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [],
       blockRecurrences: [],
       planningWindowStart: new Date(2026, 4, 16, 0, 0, 0, 0),
@@ -529,7 +529,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates,
       blockRecurrences: [
         {
@@ -576,7 +576,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Empty Cycle",
@@ -585,7 +585,7 @@ describe("generateSchedulePreview", () => {
         endsOnDate: "2026-05-31",
         segments: [],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents,
@@ -611,7 +611,7 @@ describe("generateSchedulePreview", () => {
   it("keeps conflicting manual events in the preview while still surfacing friction", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Empty Cycle",
@@ -620,7 +620,7 @@ describe("generateSchedulePreview", () => {
         endsOnDate: "2026-05-31",
         segments: [],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -707,7 +707,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -828,7 +828,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [
         {
           id: "template_commute",
@@ -901,7 +901,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [
         {
           id: "template_workout",
@@ -1002,7 +1002,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [
         {
           id: "template_review",
@@ -1079,7 +1079,7 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions,
-      shiftCycle,
+      shiftCycles: [shiftCycle],
       blockTemplates: [
         {
           id: "template_review",
@@ -1125,7 +1125,7 @@ describe("generateSchedulePreview", () => {
   it("keeps sunday sleep recurrence in the sunday preview group", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Empty Cycle",
@@ -1134,7 +1134,7 @@ describe("generateSchedulePreview", () => {
         endsOnDate: "2026-05-31",
         segments: [],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1191,7 +1191,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1208,7 +1208,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1272,7 +1272,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1289,7 +1289,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1347,7 +1347,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1364,7 +1364,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1458,7 +1458,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1475,7 +1475,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "template_wind_down",
@@ -1533,7 +1533,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1550,7 +1550,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1634,7 +1634,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1651,7 +1651,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1718,7 +1718,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1735,7 +1735,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1808,7 +1808,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Early Rotation",
@@ -1825,7 +1825,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "template_maintenance",
@@ -1889,7 +1889,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1906,7 +1906,7 @@ describe("generateSchedulePreview", () => {
           },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents: [
@@ -1971,7 +1971,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_sequence",
         userId: "user_001",
         name: "DDNNOO",
@@ -1987,7 +1987,7 @@ describe("generateSchedulePreview", () => {
           { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [],
       blockRecurrences: [],
       planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
@@ -2120,7 +2120,7 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_off_days",
         userId: "user_001",
         name: "4 On 4 Off",
@@ -2135,7 +2135,7 @@ describe("generateSchedulePreview", () => {
           { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
         ],
         ...baseTimestamps,
-      },
+      }],
       blockTemplates: [
         {
           id: "template_read",

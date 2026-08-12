@@ -43,7 +43,6 @@ export function createInitialDayFrameState(
     previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
     shiftDefinitions: normalizedAuthoredSetup.shiftDefinitions,
     shiftCycles: normalizedAuthoredSetup.shiftCycles,
-    shiftCycle: normalizedAuthoredSetup.shiftCycles[0] ?? null,
     blockTemplates: normalizedAuthoredSetup.blockTemplates,
     blockRecurrences: normalizedAuthoredSetup.blockRecurrences,
     manualEvents: normalizedAuthoredSetup.manualEvents,

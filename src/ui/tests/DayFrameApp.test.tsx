@@ -104,6 +104,39 @@ describe("DayFrameApp", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
   });
 
+  it("commits one complete authored setup transition when Setup is saved", () => {
+    const store = createDayFrameStore();
+    const commitAuthoredSetup = vi.spyOn(store, "commitAuthoredSetup");
+
+    render(<DayFrameApp store={store} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(commitAuthoredSetup).toHaveBeenCalledTimes(1);
+    expect(commitAuthoredSetup).toHaveBeenCalledWith({
+      schedulingPreferences: {
+        dayBoundaryStartTime: "03:00",
+        weekStartsOn: "saturday",
+      },
+      previewRange: {
+        preset: "threeDays",
+        startDate: "2026-05-04",
+        endDate: "2026-05-06",
+      },
+      shiftDefinitions: [],
+      shiftCycles: [
+        expect.objectContaining({
+          id: "cycle_001",
+          mode: "manualSegments",
+          name: "Cycle 1",
+        }),
+      ],
+      blockTemplates: [],
+      blockRecurrences: [],
+    });
+    expect(screen.getByText("Setup saved.")).toBeInTheDocument();
+  });
+
   it("shows unified setup content and still lets the user open preview", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
@@ -210,7 +243,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -228,7 +261,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -421,7 +454,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -439,7 +472,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_workout",
@@ -643,7 +676,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -661,7 +694,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_workout",
@@ -966,7 +999,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -984,7 +1017,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1242,7 +1275,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Night Rotation",
@@ -1260,7 +1293,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1358,7 +1391,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1376,7 +1409,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_workout",
@@ -1541,7 +1574,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1559,7 +1592,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_sleep",
@@ -1623,7 +1656,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1641,7 +1674,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_workout",
@@ -1707,7 +1740,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1725,7 +1758,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_workout",
@@ -1809,7 +1842,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -1827,7 +1860,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "template_breakfast",
@@ -2104,7 +2137,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -2122,7 +2155,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -2202,7 +2235,7 @@ describe("DayFrameApp", () => {
           updatedAt: "2026-05-03T00:00:00-05:00",
         },
       ],
-      shiftCycle: {
+      shiftCycles: [{
         id: "cycle_001",
         userId: "user_001",
         name: "Day Rotation",
@@ -2220,7 +2253,7 @@ describe("DayFrameApp", () => {
         ],
         createdAt: "2026-05-03T00:00:00-05:00",
         updatedAt: "2026-05-03T00:00:00-05:00",
-      },
+      }],
       blockTemplates: [
         {
           id: "default_sleep",

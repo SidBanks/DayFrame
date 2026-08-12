@@ -18,18 +18,13 @@ export type DayFrameAppStore = Pick<
   DayFrameStore,
   | "getState"
   | "subscribe"
+  | "commitAuthoredSetup"
   | "saveProfile"
   | "loadProfile"
   | "deleteProfile"
   | "clearLocalData"
   | "exportBackup"
   | "importBackup"
-  | "setSchedulingPreferences"
-  | "setPreviewRange"
-  | "setShiftDefinitions"
-  | "setShiftCycles"
-  | "setBlockTemplates"
-  | "setBlockRecurrences"
   | "setManualEvents"
   | "generatePreview"
   | "applySuggestedFixToPreview"
@@ -187,31 +182,25 @@ export function DayFrameApp({
     const savedAt = createIsoTimestamp();
     const resolvedPreviewRange = resolvePreviewRangeFromSetupDraft(setupDraft);
 
-    storeRef.current.setSchedulingPreferences(setupDraft.schedulingPreferences);
-    storeRef.current.setPreviewRange(resolvedPreviewRange);
-    storeRef.current.setShiftDefinitions(
-      setupDraft.shiftDefinitions.map((shiftDefinition) => ({
+    storeRef.current.commitAuthoredSetup({
+      schedulingPreferences: setupDraft.schedulingPreferences,
+      previewRange: resolvedPreviewRange,
+      shiftDefinitions: setupDraft.shiftDefinitions.map((shiftDefinition) => ({
         ...shiftDefinition,
         updatedAt: savedAt,
       })),
-    );
-    storeRef.current.setShiftCycles(
-      setupDraft.shiftCycles.map((shiftCycle) => ({
+      shiftCycles: setupDraft.shiftCycles.map((shiftCycle) => ({
         ...shiftCycle,
         updatedAt: savedAt,
       })),
-    );
-    storeRef.current.setBlockTemplates(
-      setupDraft.templateEntries.map((entry) => ({
+      blockTemplates: setupDraft.templateEntries.map((entry) => ({
         ...entry.template,
         updatedAt: savedAt,
       })),
-    );
-    storeRef.current.setBlockRecurrences(
-      setupDraft.templateEntries.map((entry) => ({
+      blockRecurrences: setupDraft.templateEntries.map((entry) => ({
         ...entry.recurrence,
       })),
-    );
+    });
     setFocusedTemplateField(null);
     setPreviewGuardrailMissingItems([]);
     setSetupSaveMessage(showMessage ? "Setup saved." : "");

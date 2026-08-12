@@ -23,7 +23,6 @@ import type { LocalDateString } from "../shifts/types.js";
 export type GenerateSchedulePreviewInput = {
   shiftDefinitions: ShiftDefinition[];
   shiftCycles?: ShiftCycle[];
-  shiftCycle?: ShiftCycle;
   blockTemplates: BlockTemplate[];
   blockRecurrences: BlockRecurrence[];
   manualEvents?: ManualCalendarEvent[];
@@ -45,7 +44,7 @@ export type GenerateSchedulePreviewResult = {
 export function generateSchedulePreview(
   input: GenerateSchedulePreviewInput,
 ): GenerateSchedulePreviewResult {
-  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
+  const shiftCycles = input.shiftCycles ?? [];
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   validateBlockTemplates(input.blockTemplates);
   const expandedPlanningWindow = expandPlanningWindow(

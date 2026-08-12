@@ -8,7 +8,7 @@ import {
 } from "./shiftCycleUtils.js";
 
 export function getActiveShiftSegment(input: GetActiveShiftSegmentInput): ShiftSegment | null {
-  const shiftCycles = input.shiftCycles ?? (input.shiftCycle ? [input.shiftCycle] : []);
+  const shiftCycles = input.shiftCycles ?? [];
   const localDate = formatLocalDate(input.date) as LocalDateString;
   const activeShiftCycle = getActiveShiftCycleForLocalDate(shiftCycles, localDate);
 
