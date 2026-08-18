@@ -100,6 +100,7 @@ export type SetupScreenProps = {
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
   saveMessage: string;
+  saveMessageTone?: "success" | "failure";
   isDirty?: boolean;
   focusedTemplateField?: {
     templateId: string;
@@ -112,6 +113,7 @@ export function SetupScreen({
   setDraft,
   onSave,
   saveMessage,
+  saveMessageTone = "success",
   isDirty = false,
   focusedTemplateField = null,
 }: SetupScreenProps): ReactElement {
@@ -197,7 +199,13 @@ export function SetupScreen({
         </div>
         <p
           className={
-            saveMessage ? "df-success-message" : isDirty ? "df-warning-message" : "df-support"
+            saveMessage
+              ? saveMessageTone === "success"
+                ? "df-success-message"
+                : "df-danger-message"
+              : isDirty
+                ? "df-warning-message"
+                : "df-support"
           }
         >
           {setupStatusMessage}

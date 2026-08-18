@@ -187,3 +187,196 @@ Determinism is a foundational architectural requirement supporting reproducibili
 ---
 
 Future Architectural Decision Records shall extend or revise these decisions through the project's architectural governance process.
+
+# ADR-1.22 Durable-Data Compatibility and Independent Format Versioning
+
+**Status:** Accepted  
+**Date:** 2026-08-13  
+**ADR:** `ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
+
+DayFrame treats durable authored data it writes or exports as user data and preserves supported historical representations through explicit compatibility, migration, conversion, or non-destructive recovery paths.
+
+Durable-data compatibility is governed by surface:
+
+- active local state receives bounded backward compatibility with durable, observable migration requirements;
+- saved profiles are intermediate user-authored durable data and receive stronger migration and recovery protection than active state;
+- backup files receive long-lived versioned compatibility and must retain a supported recovery or conversion path before direct-reader support may retire.
+
+Local persistence, profile storage, and backup formats are independently versioned. A durable format version represents a compatibility contract rather than a frozen serialized layout.
+
+In-memory normalization does not constitute completed migration. Unsupported or ambiguous durable data must not silently degrade into incomplete current state, and compatibility readers protecting DayFrame-produced data may be retired only through an explicit architectural decision supported by appropriate migration or recovery evidence.
+
+Existing V1 local, profile, and backup compatibility remains unchanged. The remaining raw singular `shiftCycle` readers remain supported.
+
+**Evidence:** Tasks 1.20–1.22.
+
+# ADR-1.39 — Session-First Durability Authority, Retry, and Recovery Boundary
+
+**Status:** Accepted
+**Date:** 2026-08-18
+**Evidence:** Tasks 1.23–1.39
+
+DayFrame separates current runtime authority from durable-storage state.
+
+A valid runtime mutation becomes authoritative for the current session even when
+durable persistence fails. Persistence failure does not roll back, suppress, or
+reinterpret an otherwise valid domain transition.
+
+The store owns interpretation of persistence outcomes and retains durability
+knowledge independently from `DayFrameState`.
+
+The current authority model distinguishes:
+
+```text
+DayFrameState
+    = current runtime/domain truth
+
+StoreDurabilityStatus
+    = current knowledge of durable convergence
+
+StoreDesiredDurableCondition
+    = store-owned retry-routing intent
+
+DurabilitySemanticCategory
+    = workflow interpretation of durability state
+```
+
+These concepts are not interchangeable.
+
+## Persistence Outcomes
+
+Persistence operations report factual outcomes rather than inferred causes or
+generic success/failure.
+
+The current persistence model distinguishes, as applicable:
+
+* successful persistence or removal;
+* storage unavailability;
+* storage failure;
+* serialization failure.
+
+A persistence failure may coexist with a successful runtime/domain transition.
+
+## Retry Authority
+
+Ordinary durability retry means:
+
+> Attempt again to establish the store's current desired durable condition.
+
+Retry does not replay the original user command, preserve a historical failed
+mutation as authority, or restore a stale failed snapshot.
+
+The current desired durable condition is store-owned and surface-specific:
+
+* `snapshot` means the latest complete current runtime representation is
+  authoritative for persistence;
+* `absent` means durable key absence is authoritative following clear.
+
+A newer runtime intent supersedes earlier failed persistence attempts.
+
+The store exclusively owns:
+
+* retry-source selection;
+* desired-condition interpretation;
+* persistence/removal execution;
+* retained durability updates;
+* retry-result construction.
+
+User-facing workflows may explicitly initiate retry but do not implement retry
+semantics.
+
+## Retry Eligibility
+
+Storage unavailability and storage failure are ordinary retryable conditions.
+
+Serialization failure is not blindly retried with unchanged data and is classified
+as requiring recovery-oriented handling.
+
+Unknown durability does not establish a failed operation and is not ordinary
+retry authority.
+
+Already-durable state does not require another persistence attempt.
+
+No automatic retry policy is adopted.
+
+## Subscription Boundary
+
+Runtime/domain-state observation and durability observation are separate concerns.
+
+Ordinary `DayFrameState` subscribers are notified of runtime-state transitions.
+
+Durability-only transitions, including retry convergence, do not produce false
+runtime-state notifications.
+
+Persistent durability consumers observe retained durability through the dedicated
+durability observation boundary.
+
+## User-Facing Durability Semantics
+
+Persistence and retained-durability facts are translated through a shared semantic
+boundary rather than independently reinterpreted by each workflow.
+
+The current semantic classes distinguish:
+
+* durable success;
+* retryable storage unavailability;
+* retryable storage failure;
+* recovery-required representation failure;
+* internal/non-actionable state.
+
+Immediate workflow feedback describes the initiating operation.
+
+Persistent app-level durability awareness describes unresolved retained durability
+across workflow navigation.
+
+These are complementary responsibilities rather than competing sources of truth.
+
+## Recovery Boundary
+
+Serialization failure preserves both:
+
+* the latest accepted runtime/session intent; and
+* the last successfully established durable representation.
+
+DayFrame does not automatically roll back, reload, reset, discard, or replace
+current runtime state because serialization failed.
+
+Ordinary unchanged Retry is unavailable for this condition.
+
+A later valid runtime mutation may naturally restore durability if the resulting
+representation can be persisted successfully.
+
+Until a model-specific recovery mechanism is architecturally justified, the
+minimum recovery contract is:
+
+* preserve current session intent;
+* preserve the previous durable checkpoint;
+* communicate that current changes are not durably saved;
+* communicate that ordinary Retry is unavailable;
+* communicate that reload or close may discard session-only changes and allow
+  older saved data to return;
+* allow continued session use;
+* avoid destructive automatic recovery.
+
+Model-specific repair, rollback, diagnostic export, and recovery tooling require
+separate future architectural authorization.
+
+## Architectural Consequence
+
+Future authored-state, persistence, workflow, and scheduling-engine changes must
+preserve the distinction between:
+
+```text
+runtime authority
+durability knowledge
+retry intent
+workflow semantics
+```
+
+unless an explicit future architectural decision supersedes this model.
+
+Changes to the shape of authored state or derived scheduling output do not by
+themselves transfer durability authority into the scheduling engine or presentation
+layer.
+
+**Evidence:** Tasks 1.23–1.39.

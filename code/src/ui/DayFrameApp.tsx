@@ -7,7 +7,20 @@ import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import { parseDayFrameBackupJson, type DayFrameBackupV1 } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
-import type { DayFrameState, DayFrameStore, GeneratePreviewActionInput } from "../state/types.js";
+import {
+  classifyClearLocalDataResult,
+  classifyDurabilityRetryResult,
+  classifyStoreDurabilityStatus,
+  classifyStoreMutationResult,
+  type ClearDurabilitySemanticClassification,
+  type DurabilitySemanticCategory,
+} from "../state/durabilitySemantics.js";
+import type {
+  DayFrameState,
+  DayFrameStore,
+  GeneratePreviewActionInput,
+  StoreDurabilityStatus,
+} from "../state/types.js";
 import { PreviewScreen } from "./PreviewScreen.js";
 import { getPreviewRangeWarnings } from "./previewRangeWarnings.js";
 import { SetupScreen, buildSetupDraft, type SetupDraft } from "./SetupScreen.js";
@@ -17,6 +30,10 @@ import "./dayFrameUi.css";
 export type DayFrameAppStore = Pick<
   DayFrameStore,
   | "getState"
+  | "getDurabilityStatus"
+  | "retryActivePersistence"
+  | "retryProfilePersistence"
+  | "subscribeDurability"
   | "subscribe"
   | "commitAuthoredSetup"
   | "saveProfile"
@@ -31,6 +48,11 @@ export type DayFrameAppStore = Pick<
 >;
 
 type DayFrameScreen = "setup" | "preview";
+type ProfileDurabilityFeedback = {
+  category: DurabilitySemanticCategory;
+  operation: "save" | "load" | "delete";
+  profileName: string;
+};
 type SelectedPreviewDayRange = {
   startDate: LocalDateString;
   endDate: LocalDateString;
@@ -48,6 +70,60 @@ export type DayFrameAppProps = {
   >;
 };
 
+function PersistentDurabilityAwareness({
+  onRetryActive,
+  onRetryProfiles,
+  status,
+}: {
+  onRetryActive: () => void;
+  onRetryProfiles: () => void;
+  status: StoreDurabilityStatus;
+}): ReactElement | null {
+  const semantics = classifyStoreDurabilityStatus(status);
+  const activeMessage = getPersistentDurabilityMessage("activeState", semantics.activeState);
+  const profilesMessage = getPersistentDurabilityMessage("profiles", semantics.profiles);
+
+  if (!activeMessage && !profilesMessage) {
+    return null;
+  }
+
+  return (
+    <section
+      aria-labelledby="dayframe-durability-awareness-heading"
+      className="df-confirmation df-workflow-block"
+    >
+      <div className="df-screen-header">
+        <p className="df-workflow-eyebrow">Local save status</p>
+        <h2 className="df-panel-title" id="dayframe-durability-awareness-heading">
+          Some changes are not durably saved
+        </h2>
+      </div>
+      <ul className="df-plain-list">
+        {activeMessage ? (
+          <li className="df-danger-message">
+            <p>{activeMessage}</p>
+            {isRetryableDurabilitySemantic(semantics.activeState) ? (
+              <button className="df-secondary-button" onClick={onRetryActive} type="button">
+                Retry active setup durability
+              </button>
+            ) : null}
+          </li>
+        ) : null}
+        {profilesMessage ? (
+          <li className="df-danger-message">
+            <p>{profilesMessage}</p>
+            {isRetryableDurabilitySemantic(semantics.profiles) ? (
+              <button className="df-secondary-button" onClick={onRetryProfiles} type="button">
+                Retry saved profiles durability
+              </button>
+            ) : null}
+          </li>
+        ) : null}
+      </ul>
+    </section>
+  );
+}
+
 export function DayFrameApp({
   store,
   getGeneratedAt = createIsoTimestamp,
@@ -56,24 +132,40 @@ export function DayFrameApp({
   getNow = () => new Date(),
   getPreviewWindow,
 }: DayFrameAppProps): ReactElement {
-  const storeRef = useRef<DayFrameAppStore>(store ?? createSeededDayFrameStore());
+  const internalStoreRef = useRef<DayFrameAppStore | null>(null);
+  const activeStore = store ?? internalStoreRef.current ?? createSeededDayFrameStore();
+
+  if (!store && internalStoreRef.current === null) {
+    internalStoreRef.current = activeStore;
+  }
+  const storeRef = useRef<DayFrameAppStore>(activeStore);
+  storeRef.current = activeStore;
   const importInputRef = useRef<FileInputLike | null>(null);
   const now = getNow();
   const [stateSnapshot, setStateSnapshot] = useState<DayFrameState>(() =>
-    storeRef.current.getState(),
+    activeStore.getState(),
+  );
+  const [durabilityStatus, setDurabilityStatus] = useState<StoreDurabilityStatus>(() =>
+    activeStore.getDurabilityStatus(),
   );
   const [setupDraft, setSetupDraft] = useState<SetupDraft>(() =>
-    buildSetupDraft(storeRef.current.getState(), createIsoTimestamp()),
+    buildSetupDraft(activeStore.getState(), createIsoTimestamp()),
   );
-  const [setupSaveMessage, setSetupSaveMessage] = useState("");
+  const [setupDurabilityFeedback, setSetupDurabilityFeedback] =
+    useState<DurabilitySemanticCategory | null>(null);
   const [currentScreen, setCurrentScreen] = useState<DayFrameScreen>("setup");
   const [previewGuardrailMissingItems, setPreviewGuardrailMissingItems] = useState<string[]>([]);
   const [isConfirmingClearLocalData, setIsConfirmingClearLocalData] = useState(false);
-  const [clearLocalDataMessage, setClearLocalDataMessage] = useState("");
+  const [clearDurabilityFeedback, setClearDurabilityFeedback] =
+    useState<ClearDurabilitySemanticClassification | null>(null);
   const [backupMessage, setBackupMessage] = useState("");
+  const [backupDurabilityFeedback, setBackupDurabilityFeedback] =
+    useState<DurabilitySemanticCategory | null>(null);
   const [backupErrorMessage, setBackupErrorMessage] = useState("");
   const [profileName, setProfileName] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
+  const [profileDurabilityFeedback, setProfileDurabilityFeedback] =
+    useState<ProfileDurabilityFeedback | null>(null);
   const [profileErrorMessage, setProfileErrorMessage] = useState("");
   const [selectedPreviewDayRange, setSelectedPreviewDayRange] =
     useState<SelectedPreviewDayRange>(null);
@@ -96,6 +188,8 @@ export function DayFrameApp({
   const [confirmingDeleteManualEventId, setConfirmingDeleteManualEventId] = useState<string | null>(
     null,
   );
+  const [manualEventDurabilityFeedback, setManualEventDurabilityFeedback] =
+    useState<DurabilitySemanticCategory | null>(null);
   const getDayBoundaryStartTimeForUserDayDate = (userDayDate: string) =>
     resolveEffectiveSchedulePreferencesForUserDayDate({
       shiftCycles: stateSnapshot.shiftCycles,
@@ -129,10 +223,20 @@ export function DayFrameApp({
   });
 
   useEffect(() => {
-    return storeRef.current.subscribe((nextState) => {
+    setStateSnapshot(activeStore.getState());
+    setDurabilityStatus(activeStore.getDurabilityStatus());
+    const unsubscribeState = activeStore.subscribe((nextState) => {
       setStateSnapshot(nextState);
     });
-  }, []);
+    const unsubscribeDurability = activeStore.subscribeDurability((nextStatus) => {
+      setDurabilityStatus(nextStatus);
+    });
+
+    return () => {
+      unsubscribeState();
+      unsubscribeDurability();
+    };
+  }, [activeStore]);
 
   useEffect(() => {
     setSetupDraft(buildSetupDraft(stateSnapshot, createIsoTimestamp()));
@@ -146,13 +250,15 @@ export function DayFrameApp({
   ]);
 
   function resetShellMessages(): void {
-    setSetupSaveMessage("");
+    setSetupDurabilityFeedback(null);
     setPreviewGuardrailMissingItems([]);
     setIsConfirmingClearLocalData(false);
-    setClearLocalDataMessage("");
+    setClearDurabilityFeedback(null);
     setBackupMessage("");
+    setBackupDurabilityFeedback(null);
     setBackupErrorMessage("");
     setProfileMessage("");
+    setProfileDurabilityFeedback(null);
     setProfileErrorMessage("");
   }
 
@@ -182,7 +288,7 @@ export function DayFrameApp({
     const savedAt = createIsoTimestamp();
     const resolvedPreviewRange = resolvePreviewRangeFromSetupDraft(setupDraft);
 
-    storeRef.current.commitAuthoredSetup({
+    const result = storeRef.current.commitAuthoredSetup({
       schedulingPreferences: setupDraft.schedulingPreferences,
       previewRange: resolvedPreviewRange,
       shiftDefinitions: setupDraft.shiftDefinitions.map((shiftDefinition) => ({
@@ -203,9 +309,11 @@ export function DayFrameApp({
     });
     setFocusedTemplateField(null);
     setPreviewGuardrailMissingItems([]);
-    setSetupSaveMessage(showMessage ? "Setup saved." : "");
+    const durabilityFeedback = classifyStoreMutationResult(result);
 
-    return storeRef.current.getState();
+    setSetupDurabilityFeedback(showMessage ? durabilityFeedback : null);
+
+    return result.state;
   }
 
   function generatePreviewFromState(currentState: DayFrameState): boolean {
@@ -252,7 +360,7 @@ export function DayFrameApp({
     setProfileMessage("");
     setProfileErrorMessage("");
     setIsConfirmingClearLocalData(false);
-    setClearLocalDataMessage("");
+    setClearDurabilityFeedback(null);
     generatePreviewFromState(savedState);
   }
 
@@ -352,7 +460,8 @@ export function DayFrameApp({
       (manualEvent) => manualEvent.id !== nextManualEvent.id,
     );
 
-    storeRef.current.setManualEvents([...remainingManualEvents, nextManualEvent]);
+    const result = storeRef.current.setManualEvents([...remainingManualEvents, nextManualEvent]);
+    setManualEventDurabilityFeedback(classifyStoreMutationResult(result));
     setEditingManualEventId(nextManualEvent.id);
     setManualEventDraft({
       title: nextManualEvent.title,
@@ -366,9 +475,10 @@ export function DayFrameApp({
   }
 
   function deleteManualEvent(eventId: string): void {
-    storeRef.current.setManualEvents(
+    const result = storeRef.current.setManualEvents(
       stateSnapshot.manualEvents.filter((manualEvent) => manualEvent.id !== eventId),
     );
+    setManualEventDurabilityFeedback(classifyStoreMutationResult(result));
     setConfirmingDeleteManualEventId(null);
     setEditingManualEventId(null);
     if (activeManualEventDate) {
@@ -420,9 +530,26 @@ export function DayFrameApp({
     });
   }
 
+  function retryActiveDurability(): void {
+    const result = storeRef.current.retryActivePersistence();
+
+    void classifyDurabilityRetryResult(result);
+  }
+
+  function retryProfileDurability(): void {
+    const result = storeRef.current.retryProfilePersistence();
+
+    void classifyDurabilityRetryResult(result);
+  }
+
   return (
     <div className="df-app">
       <div className="df-shell">
+        <PersistentDurabilityAwareness
+          onRetryActive={retryActiveDurability}
+          onRetryProfiles={retryProfileDurability}
+          status={durabilityStatus}
+        />
         <header className="df-shell-header">
           <div className="df-shell-header-grid">
             <section className="df-confirmation df-workflow-block df-workflow-block--profiles">
@@ -453,11 +580,16 @@ export function DayFrameApp({
                     className="df-secondary-button"
                     onClick={() => {
                       try {
-                        storeRef.current.saveProfile({
+                        const result = storeRef.current.saveProfile({
                           name: profileName,
                           savedAt: getExportedAt(),
                         });
-                        setProfileMessage("Current setup saved as a local profile.");
+                        setProfileDurabilityFeedback({
+                          category: classifyStoreMutationResult(result),
+                          operation: "save",
+                          profileName: profileName.trim(),
+                        });
+                        setProfileMessage("");
                         setProfileErrorMessage("");
                         setProfileName("");
                       } catch (error) {
@@ -484,15 +616,20 @@ export function DayFrameApp({
                           <button
                             className="df-secondary-button"
                             onClick={() => {
-                              storeRef.current.loadProfile(savedProfile.id);
+                              const result = storeRef.current.loadProfile(savedProfile.id);
                               setCurrentScreen("setup");
                               clearPreviewSelection();
-                              setSetupSaveMessage("");
-                              setProfileMessage(`Loaded profile "${savedProfile.name}".`);
+                              setSetupDurabilityFeedback(null);
+                              setProfileDurabilityFeedback({
+                                category: classifyStoreMutationResult(result),
+                                operation: "load",
+                                profileName: savedProfile.name,
+                              });
+                              setProfileMessage("");
                               setProfileErrorMessage("");
                               setBackupMessage("");
                               setBackupErrorMessage("");
-                              setClearLocalDataMessage("");
+                              setClearDurabilityFeedback(null);
                               setPreviewGuardrailMissingItems([]);
                               setIsConfirmingClearLocalData(false);
                             }}
@@ -503,8 +640,13 @@ export function DayFrameApp({
                           <button
                             className="df-secondary-button"
                             onClick={() => {
-                              storeRef.current.deleteProfile(savedProfile.id);
-                              setProfileMessage(`Deleted profile "${savedProfile.name}".`);
+                              const result = storeRef.current.deleteProfile(savedProfile.id);
+                              setProfileDurabilityFeedback({
+                                category: classifyStoreMutationResult(result),
+                                operation: "delete",
+                                profileName: savedProfile.name,
+                              });
+                              setProfileMessage("");
                               setProfileErrorMessage("");
                             }}
                             type="button"
@@ -525,11 +667,13 @@ export function DayFrameApp({
 
                     downloadDayFrameBackup(backup);
                     setBackupMessage("DayFrame setup backup downloaded.");
+                    setBackupDurabilityFeedback(null);
                     setBackupErrorMessage("");
                     setProfileMessage("");
+                    setProfileDurabilityFeedback(null);
                     setProfileErrorMessage("");
                     setIsConfirmingClearLocalData(false);
-                    setClearLocalDataMessage("");
+                    setClearDurabilityFeedback(null);
                   }}
                   type="button"
                 >
@@ -548,11 +692,13 @@ export function DayFrameApp({
                   className="df-secondary-button"
                   onClick={() => {
                     setIsConfirmingClearLocalData(true);
-                    setSetupSaveMessage("");
-                    setClearLocalDataMessage("");
+                    setSetupDurabilityFeedback(null);
+                    setClearDurabilityFeedback(null);
                     setBackupMessage("");
+                    setBackupDurabilityFeedback(null);
                     setBackupErrorMessage("");
                     setProfileMessage("");
+                    setProfileDurabilityFeedback(null);
                     setProfileErrorMessage("");
                   }}
                   type="button"
@@ -569,11 +715,13 @@ export function DayFrameApp({
                     event,
                     storeRef.current,
                     setBackupMessage,
+                    setBackupDurabilityFeedback,
                     setBackupErrorMessage,
-                    setSetupSaveMessage,
+                    setSetupDurabilityFeedback,
                     setProfileMessage,
+                    setProfileDurabilityFeedback,
                     setProfileErrorMessage,
-                    setClearLocalDataMessage,
+                    setClearDurabilityFeedback,
                     setCurrentScreen,
                     clearPreviewSelection,
                     setPreviewGuardrailMissingItems,
@@ -592,18 +740,18 @@ export function DayFrameApp({
                     <button
                       className="df-danger-button"
                       onClick={() => {
-                        storeRef.current.clearLocalData();
+                        const result = storeRef.current.clearLocalData();
                         setCurrentScreen("setup");
                         clearPreviewSelection();
-                        setSetupSaveMessage("");
+                        setSetupDurabilityFeedback(null);
                         setPreviewGuardrailMissingItems([]);
                         setIsConfirmingClearLocalData(false);
-                        setClearLocalDataMessage(
-                          "Local DayFrame setup data cleared from this device.",
-                        );
+                        setClearDurabilityFeedback(classifyClearLocalDataResult(result));
                         setBackupMessage("");
+                        setBackupDurabilityFeedback(null);
                         setBackupErrorMessage("");
                         setProfileMessage("");
+                        setProfileDurabilityFeedback(null);
                         setProfileErrorMessage("");
                         setProfileName("");
                       }}
@@ -622,14 +770,24 @@ export function DayFrameApp({
                     </button>
                   </div>
                 </div>
-              ) : clearLocalDataMessage ? (
-                <p className="df-success-message">{clearLocalDataMessage}</p>
+              ) : clearDurabilityFeedback ? (
+                <p className={getClearFeedbackClassName(clearDurabilityFeedback)}>
+                  {getClearFeedbackMessage(clearDurabilityFeedback)}
+                </p>
               ) : backupErrorMessage ? (
                 <p className="df-danger-message">{backupErrorMessage}</p>
+              ) : backupDurabilityFeedback ? (
+                <p className={getDurabilityFeedbackClassName(backupDurabilityFeedback)}>
+                  {getMutationFeedbackMessage("backupImport", backupDurabilityFeedback)}
+                </p>
               ) : backupMessage ? (
                 <p className="df-success-message">{backupMessage}</p>
               ) : profileErrorMessage ? (
                 <p className="df-danger-message">{profileErrorMessage}</p>
+              ) : profileDurabilityFeedback ? (
+                <p className={getDurabilityFeedbackClassName(profileDurabilityFeedback.category)}>
+                  {getProfileFeedbackMessage(profileDurabilityFeedback)}
+                </p>
               ) : profileMessage ? (
                 <p className="df-success-message">{profileMessage}</p>
               ) : (
@@ -960,6 +1118,15 @@ export function DayFrameApp({
                     </button>
                   </div>
 
+                  {manualEventDurabilityFeedback ? (
+                    <p className={getDurabilityFeedbackClassName(manualEventDurabilityFeedback)}>
+                      {getMutationFeedbackMessage(
+                        "manualEvent",
+                        manualEventDurabilityFeedback,
+                      )}
+                    </p>
+                  ) : null}
+
                   {manualEventsForActiveDate.length > 0 ? (
                     <ul className="df-plain-list">
                       {manualEventsForActiveDate.map((manualEvent) => (
@@ -1041,10 +1208,19 @@ export function DayFrameApp({
               focusedTemplateField={focusedTemplateField}
               isDirty={isSetupDirty}
               onSave={saveCurrentSetup}
-              saveMessage={setupSaveMessage}
+              saveMessage={
+                setupDurabilityFeedback
+                  ? getMutationFeedbackMessage("setup", setupDurabilityFeedback)
+                  : ""
+              }
+              saveMessageTone={
+                setupDurabilityFeedback === null || setupDurabilityFeedback === "durableSuccess"
+                  ? "success"
+                  : "failure"
+              }
               setDraft={(nextDraft) => {
                 setFocusedTemplateField(null);
-                setSetupSaveMessage("");
+                setSetupDurabilityFeedback(null);
                 setSetupDraft(nextDraft);
               }}
             />
@@ -1581,11 +1757,15 @@ async function handleBackupFileSelection(
   event: ChangeEvent<HTMLInputElement>,
   store: DayFrameAppStore,
   setBackupMessage: (message: string) => void,
+  setBackupDurabilityFeedback: (feedback: DurabilitySemanticCategory | null) => void,
   setBackupErrorMessage: (message: string) => void,
-  setSetupSaveMessage: (message: string) => void,
+  setSetupDurabilityFeedback: (feedback: DurabilitySemanticCategory | null) => void,
   setProfileMessage: (message: string) => void,
+  setProfileDurabilityFeedback: (feedback: ProfileDurabilityFeedback | null) => void,
   setProfileErrorMessage: (message: string) => void,
-  setClearLocalDataMessage: (message: string) => void,
+  setClearDurabilityFeedback: (
+    feedback: ClearDurabilitySemanticClassification | null,
+  ) => void,
   setCurrentScreen: (screen: DayFrameScreen) => void,
   clearPreviewSelection: () => void,
   setPreviewGuardrailMissingItems: (items: string[]) => void,
@@ -1603,12 +1783,14 @@ async function handleBackupFileSelection(
   try {
     const backup = parseDayFrameBackupJson(await file.text());
 
-    store.importBackup(backup);
-    setBackupMessage("DayFrame setup backup imported.");
+    const result = store.importBackup(backup);
+    setBackupDurabilityFeedback(classifyStoreMutationResult(result));
+    setBackupMessage("");
     setBackupErrorMessage("");
-    setSetupSaveMessage("");
-    setClearLocalDataMessage("");
+    setSetupDurabilityFeedback(null);
+    setClearDurabilityFeedback(null);
     setProfileMessage("");
+    setProfileDurabilityFeedback(null);
     setProfileErrorMessage("");
     setCurrentScreen("setup");
     clearPreviewSelection();
@@ -1616,10 +1798,133 @@ async function handleBackupFileSelection(
     setIsConfirmingClearLocalData(false);
   } catch (error) {
     setBackupMessage("");
-    setClearLocalDataMessage("");
+    setBackupDurabilityFeedback(null);
+    setClearDurabilityFeedback(null);
     setBackupErrorMessage(getBackupErrorMessage(error));
     setProfileMessage("");
+    setProfileDurabilityFeedback(null);
   }
+}
+
+function getDurabilityFeedbackClassName(category: DurabilitySemanticCategory): string {
+  return category === "durableSuccess" ? "df-success-message" : "df-danger-message";
+}
+
+function getPersistentDurabilityMessage(
+  surface: "activeState" | "profiles",
+  category: DurabilitySemanticCategory,
+): string | null {
+  if (category === "durableSuccess" || category === "internalNoOp") {
+    return null;
+  }
+
+  const subject = surface === "activeState" ? "Active setup" : "Saved profiles";
+  const availability = surface === "activeState" ? "is" : "are";
+
+  switch (category) {
+    case "retryableUnavailable":
+      return `${subject} ${availability} available for this session, but local storage is unavailable.`;
+    case "retryableStorageFailure":
+      return `${subject} ${availability} available for this session, but the durable save failed.`;
+    case "recoveryRequired":
+      return surface === "activeState"
+        ? "Active setup changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved setup may return."
+        : "Saved-profile changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved profile list may return.";
+  }
+}
+
+function isRetryableDurabilitySemantic(category: DurabilitySemanticCategory): boolean {
+  return category === "retryableUnavailable" || category === "retryableStorageFailure";
+}
+
+function getMutationFeedbackMessage(
+  workflow: "setup" | "manualEvent" | "backupImport",
+  category: DurabilitySemanticCategory,
+): string {
+  const subject =
+    workflow === "setup"
+      ? "Setup"
+      : workflow === "manualEvent"
+        ? "Event change"
+        : "Backup";
+
+  switch (category) {
+    case "durableSuccess":
+      return workflow === "setup"
+        ? "Setup saved."
+        : workflow === "manualEvent"
+          ? "Event change saved."
+          : "DayFrame setup backup imported.";
+    case "retryableUnavailable":
+      return `${subject} applied for this session, but local storage is unavailable.`;
+    case "retryableStorageFailure":
+      return `${subject} applied for this session, but it could not be saved locally.`;
+    case "recoveryRequired":
+      return `${subject} applied for this session, but it could not be prepared for local storage.`;
+    case "internalNoOp":
+      return `${subject} applied for this session; no durability attempt was made.`;
+  }
+}
+
+function getProfileFeedbackMessage(feedback: ProfileDurabilityFeedback): string {
+  const quotedName = `"${feedback.profileName}"`;
+
+  if (feedback.category === "durableSuccess") {
+    switch (feedback.operation) {
+      case "save":
+        return "Current setup saved as a local profile.";
+      case "load":
+        return `Loaded profile ${quotedName}.`;
+      case "delete":
+        return `Deleted profile ${quotedName}.`;
+    }
+  }
+
+  const operation =
+    feedback.operation === "save"
+      ? `Profile ${quotedName} exists for this session`
+      : feedback.operation === "load"
+        ? `Profile ${quotedName} is loaded for this session`
+        : `Profile ${quotedName} is removed for this session`;
+  const durability =
+    feedback.category === "retryableUnavailable"
+      ? "local storage is unavailable"
+      : feedback.category === "retryableStorageFailure"
+        ? "the local storage attempt failed"
+        : feedback.category === "recoveryRequired"
+          ? "the change could not be prepared for local storage"
+          : "no durability attempt was made";
+
+  return `${operation}, but ${durability}.`;
+}
+
+function getClearFeedbackClassName(
+  feedback: ClearDurabilitySemanticClassification,
+): string {
+  return feedback.aggregate === "durableSuccess" ? "df-success-message" : "df-danger-message";
+}
+
+function getClearFeedbackMessage(feedback: ClearDurabilitySemanticClassification): string {
+  if (feedback.aggregate === "durableSuccess") {
+    return "Local DayFrame setup data cleared from this device.";
+  }
+
+  const unresolvedSurfaces = [
+    feedback.activeState === "durableSuccess"
+      ? null
+      : `active setup (${getRemovalFailureLabel(feedback.activeState)})`,
+    feedback.profiles === "durableSuccess"
+      ? null
+      : `saved profiles (${getRemovalFailureLabel(feedback.profiles)})`,
+  ].filter((surface): surface is string => surface !== null);
+
+  return `Local data cleared for this session, but local removal is incomplete for ${unresolvedSurfaces.join(
+    " and ",
+  )}.`;
+}
+
+function getRemovalFailureLabel(category: DurabilitySemanticCategory): string {
+  return category === "retryableUnavailable" ? "storage unavailable" : "storage failure";
 }
 
 function downloadDayFrameBackup(backup: DayFrameBackupV1): void {

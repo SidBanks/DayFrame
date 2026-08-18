@@ -94,25 +94,88 @@ export type CommitAuthoredSetupInput = Pick<
   | "blockRecurrences"
 >;
 
+export type PersistenceWriteOutcome =
+  | { status: "persisted" }
+  | { status: "unavailable" }
+  | { status: "serializationFailure" }
+  | { status: "storageFailure" };
+
+export type PersistenceRemovalOutcome =
+  | { status: "removed" }
+  | { status: "unavailable" }
+  | { status: "storageFailure" };
+
+export type StoreMutationResult = {
+  state: DayFrameState;
+  persistence: PersistenceWriteOutcome;
+};
+
+export type ClearLocalDataResult = {
+  state: DayFrameState;
+  activeState: PersistenceRemovalOutcome;
+  profiles: PersistenceRemovalOutcome;
+  durability: "cleared" | "partiallyCleared" | "notCleared";
+};
+
+export type SurfaceDurabilityStatus =
+  | "unknown"
+  | "durable"
+  | "unavailable"
+  | "serializationFailure"
+  | "storageFailure";
+
+export type StoreDurabilityStatus = {
+  activeState: SurfaceDurabilityStatus;
+  profiles: SurfaceDurabilityStatus;
+};
+
+export type DesiredDurableCondition = "snapshot" | "absent";
+
+export type StoreDesiredDurableCondition = {
+  activeState: DesiredDurableCondition;
+  profiles: DesiredDurableCondition;
+};
+
+export type DurabilityRetryResult =
+  | {
+      status: "attempted";
+      desiredCondition: "snapshot";
+      persistence: PersistenceWriteOutcome;
+    }
+  | {
+      status: "attempted";
+      desiredCondition: "absent";
+      persistence: PersistenceRemovalOutcome;
+    }
+  | {
+      status: "notAttempted";
+      reason: "unknown" | "alreadyDurable" | "serializationFailure";
+    };
+
 export type DayFrameStore = {
   getState: () => DayFrameState;
+  getDurabilityStatus: () => StoreDurabilityStatus;
+  getDesiredDurableCondition: () => StoreDesiredDurableCondition;
+  retryActivePersistence: () => DurabilityRetryResult;
+  retryProfilePersistence: () => DurabilityRetryResult;
+  subscribeDurability: (listener: (status: StoreDurabilityStatus) => void) => () => void;
   subscribe: (listener: (state: DayFrameState) => void) => () => void;
-  commitAuthoredSetup: (authoredSetup: CommitAuthoredSetupInput) => DayFrameState;
+  commitAuthoredSetup: (authoredSetup: CommitAuthoredSetupInput) => StoreMutationResult;
   setSchedulingPreferences: (
     schedulingPreferences: Partial<DayFrameSchedulingPreferences>,
-  ) => DayFrameState;
-  setPreviewRange: (previewRange: DayFramePreviewRange) => DayFrameState;
-  setShiftDefinitions: (shiftDefinitions: ShiftDefinition[]) => DayFrameState;
-  setShiftCycles: (shiftCycles: ShiftCycle[]) => DayFrameState;
-  setBlockTemplates: (blockTemplates: BlockTemplate[]) => DayFrameState;
-  setBlockRecurrences: (blockRecurrences: BlockRecurrence[]) => DayFrameState;
-  setManualEvents: (manualEvents: ManualCalendarEvent[]) => DayFrameState;
-  saveProfile: (input: { name: string; savedAt: string }) => DayFrameState;
-  loadProfile: (profileId: string) => DayFrameState;
-  deleteProfile: (profileId: string) => DayFrameState;
-  clearLocalData: () => void;
+  ) => StoreMutationResult;
+  setPreviewRange: (previewRange: DayFramePreviewRange) => StoreMutationResult;
+  setShiftDefinitions: (shiftDefinitions: ShiftDefinition[]) => StoreMutationResult;
+  setShiftCycles: (shiftCycles: ShiftCycle[]) => StoreMutationResult;
+  setBlockTemplates: (blockTemplates: BlockTemplate[]) => StoreMutationResult;
+  setBlockRecurrences: (blockRecurrences: BlockRecurrence[]) => StoreMutationResult;
+  setManualEvents: (manualEvents: ManualCalendarEvent[]) => StoreMutationResult;
+  saveProfile: (input: { name: string; savedAt: string }) => StoreMutationResult;
+  loadProfile: (profileId: string) => StoreMutationResult;
+  deleteProfile: (profileId: string) => StoreMutationResult;
+  clearLocalData: () => ClearLocalDataResult;
   exportBackup: (exportedAt: string) => DayFrameBackupV1;
-  importBackup: (backup: DayFrameBackupV1) => DayFrameState;
+  importBackup: (backup: DayFrameBackupV1) => StoreMutationResult;
   generatePreview: (input: GeneratePreviewActionInput) => DayFrameState;
   applySuggestedFixToPreview: (input: ApplyPreviewFixActionInput) => DayFrameState;
 };

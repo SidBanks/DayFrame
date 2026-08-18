@@ -26,18 +26,171 @@ import type {
   DayFrameSchedulingPreferences,
   DayFrameState,
   DayFrameStore,
+  DurabilityRetryResult,
   GeneratePreviewActionInput,
+  PersistenceRemovalOutcome,
+  PersistenceWriteOutcome,
+  StoreDesiredDurableCondition,
+  StoreDurabilityStatus,
+  StoreMutationResult,
+  SurfaceDurabilityStatus,
 } from "./types.js";
 
 export const DAYFRAME_STORAGE_KEY = "dayframe-store-v1";
 export const DAYFRAME_PROFILES_STORAGE_KEY = "dayframe-profiles-v1";
 
+export type { PersistenceRemovalOutcome, PersistenceWriteOutcome } from "./types.js";
+
+function mapWriteOutcomeToDurability(
+  outcome: PersistenceWriteOutcome,
+): Exclude<SurfaceDurabilityStatus, "unknown"> {
+  return outcome.status === "persisted" ? "durable" : outcome.status;
+}
+
+function mapRemovalOutcomeToDurability(
+  outcome: PersistenceRemovalOutcome,
+): Exclude<SurfaceDurabilityStatus, "unknown" | "serializationFailure"> {
+  return outcome.status === "removed" ? "durable" : outcome.status;
+}
+
 export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayFrameStore {
   let state = mergeInitialState(initialState);
+  let durabilityStatus: StoreDurabilityStatus = {
+    activeState: "unknown",
+    profiles: "unknown",
+  };
+  let desiredDurableCondition: StoreDesiredDurableCondition = {
+    activeState: "snapshot",
+    profiles: "snapshot",
+  };
   const listeners = new Set<(state: DayFrameState) => void>();
+  const durabilityListeners = new Set<(status: StoreDurabilityStatus) => void>();
 
   function getState(): DayFrameState {
     return cloneState(state);
+  }
+
+  function getDurabilityStatus(): StoreDurabilityStatus {
+    return { ...durabilityStatus };
+  }
+
+  function getDesiredDurableCondition(): StoreDesiredDurableCondition {
+    return { ...desiredDurableCondition };
+  }
+
+  function subscribeDurability(
+    listener: (status: StoreDurabilityStatus) => void,
+  ): () => void {
+    durabilityListeners.add(listener);
+
+    return () => {
+      durabilityListeners.delete(listener);
+    };
+  }
+
+  function updateDurabilityStatus(nextStatus: StoreDurabilityStatus): void {
+    if (
+      durabilityStatus.activeState === nextStatus.activeState &&
+      durabilityStatus.profiles === nextStatus.profiles
+    ) {
+      return;
+    }
+
+    durabilityStatus = nextStatus;
+
+    for (const listener of durabilityListeners) {
+      listener(getDurabilityStatus());
+    }
+  }
+
+  function retainActiveSnapshotIntent(): void {
+    desiredDurableCondition = {
+      ...desiredDurableCondition,
+      activeState: "snapshot",
+    };
+  }
+
+  function retainProfileSnapshotIntent(): void {
+    desiredDurableCondition = {
+      ...desiredDurableCondition,
+      profiles: "snapshot",
+    };
+  }
+
+  function retainActiveWriteOutcome(outcome: PersistenceWriteOutcome): void {
+    updateDurabilityStatus({
+      ...durabilityStatus,
+      activeState: mapWriteOutcomeToDurability(outcome),
+    });
+  }
+
+  function retainProfileWriteOutcome(outcome: PersistenceWriteOutcome): void {
+    updateDurabilityStatus({
+      ...durabilityStatus,
+      profiles: mapWriteOutcomeToDurability(outcome),
+    });
+  }
+
+  function getRetryIneligibilityReason(
+    status: SurfaceDurabilityStatus,
+  ): Extract<DurabilityRetryResult, { status: "notAttempted" }>["reason"] | undefined {
+    switch (status) {
+      case "unknown":
+        return "unknown";
+      case "durable":
+        return "alreadyDurable";
+      case "serializationFailure":
+        return "serializationFailure";
+      case "unavailable":
+      case "storageFailure":
+        return undefined;
+    }
+  }
+
+  function retryActivePersistence(): DurabilityRetryResult {
+    const reason = getRetryIneligibilityReason(durabilityStatus.activeState);
+
+    if (reason) {
+      return { status: "notAttempted", reason };
+    }
+
+    if (desiredDurableCondition.activeState === "snapshot") {
+      const persistence = persistState(state);
+
+      retainActiveWriteOutcome(persistence);
+      return { status: "attempted", desiredCondition: "snapshot", persistence };
+    }
+
+    const persistence = clearPersistedState();
+
+    updateDurabilityStatus({
+      ...durabilityStatus,
+      activeState: mapRemovalOutcomeToDurability(persistence),
+    });
+    return { status: "attempted", desiredCondition: "absent", persistence };
+  }
+
+  function retryProfilePersistence(): DurabilityRetryResult {
+    const reason = getRetryIneligibilityReason(durabilityStatus.profiles);
+
+    if (reason) {
+      return { status: "notAttempted", reason };
+    }
+
+    if (desiredDurableCondition.profiles === "snapshot") {
+      const persistence = persistProfiles(state.savedProfiles);
+
+      retainProfileWriteOutcome(persistence);
+      return { status: "attempted", desiredCondition: "snapshot", persistence };
+    }
+
+    const persistence = clearPersistedProfiles();
+
+    updateDurabilityStatus({
+      ...durabilityStatus,
+      profiles: mapRemovalOutcomeToDurability(persistence),
+    });
+    return { status: "attempted", desiredCondition: "absent", persistence };
   }
 
   function subscribe(listener: (state: DayFrameState) => void): () => void {
@@ -48,7 +201,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     };
   }
 
-  function commitAuthoredSetup(authoredSetup: CommitAuthoredSetupInput): DayFrameState {
+  function commitAuthoredSetup(authoredSetup: CommitAuthoredSetupInput): StoreMutationResult {
     state = {
       ...state,
       schedulingPreferences: {
@@ -64,14 +217,16 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
   function setSchedulingPreferences(
     schedulingPreferences: Partial<DayFrameSchedulingPreferences>,
-  ): DayFrameState {
+  ): StoreMutationResult {
     state = {
       ...state,
       schedulingPreferences: {
@@ -81,12 +236,14 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setPreviewRange(previewRange: DayFramePreviewRange): DayFrameState {
+  function setPreviewRange(previewRange: DayFramePreviewRange): StoreMutationResult {
     state = {
       ...state,
       previewRange: {
@@ -95,72 +252,88 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setShiftDefinitions(shiftDefinitions: DayFrameState["shiftDefinitions"]): DayFrameState {
+  function setShiftDefinitions(
+    shiftDefinitions: DayFrameState["shiftDefinitions"],
+  ): StoreMutationResult {
     state = {
       ...state,
       shiftDefinitions: cloneShiftDefinitions(shiftDefinitions),
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): DayFrameState {
+  function setShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): StoreMutationResult {
     state = {
       ...state,
       shiftCycles: cloneShiftCycles(shiftCycles),
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setBlockTemplates(blockTemplates: DayFrameState["blockTemplates"]): DayFrameState {
+  function setBlockTemplates(blockTemplates: DayFrameState["blockTemplates"]): StoreMutationResult {
     state = {
       ...state,
       blockTemplates: cloneBlockTemplates(blockTemplates),
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setBlockRecurrences(blockRecurrences: DayFrameState["blockRecurrences"]): DayFrameState {
+  function setBlockRecurrences(
+    blockRecurrences: DayFrameState["blockRecurrences"],
+  ): StoreMutationResult {
     state = {
       ...state,
       blockRecurrences: cloneBlockRecurrences(blockRecurrences),
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function setManualEvents(manualEvents: ManualCalendarEvent[]): DayFrameState {
+  function setManualEvents(manualEvents: ManualCalendarEvent[]): StoreMutationResult {
     state = {
       ...state,
       manualEvents: cloneManualEvents(manualEvents),
       preview: markPreviewStale(state.preview),
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function saveProfile(input: { name: string; savedAt: string }): DayFrameState {
+  function saveProfile(input: { name: string; savedAt: string }): StoreMutationResult {
     const trimmedName = input.name.trim();
 
     if (!trimmedName) {
@@ -184,12 +357,14 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
         : [...state.savedProfiles, nextProfile],
     };
 
-    persistProfiles(state.savedProfiles);
+    retainProfileSnapshotIntent();
+    const persistence = persistProfiles(state.savedProfiles);
+    retainProfileWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function loadProfile(profileId: string): DayFrameState {
+  function loadProfile(profileId: string): StoreMutationResult {
     const profile = state.savedProfiles.find((currentProfile) => currentProfile.id === profileId);
 
     if (!profile) {
@@ -204,35 +379,55 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       preview: null,
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function deleteProfile(profileId: string): DayFrameState {
+  function deleteProfile(profileId: string): StoreMutationResult {
     state = {
       ...state,
       savedProfiles: state.savedProfiles.filter((profile) => profile.id !== profileId),
     };
 
-    persistProfiles(state.savedProfiles);
+    retainProfileSnapshotIntent();
+    const persistence = persistProfiles(state.savedProfiles);
+    retainProfileWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
-  function clearLocalData(): DayFrameState {
+  function clearLocalData() {
     state = createInitialDayFrameState();
-    clearPersistedState();
-    clearPersistedProfiles();
+    desiredDurableCondition = {
+      activeState: "absent",
+      profiles: "absent",
+    };
+    const activeState = clearPersistedState();
+    const profiles = clearPersistedProfiles();
+    updateDurabilityStatus({
+      activeState: mapRemovalOutcomeToDurability(activeState),
+      profiles: mapRemovalOutcomeToDurability(profiles),
+    });
+    const removedCount =
+      Number(activeState.status === "removed") + Number(profiles.status === "removed");
 
-    return notify();
+    return {
+      state: notify(),
+      activeState,
+      profiles,
+      durability:
+        removedCount === 2 ? "cleared" : removedCount === 1 ? "partiallyCleared" : "notCleared",
+    } as const;
   }
 
   function exportBackup(exportedAt: string) {
     return createDayFrameBackup(getAuthoredSetup(state), exportedAt);
   }
 
-  function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): DayFrameState {
+  function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): StoreMutationResult {
     const validatedBackup = validateDayFrameBackup(backup);
     const clonedBackupData = cloneDayFrameAuthoredSetup(validatedBackup.data);
 
@@ -242,9 +437,11 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       preview: null,
     };
 
-    persistState(state);
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
 
-    return notify();
+    return { state: notify(), persistence };
   }
 
   function generatePreview(input: GeneratePreviewActionInput): DayFrameState {
@@ -330,6 +527,11 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
 
   return {
     getState,
+    getDurabilityStatus,
+    getDesiredDurableCondition,
+    retryActivePersistence,
+    retryProfilePersistence,
+    subscribeDurability,
     subscribe,
     commitAuthoredSetup,
     setSchedulingPreferences,
@@ -411,12 +613,14 @@ function loadPersistedState(): Partial<PersistedDayFrameState> | undefined {
   }
 }
 
-function persistState(state: DayFrameState): void {
-  const storage = getStorage();
+export function persistState(state: DayFrameState): PersistenceWriteOutcome {
+  const storageAccess = getStorageForPersistence();
 
-  if (!storage) {
-    return;
+  if (storageAccess.status !== "available") {
+    return { status: storageAccess.status };
   }
+
+  const { storage } = storageAccess;
 
   const persistedState: PersistedDayFrameState = {
     schedulingPreferences: {
@@ -432,10 +636,19 @@ function persistState(state: DayFrameState): void {
     manualEvents: cloneManualEvents(state.manualEvents),
   };
 
+  let serializedState: string;
+
   try {
-    storage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(persistedState));
+    serializedState = JSON.stringify(persistedState);
   } catch {
-    // Ignore storage failures so local persistence never blocks app usage.
+    return { status: "serializationFailure" };
+  }
+
+  try {
+    storage.setItem(DAYFRAME_STORAGE_KEY, serializedState);
+    return { status: "persisted" };
+  } catch {
+    return { status: "storageFailure" };
   }
 }
 
@@ -473,48 +686,62 @@ function getAuthoredSetup(state: DayFrameState) {
   });
 }
 
-function persistProfiles(profiles: DayFrameSavedProfile[]): void {
-  const storage = getStorage();
+export function persistProfiles(profiles: DayFrameSavedProfile[]): PersistenceWriteOutcome {
+  const storageAccess = getStorageForPersistence();
 
-  if (!storage) {
-    return;
+  if (storageAccess.status !== "available") {
+    return { status: storageAccess.status };
+  }
+
+  const { storage } = storageAccess;
+
+  let serializedProfiles: string;
+
+  try {
+    serializedProfiles = JSON.stringify(createDayFrameProfilesStorage(profiles));
+  } catch {
+    return { status: "serializationFailure" };
   }
 
   try {
-    storage.setItem(
-      DAYFRAME_PROFILES_STORAGE_KEY,
-      JSON.stringify(createDayFrameProfilesStorage(profiles)),
-    );
+    storage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, serializedProfiles);
+    return { status: "persisted" };
   } catch {
-    // Ignore storage failures so saved profiles never blocks app usage.
+    return { status: "storageFailure" };
   }
 }
 
-function clearPersistedState(): void {
-  const storage = getStorage();
+export function clearPersistedState(): PersistenceRemovalOutcome {
+  const storageAccess = getStorageForPersistence();
 
-  if (!storage) {
-    return;
+  if (storageAccess.status !== "available") {
+    return { status: storageAccess.status };
   }
+
+  const { storage } = storageAccess;
 
   try {
     storage.removeItem(DAYFRAME_STORAGE_KEY);
+    return { status: "removed" };
   } catch {
-    // Ignore storage failures so clearing local data never blocks app usage.
+    return { status: "storageFailure" };
   }
 }
 
-function clearPersistedProfiles(): void {
-  const storage = getStorage();
+export function clearPersistedProfiles(): PersistenceRemovalOutcome {
+  const storageAccess = getStorageForPersistence();
 
-  if (!storage) {
-    return;
+  if (storageAccess.status !== "available") {
+    return { status: storageAccess.status };
   }
+
+  const { storage } = storageAccess;
 
   try {
     storage.removeItem(DAYFRAME_PROFILES_STORAGE_KEY);
+    return { status: "removed" };
   } catch {
-    // Ignore storage failures so clearing local data never blocks app usage.
+    return { status: "storageFailure" };
   }
 }
 
@@ -524,6 +751,19 @@ function getStorage(): StorageLike | undefined {
   }
 
   return globalThis.localStorage as StorageLike;
+}
+
+function getStorageForPersistence():
+  | { status: "available"; storage: StorageLike }
+  | { status: "unavailable" }
+  | { status: "storageFailure" } {
+  try {
+    const storage = getStorage();
+
+    return storage ? { status: "available", storage } : { status: "unavailable" };
+  } catch {
+    return { status: "storageFailure" };
+  }
 }
 
 type StorageLike = {

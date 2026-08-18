@@ -2,55 +2,203 @@
 
 # Current State
 
-**Last Updated:** Phase 1 — Tasks 1.1–1.20 Complete
+## Phase 1 — Architectural Foundation Alignment
+
+**Status:** Complete
+**Current through:** Task 1.39
+**Last reviewed:** 2026-08-18
+
+Phase 1 has completed the architectural-foundation alignment work required before
+DayFrame moves into **Phase 2 — Authority and State Alignment**.
+
+The completed Phase 1 work established canonical ownership for authored Setup and
+Preview coordination, removed obsolete singular shift-cycle authority from current
+runtime and scheduling pathways, adopted durable-data compatibility governance,
+and built a complete session-first durability model spanning persistence outcomes,
+retained durability state, user-visible failure awareness, explicit retry, and a
+bounded recovery-required contract.
+
+No additional durability implementation is currently required before proceeding
+to the next architectural domain.
 
 ---
 
 # Current Focus
 
-DayFrame is actively executing **Phase 1 — Architectural Foundation Alignment**.
+DayFrame has completed **Phase 1 — Architectural Foundation Alignment** through
+Task **1.39**.
 
-The conceptual architecture, implementation audits, audit syntheses, Alignment Strategy, Implementation Roadmap, and Implementation Execution Plan are complete.
+The immediate project objective is now:
 
-Phase 1 has now completed Tasks **1.1 through 1.20**.
+```text
+Phase 1 review / checkpoint
+        ↓
+validated repository checkpoint
+        ↓
+Phase 2 — Authority and State Alignment
+```
 
-The latest implementation sequence resolved the legacy singular `shiftCycle` model across persistence writers, normalized authored data, runtime state, store APIs, and core scheduling contracts.
+Phase 2 should begin with an investigation of:
 
-Current DayFrame architecture now uses plural:
+```text
+authoritative state objects
+derived-state boundaries
+invalidation ownership
+replacement semantics
+state-transition authority
+```
+
+rather than another durability implementation task.
+
+---
+
+# Phase 1 Executive Result
+
+Phase 1 established four major architectural foundations.
+
+## 1. Transaction and Workflow Ownership
+
+Authored Setup now commits through one store-owned atomic transition:
+
+```text
+DayFrameApp.saveCurrentSetup
+        ↓
+commitAuthoredSetup
+        ↓
+one complete authored transition
+        ↓
+stale once
+persist once
+notify once
+```
+
+Preview coordination has one supported application path:
+
+```text
+DayFrameApp
+    ↓
+PreviewScreen
+```
+
+The obsolete alternate Preview container/path was removed.
+
+---
+
+## 2. Canonical Shift-Cycle Authority
+
+Current DayFrame architecture uses:
 
 ```text
 shiftCycles
 ```
 
-throughout all current authored, runtime, and scheduling pathways.
+through all current authored, runtime, store, and scheduling pathways.
 
-Singular:
+The final boundary is:
 
 ```text
-shiftCycle
+RAW HISTORICAL INPUT
+    shiftCycle accepted
+          ↓
+boundary-specific validation / normalization
+          ↓
+NORMALIZED AUTHORED DATA
+    shiftCycles only
+          ↓
+CURRENT RUNTIME
+    shiftCycles only
+          ↓
+STORE / CORE SCHEDULING
+    shiftCycles only
 ```
 
-remains intentionally supported only at raw historical durable-data reader boundaries for:
+Singular `shiftCycle` survives only at raw historical-data ingress where older
+repository-produced data may still require it.
 
-* legacy local persisted state;
-* legacy saved profiles;
-* Version 1 backups.
+---
 
-Task 1.20 established that current project evidence does not justify retiring those readers.
+## 3. Durable-Data Governance
 
-The immediate objective is to checkpoint this completed compatibility-alignment sequence before deciding DayFrame's durable-data compatibility and format-versioning policy.
+DayFrame now has an accepted durable-data compatibility and independent
+format-versioning policy:
+
+`ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
+
+DayFrame treats durable authored data it writes or exports as user data.
+
+Historical representations must be handled through explicit:
+
+* compatibility;
+* migration;
+* conversion;
+* recovery;
+* or explicit unsupported-format behavior;
+
+rather than silent degradation.
+
+Local persistence, profile storage, and backup formats are independently
+versioned.
+
+A durable format version represents a compatibility contract rather than a frozen
+serialized layout.
+
+In-memory normalization does not constitute completed migration.
+
+Compatibility-reader retirement requires explicit architectural authorization and
+surface-appropriate migration or recovery evidence.
+
+---
+
+## 4. Session-First Durability Architecture
+
+Tasks 1.23–1.39 established a complete ordinary durability lifecycle:
+
+```text
+runtime mutation
+    ↓
+factual persistence outcome
+    ↓
+store-owned durability interpretation
+    ↓
+mutation-result observability
+    ↓
+retained durability status
+    ↓
+desired durable condition
+    ↓
+explicit store-owned retry
+    ↓
+reactive durability subscription
+    ↓
+shared semantic classification
+    ↓
+immediate workflow feedback
+    ↓
+persistent app-level awareness
+    ↓
+explicit user-triggered Retry
+    ↓
+recovery-required boundary
+    ↓
+session-loss risk communication
+```
+
+Runtime/domain success and durable success are no longer treated as the same fact.
 
 ---
 
 # Architecture Status
 
-| Area                       | Status        |
-| -------------------------- | ------------- |
-| Architecture Specification | ✅ Published   |
-| Architecture Charter       | ✅ Published   |
-| Architectural Decisions    | ✅ Published   |
-| Canonical Terminology      | ✅ Published   |
-| Architecture Governance    | ✅ Established |
+| Area                                    | Status        |
+| --------------------------------------- | ------------- |
+| Architecture Specification              | ✅ Published   |
+| Architecture Charter                    | ✅ Published   |
+| Architectural Decisions                 | ✅ Published   |
+| Canonical Terminology                   | ✅ Published   |
+| Architecture Governance                 | ✅ Established |
+| Durable-Data Compatibility ADR          | ✅ Accepted    |
+| Phase 1 Foundation Alignment            | ✅ Complete    |
+| Phase 2 — Authority and State Alignment | ⏭ Next        |
 
 ---
 
@@ -70,16 +218,16 @@ The immediate objective is to checkpoint this completed compatibility-alignment 
 
 # Implementation Status
 
-| Area                                                      | Status     |
-| --------------------------------------------------------- | ---------- |
-| Implementation Planning                                   | ✅ Complete |
-| Phase 1 — Architectural Foundation Alignment              | ▶ Active   |
-| Tasks 1.1–1.4 — Initial ownership/obsolete-path alignment | ✅ Complete |
-| Tasks 1.5–1.20 — `shiftCycle` compatibility alignment     | ✅ Complete |
-| Session Checkpoint                                        | ⏳ Next     |
-| Durable-data compatibility policy                         | Pending    |
-| Next Phase 1 task                                         | Pending    |
-| Phase 1 Completion                                        | Pending    |
+| Area                                                        | Status     |
+| ----------------------------------------------------------- | ---------- |
+| Implementation Planning                                     | ✅ Complete |
+| Tasks 1.1–1.4 — Initial ownership/obsolete-path alignment   | ✅ Complete |
+| Tasks 1.5–1.20 — `shiftCycle` compatibility alignment       | ✅ Complete |
+| Tasks 1.21–1.22 — Durable-data governance                   | ✅ Complete |
+| Tasks 1.23–1.39 — Durability behavior and recovery boundary | ✅ Complete |
+| Phase 1 — Architectural Foundation Alignment                | ✅ Complete |
+| Phase 1 Project Review / Checkpoint                         | ⏳ Next     |
+| Phase 2 — Authority and State Alignment                     | ⏭ Next     |
 
 ---
 
@@ -87,7 +235,7 @@ The immediate objective is to checkpoint this completed compatibility-alignment 
 
 ## Tasks 1.1–1.4 — Initial Foundation Alignment
 
-The first Phase 1 implementation cluster:
+The first Phase 1 cluster:
 
 * established the foundational ownership map;
 * identified authored Setup transaction ownership as distributed;
@@ -97,6 +245,16 @@ The first Phase 1 implementation cluster:
 * removed the obsolete Preview path;
 * preserved supported `DayFrameApp → PreviewScreen` behavior.
 
+The resulting authored Setup path is:
+
+```text
+DayFrameApp.saveCurrentSetup
+        ↓
+commitAuthoredSetup
+        ↓
+one store-owned authored transition
+```
+
 The resulting Preview coordination path is:
 
 ```text
@@ -105,27 +263,14 @@ DayFrameApp
 PreviewScreen
 ```
 
-The resulting authored Setup transaction is:
-
-```text
-DayFrameApp.saveCurrentSetup
-        ↓
-commitAuthoredSetup
-        ↓
-one complete authored transition
-        ↓
-stale once
-persist once
-notify once
-```
-
 ---
 
-# Legacy `shiftCycle` Alignment
+# Tasks 1.5–1.20 — Legacy `shiftCycle` Alignment
 
-Tasks 1.5 through 1.20 completed a staged investigation and retirement of the old singular shift-cycle representation.
+Tasks 1.5–1.20 completed a staged investigation and retirement of the old singular
+shift-cycle representation from current architectural authority.
 
-The work intentionally separated:
+The work deliberately separated:
 
 ```text
 historical compatibility
@@ -139,251 +284,51 @@ current architectural authority
 
 rather than deleting singular support indiscriminately.
 
----
+## Writer Alignment
 
-# Task 1.5 — Establish Legacy `shiftCycle` Compatibility Boundary
-
-Task 1.5 determined that:
-
-* plural `shiftCycles` is the current scheduling authority;
-* singular `shiftCycle` remained a compatibility representation;
-* historical local state, saved profiles, and V1 backups could contain singular-only cycle data;
-* the compatibility structure was transitional rather than immediately removable.
-
-The correct migration strategy therefore became:
-
-```text
-stop producing legacy data
-        ↓
-continue reading legacy data
-        ↓
-normalize into current authority
-```
-
----
-
-# Task 1.6 — Stop Writing Legacy Local-Storage Mirror
-
-New authored local-storage writes stopped emitting singular `shiftCycle`.
-
-The current local writer now emits:
+Current local-storage, profile, and backup writers now emit plural:
 
 ```text
 shiftCycles
 ```
 
-while the legacy reader still accepts:
+only.
+
+Historical readers continue accepting singular:
 
 ```text
 shiftCycle
 ```
 
-and normalizes it into plural state.
+where repository-produced historical data requires it.
 
-Legacy local data converges to plural-only persistence after the next authored mutation.
+## Runtime Alignment
 
----
+Removed:
 
-# Task 1.7 — Establish Profile and Backup Compatibility Evidence
-
-Direct executable tests were added proving that:
-
-```text
-legacy profile
-    shiftCycle only
-        ↓
-normalization
-        ↓
-shiftCycles
-```
-
-and:
-
-```text
-legacy V1 backup
-    shiftCycle only
-        ↓
-normalization
-        ↓
-shiftCycles
-```
-
-These fixtures remain deliberate compatibility contracts.
-
----
-
-# Task 1.8 — Stop Emitting Null Singular Profile/Backup Output
-
-New profile and backup output stopped emitting:
-
-```text
-shiftCycle: null
-```
-
-All current durable writers now produce plural-only cycle data.
-
-The writer boundary became:
-
-```text
-LOCAL STORAGE ─┐
-PROFILE ───────┼──→ shiftCycles only
-V1 BACKUP ─────┘
-```
-
-while historical singular readers remained intact.
-
----
-
-# Task 1.9 — Establish Runtime/API Compatibility Boundary
-
-Task 1.9 established that singular compatibility ends at durable-data normalization.
-
-No supported production behavior required:
-
-* runtime `DayFrameState.shiftCycle`;
-* `setShiftCycle`;
-* singular core scheduling collection inputs.
-
-Those remaining structures were test/fixture convenience or obsolete runtime compatibility rather than durable-data requirements.
-
----
-
-# Task 1.10 — Remove `setShiftCycle`
-
-The test-only store alias:
-
-```text
-setShiftCycle
-```
-
-was removed.
-
-Tests were migrated to:
-
-```text
-setShiftCycles
-```
-
-The store now has one canonical shift-cycle mutation vocabulary.
-
----
-
-# Task 1.11 — Establish Runtime State / Initialization Boundary
-
-Task 1.11 investigated whether removing runtime singular state required a new store initialization abstraction.
-
-It did not.
-
-Production constructs the store without partial initialization, while partial current-state initialization is primarily a test convenience.
-
-The existing:
-
-```text
-Partial<DayFrameState>
-```
-
-remained sufficient once historical singular fixtures were modernized.
-
-No new initialization type was justified.
-
----
-
-# Task 1.12 — Remove Runtime `shiftCycle` Mirror
-
-Runtime:
-
-```text
-DayFrameState.shiftCycle
-```
-
-was removed.
-
-The following obsolete runtime behavior was also removed:
-
+* `DayFrameState.shiftCycle`;
+* singular runtime mirror synthesis;
 * singular store-initialization fallback;
-* initial-state singular mirror synthesis;
-* snapshot/clone singular mirror synthesis.
+* `setShiftCycle`.
 
-Twelve non-migration application fixtures were migrated to:
-
-```text
-shiftCycles: [cycle]
-```
-
-Current runtime state is now:
+Current runtime uses:
 
 ```text
-DayFrameState
-    ↓
-shiftCycles only
+DayFrameState.shiftCycles
 ```
 
-Historical durable-data readers remain upstream of runtime state.
+only.
 
----
+## Core Scheduling Alignment
 
-# Task 1.13 — Establish Core Singular Scheduling Compatibility Boundary
+Removed obsolete singular collection aliases from:
 
-The remaining core scheduling aliases were investigated.
+* `generateBlockCandidates`;
+* `getActiveShiftSegment`;
+* `generateCycleWorkBlocks`;
+* `generateSchedulePreview`.
 
-Task 1.13 found:
-
-* production uses plural cycles everywhere;
-* singular core collection inputs had no production caller;
-* three singular aliases were maintained only by historical test fixtures;
-* one alias had no caller at all;
-* no supported external package/library contract required them.
-
-This established a staged core cleanup sequence.
-
----
-
-# Task 1.14 — Remove `generateBlockCandidates.shiftCycle`
-
-The unused zero-caller alias was removed.
-
-`generateBlockCandidates` now accepts:
-
-```text
-shiftCycles?
-```
-
-with omission preserving its existing empty-array behavior.
-
----
-
-# Task 1.15 — Remove `getActiveShiftSegment.shiftCycle`
-
-Five historical unit-test callers were migrated to plural arrays.
-
-`getActiveShiftSegment` now operates through plural cycle vocabulary only.
-
-Effective schedule-preference behavior remained unchanged.
-
----
-
-# Task 1.16 — Remove `generateCycleWorkBlocks.shiftCycle`
-
-Seven historical unit-test callers were migrated to plural input.
-
-The singular collection alias was removed while preserving:
-
-* normalization;
-* validation;
-* manual-segment generation;
-* repeating sequences;
-* ordering;
-* date behavior.
-
----
-
-# Task 1.17 — Remove `generateSchedulePreview.shiftCycle`
-
-Twenty-six historical engine-test callers were migrated to plural arrays.
-
-The final singular collection input was removed from the primary Preview-generation engine.
-
-The supported core scheduling vocabulary is now:
+The supported scheduling path is now:
 
 ```text
 DayFrameState.shiftCycles
@@ -396,232 +341,809 @@ effective preference resolution
         └── getActiveShiftSegment({ shiftCycles })
 ```
 
-No singular collection compatibility alias remains in the core scheduling pipeline.
+## Normalized Authored Data
 
----
-
-# Task 1.18 — Establish Authored-Data Compatibility Boundary
-
-Task 1.18 investigated the remaining optional:
+Removed obsolete:
 
 ```text
 DayFrameAuthoredSetup.shiftCycle
 ```
 
-property.
-
-It established that:
-
-* `DayFrameAuthoredSetup` represents normalized current authored data;
-* current writers produce plural data only;
-* normalized consumers use plural data only;
-* raw local/profile/backup readers already own historical singular compatibility independently;
-* clone-helper singular support survived only because test fixtures continued using the old typed shape.
-
-The property was classified as obsolete on normalized authored data.
-
-No replacement raw abstraction was justified.
+`DayFrameAuthoredSetup` is plural-only.
 
 ---
 
-# Task 1.19 — Remove `DayFrameAuthoredSetup.shiftCycle`
+# Task 1.20 — Compatibility Horizon
 
-The obsolete property was removed.
+Task 1.20 established that no current evidence justifies retiring the remaining
+raw singular readers.
 
-`DayFrameAuthoredSetup` is now plural-only.
-
-The shared authored clone helper no longer clones singular cycle state.
-
-Profile and backup normalized data continue using `DayFrameAuthoredSetup` without introducing a replacement type.
-
-The complete current representation is now:
-
-```text
-NORMALIZED AUTHORED DATA
-    shiftCycles only
-        ↓
-CURRENT RUNTIME
-    shiftCycles only
-        ↓
-CORE SCHEDULING
-    shiftCycles only
-```
-
----
-
-# Task 1.20 — Establish Compatibility Horizon
-
-Task 1.20 investigated whether the remaining raw singular readers can safely be retired.
-
-The determination was:
-
-> **No defensible current retirement horizon exists.**
-
-All three readers protect formats that earlier versions of the repository demonstrably produced.
-
-Historical producer evidence established that singular state/profile/backup data was emitted before multiple-cycle support while the same persistence keys and V1 format identifiers remained in use.
-
-The remaining compatibility seams are therefore intentional.
-
----
-
-# Current `shiftCycle` Boundary
-
-The final architectural boundary is:
-
-```text
-RAW HISTORICAL INPUT
-    shiftCycle accepted
-          ↓
-boundary-specific validation / normalization
-          ↓
-NORMALIZED AUTHORED DATA
-    shiftCycles only
-          ↓
-CURRENT RUNTIME
-    shiftCycles only
-          ↓
-CORE SCHEDULING
-    shiftCycles only
-```
-
-Singular compatibility is no longer competing architectural authority.
-
-It exists only at historical-data ingress.
-
----
-
-# Remaining Raw Compatibility Readers
+The reader classifications are:
 
 ## Local Authored State
 
-Classification:
-
 **Retain Until Explicit Criteria Are Met**
 
-Legacy local state can converge to plural-only persistence, but migration is lazy.
-
-Startup normalizes the historical shape in memory.
-
-A later authored mutation rewrites current plural data.
-
-Merely opening DayFrame does not prove durable migration occurred.
-
-No migration marker or population evidence exists.
-
----
+Legacy local state can converge to plural-only persistence, but migration remains
+lazy and unobservable at the population level.
 
 ## Saved Profiles
 
-Classification:
-
 **Retain Until Explicit Criteria Are Met**
 
-Profile validation normalizes legacy data in memory.
-
-Saving or deleting a profile rewrites the current profile collection in plural form.
-
-Loading a profile does not rewrite the original profile-storage collection.
-
-Therefore legacy profile storage may persist indefinitely unless a collection-writing action occurs.
-
----
+Legacy profiles normalize in memory, but loading a profile does not rewrite the
+source profile collection.
 
 ## V1 Backups
 
-Classification:
-
 **Retain Indefinitely for Now**
 
-Historical singular and current plural backups both use Version 1.
-
-External backup files cannot be automatically rewritten or globally detected.
-
-DayFrame has no evidence establishing that repository-produced historical V1 files are no longer held by users.
+Historical backup files are externally held and cannot be automatically rewritten
+or globally detected.
 
 No finite retirement horizon is currently defensible.
 
 ---
 
-# Compatibility Governance Gap
+# Tasks 1.21–1.22 — Durable-Data Governance
 
-Task 1.20 established that DayFrame currently has no explicit durable-data compatibility policy.
+Task 1.21 investigated DayFrame's durable-data compatibility and format-versioning
+requirements.
 
-No adopted policy defines:
+Task 1.22 adopted the resulting policy through:
 
-* how long historical local state remains readable;
-* how long saved-profile formats remain supported;
-* how long exported backups remain importable;
-* what a format version guarantees;
-* when migration compatibility may be retired;
-* what evidence is sufficient to prove migration completion;
-* whether old backups receive permanent import support;
-* whether unsupported formats should receive conversion tooling;
-* what user-visible behavior is required when historical data becomes unsupported.
+`ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
 
-This is now a governance question rather than an implementation ambiguity.
+The adopted surface commitments are:
+
+| Surface            | Commitment                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Active local state | Bounded backward compatibility with eager or durably observable migration before historical-reader retirement |
+| Saved profiles     | Strong bounded compatibility, atomic migration, preservation of unconvertible entries, explicit recovery      |
+| Backup files       | Long-lived versioned direct import plus continued conversion/recovery support before direct-reader retirement |
+
+The ADR also establishes that:
+
+* formats are independently versioned;
+* incompatible semantic or representation changes require a new version or
+  migration epoch;
+* unsupported historical data must not silently degrade;
+* pre-public-release repository-produced data receives the normal compatibility
+  presumption unless explicitly excluded;
+* compatibility retirement requires explicit architectural authorization.
 
 ---
 
-# Candidate Future Compatibility Requirements
+# Existing V1 Compatibility
 
-Task 1.20 identified candidate prerequisites for any future reader retirement.
+Existing V1 representations remain intentionally supported:
 
-These are **not yet adopted policy**.
+```text
+dayframe-store-v1
+    historical singular + current plural family
 
-Potential requirements include:
+profile version 1
+    historical singular + current plural family
 
-* explicit durable-data compatibility governance;
-* meaningful format discriminators;
-* non-destructive unsupported-format behavior;
-* migration/conversion strategy;
-* observable migration state where appropriate;
-* explicit backup support policy;
-* documented retirement authority;
-* evidence sufficient to demonstrate acceptable remaining exposure.
+backup version 1
+    historical singular + current plural family
+```
 
-No reader should be removed merely because current architecture no longer writes its historical representation.
+These V1 identifiers span multiple writer generations and therefore cannot
+themselves distinguish singular from plural historical data.
+
+Current writers remain plural-only.
+
+---
+
+# Tasks 1.23–1.27 — Persistence Outcomes and Retained Durability
+
+This sequence established factual persistence reporting and store-owned durability
+knowledge.
+
+## Persistence Outcomes
+
+Persistence helpers now distinguish factual outcomes including:
+
+```text
+persisted
+removed
+unavailable
+storageFailure
+serializationFailure
+```
+
+as applicable to the operation.
+
+Runtime mutations remain session-first:
+
+```text
+valid runtime mutation
+    ↓
+runtime state applied
+    ↓
+persistence attempted
+    ↓
+durability outcome reported
+```
+
+A persistence failure does not roll back a valid runtime transition.
+
+## Store Mutation Results
+
+Persisting store operations expose their persistence result to the initiating
+workflow.
+
+Runtime/domain success and persistence success are therefore independently
+observable.
+
+## Retained Durability
+
+The store retains per-surface durability outside `DayFrameState`.
+
+Current durability vocabulary is:
+
+```text
+unknown
+durable
+unavailable
+storageFailure
+serializationFailure
+```
+
+for:
+
+```text
+activeState
+profiles
+```
+
+`unknown` is not treated as failure.
+
+Durability status is infrastructure truth, not domain state.
+
+---
+
+# Task 1.28 — Retry Semantics and Authority
+
+Task 1.28 established the governing retry rule:
+
+> Retry attempts again to establish the store's current desired durable condition.
+
+Rejected models included:
+
+* replaying the original failed mutation;
+* replaying a last-failed snapshot;
+* workflow command replay;
+* persistence-operation queues.
+
+The authoritative retry source is:
+
+```text
+current desired durable condition
+```
+
+with:
+
+```text
+snapshot
+```
+
+meaning the latest complete current representation, and:
+
+```text
+absent
+```
+
+meaning durable key absence after clear.
+
+Retry initiation belongs to user/workflow interaction.
+
+Retry execution and interpretation belong to the store.
+
+---
+
+# Task 1.29 — Desired Durable Condition
+
+The store now privately retains per-surface desired durable condition:
+
+```text
+snapshot
+absent
+```
+
+outside `DayFrameState`.
+
+Ordinary persistence establishes:
+
+```text
+snapshot
+```
+
+intent.
+
+Clear establishes:
+
+```text
+absent
+```
+
+intent.
+
+This distinction allows failed clear operations to be retried safely without
+mistaking reset runtime defaults for data that should be persisted.
+
+---
+
+# Task 1.30 — Persistence Accessor Failure Normalization
+
+Throwing `globalThis.localStorage` access during writes/removals is normalized to:
+
+```text
+storageFailure
+```
+
+through the existing persistence outcome model.
+
+This allows ordinary mutations and clear to complete their established
+session-first path instead of allowing accessor exceptions to escape.
+
+Read/hydration accessor behavior remains a separately deferred lifecycle concern.
+
+---
+
+# Task 1.31 — Explicit Store-Owned Retry
+
+The store exposes explicit surface-specific retry:
+
+```text
+retryActivePersistence()
+retryProfilePersistence()
+```
+
+Retry eligibility is:
+
+| Durability Status      | Ordinary Retry |
+| ---------------------- | -------------- |
+| `storageFailure`       | Yes            |
+| `unavailable`          | Yes            |
+| `serializationFailure` | No             |
+| `durable`              | No             |
+| `unknown`              | No             |
+
+Snapshot retry uses the latest complete current representation.
+
+Absence retry repeats removal.
+
+Retry:
+
+* changes no `DayFrameState`;
+* sends no ordinary state notification;
+* updates only retained durability;
+* returns an exact discriminated result.
+
+---
+
+# Task 1.32 — Workflow Durability Feedback Contract
+
+Task 1.32 adopted:
+
+```text
+immediate contextual feedback
+        +
+persistent app-level durability awareness
+```
+
+Immediate mutation results answer:
+
+> What happened during this operation?
+
+Retained durability answers:
+
+> Does this durable surface still need attention?
+
+The investigation established a real need for a separate reactive durability
+subscription because retry may change durability without changing
+`DayFrameState`.
+
+---
+
+# Task 1.33 — Durability Subscription
+
+`DayFrameStore` now exposes a separate retained-durability subscription.
+
+Conceptually:
+
+```text
+getState()
+subscribe()
+    → runtime/domain truth
+
+getDurabilityStatus()
+subscribeDurability()
+    → retained durability truth
+```
+
+A logical store operation emits at most one durability notification and emits none
+when the final retained durability snapshot is unchanged.
+
+Clear batches active/profile durability into one final notification.
+
+Retry can produce a durability notification while ordinary `DayFrameState`
+subscribers remain silent.
+
+---
+
+# Task 1.34 — Shared Durability Semantic Classification
+
+A pure shared classification layer translates factual persistence/store outcomes
+into workflow meaning.
+
+Current semantic vocabulary is:
+
+```text
+durableSuccess
+retryableUnavailable
+retryableStorageFailure
+recoveryRequired
+internalNoOp
+```
+
+Key mappings include:
+
+```text
+unavailable
+    → retryableUnavailable
+
+storageFailure
+    → retryableStorageFailure
+
+serializationFailure
+    → recoveryRequired
+
+unknown
+    → internalNoOp
+
+alreadyDurable retry
+    → durableSuccess
+```
+
+The classifier:
+
+* contains no React;
+* contains no product copy;
+* performs no persistence;
+* executes no retry;
+* performs no store mutation.
+
+Clear classification preserves aggregate and independent active/profile semantics.
+
+---
+
+# Task 1.35 — Immediate Workflow Durability Feedback
+
+Every user-facing persisting workflow now consumes the shared semantic classifier.
+
+Covered workflows include:
+
+* Setup save;
+* manual-event create/edit/delete;
+* profile save;
+* profile delete;
+* profile load;
+* backup import;
+* clear local data.
+
+Current workflow behavior can represent:
+
+```text
+runtime change succeeded
++
+durability failed
+```
+
+without rolling back session state or falsely claiming durable success.
+
+Immediate feedback remains workflow-local and may disappear with workflow
+navigation.
+
+---
+
+# Task 1.36 — Persistent App-Level Durability Awareness
+
+DayFrame now has one shell-level persistent durability-awareness surface.
+
+It initializes from:
+
+```text
+getDurabilityStatus()
+```
+
+and updates through:
+
+```text
+subscribeDurability()
+```
+
+Active-state and profile durability are represented independently.
+
+Persistent behavior is:
+
+```text
+unknown
+    → silent
+
+durable
+    → silent
+
+unavailable
+    → persistent retryable awareness
+
+storageFailure
+    → persistent retryable awareness
+
+serializationFailure
+    → persistent recovery-required awareness
+```
+
+The surface survives in-app workflow navigation and clears automatically when the
+retained durability surface converges to `durable`.
+
+---
+
+# Task 1.37 — Explicit User-Triggered Durability Retry
+
+Persistent retryable awareness now exposes independent controls for:
+
+```text
+active state
+profiles
+```
+
+Retry appears only for:
+
+```text
+retryableUnavailable
+retryableStorageFailure
+```
+
+No Retry appears for:
+
+```text
+recoveryRequired
+durableSuccess
+internalNoOp
+```
+
+The controls invoke only:
+
+```text
+retryActivePersistence()
+retryProfilePersistence()
+```
+
+They do not replay Setup saves, profile mutations, clear, or other originating
+workflow commands.
+
+Partial-clear failure can therefore be repaired through the correct store-owned
+absence retry without exposing `snapshot | absent` to the UI.
+
+---
+
+# Task 1.38 — Serialization-Failure Recovery Boundary
+
+Task 1.38 investigated what `recoveryRequired` should mean.
+
+The principal finding was that no supported production UI path was found that
+naturally creates unserializable authored data.
+
+Current concrete serialization-failure tests deliberately inject invalid
+programmatic runtime values.
+
+The condition is therefore primarily a defensive integrity boundary in the
+current implementation.
+
+The investigation nevertheless established stable recovery principles.
+
+## Runtime Preservation
+
+After serialization failure:
+
+```text
+latest session intent
+    → remains active in memory
+```
+
+## Durable Checkpoint Preservation
+
+Serialization occurs before durable replacement.
+
+Therefore:
+
+```text
+serialization failure
+    ↓
+no successful durable write
+    ↓
+previous durable representation remains untouched
+```
+
+## Recovery Boundary
+
+Ordinary unchanged Retry is inappropriate.
+
+A later ordinary mutation that changes the representation may serialize
+successfully and naturally restore durability.
+
+Automatic rollback, reset, reload, or schema-specific repair is not adopted.
+
+## Future-Model Deferral
+
+Current-model-specific work intentionally deferred includes:
+
+* field-level repair;
+* entity-specific serialization diagnostics;
+* shift/template/recurrence-specific repair UI;
+* invalid-profile surgery;
+* schema-specific recovery tooling.
+
+Those areas are expected to couple strongly to the later authored-data and engine
+redesign.
+
+---
+
+# Task 1.39 — Recovery-Required Session-Risk Communication
+
+Persistent recovery-required awareness now explicitly communicates:
+
+* current session changes remain available;
+* those changes are not durably saved;
+* ordinary Retry is unavailable;
+* reloading DayFrame may discard those changes;
+* closing DayFrame may discard those changes;
+* older saved data may return.
+
+No:
+
+* recovery control;
+* rollback;
+* reset;
+* backup-export promise;
+* unload interception;
+* navigation blocking;
+* model-specific repair
+
+was introduced.
+
+Task 1.39 completed the minimum Phase 1 serialization-recovery obligation.
+
+---
+
+# Current Durability Architecture
+
+The current operational durability path is:
+
+```text
+USER ACTION
+    ↓
+STORE-OWNED RUNTIME MUTATION
+    ↓
+CURRENT SESSION STATE APPLIED
+    ↓
+PERSISTENCE ATTEMPT
+    ↓
+FACTUAL OUTCOME
+    ├── persisted / removed
+    ├── unavailable
+    ├── storageFailure
+    └── serializationFailure
+    ↓
+RETAINED DURABILITY STATUS
+    ↓
+SHARED WORKFLOW SEMANTICS
+    ├── durableSuccess
+    ├── retryableUnavailable
+    ├── retryableStorageFailure
+    └── recoveryRequired
+    ↓
+IMMEDIATE CONTEXTUAL FEEDBACK
+    +
+PERSISTENT APP-LEVEL AWARENESS
+    ↓
+USER RETRY when eligible
+    ↓
+STORE-OWNED RETRY
+    ↓
+RETAINED STATUS CONVERGENCE
+```
+
+The current architecture deliberately separates:
+
+```text
+DayFrameState
+    = current runtime/domain truth
+
+StoreDurabilityStatus
+    = current durability knowledge
+
+StoreDesiredDurableCondition
+    = retry-routing intent
+
+DurabilitySemanticCategory
+    = workflow interpretation
+```
+
+None is treated as interchangeable with the others.
+
+---
+
+# Session-First Authority
+
+The current durability model follows:
+
+> A valid runtime transition remains authoritative for the current session even if
+> durable persistence fails.
+
+Persistence failure therefore does not:
+
+* roll back runtime state;
+* suppress a valid mutation;
+* reload older data;
+* regenerate domain state;
+* pretend the mutation itself failed.
+
+Instead, DayFrame records and communicates the durability discrepancy.
+
+---
+
+# Retry Authority
+
+The current retry rule is:
+
+```text
+current desired durable condition
+    ↓
+snapshot
+    → persist latest current representation
+
+absent
+    → remove durable key
+```
+
+Retry does not preserve or replay historical failed commands.
+
+This means newer runtime intent supersedes older failed persistence attempts.
+
+---
+
+# Recovery Boundary
+
+Current ordinary retry covers:
+
+```text
+unavailable
+storageFailure
+```
+
+Current recovery-required classification covers:
+
+```text
+serializationFailure
+```
+
+No model-specific recovery machinery is currently justified.
+
+The minimum safety boundary is:
+
+```text
+preserve current runtime intent
+preserve prior durable representation
+communicate session-end risk
+allow continued editing
+never automatically discard or roll back
+```
+
+---
+
+# Durable / Derived Data Boundary
+
+The current durability work protects authored/recovery-relevant state rather than
+treating all runtime data as durable authority.
+
+This principle is expected to become more important during future engine
+alignment:
+
+```text
+USER-AUTHORED / RECOVERY-RELEVANT STATE
+    → preserve / migrate / recover
+
+RECOMPUTABLE ENGINE OUTPUT
+    → derived
+    → invalidate / regenerate
+```
+
+The exact authored-data boundary remains a Phase 2 authority question.
+
+---
+
+# Existing V1 Reader Status
+
+The remaining raw singular compatibility readers remain unchanged.
+
+## Local State
+
+**Retain Until Explicit Criteria Are Met**
+
+## Saved Profiles
+
+**Retain Until Explicit Criteria Are Met**
+
+## V1 Backups
+
+**Retain Indefinitely for Now**
+
+The accepted durable-data ADR governs their future treatment.
+
+No Task 1.23–1.39 durability work authorized reader retirement.
 
 ---
 
 # Validation Status
 
-Current validated baseline:
+Current validated baseline after Task 1.39:
 
 * `npm run lint` — passed
 * `npm run typecheck` — passed
 * `npm test` — passed
 * `npm run build` — passed
+* affected-scope `git diff --check` — passed
 
 Current automated baseline:
 
-**22 test files / 244 tests passing**
+**23 test files / 366 tests passing**
 
-The suite continues to include direct compatibility evidence for:
+The current suite protects:
 
-* singular-only historical local state;
-* singular-only historical saved profiles;
-* singular-only historical V1 backups.
+* historical singular local/profile/backup compatibility;
+* plural current runtime/core authority;
+* persistence outcomes;
+* mutation-result semantics;
+* retained durability;
+* desired durable condition;
+* storage-accessor normalization;
+* store-owned retry;
+* durability subscriptions;
+* semantic classification;
+* immediate workflow feedback;
+* persistent cross-navigation awareness;
+* explicit user-triggered Retry;
+* partial-clear retry;
+* recovery-required suppression of Retry;
+* session-end risk communication.
 
-Current plural architecture remains fully validated.
+Repository-wide `git diff --check` continues to identify pre-existing whitespace in
+architecture documentation outside the executable task scopes. That cleanup should
+be performed when those documents are intentionally edited rather than folded into
+an unrelated implementation task.
 
 ---
 
-# Architectural Progress
+# Phase 1 Completion Assessment
 
-Phase 1 has now completed three major categories of foundational alignment.
+Phase 1 has completed the architectural foundation work currently required by the
+accepted execution sequence.
 
-## 1. Transaction Ownership
+Completed foundation areas include:
+
+## Transaction Ownership
 
 ```text
 Setup save
     ↓
-one store-owned authored transition
+one store-owned authored transaction
 ```
 
----
-
-## 2. Preview Coordination
+## Preview Coordination
 
 ```text
 DayFrameApp
@@ -629,58 +1151,155 @@ DayFrameApp
 PreviewScreen
 ```
 
-One obsolete alternate Preview path has been removed.
-
----
-
-## 3. Shift-Cycle Authority
-
-Historical state once allowed singular cycle representation across multiple layers.
-
-Current architecture now has one vocabulary:
+## Shift-Cycle Authority
 
 ```text
-shiftCycles
+historical raw input
+    → normalization
+    → shiftCycles-only current architecture
 ```
 
-through:
+## Durable-Data Governance
 
-* durable writers;
-* normalized authored data;
-* runtime state;
-* store mutation APIs;
-* Preview generation;
-* cycle work generation;
-* candidate generation;
-* effective schedule-preference resolution.
+```text
+user data
+    ↓
+explicit compatibility/versioning policy
+```
 
-Singular compatibility survives only at raw historical-reader boundaries.
+## Durability Authority
+
+```text
+runtime truth
+≠
+durability truth
+≠
+retry intent
+≠
+workflow semantics
+```
+
+## Failure / Retry / Recovery Boundary
+
+```text
+transient persistence failure
+    → explicit Retry
+
+representation failure
+    → recoveryRequired
+    → preserve + communicate
+```
+
+No additional Phase 1 durability implementation is required before proceeding.
 
 ---
 
-# Remaining Phase 1 Findings
+# Remaining Architectural Findings
 
-The original Task 1.1 foundational audit still contains unresolved topics outside the completed `shiftCycle` sequence.
-
-These include:
+Earlier Phase 1 audits identified additional concerns including:
 
 * manual-event command ownership;
 * feedback aggregation;
 * focus and continuity ownership;
 * duplicated date-conversion helpers;
-* persistence-failure authority;
 * seeded-store purpose.
 
-The following former findings are now resolved:
+Some of these findings may now be superseded or reframed by the completed Phase 1
+architecture.
 
-* `PreviewScreenContainer` status;
-* singular `shiftCycle` writer duplication;
-* runtime `shiftCycle` mirror;
-* singular store mutation alias;
-* singular core scheduling aliases;
-* normalized authored singular property.
+They should not automatically become implementation tasks.
 
-Durable reader retirement remains intentionally unresolved pending compatibility governance.
+Phase 2 should re-evaluate them through the broader authority/state model rather
+than continuing the original finding list mechanically.
+
+Persistence-failure authority is no longer an unresolved finding; Tasks 1.23–1.39
+established that authority comprehensively.
+
+---
+
+# Phase 2 — Authority and State Alignment
+
+## Status
+
+**Next architectural domain**
+
+Phase 2 should begin with investigation rather than mutation.
+
+The first investigation should establish the current and intended boundaries for:
+
+### Authoritative State
+
+Which state objects represent primary truth?
+
+### Derived State
+
+Which values can always be recreated from authoritative inputs?
+
+### Invalidation
+
+Which layer decides that derived information is stale?
+
+### Replacement
+
+What exactly happens when authored state is replaced through:
+
+* profile load;
+* backup import;
+* future recovery;
+* other replacement operations?
+
+### Ownership
+
+Which layer is authorized to perform each transition?
+
+---
+
+# Recommended Phase 2 Opening Question
+
+The next question is:
+
+> **What current DayFrame state is authoritative, what is derived, and which layer
+> owns invalidation and replacement of each?**
+
+This investigation should precede substantial scheduling-engine restructuring.
+
+The goal is to establish a stable state authority model before later engine work
+changes the shape or volume of derived data.
+
+---
+
+# Why Phase 2 Precedes Engine Redesign
+
+Future DayFrame architecture is expected to contain richer authored concepts and
+significantly more derived scheduling information.
+
+A likely conceptual boundary is:
+
+```text
+AUTHORED INTENT
+    Commitments
+    Goals
+    Priorities
+    Constraints
+        ↓
+SCHEDULING / ALLOCATION ENGINE
+        ↓
+DERIVED OUTPUT
+    Schedule
+    Capacity
+    Allocations
+    Recommendations
+    Friction
+    Projections
+```
+
+The exact implementation remains future work.
+
+Phase 2 must establish the authority rules before those concepts are implemented.
+
+The durability foundation created in Phase 1 should remain largely independent of
+that engine transformation because it protects authoritative authored/recovery
+state rather than current engine internals.
 
 ---
 
@@ -690,11 +1309,12 @@ The following rules remain active.
 
 ## Current-State Documentation
 
-Current implementation documents should describe the current architecture.
+Current implementation documents describe the architecture as it exists now.
 
 ## Historical Documentation
 
-Audits, task results, checkpoints, and archive documents should preserve the state that existed when they were created.
+Audits, task results, checkpoints, and archived documents preserve the state that
+existed when they were created.
 
 Historical references to removed structures remain valid historical evidence.
 
@@ -713,20 +1333,11 @@ TASK_X.Y_NAME_RESULT.md
 
 Pre-execution artifact integrity must be verified before work begins.
 
-Expected sections include:
+A finding does not itself authorize implementation.
 
-* task metadata;
-* Execution Artifact Rules;
-* Purpose;
-* Scope;
-* Explicit Non-Goals;
-* Validation Requirements;
-* Completion Criteria;
-* Task Determination.
+Investigation and implementation remain separate where uncertainty warrants it.
 
-Codex should not execute an incomplete task artifact.
-
-Task-specific checkpoints should not be created unless explicitly authorized.
+Task-specific checkpoints are created only when explicitly authorized.
 
 ---
 
@@ -735,22 +1346,22 @@ Task-specific checkpoints should not be created unless explicitly authorized.
 Implementation continues according to:
 
 ```text
-Review
-    ↓
+Investigate / Review
+        ↓
+Authorize
+        ↓
 Implement
-    ↓
+        ↓
 Validate
-    ↓
+        ↓
 Document
-    ↓
+        ↓
 Checkpoint
-    ↓
+        ↓
 Commit
 ```
 
-Investigations and implementation tasks remain separate where uncertainty warrants it.
-
-A finding does not itself authorize mutation.
+Architecture governs implementation.
 
 ---
 
@@ -769,47 +1380,26 @@ Implementation should preserve:
 * Documentation Integrity
 * Forward Migration Safety
 * User Data Preservation
+* Session-First Runtime Authority
+* Separation of Authoritative and Derived State
 
-Architecture governs implementation.
-
-When implementation evidence is insufficient, DayFrame should preserve uncertainty rather than invent certainty.
+When evidence is insufficient, DayFrame should preserve uncertainty rather than
+invent certainty.
 
 ---
 
 # Immediate Next Steps
 
-1. Create the Session Checkpoint covering Tasks 1.5 through 1.20.
-2. Commit the validated compatibility-alignment baseline.
-3. Begin the next governance investigation/decision concerning durable-data compatibility and format versioning.
-4. Determine whether that policy should be captured as an Architectural Decision Record.
-5. Do not remove any remaining raw singular reader before policy and evidence explicitly authorize retirement.
-6. After compatibility governance is settled, return to the remaining Phase 1 foundational findings and select the next dependency-correct implementation seam.
-
----
-
-# Likely Next Governance Question
-
-The immediate question is no longer:
-
-> Where should legacy `shiftCycle` compatibility live?
-
-That question is resolved.
-
-The next question is:
-
-> **What durable-data compatibility and format-versioning promises should DayFrame make going forward?**
-
-This decision should govern future:
-
-* persistence migrations;
-* profile migrations;
-* backup compatibility;
-* format versioning;
-* retirement criteria;
-* unsupported-format behavior;
-* conversion tooling.
-
-It should not retroactively remove existing compatibility merely for architectural cleanliness.
+1. Complete the Phase 1 project review.
+2. Update governance documentation reflecting Tasks 1.23–1.39 where appropriate.
+3. Create the Phase 1 / session checkpoint.
+4. Resolve the known architecture-document whitespace while those files are
+   intentionally in scope.
+5. Commit and push the validated Phase 1 baseline.
+6. Begin **Phase 2 — Authority and State Alignment** with an investigation of
+   authoritative state, derived state, invalidation, and replacement ownership.
+7. Do not extend the durability sequence unless a concrete future architectural
+   dependency requires it.
 
 ---
 
@@ -820,6 +1410,7 @@ It should not retroactively remove existing compatibility merely for architectur
 * `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md`
 * `ARCHITECTURE_CHARTER.md`
 * `DECISIONS.md`
+* `ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
 
 ## Audit
 
@@ -851,67 +1442,102 @@ It should not retroactively remove existing compatibility merely for architectur
 
 # Open Questions
 
-## Durable-Data Compatibility Governance
+## Phase 2 State Authority
 
-What historical data does DayFrame promise to continue reading?
+Which current state structures own primary truth?
 
-How should format versions communicate compatibility?
+Which values are derived?
 
-Should V1 backups remain importable indefinitely?
+Which derived values should never be durable authority?
 
-If not, must conversion tooling remain available?
+Who owns invalidation?
 
-What constitutes sufficient evidence that a local/profile migration has completed?
+What constitutes replacement rather than mutation?
 
-What happens when an unsupported historical format is encountered?
+What must survive a replacement operation?
 
-These questions require explicit architectural governance.
+How should Preview and later scheduling-engine output relate to authored state?
 
 ---
 
-## Remaining Foundational Questions
+## Future Durable Formats
 
-After compatibility governance, Phase 1 still needs to determine the appropriate next seams for:
+Future authored-model changes may require:
 
-* manual-event command ownership;
-* feedback and recovery ownership;
-* focus/continuity ownership;
-* duplicated date conversion;
-* persistence failure authority;
-* seeded-store purpose.
+* new local persistence versions;
+* profile migration epochs;
+* new backup versions;
+* conversion tooling.
 
-These findings remain evidence candidates rather than pre-authorized refactors.
+Those decisions remain governed by the accepted durable-data ADR and should be made
+when the future authored model is sufficiently defined.
+
+---
+
+## Serialization Recovery
+
+Current model-specific serialization repair remains intentionally deferred.
+
+If future authored data makes representation failure realistically reachable,
+DayFrame should revisit:
+
+* diagnostics;
+* defensive export;
+* repair tooling;
+* recovery surfaces;
+
+against the then-current authored architecture.
 
 ---
 
 # Current Determination
 
-DayFrame has completed Tasks **1.1 through 1.20** of Phase 1 — Architectural Foundation Alignment.
+DayFrame has completed Tasks **1.1 through 1.39** of
+**Phase 1 — Architectural Foundation Alignment**.
 
-The latest compatibility-alignment sequence successfully transformed the old singular shift-cycle model from a cross-cutting architectural representation into a narrowly isolated historical-data compatibility concern.
-
-Current DayFrame architecture is plural-only across:
+The phase has produced coherent foundations for:
 
 ```text
-durable output
-    ↓
-normalized authored data
-    ↓
-runtime state
-    ↓
-store APIs
-    ↓
-core scheduling
+transaction ownership
+Preview coordination
+canonical shift-cycle authority
+durable-data governance
+persistence outcome authority
+retained durability
+explicit retry
+reactive durability observation
+workflow durability semantics
+persistent user awareness
+recovery-required safety
 ```
 
-Historical singular `shiftCycle` remains supported only when reading data produced by older DayFrame implementations.
+The durability sequence is intentionally complete for now.
 
-Task 1.20 established that none of those remaining readers can currently be retired safely.
+Current executable validation is:
 
-The repository remains fully validated.
+```text
+23 test files
+366 tests passing
+lint passing
+typecheck passing
+build passing
+```
 
 The current execution boundary is:
 
-**Phase 1 — Architectural Foundation Alignment → Session Checkpoint → Durable-Data Compatibility Governance**
+```text
+PHASE 1
+Architectural Foundation Alignment
+        ↓
+PROJECT REVIEW / CHECKPOINT
+        ↓
+PHASE 2
+Authority and State Alignment
+```
 
-The next work should establish policy before making any further compatibility-retirement change.
+The next implementation work should not extend durability merely for additional
+completeness.
+
+The next task should establish **which DayFrame state is authoritative, which is
+derived, and who owns invalidation and replacement** before substantial engine
+restructuring begins.

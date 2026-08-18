@@ -1,11 +1,16 @@
 /* @vitest-environment jsdom */
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDayFrameBackup } from "../../state/dayFrameBackup.js";
-import { createDayFrameStore, DAYFRAME_STORAGE_KEY } from "../../state/dayFrameStore.js";
+import {
+  createDayFrameStore,
+  DAYFRAME_PROFILES_STORAGE_KEY,
+  DAYFRAME_STORAGE_KEY,
+} from "../../state/dayFrameStore.js";
+import type { PersistenceWriteOutcome, StoreDurabilityStatus } from "../../state/types.js";
 import { DayFrameApp } from "../DayFrameApp.js";
 
 let createObjectUrlMock: ReturnType<typeof vi.fn>;
@@ -2526,5 +2531,737 @@ describe("DayFrameApp", () => {
     await waitFor(() => {
       expect(screen.getByText("Backup file is not valid JSON.")).toBeInTheDocument();
     });
+  });
+
+  it.each([
+    ["unavailable", "Setup applied for this session, but local storage is unavailable."],
+    ["storageFailure", "Setup applied for this session, but it could not be saved locally."],
+    [
+      "serializationFailure",
+      "Setup applied for this session, but it could not be prepared for local storage.",
+    ],
+  ] as const)(
+    "keeps a Setup commit in runtime while reflecting %s durability semantics",
+    (status, expectedMessage) => {
+      const store = createDayFrameStore();
+      const commitAuthoredSetup = store.commitAuthoredSetup;
+      const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
+      const workflowStore = {
+        ...store,
+        commitAuthoredSetup: (...args: Parameters<typeof commitAuthoredSetup>) => ({
+          ...commitAuthoredSetup(...args),
+          persistence: { status } as PersistenceWriteOutcome,
+        }),
+      };
+
+      render(<DayFrameApp store={workflowStore} />);
+      fireEvent.change(screen.getByLabelText("Week Starts On"), {
+        target: { value: "monday" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+      expect(store.getState().schedulingPreferences.weekStartsOn).toBe("monday");
+      expect(screen.getByText(expectedMessage)).toHaveClass("df-danger-message");
+      expect(screen.queryByText("Setup saved.")).not.toBeInTheDocument();
+      expect(retryActivePersistence).not.toHaveBeenCalled();
+      expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+    },
+  );
+
+  it("distinguishes a runtime profile save from retryable profile durability failure", () => {
+    const store = createDayFrameStore();
+    const saveProfile = store.saveProfile;
+    const workflowStore = {
+      ...store,
+      saveProfile: (...args: Parameters<typeof saveProfile>) => ({
+        ...saveProfile(...args),
+        persistence: { status: "storageFailure" } as const,
+      }),
+    };
+
+    render(<DayFrameApp store={workflowStore} />);
+    fireEvent.change(screen.getByLabelText("Profile Name"), {
+      target: { value: "Session Profile" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+
+    expect(store.getState().savedProfiles[0]?.name).toBe("Session Profile");
+    expect(
+      screen.getByText(
+        'Profile "Session Profile" exists for this session, but the local storage attempt failed.',
+      ),
+    ).toHaveClass("df-danger-message");
+    expect(screen.queryByText("Current setup saved as a local profile.")).not.toBeInTheDocument();
+  });
+
+  it("keeps a manual event runtime change and editor behavior after retryable persistence failure", async () => {
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new DOMException("Storage write failed.");
+      });
+
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Runtime Appointment" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Event" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Runtime Appointment").length).toBeGreaterThan(0);
+    });
+    expect(
+      screen.getByText("Event change applied for this session, but it could not be saved locally."),
+    ).toHaveClass("df-danger-message");
+    expect(
+      screen.getByText(
+        "Active setup is available for this session, but the durable save failed.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Day Details" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry active setup durability" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("heading", { name: "Day Details" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Active setup is available for this session, but the durable save failed.",
+      ),
+    ).toBeInTheDocument();
+
+    setItem.mockRestore();
+  });
+
+  it("retains profile delete and load runtime transitions while classifying durability", () => {
+    const store = createDayFrameStore();
+    store.saveProfile({ name: "Runtime Profile", savedAt: "2026-05-05T10:00:00-05:00" });
+    const loadProfile = store.loadProfile;
+    const deleteProfile = store.deleteProfile;
+    const workflowStore = {
+      ...store,
+      loadProfile: (...args: Parameters<typeof loadProfile>) => ({
+        ...loadProfile(...args),
+        persistence: { status: "unavailable" } as const,
+      }),
+      deleteProfile: (...args: Parameters<typeof deleteProfile>) => ({
+        ...deleteProfile(...args),
+        persistence: { status: "storageFailure" } as const,
+      }),
+    };
+
+    render(<DayFrameApp store={workflowStore} />);
+    fireEvent.click(screen.getByRole("button", { name: "Load Profile" }));
+    expect(
+      screen.getByText(
+        'Profile "Runtime Profile" is loaded for this session, but local storage is unavailable.',
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete Profile" }));
+    expect(store.getState().savedProfiles).toHaveLength(0);
+    expect(
+      screen.getByText(
+        'Profile "Runtime Profile" is removed for this session, but the local storage attempt failed.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps a valid backup import in runtime while reflecting recovery-required semantics", async () => {
+    const store = createDayFrameStore();
+    const importBackup = store.importBackup;
+    const workflowStore = {
+      ...store,
+      importBackup: (...args: Parameters<typeof importBackup>) => ({
+        ...importBackup(...args),
+        persistence: { status: "serializationFailure" } as const,
+      }),
+    };
+    const backup = createDayFrameBackup(
+      {
+        schedulingPreferences: { dayBoundaryStartTime: "04:00", weekStartsOn: "monday" },
+        previewRange: {
+          preset: "custom",
+          startDate: "2026-05-08",
+          endDate: "2026-05-12",
+        },
+        manualEvents: [],
+        shiftDefinitions: [],
+        shiftCycles: [],
+        blockTemplates: [],
+        blockRecurrences: [],
+      },
+      "2026-05-05T10:00:00-05:00",
+    );
+
+    render(<DayFrameApp store={workflowStore} />);
+    fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
+      target: {
+        files: [
+          new File([JSON.stringify(backup)], "dayframe-backup.json", {
+            type: "application/json",
+          }),
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Backup applied for this session, but it could not be prepared for local storage.",
+        ),
+      ).toBeInTheDocument();
+    });
+    expect(store.getState().schedulingPreferences.weekStartsOn).toBe("monday");
+    expect(screen.queryByText("DayFrame setup backup imported.")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [
+      "partiallyCleared",
+      { status: "removed" },
+      { status: "storageFailure" },
+      "saved profiles (storage failure)",
+    ],
+    [
+      "notCleared",
+      { status: "unavailable" },
+      { status: "storageFailure" },
+      "active setup (storage unavailable) and saved profiles (storage failure)",
+    ],
+  ] as const)(
+    "retains structured %s clear semantics after the runtime reset",
+    (durability, activeState, profiles, unresolvedText) => {
+      const store = createDayFrameStore({
+        schedulingPreferences: { dayBoundaryStartTime: "03:00", weekStartsOn: "monday" },
+      });
+      const clearLocalData = store.clearLocalData;
+      const workflowStore = {
+        ...store,
+        clearLocalData: () => ({
+          ...clearLocalData(),
+          activeState,
+          profiles,
+          durability,
+        }),
+      };
+
+      render(<DayFrameApp store={workflowStore} />);
+      fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
+      fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
+
+      expect(store.getState().schedulingPreferences.weekStartsOn).toBe("saturday");
+      expect(
+        screen.getByText(`Local data cleared for this session, but local removal is incomplete for ${unresolvedText}.`),
+      ).toHaveClass("df-danger-message");
+      expect(
+        screen.queryByText("Local DayFrame setup data cleared from this device."),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("suppresses persistent durability awareness for initial unknown and durable surfaces", () => {
+    const unknownStore = createDayFrameStore();
+    const { rerender } = render(<DayFrameApp store={unknownStore} />);
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+
+    const durableStore = createDayFrameStore();
+    durableStore.setSchedulingPreferences({ weekStartsOn: "monday" });
+    durableStore.saveProfile({ name: "Durable", savedAt: "2026-05-05T10:00:00-05:00" });
+    rerender(<DayFrameApp store={durableStore} />);
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows active storage failure persistently beside immediate feedback and clears on ordinary convergence", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(
+      screen.getByText("Setup applied for this session, but it could not be saved locally."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Active setup is available for this session, but the durable save failed.",
+      ),
+    ).toBeInTheDocument();
+
+    setItem.mockRestore();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Setup saved.")).toBeInTheDocument();
+  });
+
+  it("keeps active durability awareness across workflow navigation", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+
+    expect(
+      screen.getByText(
+        "Active setup is available for this session, but the durable save failed.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry active setup durability" }),
+    ).toBeInTheDocument();
+
+    setItem.mockRestore();
+  });
+
+  it("shows profile failure independently and clears it after ordinary profile convergence", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.change(screen.getByLabelText("Profile Name"), {
+      target: { value: "First Profile" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+
+    expect(
+      screen.getByText(
+        "Saved profiles are available for this session, but the durable save failed.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Active setup is available for this session, but the durable save failed.",
+      ),
+    ).not.toBeInTheDocument();
+
+    setItem.mockRestore();
+    fireEvent.change(screen.getByLabelText("Profile Name"), {
+      target: { value: "Second Profile" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("represents both surfaces and suppresses mixed unknown or durable surfaces", () => {
+    const store = createDayFrameStore();
+    const combinedStore = {
+      ...store,
+      getDurabilityStatus: () => ({
+        activeState: "unavailable" as const,
+        profiles: "serializationFailure" as const,
+      }),
+    };
+
+    const { rerender } = render(<DayFrameApp store={combinedStore} />);
+
+    expect(
+      screen.getByText(
+        "Active setup is available for this session, but local storage is unavailable.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Saved-profile changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved profile list may return.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry active setup durability" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry saved profiles durability" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/snapshot|absent/i)).not.toBeInTheDocument();
+
+    rerender(
+      <DayFrameApp
+        store={{
+          ...store,
+          getDurabilityStatus: () => ({
+            activeState: "unknown" as const,
+            profiles: "storageFailure" as const,
+          }),
+        }}
+      />,
+    );
+    expect(
+      screen.queryByText(/Active setup is available for this session/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Saved profiles are available for this session/)).toBeInTheDocument();
+
+    rerender(
+      <DayFrameApp
+        store={{
+          ...store,
+          getDurabilityStatus: () => ({
+            activeState: "durable" as const,
+            profiles: "unavailable" as const,
+          }),
+        }}
+      />,
+    );
+    expect(
+      screen.queryByText(/Active setup is available for this session/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Saved profiles are available for this session, but local storage is unavailable.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry saved profiles durability" }),
+    ).toBeEnabled();
+  });
+
+  it("shows active recovery-required awareness without implying an action", () => {
+    const store = createDayFrameStore();
+
+    render(
+      <DayFrameApp
+        store={{
+          ...store,
+          getDurabilityStatus: () => ({
+            activeState: "serializationFailure",
+            profiles: "durable",
+          }),
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Active setup changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved setup may return.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /retry|recover/i })).not.toBeInTheDocument();
+  });
+
+  it("communicates both active and profile recovery-required session risks distinctly", () => {
+    const baseStore = createDayFrameStore();
+
+    render(
+      <DayFrameApp
+        store={{
+          ...baseStore,
+          getDurabilityStatus: () => ({
+            activeState: "serializationFailure",
+            profiles: "serializationFailure",
+          }),
+        }}
+      />,
+    );
+
+    const region = screen.getByRole("region", { name: "Some changes are not durably saved" });
+    expect(
+      within(region).getByText(
+        "Active setup changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved setup may return.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(region).getByText(
+        "Saved-profile changes are still available in this session, but they are not durably saved and ordinary Retry is unavailable. Reloading or closing DayFrame may discard these session changes; an older saved profile list may return.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(region).queryByRole("button")).not.toBeInTheDocument();
+    expect(within(region).queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("keeps recovery-required session-risk communication across in-app navigation", () => {
+    const baseStore = createDayFrameStore();
+    const store = {
+      ...baseStore,
+      getDurabilityStatus: () => ({
+        activeState: "serializationFailure" as const,
+        profiles: "durable" as const,
+      }),
+      subscribeDurability: () => () => undefined,
+    };
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+
+    expect(
+      screen.getByText(/Reloading or closing DayFrame may discard these session changes/),
+    ).toBeInTheDocument();
+  });
+
+  it("clears recovery-required session-risk communication after natural convergence", () => {
+    const baseStore = createDayFrameStore();
+    let status: StoreDurabilityStatus = {
+      activeState: "serializationFailure",
+      profiles: "durable",
+    };
+    const durabilityListeners = new Set<(nextStatus: StoreDurabilityStatus) => void>();
+    const commitAuthoredSetup = baseStore.commitAuthoredSetup;
+    const store = {
+      ...baseStore,
+      getDurabilityStatus: () => ({ ...status }),
+      subscribeDurability: (listener: (nextStatus: StoreDurabilityStatus) => void) => {
+        durabilityListeners.add(listener);
+        return () => durabilityListeners.delete(listener);
+      },
+      commitAuthoredSetup: (...args: Parameters<typeof commitAuthoredSetup>) => {
+        const result = commitAuthoredSetup(...args);
+        status = { ...status, activeState: "durable" };
+        for (const listener of durabilityListeners) {
+          listener({ ...status });
+        }
+        return result;
+      },
+    };
+
+    render(<DayFrameApp store={store} />);
+    expect(screen.getByText(/Reloading or closing DayFrame/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("retries active durability explicitly without replaying a workflow or notifying state subscribers", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    store.setSchedulingPreferences({ weekStartsOn: "monday" });
+    setItem.mockRestore();
+    const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
+    const commitAuthoredSetup = vi.spyOn(store, "commitAuthoredSetup");
+    const stateListener = vi.fn();
+    store.subscribe(stateListener);
+
+    render(<DayFrameApp store={store} />);
+    expect(screen.getByText(/Active setup is available for this session/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry active setup durability" }));
+
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+    expect(retryActivePersistence).toHaveBeenCalledTimes(1);
+    expect(commitAuthoredSetup).not.toHaveBeenCalled();
+    expect(stateListener).not.toHaveBeenCalled();
+  });
+
+  it("updates a retry failure from storage failure to unavailable", () => {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    store.setSchedulingPreferences({ weekStartsOn: "monday" });
+    setItem.mockRestore();
+
+    render(<DayFrameApp store={store} />);
+    expect(screen.getByText(/the durable save failed/)).toBeInTheDocument();
+
+    delete (globalThis as { localStorage?: unknown }).localStorage;
+    fireEvent.click(screen.getByRole("button", { name: "Retry active setup durability" }));
+
+    if (originalDescriptor) {
+      Object.defineProperty(globalThis, "localStorage", originalDescriptor);
+    }
+
+    expect(screen.getByText(/local storage is unavailable/)).toBeInTheDocument();
+    expect(screen.queryByText(/the durable save failed/)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry active setup durability" }),
+    ).toBeInTheDocument();
+  });
+
+  it("retries profile snapshot durability through the profile store API", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    store.saveProfile({ name: "Retry Profile", savedAt: "2026-05-05T10:00:00-05:00" });
+    setItem.mockRestore();
+    const retryProfilePersistence = vi.spyOn(store, "retryProfilePersistence");
+    const saveProfile = vi.spyOn(store, "saveProfile");
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry saved profiles durability" }));
+
+    expect(retryProfilePersistence).toHaveBeenCalledTimes(1);
+    expect(saveProfile).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps surface retries independent when both surfaces fail", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    store.setSchedulingPreferences({ weekStartsOn: "monday" });
+    store.saveProfile({ name: "Failed Profile", savedAt: "2026-05-05T10:00:00-05:00" });
+    setItem.mockRestore();
+    const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
+    const retryProfilePersistence = vi.spyOn(store, "retryProfilePersistence");
+
+    render(<DayFrameApp store={store} />);
+    expect(screen.getByRole("button", { name: "Retry active setup durability" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Retry saved profiles durability" }),
+    ).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry active setup durability" }));
+
+    expect(retryActivePersistence).toHaveBeenCalledTimes(1);
+    expect(retryProfilePersistence).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText(/Active setup is available for this session/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Saved profiles are available for this session/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Retry saved profiles durability" }),
+    ).toBeEnabled();
+  });
+
+  it.each([
+    ["active", DAYFRAME_STORAGE_KEY, "Retry active setup durability"],
+    ["profiles", DAYFRAME_PROFILES_STORAGE_KEY, "Retry saved profiles durability"],
+  ] as const)(
+    "retries a partial-clear %s removal without replaying clear",
+    (failedSurface, failedKey, retryName) => {
+      const store = createDayFrameStore();
+      const originalRemoveItem = Storage.prototype.removeItem;
+      const removeItem = vi.spyOn(Storage.prototype, "removeItem").mockImplementation(function (
+        this: Storage,
+        key: string,
+      ) {
+        if (key === failedKey) {
+          throw new DOMException("Storage removal failed.");
+        }
+        originalRemoveItem.call(this, key);
+      });
+      const clearLocalData = vi.spyOn(store, "clearLocalData");
+      store.clearLocalData();
+      removeItem.mockRestore();
+      const retryMethod =
+        failedSurface === "active"
+          ? vi.spyOn(store, "retryActivePersistence")
+          : vi.spyOn(store, "retryProfilePersistence");
+
+      render(<DayFrameApp store={store} />);
+      fireEvent.click(screen.getByRole("button", { name: retryName }));
+
+      expect(retryMethod).toHaveBeenCalledTimes(1);
+      expect(clearLocalData).toHaveBeenCalledTimes(1);
+      expect(
+        screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("performs one attempt for one failed Retry activation and leaves Retry available", () => {
+    const store = createDayFrameStore();
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    store.setSchedulingPreferences({ weekStartsOn: "monday" });
+    const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
+    const attemptsBeforeClick = setItem.mock.calls.length;
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry active setup durability" }));
+
+    expect(retryActivePersistence).toHaveBeenCalledTimes(1);
+    expect(setItem.mock.calls.length - attemptsBeforeClick).toBe(1);
+    expect(
+      screen.getByRole("button", { name: "Retry active setup durability" }),
+    ).toBeEnabled();
+
+    setItem.mockRestore();
+  });
+
+  it("transitions Retry to recovery-required awareness when retry classification requires it", () => {
+    const baseStore = createDayFrameStore();
+    let status: StoreDurabilityStatus = {
+      activeState: "storageFailure",
+      profiles: "durable",
+    };
+    const durabilityListeners = new Set<(nextStatus: StoreDurabilityStatus) => void>();
+    const retryActivePersistence = vi.fn(() => {
+      status = { activeState: "serializationFailure", profiles: "durable" };
+      for (const listener of durabilityListeners) {
+        listener(status);
+      }
+      return { status: "notAttempted", reason: "serializationFailure" } as const;
+    });
+    const store = {
+      ...baseStore,
+      getDurabilityStatus: () => ({ ...status }),
+      retryActivePersistence,
+      subscribeDurability: (listener: (nextStatus: StoreDurabilityStatus) => void) => {
+        durabilityListeners.add(listener);
+        return () => durabilityListeners.delete(listener);
+      },
+    };
+
+    render(<DayFrameApp store={store} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry active setup durability" }));
+
+    expect(retryActivePersistence).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(/ordinary Retry is unavailable/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry active setup durability" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /recover/i })).not.toBeInTheDocument();
+  });
+
+  it("cleans up durability subscriptions and follows a replacement store", () => {
+    const firstStore = createDayFrameStore();
+    const secondStore = createDayFrameStore();
+    const firstUnsubscribe = vi.fn();
+    const firstSubscribe = firstStore.subscribeDurability;
+    vi.spyOn(firstStore, "subscribeDurability").mockImplementation((listener) => {
+      const unsubscribe = firstSubscribe(listener);
+      return () => {
+        firstUnsubscribe();
+        unsubscribe();
+      };
+    });
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage write failed.");
+    });
+    firstStore.setSchedulingPreferences({ weekStartsOn: "monday" });
+    setItem.mockRestore();
+    const { rerender, unmount } = render(<DayFrameApp store={firstStore} />);
+
+    expect(screen.getByText(/Active setup is available for this session/)).toBeInTheDocument();
+    rerender(<DayFrameApp store={secondStore} />);
+    expect(firstUnsubscribe).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("region", { name: "Some changes are not durably saved" }),
+    ).not.toBeInTheDocument();
+
+    unmount();
   });
 });

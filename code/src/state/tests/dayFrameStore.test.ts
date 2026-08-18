@@ -3,10 +3,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDayFrameBackup, parseDayFrameBackupJson } from "../dayFrameBackup.js";
 import { createInitialDayFrameState } from "../createInitialDayFrameState.js";
 import {
+  clearPersistedProfiles,
+  clearPersistedState,
   createDayFrameStore,
   DAYFRAME_PROFILES_STORAGE_KEY,
   DAYFRAME_STORAGE_KEY,
+  persistProfiles,
+  persistState,
 } from "../dayFrameStore.js";
+import type { DayFrameSavedProfile, DayFrameState } from "../types.js";
 import type { BlockRecurrence, BlockTemplate } from "../../core/blocks/types.js";
 import type { ShiftCycle } from "../../core/cycles/types.js";
 import type { ShiftDefinition } from "../../core/shifts/types.js";
@@ -470,7 +475,7 @@ describe("dayFrameStore", () => {
     setItem.mockClear();
     store.subscribe(listener);
 
-    const state = store.commitAuthoredSetup({
+    const result = store.commitAuthoredSetup({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
@@ -485,6 +490,7 @@ describe("dayFrameStore", () => {
       blockTemplates,
       blockRecurrences,
     });
+    const { state } = result;
 
     shiftDefinitions[0]!.name = "Mutated after commit";
     shiftCycles[0]!.name = "Mutated after commit";
@@ -509,6 +515,7 @@ describe("dayFrameStore", () => {
       preview: { isStale: true },
     });
     expect(store.getState()).toEqual(state);
+    expect(result.persistence).toEqual({ status: "persisted" });
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith(state);
     expect(setItem).toHaveBeenCalledTimes(1);
@@ -529,7 +536,7 @@ describe("dayFrameStore", () => {
   it("commits authored setup without creating a preview", () => {
     const store = createDayFrameStore();
 
-    const state = store.commitAuthoredSetup({
+    const { state } = store.commitAuthoredSetup({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
@@ -690,7 +697,7 @@ describe("dayFrameStore", () => {
       generatedAt: "2026-05-03T13:00:00-05:00",
     });
 
-    const state = store.setSchedulingPreferences({
+    const { state } = store.setSchedulingPreferences({
       dayBoundaryStartTime: "04:00",
     });
 
@@ -752,7 +759,7 @@ describe("dayFrameStore", () => {
         data: legacyData,
       }),
     );
-    const state = createDayFrameStore().importBackup(backup);
+    const { state } = createDayFrameStore().importBackup(backup);
 
     expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
     expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
@@ -786,7 +793,7 @@ describe("dayFrameStore", () => {
       generatedAt: "2026-05-03T13:00:00-05:00",
     });
 
-    const state = store.importBackup(
+    const { state } = store.importBackup(
       createDayFrameBackup(
         {
           schedulingPreferences: {
@@ -915,7 +922,7 @@ describe("dayFrameStore", () => {
     installLocalStorageMock(localStorage);
 
     const store = createDayFrameStore();
-    const state = store.loadProfile("profile_legacy");
+    const { state } = store.loadProfile("profile_legacy");
 
     expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
     expect(state.preview).toBeNull();
@@ -1221,13 +1228,1740 @@ describe("dayFrameStore", () => {
       },
     ]);
 
-    store.clearLocalData();
+    const result = store.clearLocalData();
 
     expect(store.getState()).toEqual(createInitialDayFrameState());
+    expect(result).toEqual({
+      state: createInitialDayFrameState(),
+      activeState: { status: "removed" },
+      profiles: { status: "removed" },
+      durability: "cleared",
+    });
+    expect(store.getDurabilityStatus()).toEqual({
+      activeState: "durable",
+      profiles: "durable",
+    });
     expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
     expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).toBeNull();
   });
+
+  describe("persistence helper outcomes", () => {
+    it("reports successful active-state and profile persistence", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      expect(persistState(createInitialDayFrameState())).toEqual({ status: "persisted" });
+      expect(persistProfiles([buildSavedProfile()])).toEqual({ status: "persisted" });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).not.toBeNull();
+      expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
+    });
+
+    it("reports unavailable storage for active-state and profile persistence", () => {
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: null,
+      });
+
+      expect(persistState(createInitialDayFrameState())).toEqual({ status: "unavailable" });
+      expect(persistProfiles([buildSavedProfile()])).toEqual({ status: "unavailable" });
+    });
+
+    it("reports active-state and profile storage-operation failures", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected storage failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      expect(persistState(createInitialDayFrameState())).toEqual({ status: "storageFailure" });
+      expect(persistProfiles([buildSavedProfile()])).toEqual({ status: "storageFailure" });
+    });
+
+    it("normalizes storage-accessor failures for writes and removals", () => {
+      installThrowingLocalStorageAccessor();
+
+      expect(persistState(createInitialDayFrameState())).toEqual({ status: "storageFailure" });
+      expect(persistProfiles([buildSavedProfile()])).toEqual({ status: "storageFailure" });
+      expect(clearPersistedState()).toEqual({ status: "storageFailure" });
+      expect(clearPersistedProfiles()).toEqual({ status: "storageFailure" });
+    });
+
+    it("distinguishes active-state and profile serialization failures", () => {
+      const localStorage = createLocalStorageMock();
+      const invalidState = buildSerializationFailureState();
+
+      installLocalStorageMock(localStorage);
+
+      expect(persistState(invalidState)).toEqual({ status: "serializationFailure" });
+      expect(persistProfiles([buildSavedProfile(invalidState)])).toEqual({
+        status: "serializationFailure",
+      });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
+      expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).toBeNull();
+    });
+
+    it("reports successful active-state and profile removal independently", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, "active");
+      localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, "profiles");
+      installLocalStorageMock(localStorage);
+
+      expect(clearPersistedState()).toEqual({ status: "removed" });
+      expect(clearPersistedProfiles()).toEqual({ status: "removed" });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
+      expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).toBeNull();
+    });
+
+    it("reports unavailable storage for each removal", () => {
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: undefined,
+      });
+
+      expect(clearPersistedState()).toEqual({ status: "unavailable" });
+      expect(clearPersistedProfiles()).toEqual({ status: "unavailable" });
+    });
+
+    it("reports active-state and profile removal failures independently", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.removeItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile removal failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      expect(clearPersistedState()).toEqual({ status: "removed" });
+      expect(clearPersistedProfiles()).toEqual({ status: "storageFailure" });
+    });
+
+    it("preserves runtime mutation and subscriber notification after a write failure", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected storage failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+
+      const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      const { state } = result;
+
+      expect(state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
+      expect(result.persistence).toEqual({ status: "storageFailure" });
+      expect(store.getState()).toEqual(state);
+      expect(listener).toHaveBeenCalledOnce();
+      expect(listener).toHaveBeenCalledWith(state);
+    });
+  });
+
+  describe("store mutation persistence results", () => {
+    it("returns unavailable with the applied active mutation and one notification", () => {
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+
+      const result = store.setPreviewRange({
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      });
+
+      expect(result.persistence).toEqual({ status: "unavailable" });
+      expect(result.state.previewRange.preset).toBe("oneWeek");
+      expect(store.getState()).toEqual(result.state);
+      expect(listener).toHaveBeenCalledOnce();
+      expect(listener).toHaveBeenCalledWith(result.state);
+    });
+
+    it("preserves serialization failure through an authored mutation result", () => {
+      const localStorage = createLocalStorageMock();
+      const store = createDayFrameStore(buildSerializationFailureState());
+
+      installLocalStorageMock(localStorage);
+
+      const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(result.persistence).toEqual({ status: "serializationFailure" });
+      expect(result.state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
+    });
+
+    it("returns profile persistence outcomes for save and delete", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile storage failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const saveResult = store.saveProfile({
+        name: "Runtime Profile",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+
+      expect(saveResult.persistence).toEqual({ status: "storageFailure" });
+      expect(saveResult.state.savedProfiles).toHaveLength(1);
+
+      const deleteResult = store.deleteProfile(saveResult.state.savedProfiles[0]!.id);
+
+      expect(deleteResult.persistence).toEqual({ status: "storageFailure" });
+      expect(deleteResult.state.savedProfiles).toEqual([]);
+    });
+
+    it("reports active-state persistence when loading a profile", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const saveResult = store.saveProfile({
+        name: "Load Source",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+      const setItem = vi.spyOn(localStorage, "setItem").mockImplementation((key: string) => {
+        if (key === DAYFRAME_STORAGE_KEY) {
+          throw new RangeError("Injected active storage failure");
+        }
+      });
+
+      const loadResult = store.loadProfile(saveResult.state.savedProfiles[0]!.id);
+
+      expect(loadResult.persistence).toEqual({ status: "storageFailure" });
+      expect(loadResult.state.savedProfiles).toHaveLength(1);
+      expect(setItem).toHaveBeenLastCalledWith(DAYFRAME_STORAGE_KEY, expect.any(String));
+    });
+
+    it("reports active-state persistence after a valid backup import", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active storage failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const result = store.importBackup(
+        createDayFrameBackup(buildSavedProfile().data, "2026-05-05T10:00:00-05:00"),
+      );
+
+      expect(result.persistence).toEqual({ status: "storageFailure" });
+      expect(result.state.preview).toBeNull();
+    });
+
+    it.each([
+      {
+        activeFailure: false,
+        profileFailure: true,
+        durability: "partiallyCleared",
+        activeStatus: "removed",
+        profileStatus: "storageFailure",
+      },
+      {
+        activeFailure: true,
+        profileFailure: false,
+        durability: "partiallyCleared",
+        activeStatus: "storageFailure",
+        profileStatus: "removed",
+      },
+      {
+        activeFailure: true,
+        profileFailure: true,
+        durability: "notCleared",
+        activeStatus: "storageFailure",
+        profileStatus: "storageFailure",
+      },
+    ] as const)(
+      "aggregates clear outcomes as $durability",
+      ({ activeFailure, profileFailure, durability, activeStatus, profileStatus }) => {
+        const localStorage = createLocalStorageMock();
+
+        localStorage.removeItem = vi.fn((key: string) => {
+          if (
+            (key === DAYFRAME_STORAGE_KEY && activeFailure) ||
+            (key === DAYFRAME_PROFILES_STORAGE_KEY && profileFailure)
+          ) {
+            throw new RangeError("Injected removal failure");
+          }
+        });
+        installLocalStorageMock(localStorage);
+
+        const result = createDayFrameStore().clearLocalData();
+
+        expect(result.state).toEqual(createInitialDayFrameState());
+        expect(result.activeState.status).toBe(activeStatus);
+        expect(result.profiles.status).toBe(profileStatus);
+        expect(result.durability).toBe(durability);
+      },
+    );
+
+    it("reports notCleared when storage is unavailable for both removals", () => {
+      const result = createDayFrameStore().clearLocalData();
+
+      expect(result.activeState).toEqual({ status: "unavailable" });
+      expect(result.profiles).toEqual({ status: "unavailable" });
+      expect(result.durability).toBe("notCleared");
+    });
+  });
+
+  describe("normalized storage-accessor failures", () => {
+    it("continues a representative active mutation and notifies once", () => {
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+      installThrowingLocalStorageAccessor();
+
+      const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(result.state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
+      expect(result.persistence).toEqual({ status: "storageFailure" });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "unknown",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it("preserves setup commit and manual-event mutation semantics", () => {
+      const setupStore = createDayFrameStore();
+      const setupListener = vi.fn();
+
+      setupStore.subscribe(setupListener);
+      installThrowingLocalStorageAccessor();
+
+      const setupResult = setupStore.commitAuthoredSetup({
+        schedulingPreferences: {
+          dayBoundaryStartTime: "04:00",
+          weekStartsOn: "monday",
+        },
+        previewRange: {
+          preset: "oneWeek",
+          startDate: "2026-05-04",
+          endDate: "2026-05-11",
+        },
+        shiftDefinitions: buildShiftDefinitions(),
+        shiftCycles: [],
+        blockTemplates: buildBlockTemplates(),
+        blockRecurrences: buildBlockRecurrences(),
+      });
+
+      expect(setupResult.persistence).toEqual({ status: "storageFailure" });
+      expect(setupResult.state.schedulingPreferences.weekStartsOn).toBe("monday");
+      expect(setupResult.state.shiftDefinitions).toEqual(buildShiftDefinitions());
+      expect(setupStore.getDurabilityStatus().activeState).toBe("storageFailure");
+      expect(setupStore.getDesiredDurableCondition().activeState).toBe("snapshot");
+      expect(setupListener).toHaveBeenCalledTimes(1);
+
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+      const manualStore = createDayFrameStore();
+      const manualListener = vi.fn();
+
+      manualStore.subscribe(manualListener);
+      installThrowingLocalStorageAccessor();
+
+      const manualResult = manualStore.setManualEvents([]);
+
+      expect(manualResult.persistence).toEqual({ status: "storageFailure" });
+      expect(manualResult.state.manualEvents).toEqual([]);
+      expect(manualStore.getDurabilityStatus().activeState).toBe("storageFailure");
+      expect(manualListener).toHaveBeenCalledTimes(1);
+    });
+
+    it("continues profile save and delete while preserving active infrastructure state", () => {
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+      installThrowingLocalStorageAccessor();
+
+      const saved = store.saveProfile({
+        name: "Profile A",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+
+      expect(saved.persistence).toEqual({ status: "storageFailure" });
+      expect(saved.state.savedProfiles).toHaveLength(1);
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "storageFailure",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+
+      const deleted = store.deleteProfile(saved.state.savedProfiles[0]!.id);
+
+      expect(deleted.persistence).toEqual({ status: "storageFailure" });
+      expect(deleted.state.savedProfiles).toEqual([]);
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it("continues profile load and backup import through active storage failure", () => {
+      const profile = buildSavedProfile();
+      const store = createDayFrameStore({ savedProfiles: [profile] });
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+      installThrowingLocalStorageAccessor();
+
+      const loaded = store.loadProfile(profile.id);
+
+      expect(loaded.persistence).toEqual({ status: "storageFailure" });
+      expect(loaded.state.savedProfiles).toEqual([profile]);
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "unknown",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+
+      const imported = store.importBackup(
+        createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"),
+      );
+
+      expect(imported.persistence).toEqual({ status: "storageFailure" });
+      expect(imported.state.schedulingPreferences).toEqual(profile.data.schedulingPreferences);
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      ["active", "storageFailure", "removed", "partiallyCleared"],
+      ["profiles", "removed", "storageFailure", "partiallyCleared"],
+      ["both", "storageFailure", "storageFailure", "notCleared"],
+    ] as const)(
+      "completes clear when %s storage access fails",
+      (failureSurface, activeStatus, profileStatus, aggregate) => {
+        const localStorage = createLocalStorageMock();
+        const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+        const listener = vi.fn();
+        let accessCount = 0;
+
+        store.subscribe(listener);
+        Object.defineProperty(globalThis, "localStorage", {
+          configurable: true,
+          get() {
+            accessCount += 1;
+            const shouldThrow =
+              failureSurface === "both" ||
+              (failureSurface === "active" && accessCount === 1) ||
+              (failureSurface === "profiles" && accessCount === 2);
+
+            if (shouldThrow) {
+              throw new RangeError("Injected storage accessor failure");
+            }
+
+            return localStorage;
+          },
+        });
+
+        const result = store.clearLocalData();
+
+        expect(result).toEqual({
+          state: createInitialDayFrameState(),
+          activeState: { status: activeStatus },
+          profiles: { status: profileStatus },
+          durability: aggregate,
+        });
+        expect(accessCount).toBe(2);
+        expect(store.getDesiredDurableCondition()).toEqual({
+          activeState: "absent",
+          profiles: "absent",
+        });
+        expect(store.getDurabilityStatus()).toEqual({
+          activeState: activeStatus === "removed" ? "durable" : "storageFailure",
+          profiles: profileStatus === "removed" ? "durable" : "storageFailure",
+        });
+        expect(listener).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it("leaves read-path accessor failure exceptional", () => {
+      installThrowingLocalStorageAccessor();
+
+      expect(() => createDayFrameStore()).toThrow("Injected storage accessor failure");
+    });
+  });
+
+  describe("store-owned durability retry", () => {
+    it("retries the latest active snapshot successfully without mutation or notification", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active write failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      store.setPreviewRange({
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      });
+
+      const stateBeforeRetry = store.getState();
+      const profileInfrastructureBefore = {
+        status: store.getDurabilityStatus().profiles,
+        desired: store.getDesiredDurableCondition().profiles,
+      };
+      const listener = vi.fn();
+      const successfulSet = vi.fn((key: string, value: string) => {
+        if (key === DAYFRAME_STORAGE_KEY) {
+          const parsed = JSON.parse(value) as { previewRange: { preset: string } };
+          expect(parsed.previewRange.preset).toBe("oneWeek");
+          expect(parsed).toMatchObject({
+            schedulingPreferences: { dayBoundaryStartTime: "04:00" },
+          });
+        }
+      });
+
+      localStorage.setItem = successfulSet;
+      store.subscribe(listener);
+
+      const result = store.retryActivePersistence();
+
+      expect(result).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "persisted" },
+      });
+      expect(successfulSet).toHaveBeenCalledTimes(1);
+      expect(store.getState()).toEqual(stateBeforeRetry);
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: profileInfrastructureBefore.status,
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: profileInfrastructureBefore.desired,
+      });
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("retains active failure and lets the latest outcome change its category", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active write failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      const failedRetry = store.retryActivePersistence();
+
+      expect(failedRetry).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "storageFailure" },
+      });
+      expect(localStorage.setItem).toHaveBeenCalledTimes(2);
+      expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "unavailable" },
+      });
+      expect(store.getDurabilityStatus().activeState).toBe("unavailable");
+    });
+
+    it("retries unavailable active persistence when storage becomes available", () => {
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expect(store.getDurabilityStatus().activeState).toBe("unavailable");
+
+      const localStorage = createLocalStorageMock();
+      const setItem = vi.fn(localStorage.setItem);
+
+      localStorage.setItem = setItem;
+      installLocalStorageMock(localStorage);
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "persisted" },
+      });
+      expect(setItem).toHaveBeenCalledTimes(1);
+      expect(store.getDurabilityStatus().activeState).toBe("durable");
+    });
+
+    it("retries active absence with one removal and leaves profiles untouched", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.removeItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_STORAGE_KEY) {
+          throw new RangeError("Injected active removal failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.clearLocalData();
+
+      const profileStatusBefore = store.getDurabilityStatus().profiles;
+      const listener = vi.fn();
+      const removeItem = vi.fn();
+      const setItem = vi.fn();
+
+      localStorage.removeItem = removeItem;
+      localStorage.setItem = setItem;
+      store.subscribe(listener);
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "absent",
+        persistence: { status: "removed" },
+      });
+      expect(removeItem).toHaveBeenCalledOnce();
+      expect(removeItem).toHaveBeenCalledWith(DAYFRAME_STORAGE_KEY);
+      expect(setItem).not.toHaveBeenCalled();
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: profileStatusBefore,
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "absent",
+      });
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("retries the latest complete profile collection without touching active infrastructure", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile write failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+      store.saveProfile({ name: "Profile B", savedAt: "2026-05-05T09:05:00-05:00" });
+
+      const activeInfrastructureBefore = {
+        status: store.getDurabilityStatus().activeState,
+        desired: store.getDesiredDurableCondition().activeState,
+      };
+      const listener = vi.fn();
+      const setItem = vi.fn(localStorage.setItem);
+
+      setItem.mockImplementation((key: string, value: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          const parsed = JSON.parse(value) as { profiles: Array<{ name: string }> };
+          expect(parsed.profiles.map((profile) => profile.name)).toEqual([
+            "Profile A",
+            "Profile B",
+          ]);
+        }
+      });
+      setItem.mockClear();
+      localStorage.setItem = setItem;
+      store.subscribe(listener);
+
+      expect(store.retryProfilePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "persisted" },
+      });
+      expect(setItem).toHaveBeenCalledTimes(1);
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: activeInfrastructureBefore.status,
+        profiles: "durable",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: activeInfrastructureBefore.desired,
+        profiles: "snapshot",
+      });
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("retries profile absence independently after partial clear", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.removeItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile removal failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.clearLocalData();
+
+      const removeItem = vi.fn();
+      const setItem = vi.fn();
+
+      localStorage.removeItem = removeItem;
+      localStorage.setItem = setItem;
+
+      expect(store.retryProfilePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "absent",
+        persistence: { status: "removed" },
+      });
+      expect(removeItem).toHaveBeenCalledOnce();
+      expect(removeItem).toHaveBeenCalledWith(DAYFRAME_PROFILES_STORAGE_KEY);
+      expect(setItem).not.toHaveBeenCalled();
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: "durable",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "absent",
+      });
+    });
+
+    it("does not attempt retry from unknown or durable", () => {
+      const localStorage = createLocalStorageMock();
+      const setItem = vi.fn(localStorage.setItem);
+      const removeItem = vi.fn(localStorage.removeItem);
+
+      localStorage.setItem = setItem;
+      localStorage.removeItem = removeItem;
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "unknown",
+      });
+      expect(store.retryProfilePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "unknown",
+      });
+      expect(setItem).not.toHaveBeenCalled();
+      expect(removeItem).not.toHaveBeenCalled();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+      setItem.mockClear();
+      listener.mockClear();
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "alreadyDurable",
+      });
+      expect(store.retryProfilePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "alreadyDurable",
+      });
+      expect(setItem).not.toHaveBeenCalled();
+      expect(removeItem).not.toHaveBeenCalled();
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("blocks retry from serialization failure without a storage operation", () => {
+      const localStorage = createLocalStorageMock();
+      const setItem = vi.fn(localStorage.setItem);
+
+      localStorage.setItem = setItem;
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore(buildSerializationFailureState());
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expect(store.getDurabilityStatus().activeState).toBe("serializationFailure");
+      setItem.mockClear();
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "serializationFailure",
+      });
+      expect(setItem).not.toHaveBeenCalled();
+      expect(store.getDurabilityStatus().activeState).toBe("serializationFailure");
+    });
+
+    it("retains a serialization failure produced during eligible snapshot retry", () => {
+      const store = createDayFrameStore(buildSerializationFailureState());
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expect(store.getDurabilityStatus().activeState).toBe("unavailable");
+
+      const localStorage = createLocalStorageMock();
+      const setItem = vi.fn(localStorage.setItem);
+
+      localStorage.setItem = setItem;
+      installLocalStorageMock(localStorage);
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "serializationFailure" },
+      });
+      expect(setItem).not.toHaveBeenCalled();
+      expect(store.getDurabilityStatus().activeState).toBe("serializationFailure");
+      expect(store.getDesiredDurableCondition().activeState).toBe("snapshot");
+    });
+
+    it("normalizes an accessor exception during eligible retry", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active write failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      store.subscribe(listener);
+      installThrowingLocalStorageAccessor();
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "attempted",
+        desiredCondition: "snapshot",
+        persistence: { status: "storageFailure" },
+      });
+      expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+      expect(store.getDesiredDurableCondition().activeState).toBe("snapshot");
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("durability status subscription", () => {
+    it("registers without an initial callback and emits a consistent future snapshot", () => {
+      const store = createDayFrameStore();
+      const stateListener = vi.fn();
+      const observedDuringCallback: unknown[] = [];
+      const durabilityListener = vi.fn((status) => {
+        observedDuringCallback.push(store.getDurabilityStatus());
+        expect(status).not.toHaveProperty("desiredDurableCondition");
+      });
+
+      store.subscribe(stateListener);
+      store.subscribeDurability(durabilityListener);
+
+      expect(durabilityListener).not.toHaveBeenCalled();
+      store.getDurabilityStatus();
+      expect(durabilityListener).not.toHaveBeenCalled();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(durabilityListener).toHaveBeenCalledOnce();
+      expect(durabilityListener).toHaveBeenCalledWith({
+        activeState: "unavailable",
+        profiles: "unknown",
+      });
+      expect(observedDuringCallback).toEqual([
+        { activeState: "unavailable", profiles: "unknown" },
+      ]);
+      expect(stateListener).toHaveBeenCalledOnce();
+    });
+
+    it("does not emit for a repeated active failure while state still notifies", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active storage failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      const durabilityListener = vi.fn();
+      const stateListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+      store.subscribe(stateListener);
+      store.setPreviewRange({
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      });
+
+      expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+      expect(durabilityListener).not.toHaveBeenCalled();
+      expect(stateListener).toHaveBeenCalledOnce();
+    });
+
+    it("emits only for profile status changes while profile runtime always notifies", () => {
+      const localStorage = createLocalStorageMock();
+      let shouldFail = true;
+
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY && shouldFail) {
+          throw new RangeError("Injected profile storage failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const durabilityListener = vi.fn();
+      const stateListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+      store.subscribe(stateListener);
+
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+      expect(durabilityListener).toHaveBeenLastCalledWith({
+        activeState: "unknown",
+        profiles: "storageFailure",
+      });
+
+      durabilityListener.mockClear();
+      stateListener.mockClear();
+      store.saveProfile({ name: "Profile B", savedAt: "2026-05-05T09:05:00-05:00" });
+      expect(durabilityListener).not.toHaveBeenCalled();
+      expect(stateListener).toHaveBeenCalledOnce();
+
+      shouldFail = false;
+      store.deleteProfile(store.getState().savedProfiles[0]!.id);
+      expect(durabilityListener).toHaveBeenCalledOnce();
+      expect(durabilityListener).toHaveBeenCalledWith({
+        activeState: "unknown",
+        profiles: "durable",
+      });
+    });
+
+    it.each(["both", "one", "none"] as const)(
+      "batches clear into at most one durability notification when %s surfaces change",
+      (changedSurfaces) => {
+        const localStorage = createLocalStorageMock();
+        const store = createDayFrameStore();
+
+        if (changedSurfaces === "one") {
+          installLocalStorageMock(localStorage);
+          store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+        } else if (changedSurfaces === "none") {
+          localStorage.setItem = vi.fn(() => {
+            throw new RangeError("Injected write failure");
+          });
+          localStorage.removeItem = vi.fn(() => {
+            throw new RangeError("Injected removal failure");
+          });
+          installLocalStorageMock(localStorage);
+          store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+          store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+        } else {
+          installLocalStorageMock(localStorage);
+        }
+
+        const durabilityListener = vi.fn();
+        const stateListener = vi.fn();
+
+        store.subscribeDurability(durabilityListener);
+        store.subscribe(stateListener);
+        store.clearLocalData();
+
+        expect(durabilityListener).toHaveBeenCalledTimes(changedSurfaces === "none" ? 0 : 1);
+        if (changedSurfaces !== "none") {
+          expect(durabilityListener).toHaveBeenCalledWith({
+            activeState: "durable",
+            profiles: "durable",
+          });
+        }
+        expect(stateListener).toHaveBeenCalledOnce();
+      },
+    );
+
+    it("emits for retry success without notifying state subscribers", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active write failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      const durabilityListener = vi.fn();
+      const stateListener = vi.fn();
+
+      localStorage.setItem = vi.fn();
+      store.subscribeDurability(durabilityListener);
+      store.subscribe(stateListener);
+      store.retryActivePersistence();
+
+      expect(durabilityListener).toHaveBeenCalledOnce();
+      expect(durabilityListener).toHaveBeenCalledWith({
+        activeState: "durable",
+        profiles: "unknown",
+      });
+      expect(stateListener).not.toHaveBeenCalled();
+    });
+
+    it("emits for a changed retry failure category but not the same category", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected active write failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      const durabilityListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+      store.retryActivePersistence();
+      expect(durabilityListener).not.toHaveBeenCalled();
+
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+      store.retryActivePersistence();
+      expect(durabilityListener).toHaveBeenCalledOnce();
+      expect(durabilityListener).toHaveBeenCalledWith({
+        activeState: "unavailable",
+        profiles: "unknown",
+      });
+    });
+
+    it("does not emit for not-attempted retry", () => {
+      const store = createDayFrameStore();
+      const durabilityListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "unknown",
+      });
+      expect(store.retryProfilePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "unknown",
+      });
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+
+    it("does not emit when clear changes desired condition but not durability", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("Injected write failure");
+      });
+      localStorage.removeItem = vi.fn(() => {
+        throw new RangeError("Injected removal failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+
+      const durabilityListener = vi.fn();
+      const stateListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+      store.subscribe(stateListener);
+      store.clearLocalData();
+
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "absent",
+      });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "storageFailure",
+      });
+      expect(durabilityListener).not.toHaveBeenCalled();
+      expect(stateListener).toHaveBeenCalledOnce();
+    });
+
+    it("preserves load, import, and manual-event active-surface semantics", () => {
+      const profile = buildSavedProfile();
+      const store = createDayFrameStore({ savedProfiles: [profile] });
+      const durabilityListener = vi.fn();
+
+      store.subscribeDurability(durabilityListener);
+      store.loadProfile(profile.id);
+      expect(durabilityListener).toHaveBeenLastCalledWith({
+        activeState: "unavailable",
+        profiles: "unknown",
+      });
+
+      durabilityListener.mockClear();
+      store.setManualEvents([]);
+      expect(durabilityListener).not.toHaveBeenCalled();
+
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+      store.importBackup(
+        createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"),
+      );
+      expect(durabilityListener).toHaveBeenCalledOnce();
+      expect(durabilityListener).toHaveBeenCalledWith({
+        activeState: "durable",
+        profiles: "unknown",
+      });
+    });
+
+    it("isolates listener snapshots and unsubscribe behavior", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const firstListener = vi.fn((status) => {
+        status.activeState = "storageFailure";
+      });
+      const secondListener = vi.fn();
+      const stateListener = vi.fn();
+      const unsubscribeFirst = store.subscribeDurability(firstListener);
+
+      store.subscribeDurability(secondListener);
+      store.subscribe(stateListener);
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(firstListener).toHaveBeenCalledOnce();
+      expect(secondListener).toHaveBeenCalledWith({
+        activeState: "durable",
+        profiles: "unknown",
+      });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: "unknown",
+      });
+
+      unsubscribeFirst();
+      unsubscribeFirst();
+      firstListener.mockClear();
+      secondListener.mockClear();
+      stateListener.mockClear();
+
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+
+      expect(firstListener).not.toHaveBeenCalled();
+      expect(secondListener).toHaveBeenCalledOnce();
+      expect(secondListener).toHaveBeenCalledWith({
+        activeState: "durable",
+        profiles: "durable",
+      });
+      expect(stateListener).toHaveBeenCalledOnce();
+    });
+
+    it("registering and unsubscribing durability listeners does not notify state", () => {
+      const store = createDayFrameStore();
+      const stateListener = vi.fn();
+      const durabilityListener = vi.fn();
+
+      store.subscribe(stateListener);
+      const unsubscribe = store.subscribeDurability(durabilityListener);
+      unsubscribe();
+
+      expect(stateListener).not.toHaveBeenCalled();
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("retained store durability status", () => {
+    it("starts unknown for default and seeded stores and returns isolated snapshots", () => {
+      const defaultStore = createDayFrameStore();
+      const seededStore = createDayFrameStore({
+        schedulingPreferences: {
+          dayBoundaryStartTime: "04:00",
+          weekStartsOn: "monday",
+        },
+      });
+      const listener = vi.fn();
+
+      defaultStore.subscribe(listener);
+
+      const status = defaultStore.getDurabilityStatus();
+
+      expect(status).toEqual({ activeState: "unknown", profiles: "unknown" });
+      expect(seededStore.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "unknown",
+      });
+      status.activeState = "durable";
+      expect(defaultStore.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "unknown",
+      });
+      expect(listener).not.toHaveBeenCalled();
+      expect(defaultStore.getState()).not.toHaveProperty("durabilityStatus");
+    });
+
+    it("retains active outcomes, later convergence, and later failure", () => {
+      const localStorage = createLocalStorageMock();
+      let shouldFail = true;
+
+      localStorage.setItem = vi.fn(() => {
+        if (shouldFail) {
+          throw new RangeError("Injected active storage failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+
+      const failed = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(failed.persistence.status).toBe("storageFailure");
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "unknown",
+      });
+
+      shouldFail = false;
+      const converged = store.setPreviewRange({
+        preset: "oneWeek",
+        startDate: "2026-05-04",
+        endDate: "2026-05-11",
+      });
+
+      expect(converged.persistence.status).toBe("persisted");
+      expect(store.getDurabilityStatus().activeState).toBe("durable");
+
+      shouldFail = true;
+      store.setShiftDefinitions(buildShiftDefinitions());
+
+      expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+      expect(listener).toHaveBeenCalledTimes(3);
+    });
+
+    it("retains unavailable and serialization-failure active outcomes", () => {
+      const unavailableStore = createDayFrameStore();
+
+      unavailableStore.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(unavailableStore.getDurabilityStatus()).toEqual({
+        activeState: "unavailable",
+        profiles: "unknown",
+      });
+
+      const localStorage = createLocalStorageMock();
+      const serializationStore = createDayFrameStore(buildSerializationFailureState());
+
+      installLocalStorageMock(localStorage);
+      serializationStore.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(serializationStore.getDurabilityStatus()).toEqual({
+        activeState: "serializationFailure",
+        profiles: "unknown",
+      });
+    });
+
+    it("retains profile outcomes independently and later converges", () => {
+      const localStorage = createLocalStorageMock();
+      let shouldFailProfiles = true;
+
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY && shouldFailProfiles) {
+          throw new RangeError("Injected profile storage failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const failed = store.saveProfile({
+        name: "Profile A",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+
+      expect(failed.persistence.status).toBe("storageFailure");
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "storageFailure",
+      });
+
+      shouldFailProfiles = false;
+      store.saveProfile({
+        name: "Profile B",
+        savedAt: "2026-05-05T09:05:00-05:00",
+      });
+
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "durable",
+      });
+
+      store.deleteProfile(failed.state.savedProfiles[0]!.id);
+
+      expect(store.getDurabilityStatus().profiles).toBe("durable");
+    });
+
+    it("updates active status only for profile load and backup import", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const saveResult = store.saveProfile({
+        name: "Load Source",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_STORAGE_KEY) {
+          throw new RangeError("Injected active storage failure");
+        }
+      });
+
+      store.loadProfile(saveResult.state.savedProfiles[0]!.id);
+
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "durable",
+      });
+
+      localStorage.setItem = vi.fn();
+      store.importBackup(
+        createDayFrameBackup(buildSavedProfile().data, "2026-05-05T10:00:00-05:00"),
+      );
+
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: "durable",
+      });
+    });
+
+    it("maps partial and non-successful clear outcomes independently", () => {
+      const localStorage = createLocalStorageMock();
+
+      localStorage.removeItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile removal failure");
+        }
+      });
+      installLocalStorageMock(localStorage);
+
+      const partialStore = createDayFrameStore();
+      const partial = partialStore.clearLocalData();
+
+      expect(partial.durability).toBe("partiallyCleared");
+      expect(partialStore.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: "storageFailure",
+      });
+
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+
+      const unavailableStore = createDayFrameStore();
+      const notCleared = unavailableStore.clearLocalData();
+
+      expect(notCleared.durability).toBe("notCleared");
+      expect(unavailableStore.getDurabilityStatus()).toEqual({
+        activeState: "unavailable",
+        profiles: "unavailable",
+      });
+    });
+
+    it("does not change retained status for non-persisting operations", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      const before = store.getDurabilityStatus();
+
+      store.exportBackup("2026-05-05T10:00:00-05:00");
+      store.getState();
+
+      expect(store.getDurabilityStatus()).toEqual(before);
+    });
+  });
+
+  describe("retained desired durable condition", () => {
+    it("starts with snapshot intent for default and seeded stores and exposes isolated snapshots", () => {
+      const defaultStore = createDayFrameStore();
+      const seededStore = createDayFrameStore({
+        schedulingPreferences: {
+          dayBoundaryStartTime: "04:00",
+          weekStartsOn: "monday",
+        },
+      });
+      const listener = vi.fn();
+
+      defaultStore.subscribe(listener);
+
+      const desired = defaultStore.getDesiredDurableCondition();
+
+      expect(desired).toEqual({ activeState: "snapshot", profiles: "snapshot" });
+      expect(seededStore.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+      desired.activeState = "absent";
+      expect(defaultStore.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+      expect(defaultStore.getDurabilityStatus()).toEqual({
+        activeState: "unknown",
+        profiles: "unknown",
+      });
+      expect(defaultStore.getState()).not.toHaveProperty("desiredDurableCondition");
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it("replaces active absence with snapshot intent even when persistence fails", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+      store.clearLocalData();
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_STORAGE_KEY) {
+          throw new RangeError("Injected active storage failure");
+        }
+      });
+
+      const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(result).toEqual({
+        state: expect.objectContaining({
+          schedulingPreferences: {
+            dayBoundaryStartTime: "04:00",
+            weekStartsOn: "saturday",
+          },
+        }),
+        persistence: { status: "storageFailure" },
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "absent",
+      });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "durable",
+      });
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it("establishes snapshot intent through every ordinary active persistence path", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+      const expectActiveSnapshotAfterClear = (operation: () => unknown) => {
+        store.clearLocalData();
+        operation();
+        expect(store.getDesiredDurableCondition()).toEqual({
+          activeState: "snapshot",
+          profiles: "absent",
+        });
+      };
+
+      expectActiveSnapshotAfterClear(() =>
+        store.commitAuthoredSetup({
+          schedulingPreferences: store.getState().schedulingPreferences,
+          previewRange: store.getState().previewRange,
+          shiftDefinitions: [],
+          shiftCycles: [],
+          blockTemplates: [],
+          blockRecurrences: [],
+        }),
+      );
+      expectActiveSnapshotAfterClear(() =>
+        store.setPreviewRange({
+          preset: "oneWeek",
+          startDate: "2026-05-04",
+          endDate: "2026-05-11",
+        }),
+      );
+      expectActiveSnapshotAfterClear(() => store.setShiftDefinitions(buildShiftDefinitions()));
+      expectActiveSnapshotAfterClear(() => store.setShiftCycles([]));
+      expectActiveSnapshotAfterClear(() => store.setBlockTemplates(buildBlockTemplates()));
+      expectActiveSnapshotAfterClear(() => store.setBlockRecurrences(buildBlockRecurrences()));
+      expectActiveSnapshotAfterClear(() => store.setManualEvents([]));
+    });
+
+    it("replaces profile absence with snapshot intent on save failure and ordinary delete", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.clearLocalData();
+      localStorage.setItem = vi.fn((key: string) => {
+        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+          throw new RangeError("Injected profile storage failure");
+        }
+      });
+
+      const saveResult = store.saveProfile({
+        name: "Profile A",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+
+      expect(saveResult.persistence).toEqual({ status: "storageFailure" });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "snapshot",
+      });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "durable",
+        profiles: "storageFailure",
+      });
+
+      store.clearLocalData();
+      const deleteResult = store.deleteProfile("missing_after_clear");
+
+      expect(deleteResult.state.savedProfiles).toEqual([]);
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "snapshot",
+      });
+    });
+
+    it("treats profile load and backup import as active snapshot intent only", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+
+      store.loadProfile("profile_outcome");
+
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+
+      store.clearLocalData();
+      store.importBackup(
+        createDayFrameBackup(buildSavedProfile().data, "2026-05-05T10:00:00-05:00"),
+      );
+
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "absent",
+      });
+    });
+
+    it.each([
+      [false, false, "cleared", "durable", "durable"],
+      [false, true, "partiallyCleared", "durable", "storageFailure"],
+      [true, true, "notCleared", "storageFailure", "storageFailure"],
+    ] as const)(
+      "retains absence for clear failures active=%s profiles=%s",
+      (activeFailure, profileFailure, aggregate, activeStatus, profileStatus) => {
+        const localStorage = createLocalStorageMock();
+
+        localStorage.removeItem = vi.fn((key: string) => {
+          if (
+            (key === DAYFRAME_STORAGE_KEY && activeFailure) ||
+            (key === DAYFRAME_PROFILES_STORAGE_KEY && profileFailure)
+          ) {
+            throw new RangeError("Injected removal failure");
+          }
+        });
+        installLocalStorageMock(localStorage);
+
+        const store = createDayFrameStore();
+        const result = store.clearLocalData();
+
+        expect(result.durability).toBe(aggregate);
+        expect(store.getDesiredDurableCondition()).toEqual({
+          activeState: "absent",
+          profiles: "absent",
+        });
+        expect(store.getDurabilityStatus()).toEqual({
+          activeState: activeStatus,
+          profiles: profileStatus,
+        });
+      },
+    );
+
+    it("lets clear replace snapshot intent for both surfaces", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      store.saveProfile({ name: "Profile A", savedAt: "2026-05-05T09:00:00-05:00" });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "snapshot",
+      });
+
+      const result = store.clearLocalData();
+
+      expect(result).toEqual({
+        state: createInitialDayFrameState(),
+        activeState: { status: "removed" },
+        profiles: { status: "removed" },
+        durability: "cleared",
+      });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "absent",
+        profiles: "absent",
+      });
+    });
+
+    it("does not change intent for reads, backup export, or Preview-only operations", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore({
+        shiftDefinitions: buildShiftDefinitions(),
+        shiftCycles: [
+          {
+            id: "cycle_preview",
+            userId: "user_001",
+            name: "Preview Cycle",
+            type: "fixedSegments",
+            mode: "manualSegments",
+            startsOnDate: "2026-05-04",
+            endsOnDate: "2026-05-05",
+            sequenceAnchorDate: "2026-05-04",
+            sequence: [],
+            segments: [],
+            ...baseTimestamps,
+          },
+        ],
+      });
+
+      store.clearLocalData();
+      store.setShiftDefinitions(buildShiftDefinitions());
+      store.setShiftCycles([
+        {
+          id: "cycle_preview",
+          userId: "user_001",
+          name: "Preview Cycle",
+          type: "fixedSegments",
+          mode: "manualSegments",
+          startsOnDate: "2026-05-04",
+          endsOnDate: "2026-05-05",
+          sequenceAnchorDate: "2026-05-04",
+          sequence: [],
+          segments: [],
+          ...baseTimestamps,
+        },
+      ]);
+      const before = store.getDesiredDurableCondition();
+
+      store.getState();
+      store.exportBackup("2026-05-05T10:00:00-05:00");
+      store.generatePreview({
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+      });
+
+      expect(store.getDesiredDurableCondition()).toEqual(before);
+    });
+
+    it("preserves intent when a storage-accessor failure is normalized", () => {
+      const localStorage = createLocalStorageMock();
+
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const listener = vi.fn();
+
+      store.subscribe(listener);
+      store.clearLocalData();
+      installThrowingLocalStorageAccessor();
+
+      const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+
+      expect(result.persistence).toEqual({ status: "storageFailure" });
+      expect(store.getDesiredDurableCondition()).toEqual({
+        activeState: "snapshot",
+        profiles: "absent",
+      });
+      expect(store.getDurabilityStatus()).toEqual({
+        activeState: "storageFailure",
+        profiles: "durable",
+      });
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+  });
 });
+
+function buildSavedProfile(state = createInitialDayFrameState()): DayFrameSavedProfile {
+  return {
+    id: "profile_outcome",
+    name: "Outcome Profile",
+    savedAt: "2026-05-05T09:00:00-05:00",
+    data: {
+      schedulingPreferences: state.schedulingPreferences,
+      previewRange: state.previewRange,
+      shiftDefinitions: state.shiftDefinitions,
+      shiftCycles: state.shiftCycles,
+      blockTemplates: state.blockTemplates,
+      blockRecurrences: state.blockRecurrences,
+      manualEvents: state.manualEvents,
+    },
+  };
+}
+
+function buildSerializationFailureState(): DayFrameState {
+  const state = createInitialDayFrameState();
+  const blockTemplate = buildBlockTemplates()[0]!;
+
+  state.blockTemplates = [
+    {
+      ...blockTemplate,
+      externalResources: [
+        {
+          id: "resource_invalid",
+          type: "note",
+          label: "Invalid metadata",
+          value: "Injected only at the persistence helper test boundary",
+          metadata: {
+            invalid: 1n as unknown as string,
+          },
+          ...baseTimestamps,
+        },
+      ],
+    },
+  ];
+
+  return state;
+}
 
 function buildShiftDefinitions(): ShiftDefinition[] {
   return [
@@ -1379,5 +3113,14 @@ function installLocalStorageMock(localStorage: {
     configurable: true,
     value: localStorage,
     writable: true,
+  });
+}
+
+function installThrowingLocalStorageAccessor(): void {
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    get() {
+      throw new RangeError("Injected storage accessor failure");
+    },
   });
 }
