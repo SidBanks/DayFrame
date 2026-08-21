@@ -4,6 +4,7 @@ import { generateSuggestedFixes } from "../friction/generateSuggestedFixes.js";
 import type { SuggestedFixFeedback } from "../friction/types.js";
 import type { TimeString } from "../time/types.js";
 import type { GenerateSchedulePreviewResult } from "./generateSchedulePreview.js";
+import { cloneOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export type ReviseSchedulePreviewInput = {
   preview: GenerateSchedulePreviewResult;
@@ -63,11 +64,17 @@ export function reviseSchedulePreview(
     preview: {
       generatedWorkBlocks: input.preview.generatedWorkBlocks.map((generatedWorkBlock) => ({
         ...generatedWorkBlock,
+        ...(generatedWorkBlock.occurrenceIdentity
+          ? { occurrenceIdentity: cloneOccurrenceIdentity(generatedWorkBlock.occurrenceIdentity) }
+          : {}),
         startsAt: new Date(generatedWorkBlock.startsAt),
         endsAt: new Date(generatedWorkBlock.endsAt),
       })),
       blockCandidates: input.preview.blockCandidates.map((blockCandidate) => ({
         ...blockCandidate,
+        ...(blockCandidate.occurrenceIdentity
+          ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+          : {}),
         externalResources: [...blockCandidate.externalResources],
       })),
       scheduledBlocks: appliedFixResult.scheduledBlocks,
@@ -76,6 +83,7 @@ export function reviseSchedulePreview(
         suggestedFixesResult.frictionPoints,
         appliedFixResult.frictionPoints,
       ),
+      planDecisionResults: input.preview.planDecisionResults.map((result) => structuredClone(result)),
     },
     didRevise: true,
   };
@@ -85,21 +93,33 @@ function clonePreviewResult(preview: GenerateSchedulePreviewResult): GenerateSch
   return {
     generatedWorkBlocks: preview.generatedWorkBlocks.map((generatedWorkBlock) => ({
       ...generatedWorkBlock,
+      ...(generatedWorkBlock.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(generatedWorkBlock.occurrenceIdentity) }
+        : {}),
       startsAt: new Date(generatedWorkBlock.startsAt),
       endsAt: new Date(generatedWorkBlock.endsAt),
     })),
     blockCandidates: preview.blockCandidates.map((blockCandidate) => ({
       ...blockCandidate,
+      ...(blockCandidate.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+        : {}),
       externalResources: [...blockCandidate.externalResources],
     })),
     scheduledBlocks: preview.scheduledBlocks.map((scheduledBlock) => ({
       ...scheduledBlock,
+      ...(scheduledBlock.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(scheduledBlock.occurrenceIdentity) }
+        : {}),
       startsAt: new Date(scheduledBlock.startsAt),
       endsAt: new Date(scheduledBlock.endsAt),
       externalResources: [...scheduledBlock.externalResources],
     })),
     unplacedCandidates: preview.unplacedCandidates.map((blockCandidate) => ({
       ...blockCandidate,
+      ...(blockCandidate.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+        : {}),
       externalResources: [...blockCandidate.externalResources],
     })),
     frictionPoints: preview.frictionPoints.map((frictionPoint) => ({
@@ -107,8 +127,12 @@ function clonePreviewResult(preview: GenerateSchedulePreviewResult): GenerateSch
       suggestedFixes: frictionPoint.suggestedFixes.map((suggestedFix) => ({
         ...suggestedFix,
         ...(suggestedFix.parameters ? { parameters: { ...suggestedFix.parameters } } : {}),
+        ...(suggestedFix.decisionContext
+          ? { decisionContext: { ...suggestedFix.decisionContext } }
+          : {}),
       })),
     })),
+    planDecisionResults: preview.planDecisionResults.map((result) => structuredClone(result)),
   };
 }
 

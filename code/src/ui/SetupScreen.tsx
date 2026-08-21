@@ -18,12 +18,15 @@ import type {
   DayFramePreviewRangePreset,
   DayFrameSchedulingPreferences,
   DayFrameState,
+  AuthoredSetupLifecycleTransaction,
+  AuthoredSourceReference,
 } from "../state/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 import { cloneShiftCycles as cloneNormalizedShiftCycles } from "../core/cycles/shiftCycleUtils.js";
+import { allocateReadableSourceId } from "../core/authored/allocateReadableSourceId.js";
 
 const blockCategories: BlockCategory[] = [
   "work",
@@ -93,6 +96,12 @@ export type SetupDraft = {
   shiftDefinitions: ShiftDefinition[];
   shiftCycles: ShiftCycle[];
   templateEntries: SetupDraftEntry[];
+  lifecycle: SetupDraftLifecycleProvenance;
+};
+
+export type SetupDraftLifecycleProvenance = {
+  created: AuthoredSourceReference[];
+  deleted: AuthoredSourceReference[];
 };
 
 export type SetupScreenProps = {
@@ -443,16 +452,19 @@ export function SetupScreen({
           <button
             className="df-secondary-button"
             onClick={() => {
-              setDraft((currentDraft) => ({
-                ...currentDraft,
-                shiftDefinitions: [
-                  ...currentDraft.shiftDefinitions,
-                  createDraftShiftDefinition(
-                    currentDraft.shiftDefinitions,
-                    currentDraft.shiftCycles,
-                  ),
-                ],
-              }));
+              setDraft((currentDraft) => {
+                const created = createDraftShiftDefinition(
+                  currentDraft.shiftDefinitions,
+                  currentDraft.shiftCycles,
+                );
+                return recordDraftCreation(
+                  {
+                    ...currentDraft,
+                    shiftDefinitions: [...currentDraft.shiftDefinitions, created],
+                  },
+                  sourceReference("shiftDefinition", created.id),
+                );
+              });
             }}
             type="button"
           >
@@ -492,39 +504,44 @@ export function SetupScreen({
                       <button
                         className="df-danger-button"
                         onClick={() => {
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            shiftDefinitions: currentDraft.shiftDefinitions.filter(
-                              (_, currentIndex) => currentIndex !== index,
+                          setDraft((currentDraft) =>
+                            recordDraftDeletion(
+                              {
+                                ...currentDraft,
+                                shiftDefinitions: currentDraft.shiftDefinitions.filter(
+                                  (_, currentIndex) => currentIndex !== index,
+                                ),
+                                shiftCycles: currentDraft.shiftCycles.map((shiftCycle) => ({
+                                  ...shiftCycle,
+                                  segments: shiftCycle.segments.map((segment) =>
+                                    segment.shiftDefinitionId === shiftDefinition.id
+                                      ? {
+                                          ...segment,
+                                          shiftDefinitionId:
+                                            currentDraft.shiftDefinitions.find(
+                                              (candidateShift) =>
+                                                candidateShift.id !== shiftDefinition.id,
+                                            )?.id ?? "",
+                                        }
+                                      : segment,
+                                  ),
+                                  sequence: (shiftCycle.sequence ?? []).map((sequenceDay) =>
+                                    sequenceDay.shiftDefinitionId === shiftDefinition.id
+                                      ? {
+                                          ...sequenceDay,
+                                          shiftDefinitionId:
+                                            currentDraft.shiftDefinitions.find(
+                                              (candidateShift) =>
+                                                candidateShift.id !== shiftDefinition.id,
+                                            )?.id ?? null,
+                                        }
+                                      : sequenceDay,
+                                  ),
+                                })),
+                              },
+                              sourceReference("shiftDefinition", shiftDefinition.id),
                             ),
-                            shiftCycles: currentDraft.shiftCycles.map((shiftCycle) => ({
-                              ...shiftCycle,
-                              segments: shiftCycle.segments.map((segment) =>
-                                segment.shiftDefinitionId === shiftDefinition.id
-                                  ? {
-                                      ...segment,
-                                      shiftDefinitionId:
-                                        currentDraft.shiftDefinitions.find(
-                                          (candidateShift) =>
-                                            candidateShift.id !== shiftDefinition.id,
-                                        )?.id ?? "",
-                                    }
-                                  : segment,
-                              ),
-                              sequence: (shiftCycle.sequence ?? []).map((sequenceDay) =>
-                                sequenceDay.shiftDefinitionId === shiftDefinition.id
-                                  ? {
-                                      ...sequenceDay,
-                                      shiftDefinitionId:
-                                        currentDraft.shiftDefinitions.find(
-                                          (candidateShift) =>
-                                            candidateShift.id !== shiftDefinition.id,
-                                        )?.id ?? null,
-                                    }
-                                  : sequenceDay,
-                              ),
-                            })),
-                          }));
+                          );
                           setConfirmingDeleteShiftIndex(null);
                         }}
                         type="button"
@@ -715,26 +732,24 @@ export function SetupScreen({
           <button
             className="df-secondary-button"
             onClick={() => {
-              setDraft((currentDraft) => ({
-                ...currentDraft,
-                shiftCycles: [
-                  ...currentDraft.shiftCycles,
-                  createDraftShiftCycleFromDraft(currentDraft, currentDraft.shiftCycles.length + 1),
-                ],
-                previewRange:
-                  getPreviewRangeSource(currentDraft.previewRange) === "cycle"
-                    ? buildCyclePreviewRange({
-                        ...currentDraft,
-                        shiftCycles: [
-                          ...currentDraft.shiftCycles,
-                          createDraftShiftCycleFromDraft(
-                            currentDraft,
-                            currentDraft.shiftCycles.length + 1,
-                          ),
-                        ],
-                      })
-                    : currentDraft.previewRange,
-              }));
+              setDraft((currentDraft) => {
+                const created = createDraftShiftCycleFromDraft(
+                  currentDraft,
+                  currentDraft.shiftCycles.length + 1,
+                );
+                const shiftCycles = [...currentDraft.shiftCycles, created];
+                return recordDraftCreations(
+                  {
+                    ...currentDraft,
+                    shiftCycles,
+                    previewRange:
+                      getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                        ? buildCyclePreviewRange({ ...currentDraft, shiftCycles })
+                        : currentDraft.previewRange,
+                  },
+                  getCycleSourceReferences(created),
+                );
+              });
             }}
             type="button"
           >
@@ -777,17 +792,20 @@ export function SetupScreen({
                               (_, currentIndex) => currentIndex !== cycleIndex,
                             );
 
-                            return {
-                              ...currentDraft,
-                              shiftCycles: nextShiftCycles,
-                              previewRange:
-                                getPreviewRangeSource(currentDraft.previewRange) === "cycle"
-                                  ? buildCyclePreviewRange({
-                                      ...currentDraft,
-                                      shiftCycles: nextShiftCycles,
-                                    })
-                                  : currentDraft.previewRange,
-                            };
+                            return recordDraftDeletions(
+                              {
+                                ...currentDraft,
+                                shiftCycles: nextShiftCycles,
+                                previewRange:
+                                  getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                                    ? buildCyclePreviewRange({
+                                        ...currentDraft,
+                                        shiftCycles: nextShiftCycles,
+                                      })
+                                    : currentDraft.previewRange,
+                              },
+                              getCycleSourceReferences(shiftCycle),
+                            );
                           });
                           setConfirmingDeleteCycleIndex(null);
                         }}
@@ -816,23 +834,36 @@ export function SetupScreen({
                       onChange={(event) => {
                         const nextValue = (event.target as { value: ShiftCycleMode }).value;
 
-                        setDraft((currentDraft) => ({
-                          ...currentDraft,
-                          shiftCycles: currentDraft.shiftCycles.map((currentCycle, currentIndex) =>
-                            currentIndex === cycleIndex
-                              ? {
-                                  ...currentCycle,
-                                  mode: nextValue,
-                                  sequenceAnchorDate:
-                                    currentCycle.sequenceAnchorDate ?? currentCycle.startsOnDate,
-                                  sequence:
-                                    currentCycle.sequence && currentCycle.sequence.length > 0
-                                      ? currentCycle.sequence
-                                      : createDefaultSequenceDays(currentDraft.shiftDefinitions),
-                                }
-                              : currentCycle,
-                          ),
-                        }));
+                        setDraft((currentDraft) => {
+                          const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                          const createdSequence =
+                            currentCycle.sequence && currentCycle.sequence.length > 0
+                              ? []
+                              : createDefaultSequenceDays(currentDraft.shiftDefinitions);
+                          const nextDraft = {
+                            ...currentDraft,
+                            shiftCycles: currentDraft.shiftCycles.map((cycle, currentIndex) =>
+                              currentIndex === cycleIndex
+                                ? {
+                                    ...cycle,
+                                    mode: nextValue,
+                                    sequenceAnchorDate:
+                                      cycle.sequenceAnchorDate ?? cycle.startsOnDate,
+                                    sequence:
+                                      createdSequence.length > 0
+                                        ? createdSequence
+                                        : (cycle.sequence ?? []),
+                                  }
+                                : cycle,
+                            ),
+                          };
+                          return recordDraftCreations(
+                            nextDraft,
+                            createdSequence.map((entry) =>
+                              sourceReference("shiftSequenceEntry", entry.id, currentCycle.id),
+                            ),
+                          );
+                        });
                       }}
                       value={shiftCycle.mode ?? "manualSegments"}
                     >
@@ -964,25 +995,25 @@ export function SetupScreen({
                       <button
                         className="df-secondary-button"
                         onClick={() => {
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            shiftCycles: currentDraft.shiftCycles.map(
-                              (currentCycle, currentIndex) =>
-                                currentIndex === cycleIndex
-                                  ? {
-                                      ...currentCycle,
-                                      segments: [
-                                        ...currentCycle.segments,
-                                        createDraftSegment(
-                                          currentCycle,
-                                          currentDraft.shiftDefinitions,
-                                          currentCycle.segments.length + 1,
-                                        ),
-                                      ],
-                                    }
-                                  : currentCycle,
-                            ),
-                          }));
+                          setDraft((currentDraft) => {
+                            const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                            const created = createDraftSegment(
+                              currentCycle,
+                              currentDraft.shiftDefinitions,
+                              currentCycle.segments.length + 1,
+                            );
+                            return recordDraftCreation(
+                              {
+                                ...currentDraft,
+                                shiftCycles: currentDraft.shiftCycles.map((cycle, currentIndex) =>
+                                  currentIndex === cycleIndex
+                                    ? { ...cycle, segments: [...cycle.segments, created] }
+                                    : cycle,
+                                ),
+                              },
+                              sourceReference("shiftSegment", created.id, currentCycle.id),
+                            );
+                          });
                         }}
                         type="button"
                       >
@@ -1022,21 +1053,30 @@ export function SetupScreen({
                                   <button
                                     className="df-danger-button"
                                     onClick={() => {
-                                      setDraft((currentDraft) => ({
-                                        ...currentDraft,
-                                        shiftCycles: currentDraft.shiftCycles.map(
-                                          (currentCycle, currentIndex) =>
-                                            currentIndex === cycleIndex
-                                              ? {
-                                                  ...currentCycle,
-                                                  segments: currentCycle.segments.filter(
-                                                    (_, currentSegmentIndex) =>
-                                                      currentSegmentIndex !== segmentIndex,
-                                                  ),
-                                                }
-                                              : currentCycle,
+                                      setDraft((currentDraft) =>
+                                        recordDraftDeletion(
+                                          {
+                                            ...currentDraft,
+                                            shiftCycles: currentDraft.shiftCycles.map(
+                                              (currentCycle, currentIndex) =>
+                                                currentIndex === cycleIndex
+                                                  ? {
+                                                      ...currentCycle,
+                                                      segments: currentCycle.segments.filter(
+                                                        (_, currentSegmentIndex) =>
+                                                          currentSegmentIndex !== segmentIndex,
+                                                      ),
+                                                    }
+                                                  : currentCycle,
+                                            ),
+                                          },
+                                          sourceReference(
+                                            "shiftSegment",
+                                            segment.id,
+                                            shiftCycle.id,
+                                          ),
                                         ),
-                                      }));
+                                      );
                                       setConfirmingDeleteSegment(null);
                                     }}
                                     type="button"
@@ -1374,24 +1414,27 @@ export function SetupScreen({
                       <button
                         className="df-secondary-button"
                         onClick={() => {
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            shiftCycles: currentDraft.shiftCycles.map(
-                              (currentCycle, currentIndex) =>
-                                currentIndex === cycleIndex
-                                  ? {
-                                      ...currentCycle,
-                                      sequence: [
-                                        ...(currentCycle.sequence ?? []),
-                                        createDraftSequenceDay(
-                                          currentCycle,
-                                          currentDraft.shiftDefinitions,
-                                        ),
-                                      ],
-                                    }
-                                  : currentCycle,
-                            ),
-                          }));
+                          setDraft((currentDraft) => {
+                            const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                            const created = createDraftSequenceDay(
+                              currentCycle,
+                              currentDraft.shiftDefinitions,
+                            );
+                            return recordDraftCreation(
+                              {
+                                ...currentDraft,
+                                shiftCycles: currentDraft.shiftCycles.map((cycle, currentIndex) =>
+                                  currentIndex === cycleIndex
+                                    ? {
+                                        ...cycle,
+                                        sequence: [...(cycle.sequence ?? []), created],
+                                      }
+                                    : cycle,
+                                ),
+                              },
+                              sourceReference("shiftSequenceEntry", created.id, currentCycle.id),
+                            );
+                          });
                         }}
                         type="button"
                       >
@@ -1401,18 +1444,24 @@ export function SetupScreen({
                         className="df-secondary-button"
                         disabled={(shiftCycle.sequence?.length ?? 0) <= 1}
                         onClick={() => {
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            shiftCycles: currentDraft.shiftCycles.map(
-                              (currentCycle, currentIndex) =>
-                                currentIndex === cycleIndex
-                                  ? {
-                                      ...currentCycle,
-                                      sequence: (currentCycle.sequence ?? []).slice(0, -1),
-                                    }
-                                  : currentCycle,
-                            ),
-                          }));
+                          setDraft((currentDraft) => {
+                            const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                            const deleted = (currentCycle.sequence ?? []).at(-1)!;
+                            return recordDraftDeletion(
+                              {
+                                ...currentDraft,
+                                shiftCycles: currentDraft.shiftCycles.map((cycle, currentIndex) =>
+                                  currentIndex === cycleIndex
+                                    ? {
+                                        ...cycle,
+                                        sequence: (cycle.sequence ?? []).slice(0, -1),
+                                      }
+                                    : cycle,
+                                ),
+                              },
+                              sourceReference("shiftSequenceEntry", deleted.id, currentCycle.id),
+                            );
+                          });
                         }}
                         type="button"
                       >
@@ -1510,13 +1559,22 @@ export function SetupScreen({
           <button
             className="df-secondary-button"
             onClick={() => {
-              setDraft((currentDraft) => ({
-                ...currentDraft,
-                templateEntries: [
-                  ...currentDraft.templateEntries,
-                  createDraftTemplateEntry(currentDraft.templateEntries, currentDraft.shiftCycles),
-                ],
-              }));
+              setDraft((currentDraft) => {
+                const created = createDraftTemplateEntry(
+                  currentDraft.templateEntries,
+                  currentDraft.shiftCycles,
+                );
+                return recordDraftCreations(
+                  {
+                    ...currentDraft,
+                    templateEntries: [...currentDraft.templateEntries, created],
+                  },
+                  [
+                    sourceReference("blockTemplate", created.template.id),
+                    sourceReference("blockRecurrence", created.recurrence.id),
+                  ],
+                );
+              });
             }}
             type="button"
           >
@@ -1591,12 +1649,20 @@ export function SetupScreen({
                       <button
                         className="df-danger-button"
                         onClick={() => {
-                          setDraft((currentDraft) => ({
-                            ...currentDraft,
-                            templateEntries: currentDraft.templateEntries.filter(
-                              (_, currentIndex) => currentIndex !== index,
+                          setDraft((currentDraft) =>
+                            recordDraftDeletions(
+                              {
+                                ...currentDraft,
+                                templateEntries: currentDraft.templateEntries.filter(
+                                  (_, currentIndex) => currentIndex !== index,
+                                ),
+                              },
+                              [
+                                sourceReference("blockTemplate", entry.template.id),
+                                sourceReference("blockRecurrence", entry.recurrence.id),
+                              ],
                             ),
-                          }));
+                          );
                           setConfirmingDeleteTemplateIndex(null);
                         }}
                         type="button"
@@ -2314,10 +2380,13 @@ function CollapsibleSetupSection({
 }
 
 export function buildSetupDraft(state: DayFrameState, timestamp: string): SetupDraft {
-  const shiftCycles =
-    state.shiftCycles.length > 0
-      ? cloneShiftCycles(state.shiftCycles)
-      : [createDraftShiftCycle(state, timestamp, 1)];
+  const createdDefaultCycle =
+    state.shiftCycles.length === 0 ? createDraftShiftCycle(state, timestamp, 1) : null;
+  const shiftCycles = createdDefaultCycle
+    ? [createdDefaultCycle]
+    : cloneShiftCycles(state.shiftCycles);
+  const templateEntries = buildDraftEntries(state);
+  const existingRecurrenceIds = new Set(state.blockRecurrences.map((recurrence) => recurrence.id));
 
   return {
     schedulingPreferences: {
@@ -2328,22 +2397,151 @@ export function buildSetupDraft(state: DayFrameState, timestamp: string): SetupD
     },
     shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
     shiftCycles,
-    templateEntries: buildDraftEntries(state),
+    templateEntries,
+    lifecycle: {
+      created: [
+        ...(createdDefaultCycle ? getCycleSourceReferences(createdDefaultCycle) : []),
+        ...templateEntries
+          .filter((entry) => !existingRecurrenceIds.has(entry.recurrence.id))
+          .map((entry) => sourceReference("blockRecurrence", entry.recurrence.id)),
+      ],
+      deleted: [],
+    },
   };
 }
 
-function buildDraftEntries(state: DayFrameState): SetupDraftEntry[] {
-  return state.blockTemplates.map((template) => ({
-    template: {
-      ...template,
-      requiresWorkAnchor: template.requiresWorkAnchor ?? false,
-      externalResources: [...template.externalResources],
-    },
-    recurrence: normalizeRecurrence(
-      state.blockRecurrences.find((recurrence) => recurrence.blockTemplateId === template.id) ??
-        createDefaultRecurrence(template.id),
+export function buildSetupLifecycleTransaction(
+  draft: SetupDraft,
+): AuthoredSetupLifecycleTransaction {
+  const createdKeys = new Set(draft.lifecycle.created.map(sourceReferenceKey));
+  const current = getSetupDraftSourceReferences(draft);
+
+  return {
+    operations: [
+      ...draft.lifecycle.deleted.map((reference) => ({
+        ...reference,
+        operation: "delete" as const,
+      })),
+      ...draft.lifecycle.created.map((reference) => ({
+        ...reference,
+        operation: "create" as const,
+      })),
+      ...current
+        .filter((reference) => !createdKeys.has(sourceReferenceKey(reference)))
+        .map((reference) => ({ ...reference, operation: "update" as const })),
+    ],
+  };
+}
+
+function getSetupDraftSourceReferences(draft: SetupDraft): AuthoredSourceReference[] {
+  return [
+    ...draft.shiftDefinitions.map((source) => sourceReference("shiftDefinition", source.id)),
+    ...draft.shiftCycles.flatMap(getCycleSourceReferences),
+    ...draft.templateEntries.flatMap((entry) => [
+      sourceReference("blockTemplate", entry.template.id),
+      sourceReference("blockRecurrence", entry.recurrence.id),
+    ]),
+  ];
+}
+
+function getCycleSourceReferences(cycle: ShiftCycle): AuthoredSourceReference[] {
+  return [
+    sourceReference("shiftCycle", cycle.id),
+    ...cycle.segments.map((segment) => sourceReference("shiftSegment", segment.id, cycle.id)),
+    ...(cycle.sequence ?? []).map((entry) =>
+      sourceReference("shiftSequenceEntry", entry.id, cycle.id),
     ),
-  }));
+  ];
+}
+
+export function createSetupDraftSourceReference(
+  sourceKind: AuthoredSourceReference["sourceKind"],
+  sourceId: string,
+  parentSourceId?: string,
+): AuthoredSourceReference {
+  return { sourceKind, sourceId, ...(parentSourceId ? { parentSourceId } : {}) };
+}
+
+const sourceReference = createSetupDraftSourceReference;
+
+function sourceReferenceKey(reference: AuthoredSourceReference): string {
+  return `${reference.sourceKind}:${reference.parentSourceId ?? ""}:${reference.sourceId}`;
+}
+
+export function recordSetupDraftSourceCreated(
+  draft: SetupDraft,
+  reference: AuthoredSourceReference,
+): SetupDraft {
+  return recordDraftCreations(draft, [reference]);
+}
+
+const recordDraftCreation = recordSetupDraftSourceCreated;
+
+function recordDraftCreations(
+  draft: SetupDraft,
+  references: AuthoredSourceReference[],
+): SetupDraft {
+  const existing = new Set(draft.lifecycle.created.map(sourceReferenceKey));
+  return {
+    ...draft,
+    lifecycle: {
+      ...draft.lifecycle,
+      created: [
+        ...draft.lifecycle.created,
+        ...references.filter((reference) => !existing.has(sourceReferenceKey(reference))),
+      ],
+    },
+  };
+}
+
+export function recordSetupDraftSourceDeleted(
+  draft: SetupDraft,
+  reference: AuthoredSourceReference,
+): SetupDraft {
+  return recordDraftDeletions(draft, [reference]);
+}
+
+const recordDraftDeletion = recordSetupDraftSourceDeleted;
+
+function recordDraftDeletions(
+  draft: SetupDraft,
+  references: AuthoredSourceReference[],
+): SetupDraft {
+  const deleted = [...draft.lifecycle.deleted];
+  const created = [...draft.lifecycle.created];
+
+  for (const reference of references) {
+    const key = sourceReferenceKey(reference);
+    const createdIndex = created.findIndex((candidate) => sourceReferenceKey(candidate) === key);
+    if (createdIndex !== -1) {
+      created.splice(createdIndex, 1);
+    } else if (!deleted.some((candidate) => sourceReferenceKey(candidate) === key)) {
+      deleted.push(reference);
+    }
+  }
+
+  return { ...draft, lifecycle: { created, deleted } };
+}
+
+function buildDraftEntries(state: DayFrameState): SetupDraftEntry[] {
+  const occupiedRecurrenceIds = state.blockRecurrences.map((recurrence) => recurrence.id);
+
+  return state.blockTemplates.map((template) => {
+    const recurrence =
+      state.blockRecurrences.find((candidate) => candidate.blockTemplateId === template.id) ??
+      createDefaultRecurrence(template.id, occupiedRecurrenceIds);
+
+    occupiedRecurrenceIds.push(recurrence.id);
+
+    return {
+      template: {
+        ...template,
+        requiresWorkAnchor: template.requiresWorkAnchor ?? false,
+        externalResources: [...template.externalResources],
+      },
+      recurrence: normalizeRecurrence(recurrence),
+    };
+  });
 }
 
 function cloneShiftDefinitions(shiftDefinitions: ShiftDefinition[]): ShiftDefinition[] {
@@ -2381,9 +2579,16 @@ function normalizeRecurrence(recurrence: BlockRecurrence): BlockRecurrence {
   return nextRecurrence;
 }
 
-function createDefaultRecurrence(blockTemplateId: string): BlockRecurrence {
+function createDefaultRecurrence(
+  blockTemplateId: string,
+  occupiedRecurrenceIds: Iterable<string>,
+): BlockRecurrence {
   return {
-    id: `rec_${blockTemplateId}`,
+    id: allocateReadableSourceId({
+      prefix: "rec_",
+      preferredId: `rec_${blockTemplateId}`,
+      occupiedIds: occupiedRecurrenceIds,
+    }),
     blockTemplateId,
     frequency: "daily",
   };
@@ -2396,7 +2601,10 @@ function createDraftShiftDefinition(
   const timestamp = createIsoTimestamp();
 
   return {
-    id: `shift_${currentDrafts.length + 1}`,
+    id: allocateReadableSourceId({
+      prefix: "shift_",
+      occupiedIds: currentDrafts.map((shiftDefinition) => shiftDefinition.id),
+    }),
     userId: currentDrafts[0]?.userId ?? shiftCycles[0]?.userId ?? "user_001",
     name: `Shift ${currentDrafts.length + 1}`,
     startTime: "09:00",
@@ -2413,7 +2621,11 @@ function createDraftShiftCycle(
   timestamp: string,
   nextIndex: number,
 ): ShiftCycle {
-  const cycleId = `cycle_${String(nextIndex).padStart(3, "0")}`;
+  const cycleId = allocateReadableSourceId({
+    prefix: "cycle_",
+    occupiedIds: state.shiftCycles.map((shiftCycle) => shiftCycle.id),
+    numericPadding: 3,
+  });
 
   return {
     id: cycleId,
@@ -2436,7 +2648,11 @@ function createDraftShiftCycle(
 
 function createDraftShiftCycleFromDraft(draft: SetupDraft, nextIndex: number): ShiftCycle {
   const timestamp = createIsoTimestamp();
-  const cycleId = `cycle_${String(nextIndex).padStart(3, "0")}`;
+  const cycleId = allocateReadableSourceId({
+    prefix: "cycle_",
+    occupiedIds: draft.shiftCycles.map((shiftCycle) => shiftCycle.id),
+    numericPadding: 3,
+  });
 
   return {
     id: cycleId,
@@ -2465,19 +2681,26 @@ function createDraftSegment(
   const fallbackShiftDefinitionId =
     shiftDefinitions[0]?.id ?? shiftCycle.segments[0]?.shiftDefinitionId ?? "";
 
-  return createDraftSegmentBase(shiftCycle.id, fallbackShiftDefinitionId, nextIndex);
+  return createDraftSegmentBase(shiftCycle.id, fallbackShiftDefinitionId, nextIndex, [
+    ...shiftCycle.segments.map((segment) => segment.id),
+    ...(shiftCycle.sequence ?? []).map((sequenceDay) => sequenceDay.id),
+  ]);
 }
 
 function createDraftSegmentBase(
   shiftCycleId: string,
   shiftDefinitionId: string,
   nextIndex: number,
+  occupiedWorkEntryIds: Iterable<string> = [],
 ): ShiftSegment {
   const nextMonthDay = String(nextIndex).padStart(2, "0");
   const nextDate = `2026-05-${nextMonthDay}` as LocalDateString;
 
   return {
-    id: `segment_${nextIndex}`,
+    id: allocateReadableSourceId({
+      prefix: "segment_",
+      occupiedIds: occupiedWorkEntryIds,
+    }),
     shiftCycleId,
     shiftDefinitionId,
     startsOnDate: nextDate,
@@ -2502,7 +2725,13 @@ function createDraftSequenceDay(
   const nextDayOffset = shiftCycle.sequence?.length ?? 0;
 
   return {
-    id: `sequence_day_${nextDayOffset + 1}`,
+    id: allocateReadableSourceId({
+      prefix: "sequence_day_",
+      occupiedIds: [
+        ...shiftCycle.segments.map((segment) => segment.id),
+        ...(shiftCycle.sequence ?? []).map((sequenceDay) => sequenceDay.id),
+      ],
+    }),
     dayOffset: nextDayOffset,
     shiftDefinitionId: shiftDefinitions[0]?.id ?? null,
   };
@@ -2514,7 +2743,10 @@ function createDraftTemplateEntry(
 ): SetupDraftEntry {
   const timestamp = createIsoTimestamp();
   const nextIndex = currentEntries.length + 1;
-  const templateId = `template_${nextIndex}`;
+  const templateId = allocateReadableSourceId({
+    prefix: "template_",
+    occupiedIds: currentEntries.map((entry) => entry.template.id),
+  });
   const userId = currentEntries[0]?.template.userId ?? shiftCycles[0]?.userId ?? "user_001";
 
   return {
@@ -2536,7 +2768,11 @@ function createDraftTemplateEntry(
       updatedAt: timestamp,
     },
     recurrence: {
-      id: `rec_template_${nextIndex}`,
+      id: allocateReadableSourceId({
+        prefix: "rec_",
+        preferredId: `rec_${templateId}`,
+        occupiedIds: currentEntries.map((entry) => entry.recurrence.id),
+      }),
       blockTemplateId: templateId,
       frequency: "daily",
     },

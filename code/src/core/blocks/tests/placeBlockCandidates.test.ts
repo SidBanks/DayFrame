@@ -3,9 +3,18 @@ import { describe, expect, it } from "vitest";
 import type { GeneratedWorkBlock } from "../../shifts/types.js";
 import { placeBlockCandidates } from "../placeBlockCandidates.js";
 import type { BlockCandidate } from "../types.js";
+import { createTemplateOccurrenceIdentity } from "../../occurrences/occurrenceIdentity.js";
 
 const baseCandidate: BlockCandidate = {
   id: "candidate_template_review_rec_review_2026-05-05",
+  occurrenceIdentity: createTemplateOccurrenceIdentity({
+    templateId: "template_review",
+    recurrenceId: "rec_review",
+    frequency: "daily",
+    userDayDate: "2026-05-05",
+    userWeekStartDate: "2026-05-02",
+    slot: 0,
+  }),
   userId: "user_001",
   templateId: "template_review",
   recurrenceId: "rec_review",
@@ -44,6 +53,10 @@ describe("placeBlockCandidates", () => {
     );
     expect(result.scheduledBlocks[0]?.endsAt.getTime()).toBe(
       new Date(2026, 4, 5, 4, 0, 0, 0).getTime(),
+    );
+    expect(result.scheduledBlocks[0]?.occurrenceIdentity).toEqual(baseCandidate.occurrenceIdentity);
+    expect(result.scheduledBlocks[0]?.occurrenceIdentity).not.toBe(
+      baseCandidate.occurrenceIdentity,
     );
   });
 
@@ -673,6 +686,8 @@ describe("placeBlockCandidates", () => {
 
     expect(result.scheduledBlocks).toHaveLength(0);
     expect(result.unplacedCandidates).toEqual([candidate]);
+    expect(result.unplacedCandidates[0]?.occurrenceIdentity).toEqual(candidate.occurrenceIdentity);
+    expect(result.unplacedCandidates[0]?.occurrenceIdentity).toBe(candidate.occurrenceIdentity);
   });
 
   it("places flexible beforeWork and afterWork candidates on downtime days without work", () => {

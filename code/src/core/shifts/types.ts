@@ -1,5 +1,6 @@
 import type { TimeString, Weekday } from "../time/types.js";
 import type { AnchorType } from "../anchors/types.js";
+import type { OccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export type LocalDateString = `${number}-${number}-${number}`;
 
@@ -18,6 +19,7 @@ export type ShiftDefinition = {
 
 export type GeneratedWorkBlock = {
   id: string;
+  occurrenceIdentity?: OccurrenceIdentity;
   shiftDefinitionId: string;
   userId: string;
   title: string;

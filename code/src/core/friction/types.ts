@@ -1,6 +1,8 @@
 import type { BlockCandidate, DraftScheduledBlock } from "../blocks/types.js";
 import type { GeneratedWorkBlock } from "../shifts/types.js";
 import type { LocalDateString } from "../shifts/types.js";
+import type { PlanDecisionId } from "../decisions/planDecision.js";
+import type { PlanDecisionReplayResult } from "../decisions/replayPlanDecisions.js";
 
 export type FrictionSeverity = "info" | "warning" | "critical";
 
@@ -19,6 +21,14 @@ export type SuggestedFix = {
   label: string;
   action: SuggestedFixAction;
   parameters?: Record<string, string | number | boolean>;
+  decisionContext?: SuggestedFixDecisionContext;
+};
+
+export type SuggestedFixDecisionContext = {
+  relationship: "ordinary" | "preserving" | "unblocking" | "superseding" | "equivalent" | "unknown";
+  decisionId?: PlanDecisionId;
+  replayStatus?: PlanDecisionReplayResult["status"];
+  explanationCode?: "sameTarget" | "exactEquivalent" | "blockedPlacement" | "constraintPreserved";
 };
 
 export type SuggestedFixFeedback = {

@@ -5,7 +5,7 @@ import {
   createDayFrameBackup,
   parseDayFrameBackupJson,
 } from "./dayFrameBackup.js";
-import type { DayFrameAuthoredSetup } from "./types.js";
+import type { DayFrameAuthoredPattern } from "./types.js";
 
 describe("dayFrameBackup", () => {
   it("creates a versioned backup with authored setup data only", () => {
@@ -54,7 +54,7 @@ describe("dayFrameBackup", () => {
       parseDayFrameBackupJson(
         JSON.stringify({
           app: "DayFrame",
-          version: 2,
+          version: 3,
           exportedAt: "2026-05-05T10:00:00-05:00",
           data: buildAuthoredSetup(),
         }),
@@ -112,7 +112,7 @@ describe("dayFrameBackup", () => {
   });
 });
 
-function buildAuthoredSetup(overrides?: Partial<DayFrameAuthoredSetup>): DayFrameAuthoredSetup {
+function buildAuthoredSetup(overrides?: Partial<DayFrameAuthoredPattern>): DayFrameAuthoredPattern {
   const shiftCycle = {
     id: "cycle_001",
     userId: "user_001",
@@ -134,7 +134,7 @@ function buildAuthoredSetup(overrides?: Partial<DayFrameAuthoredSetup>): DayFram
         endsOnDate: "2026-05-31",
       },
     ],
-  } satisfies DayFrameAuthoredSetup["shiftCycles"][number];
+  } satisfies DayFrameAuthoredPattern["shiftCycles"][number];
 
   return {
     schedulingPreferences: {

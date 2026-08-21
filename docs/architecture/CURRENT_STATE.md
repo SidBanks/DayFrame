@@ -2,6 +2,20 @@
 
 # Current State
 
+## Phase 2 — Authoritative State and Lifetime-Safe Planning Authority
+
+**Status:** Complete with deferred release work
+**Current through:** Task 2.40
+**Last reviewed:** 2026-08-20
+
+DayFrame now has explicit source incarnations, Active/Profile/Backup V2 lifetime semantics, lifetime-safe durable occurrence references, independently persisted PlanDecision V1 authority, deterministic replay, explicit Try → Accept, persistent accepted-choice visibility/removal, and decision-aware recommendations.
+
+No Phase 2 correctness defect remains. Backup V3 is required before broader release because Setup Backup V2 does not include PlanDecision or Profile V2 authority. The next architecture-first direction is Phase 3 execution/history semantics; release-readiness work may prioritize Backup V3 first.
+
+Canonical publication: `docs/checkpoints/CHECKPOINT_Phase_2_Complete.md`.
+
+---
+
 ## Phase 1 — Architectural Foundation Alignment
 
 **Status:** Complete
@@ -23,9 +37,9 @@ to the next architectural domain.
 
 ---
 
-# Current Focus
+# Phase 1 Closure Focus (Historical)
 
-DayFrame has completed **Phase 1 — Architectural Foundation Alignment** through
+At the Phase 1 checkpoint, DayFrame had completed **Phase 1 — Architectural Foundation Alignment** through
 Task **1.39**.
 
 The immediate project objective is now:
@@ -1490,7 +1504,7 @@ against the then-current authored architecture.
 
 ---
 
-# Current Determination
+# Phase 1 Determination (Historical)
 
 DayFrame has completed Tasks **1.1 through 1.39** of
 **Phase 1 — Architectural Foundation Alignment**.

@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   cloneSavedProfiles,
+  convertDayFrameProfilesStorageV1,
   createDayFrameProfilesStorage,
+  createDayFrameProfilesStorageV2,
   createDayFrameSavedProfile,
   validateDayFrameProfilesStorage,
+  validateDayFrameProfilesStorageV2,
 } from "./dayFrameProfiles.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 
@@ -68,6 +71,53 @@ describe("dayFrameProfiles", () => {
     expect(
       validateDayFrameProfilesStorage({ app: "Other", version: 1, profiles: [] }),
     ).toBeUndefined();
+  });
+
+  it("creates and validates an independently versioned incarnation-free Profile V2 envelope", () => {
+    const profile = createDayFrameSavedProfile({
+      id: "profile_v2",
+      name: "Reusable Week",
+      savedAt: "2026-05-05T09:00:00-05:00",
+      data: buildAuthoredSetup(),
+    });
+    const storage = createDayFrameProfilesStorageV2([profile]);
+
+    expect(storage).toMatchObject({
+      app: "DayFrame",
+      surface: "profiles",
+      version: 2,
+      quarantinedProfiles: [],
+    });
+    expect(validateDayFrameProfilesStorageV2(storage)).toEqual(storage);
+  });
+
+  it("rejects singular-cycle and incarnation-bearing Profile V2 records", () => {
+    const base = createDayFrameProfilesStorageV2([
+      createDayFrameSavedProfile({ id: "profile_v2", name: "Reusable Week",
+        savedAt: "2026-05-05T09:00:00-05:00", data: buildAuthoredSetup() }),
+    ]);
+    const singular = structuredClone(base) as unknown as { profiles: Array<{ data: Record<string, unknown> }> };
+    delete singular.profiles[0]!.data.shiftCycles;
+    singular.profiles[0]!.data.shiftCycle = {};
+    expect(() => validateDayFrameProfilesStorageV2(singular)).toThrow(RangeError);
+
+    const incarnated = structuredClone(base) as unknown as { profiles: Array<{ data: {
+      shiftDefinitions: unknown[] } }> };
+    incarnated.profiles[0]!.data.shiftDefinitions = [{ incarnationId: "runtime-only" }];
+    expect(() => validateDayFrameProfilesStorageV2(incarnated)).toThrow(RangeError);
+  });
+
+  it("converts valid V1 entries while preserving invalid entries for quarantine", () => {
+    const invalidEntry = { id: "broken", name: "Broken", savedAt: "2026-05-05", data: null };
+    const converted = convertDayFrameProfilesStorageV1({
+      app: "DayFrame",
+      version: 1,
+      profiles: [{ id: "profile_1", name: "Week A", savedAt: "2026-05-05", data: buildAuthoredSetup() },
+        invalidEntry],
+    });
+
+    expect(converted.profiles.map(({ id }) => id)).toEqual(["profile_1"]);
+    expect(converted.quarantinedProfiles).toEqual([invalidEntry]);
   });
 
   it("saves and validates repeating sequence cycles in profiles", () => {

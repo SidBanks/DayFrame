@@ -16,6 +16,7 @@ import {
   validateShiftCycles,
 } from "./shiftCycleUtils.js";
 import { getUserDayDate, parseTimeString } from "../time/userDay.js";
+import { createWorkOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export function generateCycleWorkBlocks(
   input: GenerateCycleWorkBlocksInput,
@@ -108,6 +109,12 @@ function generateManualSegmentWorkBlocks(input: {
     ...workBlock,
     shiftCycleId: input.shiftCycle.id,
     shiftSegmentId: input.segment.id,
+    occurrenceIdentity: createWorkOccurrenceIdentity({
+      shiftDefinitionId: workBlock.shiftDefinitionId,
+      shiftCycleId: input.shiftCycle.id,
+      shiftSegmentId: input.segment.id,
+      localStartDate: workBlock.startDate,
+    }),
   }));
 }
 
@@ -160,6 +167,12 @@ function generateRepeatingSequenceWorkBlocks(input: {
           ...workBlock,
           shiftCycleId: input.shiftCycle.id,
           shiftSegmentId: sequenceDay.id,
+          occurrenceIdentity: createWorkOccurrenceIdentity({
+            shiftDefinitionId: workBlock.shiftDefinitionId,
+            shiftCycleId: input.shiftCycle.id,
+            shiftSegmentId: sequenceDay.id,
+            localStartDate: workBlock.startDate,
+          }),
         });
       }
     }

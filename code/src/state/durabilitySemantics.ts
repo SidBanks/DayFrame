@@ -1,10 +1,13 @@
 import type {
+  ActivePersistenceMutationResult,
+  ActivePersistenceOutcome,
+  ActiveRemovalOutcome,
   ClearLocalDataResult,
   DurabilityRetryResult,
   PersistenceRemovalOutcome,
   PersistenceWriteOutcome,
   StoreDurabilityStatus,
-  StoreMutationResult,
+  PersistenceMutationResult,
   SurfaceDurabilityStatus,
 } from "./types.js";
 
@@ -29,6 +32,7 @@ export type ClearDurabilitySemanticClassification = {
   aggregate: ClearDurabilityAggregateSemantic;
   activeState: DurabilitySemanticCategory;
   profiles: DurabilitySemanticCategory;
+  planDecisions: DurabilitySemanticCategory;
 };
 
 const writeOutcomeCategories = {
@@ -70,6 +74,16 @@ export function classifyPersistenceRemovalOutcome(
   return removalOutcomeCategories[outcome.status];
 }
 
+export function classifyActivePersistenceOutcome(
+  outcome: ActivePersistenceOutcome,
+): DurabilitySemanticCategory {
+  return outcome.status === "blocked" ? "internalNoOp" : classifyPersistenceWriteOutcome(outcome);
+}
+
+function classifyActiveRemovalOutcome(outcome: ActiveRemovalOutcome): DurabilitySemanticCategory {
+  return outcome.status === "blocked" ? "internalNoOp" : classifyPersistenceRemovalOutcome(outcome);
+}
+
 export function classifySurfaceDurabilityStatus(
   status: SurfaceDurabilityStatus,
 ): DurabilitySemanticCategory {
@@ -77,9 +91,15 @@ export function classifySurfaceDurabilityStatus(
 }
 
 export function classifyStoreMutationResult(
-  result: StoreMutationResult,
+  result: PersistenceMutationResult,
 ): DurabilitySemanticCategory {
   return classifyPersistenceWriteOutcome(result.persistence);
+}
+
+export function classifyActiveStoreMutationResult(
+  result: ActivePersistenceMutationResult,
+): DurabilitySemanticCategory {
+  return classifyActivePersistenceOutcome(result.persistence);
 }
 
 export function classifyStoreDurabilityStatus(
@@ -107,6 +127,8 @@ export function classifyDurabilityRetryResult(
       return "internalNoOp";
     case "serializationFailure":
       return "recoveryRequired";
+    case "recoveryProtected":
+      return "internalNoOp";
     default:
       return assertNever(result.reason);
   }
@@ -117,8 +139,9 @@ export function classifyClearLocalDataResult(
 ): ClearDurabilitySemanticClassification {
   return {
     aggregate: clearAggregateCategories[result.durability],
-    activeState: classifyPersistenceRemovalOutcome(result.activeState),
+    activeState: classifyActiveRemovalOutcome(result.activeState),
     profiles: classifyPersistenceRemovalOutcome(result.profiles),
+    planDecisions: classifyPersistenceRemovalOutcome(result.planDecisions),
   };
 }
 

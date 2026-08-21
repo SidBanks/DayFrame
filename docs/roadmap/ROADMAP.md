@@ -31,7 +31,7 @@ The DayFrame architecture is now the authoritative conceptual model for all futu
 
 # Phase 2 — Implementation Alignment
 
-**Status:** Current
+**Status:** Complete
 
 ### Goal
 
@@ -57,7 +57,7 @@ Bring the implementation into full compliance with the published architecture.
 
 # Phase 3 — Execution Engine
 
-**Status:** Planned
+**Status:** Next architectural phase
 
 ### Goal
 

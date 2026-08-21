@@ -190,7 +190,7 @@ Future Architectural Decision Records shall extend or revise these decisions thr
 
 # ADR-1.22 Durable-Data Compatibility and Independent Format Versioning
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-08-13  
 **ADR:** `ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
 
@@ -380,3 +380,14 @@ themselves transfer durability authority into the scheduling engine or presentat
 layer.
 
 **Evidence:** Tasks 1.23–1.39.
+
+# ADR-2.40 — Lifetime-Safe Accepted Planning Authority
+
+**Status:** Accepted
+**Date:** 2026-08-20
+
+DayFrame identifies authored source lifetimes explicitly and stores one-off accepted planning intent as independent PlanDecision authority against DurableOccurrenceReference V1. Authored authority outranks applicable decisions; applicable decisions outrank heuristics; recommendations and Try remain non-authoritative until explicit Accept.
+
+PlanDecision replay is deterministic, stale references never retarget recreated sources, accepted choices remain visible/removable, and recommendation derivation suppresses equivalent suggestions while explicitly labeling proposed revisions. Backup V3 remains required before broader release because Backup V2 is a Setup-only recovery artifact.
+
+**Evidence:** Tasks 2.24–2.40 and `CHECKPOINT_Phase_2_Complete.md`.

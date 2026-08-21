@@ -14,6 +14,14 @@ record.
 
 ---
 
+# 2026-08-20 — Phase 2 Lifetime-Safe Planning Authority Complete
+
+DayFrame completed Phase 2 through Task 2.40. The implementation now carries explicit source lifetimes across Active/Profile/Backup V2 boundaries, supports lifetime-safe durable occurrence references and independently persisted PlanDecision V1 authority, replays accepted intent deterministically, and provides explicit Try/Accept, persistent visibility/removal, and decision-aware recommendations.
+
+Phase 2 closes with Backup V3 tracked as a prerequisite before broader release, not as an architectural closure blocker. The canonical evidence is `CHECKPOINT_Phase_2_Complete.md`.
+
+---
+
 # 2026-08-18 — Phase 1 Architectural Foundation Alignment Complete
 
 DayFrame completed **Phase 1 — Architectural Foundation Alignment** through

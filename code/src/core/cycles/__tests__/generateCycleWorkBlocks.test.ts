@@ -80,6 +80,26 @@ describe("generateCycleWorkBlocks", () => {
       "2026-05-17",
       "2026-05-18",
     ]);
+    expect(workBlocks[0]?.occurrenceIdentity).toEqual({
+      version: 1,
+      sourceKind: "work",
+      shiftCycleId: "cycle_001",
+      shiftSegmentId: "segment_day",
+      shiftDefinitionId: "shift_day",
+      localStartDate: "2026-05-14",
+      slot: 0,
+    });
+
+    const regenerated = generateCycleWorkBlocks({
+      shiftCycles: [shiftCycle],
+      shiftDefinitions,
+      planningWindowStart: new Date(2026, 4, 14, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 19, 0, 0, 0, 0),
+      dayBoundaryStartTime: "03:00",
+    });
+    expect(regenerated.map((workBlock) => workBlock.occurrenceIdentity)).toEqual(
+      workBlocks.map((workBlock) => workBlock.occurrenceIdentity),
+    );
   });
 
   it("does not generate blocks past a segment boundary", () => {
@@ -154,6 +174,15 @@ describe("generateCycleWorkBlocks", () => {
       startDate: "2026-05-17",
       endDate: "2026-05-18",
       crossesMidnight: true,
+      occurrenceIdentity: {
+        version: 1,
+        sourceKind: "work",
+        shiftCycleId: "cycle_001",
+        shiftSegmentId: "segment_night",
+        shiftDefinitionId: "shift_night",
+        localStartDate: "2026-05-17",
+        slot: 0,
+      },
     });
   });
 

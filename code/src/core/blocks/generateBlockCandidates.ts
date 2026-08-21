@@ -7,9 +7,11 @@ import type {
   BlockRecurrence,
   BlockTemplate,
   GenerateBlockCandidatesInput,
+  RecurrenceFrequency,
 } from "./types.js";
 import { getWeekdayFromDate } from "../time/userWeek.js";
 import type { LocalDateString } from "../shifts/types.js";
+import { createTemplateOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export function generateBlockCandidates(input: GenerateBlockCandidatesInput): BlockCandidate[] {
   const shiftCycles = input.shiftCycles ?? [];
@@ -84,7 +86,7 @@ function generateCandidatesForRecurrence(
       return generateWeeklyCandidates(
         input.blockTemplate,
         input.recurrence,
-        eligibleUserDays,
+        input.userDays,
         input.shiftCycles,
         input.defaultSchedulingPreferences,
       );
@@ -100,7 +102,7 @@ function generateCandidatesForRecurrence(
       return generateTimesPerUserWeekCandidates(
         input.blockTemplate,
         input.recurrence,
-        eligibleUserDays,
+        input.userDays,
         input.shiftCycles,
         input.defaultSchedulingPreferences,
       );
@@ -113,33 +115,37 @@ function generateCandidatesForRecurrence(
 function generateWeeklyCandidates(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
-  eligibleUserDays: LocalDateString[],
+  generationUserDays: LocalDateString[],
   shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate[] {
-  const firstDayByUserWeek = new Map<LocalDateString, LocalDateString>();
+  const generationUserDaySet = new Set(generationUserDays);
+  const canonicalWeekBuckets = collectCanonicalEffectiveWeekBuckets(
+    generationUserDays,
+    shiftCycles,
+    defaultSchedulingPreferences,
+  );
 
-  for (const userDayDate of eligibleUserDays) {
-    const userWeekStartDate = getUserWeekStartDateForUserDayDate(
-      userDayDate,
-      shiftCycles,
-      defaultSchedulingPreferences,
+  return canonicalWeekBuckets.flatMap((canonicalDates) => {
+    const userDayDate = canonicalDates.find((date) =>
+      isWithinRecurrenceDateBounds(date, recurrence),
     );
 
-    if (!firstDayByUserWeek.has(userWeekStartDate)) {
-      firstDayByUserWeek.set(userWeekStartDate, userDayDate);
+    if (!userDayDate || !generationUserDaySet.has(userDayDate)) {
+      return [];
     }
-  }
 
-  return [...firstDayByUserWeek.entries()].map(([, userDayDate]) =>
-    buildBlockCandidate(
-      blockTemplate,
-      recurrence,
-      userDayDate,
-      shiftCycles,
-      defaultSchedulingPreferences,
-    ),
-  );
+    return [
+      buildBlockCandidate(
+        blockTemplate,
+        recurrence,
+        userDayDate,
+        shiftCycles,
+        defaultSchedulingPreferences,
+        0,
+      ),
+    ];
+  });
 }
 
 function generateSpecificWeekdayCandidates(
@@ -169,7 +175,7 @@ function generateSpecificWeekdayCandidates(
 function generateTimesPerUserWeekCandidates(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
-  eligibleUserDays: LocalDateString[],
+  generationUserDays: LocalDateString[],
   shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): BlockCandidate[] {
@@ -183,35 +189,32 @@ function generateTimesPerUserWeekCandidates(
     );
   }
 
-  const userDaysByWeek = new Map<LocalDateString, LocalDateString[]>();
-
-  for (const userDayDate of eligibleUserDays) {
-    const userWeekStartDate = getUserWeekStartDateForUserDayDate(
-      userDayDate,
-      shiftCycles,
-      defaultSchedulingPreferences,
-    );
-    const weekDays = userDaysByWeek.get(userWeekStartDate) ?? [];
-
-    weekDays.push(userDayDate);
-    userDaysByWeek.set(userWeekStartDate, weekDays);
-  }
-
+  const generationUserDaySet = new Set(generationUserDays);
+  const canonicalWeekBuckets = collectCanonicalEffectiveWeekBuckets(
+    generationUserDays,
+    shiftCycles,
+    defaultSchedulingPreferences,
+  );
   const candidates: BlockCandidate[] = [];
 
-  for (const weekDays of userDaysByWeek.values()) {
-    for (
-      let index = 0;
-      index < Math.min(weekDays.length, recurrence.timesPerUserWeek);
-      index += 1
-    ) {
+  for (const canonicalDates of canonicalWeekBuckets) {
+    const occurrenceDates = canonicalDates
+      .filter((date) => isWithinRecurrenceDateBounds(date, recurrence))
+      .slice(0, recurrence.timesPerUserWeek);
+
+    for (const [slot, userDayDate] of occurrenceDates.entries()) {
+      if (!generationUserDaySet.has(userDayDate)) {
+        continue;
+      }
+
       candidates.push(
         buildBlockCandidate(
           blockTemplate,
           recurrence,
-          weekDays[index]!,
+          userDayDate,
           shiftCycles,
           defaultSchedulingPreferences,
+          slot,
         ),
       );
     }
@@ -220,12 +223,59 @@ function generateTimesPerUserWeekCandidates(
   return candidates;
 }
 
+function collectCanonicalEffectiveWeekBuckets(
+  generationUserDays: LocalDateString[],
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
+  defaultSchedulingPreferences: UserTimePreferences,
+): LocalDateString[][] {
+  const effectiveWeekKeys = new Set(
+    generationUserDays.map((userDayDate) =>
+      getUserWeekStartDateForUserDayDate(userDayDate, shiftCycles, defaultSchedulingPreferences),
+    ),
+  );
+
+  return [...effectiveWeekKeys]
+    .sort((left, right) => left.localeCompare(right))
+    .map((effectiveWeekKey) =>
+      collectCanonicalDatesForEffectiveWeekKey(
+        effectiveWeekKey,
+        shiftCycles,
+        defaultSchedulingPreferences,
+      ),
+    );
+}
+
+function collectCanonicalDatesForEffectiveWeekKey(
+  effectiveWeekKey: LocalDateString,
+  shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
+  defaultSchedulingPreferences: UserTimePreferences,
+): LocalDateString[] {
+  const canonicalDates: LocalDateString[] = [];
+
+  // A normal effective user-week contains key + 0...6. The existing noon-based
+  // preference resolver can map key + 7 back to key when the day boundary is
+  // later than noon, so include that final bounded label as well.
+  for (let dayOffset = 0; dayOffset <= 7; dayOffset += 1) {
+    const userDayDate = addDaysToLocalDate(effectiveWeekKey, dayOffset);
+
+    if (
+      getUserWeekStartDateForUserDayDate(userDayDate, shiftCycles, defaultSchedulingPreferences) ===
+      effectiveWeekKey
+    ) {
+      canonicalDates.push(userDayDate);
+    }
+  }
+
+  return canonicalDates;
+}
+
 function buildBlockCandidate(
   blockTemplate: BlockTemplate,
   recurrence: BlockRecurrence,
   userDayDate: LocalDateString,
   shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
+  occurrenceSlot = 0,
 ): BlockCandidate {
   const userWeekStartDate = getUserWeekStartDateForUserDayDate(
     userDayDate,
@@ -249,6 +299,17 @@ function buildBlockCandidate(
 
   return {
     id: `candidate_${blockTemplate.id}_${recurrence.id}_${userDayDate}`,
+    occurrenceIdentity: createTemplateOccurrenceIdentity({
+      templateId: blockTemplate.id,
+      recurrenceId: recurrence.id,
+      frequency: recurrence.frequency as Extract<
+        RecurrenceFrequency,
+        "daily" | "specificWeekdays" | "weekly" | "timesPerUserWeek"
+      >,
+      userDayDate,
+      userWeekStartDate,
+      slot: occurrenceSlot,
+    }),
     userId: blockTemplate.userId,
     templateId: blockTemplate.id,
     recurrenceId: recurrence.id,
@@ -376,6 +437,13 @@ function getUserDayStartFromLocalDate(
 
 function getLocalDateString(date: Date): LocalDateString {
   return getUserDayDate(date, "00:00") as LocalDateString;
+}
+
+function addDaysToLocalDate(localDate: LocalDateString, days: number): LocalDateString {
+  const [year, month, day] = localDate.split("-").map(Number);
+  const date = new Date(year!, month! - 1, day! + days, 12, 0, 0, 0);
+
+  return getLocalDateString(date);
 }
 
 function getWeekdayFromLocalDate(localDate: LocalDateString): Weekday {

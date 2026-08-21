@@ -1,11 +1,18 @@
 import type { BlockRecurrence, BlockTemplate } from "../core/blocks/types.js";
 import { normalizeShiftCycles } from "../core/cycles/shiftCycleUtils.js";
 import type { LocalDateString } from "../core/shifts/types.js";
-import type { DayFramePreviewRange, DayFramePreviewRangePreset, DayFrameState } from "./types.js";
+import type {
+  DayFrameAuthoredPattern,
+  DayFramePreviewRange,
+  DayFramePreviewRangePreset,
+  DayFrameState,
+} from "./types.js";
 import { normalizeManualCalendarEvents } from "./manualCalendarEvents.js";
+import { instantiateActiveSetup } from "./activeV2.js";
+import { createSourceIncarnationId } from "../core/authored/sourceIncarnation.js";
 
 export type PersistedDayFrameState = Pick<
-  DayFrameState,
+  DayFrameAuthoredPattern,
   | "schedulingPreferences"
   | "previewRange"
   | "shiftDefinitions"
@@ -14,18 +21,26 @@ export type PersistedDayFrameState = Pick<
   | "blockRecurrences"
   | "manualEvents"
 > & {
-  shiftCycle?: DayFrameState["shiftCycles"][number] | null;
+  shiftCycle?: DayFrameAuthoredPattern["shiftCycles"][number] | null;
 };
 
 type LegacyPersistedDayFrameState = Partial<
   PersistedDayFrameState & {
-    shiftCycle?: DayFrameState["shiftCycles"][number] | null;
+    shiftCycle?: DayFrameAuthoredPattern["shiftCycles"][number] | null;
   }
 >;
 
 export function createInitialDayFrameState(
   persistedState?: LegacyPersistedDayFrameState,
 ): DayFrameState {
+  const activeSetup = instantiateActiveSetup(normalizePersistedDayFramePattern(persistedState), createSourceIncarnationId);
+
+  return { ...activeSetup, savedProfiles: [], preview: null };
+}
+
+export function normalizePersistedDayFramePattern(
+  persistedState?: LegacyPersistedDayFrameState,
+): DayFrameAuthoredPattern {
   const normalizedAuthoredSetup = normalizePersistedAuthoredSetup({
     shiftDefinitions: persistedState?.shiftDefinitions ?? [],
     shiftCycles: normalizePersistedShiftCycles(persistedState),
@@ -35,19 +50,13 @@ export function createInitialDayFrameState(
   });
 
   return {
-    schedulingPreferences: {
-      dayBoundaryStartTime: "03:00",
-      weekStartsOn: "saturday",
-      ...persistedState?.schedulingPreferences,
-    },
-    previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
-    shiftDefinitions: normalizedAuthoredSetup.shiftDefinitions,
-    shiftCycles: normalizedAuthoredSetup.shiftCycles,
-    blockTemplates: normalizedAuthoredSetup.blockTemplates,
-    blockRecurrences: normalizedAuthoredSetup.blockRecurrences,
-    manualEvents: normalizedAuthoredSetup.manualEvents,
-    savedProfiles: [],
-    preview: null,
+      schedulingPreferences: {
+        dayBoundaryStartTime: "03:00",
+        weekStartsOn: "saturday",
+        ...persistedState?.schedulingPreferences,
+      },
+      previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
+      ...normalizedAuthoredSetup,
   };
 }
 
@@ -86,11 +95,11 @@ export function normalizePersistedPreviewRange(
 
 export function normalizePersistedAuthoredSetup(
   authoredSetup: Pick<
-    DayFrameState,
+    DayFrameAuthoredPattern,
     "shiftDefinitions" | "shiftCycles" | "blockTemplates" | "blockRecurrences" | "manualEvents"
   >,
 ): Pick<
-  DayFrameState,
+  DayFrameAuthoredPattern,
   "shiftDefinitions" | "shiftCycles" | "blockTemplates" | "blockRecurrences" | "manualEvents"
 > {
   return {
@@ -105,13 +114,15 @@ export function normalizePersistedAuthoredSetup(
   };
 }
 
-function normalizePersistedManualEvents(manualEvents: unknown): DayFrameState["manualEvents"] {
+function normalizePersistedManualEvents(
+  manualEvents: unknown,
+): DayFrameAuthoredPattern["manualEvents"] {
   return normalizeManualCalendarEvents(manualEvents);
 }
 
 function normalizePersistedShiftCycles(
   persistedState?: LegacyPersistedDayFrameState,
-): DayFrameState["shiftCycles"] {
+): DayFrameAuthoredPattern["shiftCycles"] {
   if (Array.isArray(persistedState?.shiftCycles)) {
     return normalizeShiftCycles(persistedState.shiftCycles);
   }

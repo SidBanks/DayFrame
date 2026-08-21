@@ -19,6 +19,12 @@ import type { ShiftDefinition } from "../shifts/types.js";
 import type { TimeString, Weekday } from "../time/types.js";
 import { getUserDayDate, getUserDayStart } from "../time/userDay.js";
 import type { LocalDateString } from "../shifts/types.js";
+import { createManualEventOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
+import type { PlanDecisionV1 } from "../decisions/planDecision.js";
+import { finalizePlanDecisionResults, replayPlanDecisions,
+  type PlanDecisionReplayResult } from "../decisions/replayPlanDecisions.js";
+import { classifySuggestedFixes } from "../decisions/classifySuggestedFixes.js";
+import type { DayFrameAuthoredSetup } from "../../state/types.js";
 
 export type GenerateSchedulePreviewInput = {
   shiftDefinitions: ShiftDefinition[];
@@ -31,6 +37,7 @@ export type GenerateSchedulePreviewInput = {
   dayBoundaryStartTime: TimeString;
   weekStartsOn: Weekday;
   generatedAt: string;
+  planDecisions?: readonly PlanDecisionV1[];
 };
 
 export type GenerateSchedulePreviewResult = {
@@ -39,6 +46,7 @@ export type GenerateSchedulePreviewResult = {
   scheduledBlocks: DraftScheduledBlock[];
   unplacedCandidates: BlockCandidate[];
   frictionPoints: FrictionPoint[];
+  planDecisionResults: PlanDecisionReplayResult[];
 };
 
 export function generateSchedulePreview(
@@ -82,8 +90,29 @@ export function generateSchedulePreview(
     },
   });
 
+  const manualScheduledBlocks = buildManualEventScheduledBlocks(
+    input.manualEvents ?? [],
+    visibleUserDayDates,
+    shiftCycles,
+    input.dayBoundaryStartTime,
+    input.weekStartsOn,
+  );
+  const authoredSetup = {
+    schedulingPreferences: { dayBoundaryStartTime: input.dayBoundaryStartTime,
+      weekStartsOn: input.weekStartsOn },
+    previewRange: { preset: "custom", startDate: "2000-01-01", endDate: "2000-01-01" },
+    shiftDefinitions: input.shiftDefinitions,
+    shiftCycles,
+    blockTemplates: input.blockTemplates,
+    blockRecurrences: input.blockRecurrences,
+    manualEvents: input.manualEvents ?? [],
+  } as unknown as DayFrameAuthoredSetup;
+  const replay = replayPlanDecisions({ decisions: input.planDecisions ?? [], authoredSetup,
+    blockCandidates, planningWindowStart: input.planningWindowStart,
+    planningWindowEnd: input.planningWindowEnd,
+    dayBoundaryStartTime: input.dayBoundaryStartTime, weekStartsOn: input.weekStartsOn });
   const placementResult = placeBlockCandidates({
-    blockCandidates,
+    blockCandidates: replay.blockCandidates,
     generatedWorkBlocks,
     planningWindowStart: new Date(expandedPlanningWindow.start),
     planningWindowEnd: new Date(expandedPlanningWindow.end),
@@ -99,14 +128,11 @@ export function generateSchedulePreview(
         },
         userDayDate,
       }).dayBoundaryStartTime,
+    hardPlacementCandidateIds: replay.hardPlacementCandidateIds,
+    additionalOccupiedBlocks: manualScheduledBlocks,
   });
-  const manualScheduledBlocks = buildManualEventScheduledBlocks(
-    input.manualEvents ?? [],
-    visibleUserDayDates,
-    shiftCycles,
-    input.dayBoundaryStartTime,
-    input.weekStartsOn,
-  );
+  const planDecisionResults = finalizePlanDecisionResults(replay.pendingResults,
+    replay.exactDecisionCandidateIds, placementResult.scheduledBlocks);
 
   const frictionDetectionResult = detectScheduleFriction({
     generatedWorkBlocks,
@@ -131,6 +157,18 @@ export function generateSchedulePreview(
         userDayDate,
       }).dayBoundaryStartTime,
   });
+  const decisionAwareFrictionPoints = classifySuggestedFixes({
+    frictionPoints: suggestedFixesResult.frictionPoints,
+    generatedWorkBlocks,
+    blockCandidates: replay.blockCandidates,
+    scheduledBlocks: [...placementResult.scheduledBlocks, ...manualScheduledBlocks],
+    unplacedCandidates: placementResult.unplacedCandidates,
+    decisions: input.planDecisions ?? [],
+    replayResults: planDecisionResults,
+    authoredSetup,
+    dayBoundaryStartTime: input.dayBoundaryStartTime,
+    classifiedAt: input.generatedAt,
+  });
   const filteredGeneratedWorkBlocks = generatedWorkBlocks.filter(
     (workBlock) =>
       visibleUserDayDates.has(workBlock.userDayDate) &&
@@ -141,7 +179,7 @@ export function generateSchedulePreview(
         input.planningWindowEnd,
       ),
   );
-  const filteredBlockCandidates = blockCandidates.filter((candidate) =>
+  const filteredBlockCandidates = replay.blockCandidates.filter((candidate) =>
     visibleUserDayDates.has(candidate.userDayDate),
   );
   const getDayBoundaryStartTimeForUserDayDate = (userDayDate: LocalDateString) =>
@@ -174,7 +212,7 @@ export function generateSchedulePreview(
   const visibleUnplacedCandidateIds = new Set(
     filteredUnplacedCandidates.map((candidate) => candidate.id),
   );
-  const filteredFrictionPoints = suggestedFixesResult.frictionPoints.filter((frictionPoint) => {
+  const filteredFrictionPoints = decisionAwareFrictionPoints.filter((frictionPoint) => {
     if (
       frictionPoint.affectedUserDayDate &&
       visibleUserDayDates.has(frictionPoint.affectedUserDayDate)
@@ -196,6 +234,7 @@ export function generateSchedulePreview(
     scheduledBlocks: filteredScheduledBlocks,
     unplacedCandidates: filteredUnplacedCandidates,
     frictionPoints: filteredFrictionPoints,
+    planDecisionResults,
   };
 }
 
@@ -236,6 +275,7 @@ function buildManualEventScheduledBlocks(
 
       return {
         id: manualEvent.id,
+        occurrenceIdentity: createManualEventOccurrenceIdentity(manualEvent.id),
         userId: "user_001",
         source: "manual",
         isAllDay: manualEvent.allDay,

@@ -4,6 +4,7 @@ import type { LocalDateString } from "../shifts/types.js";
 import type { GeneratedWorkBlock } from "../shifts/types.js";
 import type { ShiftCycle } from "../cycles/types.js";
 import type { AnchorType } from "../anchors/types.js";
+import type { OccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export type BlockCategory =
   | "work"
@@ -103,6 +104,7 @@ export type BlockRecurrence = {
 
 export type BlockCandidate = {
   id: string;
+  occurrenceIdentity?: OccurrenceIdentity;
   userId: string;
   templateId: string;
   recurrenceId: string;
@@ -149,6 +151,7 @@ export type ScheduledBlockStatus =
 
 export type DraftScheduledBlock = {
   id: string;
+  occurrenceIdentity?: OccurrenceIdentity;
   userId: string;
   templateId?: string;
   source: ScheduledBlockSource;
@@ -178,6 +181,8 @@ export type PlaceBlockCandidatesInput = {
   getDayBoundaryStartTimeForUserDayDate?: (userDayDate: LocalDateString) => TimeString;
   visiblePlanningWindowStart?: Date;
   visiblePlanningWindowEnd?: Date;
+  hardPlacementCandidateIds?: ReadonlySet<string>;
+  additionalOccupiedBlocks?: Array<{ startsAt: Date; endsAt: Date }>;
 };
 
 export type PlaceBlockCandidatesResult = {

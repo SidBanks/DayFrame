@@ -8,6 +8,7 @@ import type {
   FrictionPoint,
   SuggestedFix,
 } from "./types.js";
+import { cloneOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 const MINIMUM_DURATION_MINUTES = 15;
 const DURATION_REDUCTION_MINUTES = 30;
@@ -413,6 +414,9 @@ function placeCandidateInFirstAvailableGap(
 
   return {
     id: `scheduled_${candidate.id}`,
+    ...(candidate.occurrenceIdentity
+      ? { occurrenceIdentity: cloneOccurrenceIdentity(candidate.occurrenceIdentity) }
+      : {}),
     userId: candidate.userId,
     templateId: candidate.templateId,
     source: "template",
@@ -567,6 +571,9 @@ function addMinutes(date: Date, minutes: number): Date {
 function cloneScheduledBlock(scheduledBlock: DraftScheduledBlock): DraftScheduledBlock {
   return {
     ...scheduledBlock,
+    ...(scheduledBlock.occurrenceIdentity
+      ? { occurrenceIdentity: cloneOccurrenceIdentity(scheduledBlock.occurrenceIdentity) }
+      : {}),
     startsAt: new Date(scheduledBlock.startsAt),
     endsAt: new Date(scheduledBlock.endsAt),
     externalResources: [...scheduledBlock.externalResources],
@@ -576,6 +583,9 @@ function cloneScheduledBlock(scheduledBlock: DraftScheduledBlock): DraftSchedule
 function cloneBlockCandidate(blockCandidate: BlockCandidate): BlockCandidate {
   return {
     ...blockCandidate,
+    ...(blockCandidate.occurrenceIdentity
+      ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+      : {}),
     externalResources: [...blockCandidate.externalResources],
   };
 }

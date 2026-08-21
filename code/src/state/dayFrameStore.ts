@@ -1,45 +1,243 @@
 import { generateSchedulePreview } from "../core/engine/generateSchedulePreview.js";
 import { reviseSchedulePreview } from "../core/engine/reviseSchedulePreview.js";
-import { cloneShiftCycles as cloneNormalizedShiftCycles } from "../core/cycles/shiftCycleUtils.js";
 import {
   cloneDayFrameAuthoredSetup,
-  createDayFrameBackup,
+  createDayFrameBackupV2,
+  DayFrameBackupValidationError,
   validateDayFrameBackup,
 } from "./dayFrameBackup.js";
 import {
   cloneSavedProfiles,
-  createDayFrameProfilesStorage,
+  createDayFrameProfilesStorageV2,
+  convertDayFrameProfilesStorageV1,
   createDayFrameSavedProfile,
-  validateDayFrameProfilesStorage,
+  validateDayFrameProfilesStorageV2,
 } from "./dayFrameProfiles.js";
 import {
   createInitialDayFrameState,
+  normalizePersistedDayFramePattern,
   type PersistedDayFrameState,
 } from "./createInitialDayFrameState.js";
+import { createSourceIncarnationId, type SourceIncarnationAllocator } from "../core/authored/sourceIncarnation.js";
+import {
+  createActiveV2,
+  cloneActiveSetup,
+  instantiateActiveSetup,
+  projectActiveToPattern,
+  validateIncarnationGraph,
+  validateActiveV2,
+} from "./activeV2.js";
 import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import type {
   ApplyPreviewFixActionInput,
+  ActiveLocalAbandonmentRecoveryResult,
+  ActiveDayFrameAuthoredSetup,
+  ActiveLocalIngressStatus,
+  ActiveLocalReplacementRecoveryResult,
+  ActivePersistenceOutcome,
+  ActiveRemovalOutcome,
+  BackupImportResult,
   CommitAuthoredSetupInput,
+  CommitAuthoredSetupTransactionInput,
   DayFramePreview,
+  DayFrameAuthoredPattern,
   DayFramePreviewRange,
   DayFrameSavedProfile,
   DayFrameSchedulingPreferences,
   DayFrameState,
+  DayFrameStoreInitialState,
   DayFrameStore,
   DurabilityRetryResult,
   GeneratePreviewActionInput,
+  ManualEventLifecycleMutation,
   PersistenceRemovalOutcome,
   PersistenceWriteOutcome,
+  ProfileMutationResult,
+  ProfileProtectedRecoveryResult,
+  QuarantinedProfileEntry,
+  QuarantineRemovalResult,
+  ProfileLoadResult,
+  ProfileIngressStatus,
   StoreDesiredDurableCondition,
   StoreDurabilityStatus,
   StoreMutationResult,
   SurfaceDurabilityStatus,
 } from "./types.js";
+import { cloneOccurrenceIdentity } from "../core/occurrences/occurrenceIdentity.js";
+import { validateDayFrameAuthoredSetup } from "../core/authored/validateDayFrameAuthoredSetup.js";
+import type { DayFrameAuthoredSetup } from "./types.js";
+import { createPlanDecisionSurface } from "./planDecisionSurface.js";
+import type { PlanDecisionIdAllocator } from "../core/decisions/planDecision.js";
 
 export const DAYFRAME_STORAGE_KEY = "dayframe-store-v1";
+export const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
+export const DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY = "dayframe-active-v2-established";
 export const DAYFRAME_PROFILES_STORAGE_KEY = "dayframe-profiles-v1";
+export const DAYFRAME_PROFILES_V2_STORAGE_KEY = "dayframe-profiles-v2";
+export const DAYFRAME_PROFILES_V2_ESTABLISHED_KEY = "dayframe-profiles-v2-established";
 
 export type { PersistenceRemovalOutcome, PersistenceWriteOutcome } from "./types.js";
+
+function describeQuarantinedProfile(raw: unknown, index: number): QuarantinedProfileEntry {
+  const record = typeof raw === "object" && raw !== null ? raw as Record<string, unknown> : undefined;
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(raw) ?? String(raw);
+  } catch {
+    serialized = String(raw);
+  }
+  let hash = 2166136261;
+  for (const character of serialized) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return {
+    quarantineId: `quarantine-${(hash >>> 0).toString(16)}-${index}`,
+    reason: "invalidProfileEntry",
+    ...(typeof record?.id === "string" ? { originalProfileId: record.id } : {}),
+    ...(typeof record?.name === "string" ? { originalProfileName: record.name } : {}),
+    raw: structuredClone(raw),
+  };
+}
+
+function buildAuthoredCandidate(
+  state: DayFrameState,
+  proposed: Partial<DayFrameAuthoredPattern>,
+): DayFrameAuthoredPattern {
+  return {
+    schedulingPreferences: proposed.schedulingPreferences ?? state.schedulingPreferences,
+    previewRange: proposed.previewRange ?? state.previewRange,
+    shiftDefinitions: proposed.shiftDefinitions ?? state.shiftDefinitions,
+    shiftCycles: proposed.shiftCycles ?? state.shiftCycles,
+    blockTemplates: proposed.blockTemplates ?? state.blockTemplates,
+    blockRecurrences: proposed.blockRecurrences ?? state.blockRecurrences,
+    manualEvents: proposed.manualEvents ?? state.manualEvents,
+  };
+}
+
+function getValidationRejection(
+  candidate: DayFrameAuthoredPattern,
+): Extract<StoreMutationResult, { status: "rejected" }> | null {
+  const validation = validateDayFrameAuthoredSetup(candidate);
+
+  return validation.status === "invalid"
+    ? {
+        status: "rejected",
+        reason: "invalidAuthoredState",
+        validation,
+      }
+    : null;
+}
+
+function validateLifecycleOperations(
+  operations: CommitAuthoredSetupTransactionInput["lifecycle"]["operations"],
+): void {
+  for (const operation of operations) {
+    if (!operation.sourceId.trim()) {
+      throw new RangeError("Lifecycle operations require a source ID.");
+    }
+
+    if (
+      (operation.sourceKind === "shiftSegment" || operation.sourceKind === "shiftSequenceEntry") &&
+      !operation.parentSourceId?.trim()
+    ) {
+      throw new RangeError("Nested lifecycle operations require a parent source ID.");
+    }
+  }
+}
+
+function authoredSourceReferenceKeys(setup: DayFrameAuthoredPattern): Set<string> {
+  const keys = new Set<string>();
+  const add = (kind: string, id: string, parentId = "") => {
+    keys.add(`${kind}:${parentId}:${id}`);
+  };
+
+  setup.shiftDefinitions.forEach((source) => add("shiftDefinition", source.id));
+  setup.shiftCycles.forEach((cycle) => {
+    add("shiftCycle", cycle.id);
+    cycle.segments.forEach((source) => add("shiftSegment", source.id, cycle.id));
+    (cycle.sequence ?? []).forEach((source) => add("shiftSequenceEntry", source.id, cycle.id));
+  });
+  setup.blockTemplates.forEach((source) => add("blockTemplate", source.id));
+  setup.blockRecurrences.forEach((source) => add("blockRecurrence", source.id));
+  return keys;
+}
+
+function validateSetupLifecycleTransaction(
+  previous: DayFrameAuthoredPattern,
+  candidate: DayFrameAuthoredPattern,
+  operations: CommitAuthoredSetupTransactionInput["lifecycle"]["operations"],
+): void {
+  validateLifecycleOperations(operations);
+  const previousKeys = authoredSourceReferenceKeys(previous);
+  const candidateKeys = authoredSourceReferenceKeys(candidate);
+  const operationKinds = new Map<string, Set<(typeof operations)[number]["operation"]>>();
+
+  for (const operation of operations) {
+    if (operation.sourceKind === "manualEvent") {
+      throw new RangeError("Setup lifecycle transactions cannot mutate manual events.");
+    }
+    const key = `${operation.sourceKind}:${operation.parentSourceId ?? ""}:${operation.sourceId}`;
+    const operationMatchesSnapshot =
+      (operation.operation === "create" && candidateKeys.has(key)) ||
+      (operation.operation === "update" && previousKeys.has(key) && candidateKeys.has(key)) ||
+      (operation.operation === "delete" && previousKeys.has(key)) ||
+      (operation.operation === "replace" && (previousKeys.has(key) || candidateKeys.has(key)));
+    if (!operationMatchesSnapshot) {
+      throw new RangeError(`Lifecycle operation does not match authored snapshots: ${key}.`);
+    }
+    const kinds = operationKinds.get(key) ?? new Set();
+    kinds.add(operation.operation);
+    operationKinds.set(key, kinds);
+  }
+
+  for (const key of new Set([...previousKeys, ...candidateKeys])) {
+    const existed = previousKeys.has(key);
+    const exists = candidateKeys.has(key);
+    const kinds = operationKinds.get(key) ?? new Set();
+    const valid =
+      (existed &&
+        exists &&
+        (kinds.has("update") ||
+          kinds.has("replace") ||
+          (kinds.has("delete") && kinds.has("create")))) ||
+      (!existed && exists && (kinds.has("create") || kinds.has("replace"))) ||
+      (existed && !exists && (kinds.has("delete") || kinds.has("replace")));
+
+    if (!valid) {
+      throw new RangeError(`Setup lifecycle provenance does not cover ${key}.`);
+    }
+  }
+}
+
+function preserveUpdatedIncarnations(
+  candidate: DayFrameAuthoredSetup,
+  previous: DayFrameAuthoredSetup,
+  operations: CommitAuthoredSetupTransactionInput["lifecycle"]["operations"],
+): void {
+  const sources = (setup: DayFrameAuthoredSetup) => {
+    const result = new Map<string, { incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"] }>();
+    const add = (kind: string, source: { id: string; incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"] }, parent = "") => result.set(`${kind}:${parent}:${source.id}`, source);
+    setup.shiftDefinitions.forEach((source) => add("shiftDefinition", source));
+    setup.shiftCycles.forEach((cycle) => {
+      add("shiftCycle", cycle);
+      cycle.segments.forEach((source) => add("shiftSegment", source, cycle.id));
+      (cycle.sequence ?? []).forEach((source) => add("shiftSequenceEntry", source, cycle.id));
+    });
+    setup.blockTemplates.forEach((source) => add("blockTemplate", source));
+    setup.blockRecurrences.forEach((source) => add("blockRecurrence", source));
+    return result;
+  };
+  const oldSources = sources(previous);
+  const newSources = sources(candidate);
+  for (const operation of operations) {
+    if (operation.operation !== "update") continue;
+    const key = `${operation.sourceKind}:${operation.parentSourceId ?? ""}:${operation.sourceId}`;
+    const oldSource = oldSources.get(key);
+    const newSource = newSources.get(key);
+    if (oldSource && newSource) newSource.incarnationId = oldSource.incarnationId;
+  }
+}
 
 function mapWriteOutcomeToDurability(
   outcome: PersistenceWriteOutcome,
@@ -53,11 +251,55 @@ function mapRemovalOutcomeToDurability(
   return outcome.status === "removed" ? "durable" : outcome.status;
 }
 
-export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayFrameStore {
-  let state = mergeInitialState(initialState);
+export function createDayFrameStore(
+  initialState?: DayFrameStoreInitialState,
+  options: {
+    allocateSourceIncarnationId?: SourceIncarnationAllocator;
+    serializeActiveV2?: (value: unknown) => string;
+    serializeProfilesV2?: (value: unknown) => string;
+    serializePlanDecisions?: (value: unknown) => string;
+    allocatePlanDecisionId?: PlanDecisionIdAllocator;
+    planDecisionClock?: () => string;
+  } = {},
+): DayFrameStore {
+  const allocateIncarnation = options.allocateSourceIncarnationId ?? createSourceIncarnationId;
+  const activeLocalIngress = loadActiveLocalIngress(
+    allocateIncarnation,
+    options.serializeActiveV2 ?? ((value) => JSON.stringify(value)),
+  );
+  const profileIngress = loadPersistedProfiles(
+    options.serializeProfilesV2 ?? ((value) => JSON.stringify(value)),
+  );
+  let state = mergeInitialState(
+    activeLocalIngress.state,
+    initialState,
+    allocateIncarnation,
+    profileIngress.profiles,
+  );
+  const planDecisionSurface = createPlanDecisionSurface({
+    getAuthoredSetup: () => getActiveSetup(state),
+    onAuthorityChanged: () => {
+      if (state.preview && !state.preview.isStale) {
+        state = { ...state, preview: markPreviewStale(state.preview) };
+        notify();
+      }
+    },
+    ...(options.allocatePlanDecisionId
+      ? { allocatePlanDecisionId: options.allocatePlanDecisionId }
+      : {}),
+    ...(options.planDecisionClock ? { now: options.planDecisionClock } : {}),
+    ...(options.serializePlanDecisions ? { serialize: options.serializePlanDecisions } : {}),
+  });
+  let activeLocalIngressStatus = activeLocalIngress.status;
+  let protectedActiveSource = activeLocalIngress.protectedSource;
+  let protectedActiveSourceKey = activeLocalIngress.protectedSourceKey;
+  let profileIngressStatus = profileIngress.status;
+  let quarantinedProfiles = profileIngress.quarantinedProfiles;
+  let protectedProfileSource = profileIngress.protectedSource;
+  let protectedProfileSourceKey = profileIngress.protectedSourceKey;
   let durabilityStatus: StoreDurabilityStatus = {
-    activeState: "unknown",
-    profiles: "unknown",
+    activeState: activeLocalIngress.activeDurability,
+    profiles: profileIngress.durability,
   };
   let desiredDurableCondition: StoreDesiredDurableCondition = {
     activeState: "snapshot",
@@ -65,6 +307,8 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   };
   const listeners = new Set<(state: DayFrameState) => void>();
   const durabilityListeners = new Set<(status: StoreDurabilityStatus) => void>();
+  const activeLocalIngressListeners = new Set<(status: ActiveLocalIngressStatus) => void>();
+  const profileIngressListeners = new Set<(status: ProfileIngressStatus) => void>();
 
   function getState(): DayFrameState {
     return cloneState(state);
@@ -74,18 +318,65 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return { ...durabilityStatus };
   }
 
+  function getActiveLocalIngressStatus(): ActiveLocalIngressStatus {
+    return cloneActiveLocalIngressStatus(activeLocalIngressStatus);
+  }
+
+  function getProfileIngressStatus(): ProfileIngressStatus {
+    return { ...profileIngressStatus };
+  }
+
+  function getQuarantinedProfiles(): QuarantinedProfileEntry[] {
+    return quarantinedProfiles.map((raw, index) => describeQuarantinedProfile(raw, index));
+  }
+
+  function exportProtectedProfileSource() {
+    if (profileIngressStatus.status !== "recoveryRequired") {
+      return { status: "notAvailable", reason: "noProtectedSource" } as const;
+    }
+    return protectedProfileSource === undefined
+      ? { status: "notAvailable", reason: "sourceUnreadable" } as const
+      : { status: "exported", raw: protectedProfileSource } as const;
+  }
+
+  function exportQuarantinedProfile(quarantineId: string) {
+    const entry = getQuarantinedProfiles().find((candidate) =>
+      candidate.quarantineId === quarantineId);
+    return entry
+      ? { status: "exported", entry } as const
+      : { status: "notAvailable", reason: "missingEntry" } as const;
+  }
+
   function getDesiredDurableCondition(): StoreDesiredDurableCondition {
     return { ...desiredDurableCondition };
   }
 
-  function subscribeDurability(
-    listener: (status: StoreDurabilityStatus) => void,
-  ): () => void {
+  function subscribeDurability(listener: (status: StoreDurabilityStatus) => void): () => void {
     durabilityListeners.add(listener);
 
     return () => {
       durabilityListeners.delete(listener);
     };
+  }
+
+  function subscribeActiveLocalIngress(
+    listener: (status: ActiveLocalIngressStatus) => void,
+  ): () => void {
+    activeLocalIngressListeners.add(listener);
+
+    return () => {
+      activeLocalIngressListeners.delete(listener);
+    };
+  }
+
+  function subscribeProfileIngress(listener: (status: ProfileIngressStatus) => void): () => void {
+    profileIngressListeners.add(listener);
+    return () => profileIngressListeners.delete(listener);
+  }
+
+  function transitionProfileIngress(nextStatus: ProfileIngressStatus): void {
+    profileIngressStatus = nextStatus;
+    for (const listener of profileIngressListeners) listener(getProfileIngressStatus());
   }
 
   function updateDurabilityStatus(nextStatus: StoreDurabilityStatus): void {
@@ -100,6 +391,14 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
 
     for (const listener of durabilityListeners) {
       listener(getDurabilityStatus());
+    }
+  }
+
+  function transitionActiveLocalIngress(nextStatus: ActiveLocalIngressStatus): void {
+    activeLocalIngressStatus = nextStatus;
+
+    for (const listener of activeLocalIngressListeners) {
+      listener(getActiveLocalIngressStatus());
     }
   }
 
@@ -125,10 +424,39 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   }
 
   function retainProfileWriteOutcome(outcome: PersistenceWriteOutcome): void {
+    if (outcome.status === "persisted") {
+      transitionProfileIngress({
+        status: "accepted",
+        quarantinedEntryCount: quarantinedProfiles.length,
+      });
+    }
+
     updateDurabilityStatus({
       ...durabilityStatus,
       profiles: mapWriteOutcomeToDurability(outcome),
     });
+  }
+
+  function isActiveCheckpointProtected(): boolean {
+    return activeLocalIngressStatus.status === "recoveryRequired";
+  }
+
+  function persistActiveState(): ActivePersistenceOutcome {
+    if (isActiveCheckpointProtected()) {
+      return { status: "blocked", reason: "activeLocalRecovery" };
+    }
+
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
+    return persistence;
+  }
+
+  function removeActiveState(): ActiveRemovalOutcome {
+    if (isActiveCheckpointProtected()) {
+      return { status: "blocked", reason: "activeLocalRecovery" };
+    }
+
+    return clearPersistedState();
   }
 
   function getRetryIneligibilityReason(
@@ -148,6 +476,10 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   }
 
   function retryActivePersistence(): DurabilityRetryResult {
+    if (isActiveCheckpointProtected()) {
+      return { status: "notAttempted", reason: "recoveryProtected" };
+    }
+
     const reason = getRetryIneligibilityReason(durabilityStatus.activeState);
 
     if (reason) {
@@ -170,7 +502,137 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return { status: "attempted", desiredCondition: "absent", persistence };
   }
 
+  function recheckProtectedActiveSource(): "matches" | "sourceUnreadable" | "sourceChanged" {
+    const currentSource = readActiveLocalSource(protectedActiveSourceKey ?? DAYFRAME_STORAGE_KEY);
+
+    if (currentSource.status === "unreadable") {
+      return "sourceUnreadable";
+    }
+
+    if (protectedActiveSource === undefined || currentSource.raw !== protectedActiveSource) {
+      return "sourceChanged";
+    }
+
+    return "matches";
+  }
+
+  function replaceProtectedActiveCheckpointWithCurrentState(): ActiveLocalReplacementRecoveryResult {
+    if (!isActiveCheckpointProtected()) {
+      return { status: "notAttempted", reason: "notRecoveryRequired" };
+    }
+
+    const authoredSetup = getAuthoredSetup(state);
+    const validation = validateDayFrameAuthoredSetup(authoredSetup);
+
+    if (validation.status === "invalid") {
+      return {
+        status: "notAttempted",
+        reason: "invalidReplacement",
+        validation: cloneInvalidValidation(validation),
+      };
+    }
+
+    const sourceRecheck = recheckProtectedActiveSource();
+
+    if (sourceRecheck !== "matches") {
+      return { status: "notAttempted", reason: sourceRecheck };
+    }
+
+    retainActiveSnapshotIntent();
+    const persistence = persistState(state);
+    retainActiveWriteOutcome(persistence);
+
+    if (persistence.status !== "persisted") {
+      return { status: "notResolved", resolution: "replaceWithCurrentState", persistence };
+    }
+    const verified = readActiveLocalSource(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+    if (verified.status !== "readable" || verified.raw === null) {
+      const verificationFailure = { status: "storageFailure" } as const;
+      retainActiveWriteOutcome(verificationFailure);
+      return {
+        status: "notResolved",
+        resolution: "replaceWithCurrentState",
+        persistence: verificationFailure,
+      };
+    }
+    try {
+      const reread = validateActiveV2(JSON.parse(verified.raw) as unknown);
+      if (JSON.stringify(reread.data) !== JSON.stringify(getActiveSetup(state))) {
+        throw new RangeError("Recovery replacement verification mismatch.");
+      }
+    } catch {
+      const verificationFailure = { status: "storageFailure" } as const;
+      retainActiveWriteOutcome(verificationFailure);
+      return {
+        status: "notResolved",
+        resolution: "replaceWithCurrentState",
+        persistence: verificationFailure,
+      };
+    }
+
+    protectedActiveSource = undefined;
+    protectedActiveSourceKey = undefined;
+    transitionActiveLocalIngress({
+      status: "accepted",
+      advisories: validation.advisories.map((advisory) => ({ ...advisory })),
+    });
+
+    return {
+      status: "resolved",
+      resolution: "replaceWithCurrentState",
+      persistence,
+      ingress: getActiveLocalIngressStatus() as Extract<
+        ActiveLocalIngressStatus,
+        { status: "accepted" }
+      >,
+    };
+  }
+
+  function abandonProtectedActiveCheckpointAndReset(): ActiveLocalAbandonmentRecoveryResult {
+    if (!isActiveCheckpointProtected()) {
+      return { status: "notAttempted", reason: "notRecoveryRequired" };
+    }
+
+    const sourceRecheck = recheckProtectedActiveSource();
+
+    if (sourceRecheck !== "matches") {
+      return { status: "notAttempted", reason: sourceRecheck };
+    }
+
+    desiredDurableCondition = { ...desiredDurableCondition, activeState: "absent" };
+    const persistence = clearPersistedState();
+
+    updateDurabilityStatus({
+      ...durabilityStatus,
+      activeState: mapRemovalOutcomeToDurability(persistence),
+    });
+
+    if (persistence.status !== "removed") {
+      return { status: "notResolved", resolution: "abandonAndReset", persistence };
+    }
+
+    const savedProfiles = cloneSavedProfiles(state.savedProfiles);
+    state = { ...createInitialDayFrameState(), savedProfiles };
+    protectedActiveSource = undefined;
+    protectedActiveSourceKey = undefined;
+    transitionActiveLocalIngress({ status: "noSource", reason: "resolvedByAbandonment" });
+
+    return {
+      status: "resolved",
+      resolution: "abandonAndReset",
+      persistence,
+      state: notify(),
+      ingress: getActiveLocalIngressStatus() as Extract<
+        ActiveLocalIngressStatus,
+        { status: "noSource" }
+      >,
+    };
+  }
+
   function retryProfilePersistence(): DurabilityRetryResult {
+    if (profileIngressStatus.status === "recoveryRequired") {
+      return { status: "notAttempted", reason: "recoveryProtected" };
+    }
     const reason = getRetryIneligibilityReason(durabilityStatus.profiles);
 
     if (reason) {
@@ -178,7 +640,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     }
 
     if (desiredDurableCondition.profiles === "snapshot") {
-      const persistence = persistProfiles(state.savedProfiles);
+      const persistence = persistProfiles(state.savedProfiles, quarantinedProfiles);
 
       retainProfileWriteOutcome(persistence);
       return { status: "attempted", desiredCondition: "snapshot", persistence };
@@ -193,6 +655,104 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     return { status: "attempted", desiredCondition: "absent", persistence };
   }
 
+  function recheckProtectedProfileSource(): "unchanged" | "sourceChanged" | "sourceUnreadable" |
+    "noProtectedSource" {
+    if (profileIngressStatus.status !== "recoveryRequired") return "noProtectedSource";
+    if (protectedProfileSource === undefined || protectedProfileSourceKey === undefined) {
+      return "sourceUnreadable";
+    }
+    try {
+      const storage = getStorage();
+      if (!storage) return "sourceUnreadable";
+      return storage.getItem(protectedProfileSourceKey) === protectedProfileSource
+        ? "unchanged" : "sourceChanged";
+    } catch {
+      return "sourceUnreadable";
+    }
+  }
+
+  function writeVerifiedProfileCollection(
+    profiles: DayFrameSavedProfile[],
+    quarantine: unknown[],
+  ): PersistenceWriteOutcome {
+    let serialized: string;
+    try {
+      const envelope = createDayFrameProfilesStorageV2(profiles, quarantine);
+      validateDayFrameProfilesStorageV2(envelope);
+      serialized = JSON.stringify(envelope);
+    } catch {
+      return { status: "serializationFailure" };
+    }
+    let storage: StorageLike | undefined;
+    try {
+      storage = getStorage();
+    } catch {
+      return { status: "storageFailure" };
+    }
+    if (!storage) return { status: "unavailable" };
+    try {
+      storage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, serialized);
+      const reread = storage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY);
+      if (reread !== serialized) return { status: "storageFailure" };
+      validateDayFrameProfilesStorageV2(JSON.parse(reread) as unknown);
+      storage.setItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY, "1");
+      return { status: "persisted" };
+    } catch {
+      return { status: "storageFailure" };
+    }
+  }
+
+  function replaceProtectedProfileCheckpointWithCurrentProfiles(): ProfileProtectedRecoveryResult {
+    const recheck = recheckProtectedProfileSource();
+    if (recheck !== "unchanged") return { status: "notAttempted", reason: recheck };
+    const persistence = writeVerifiedProfileCollection(state.savedProfiles, quarantinedProfiles);
+    retainProfileSnapshotIntent();
+    retainProfileWriteOutcome(persistence);
+    if (persistence.status !== "persisted") {
+      return { status: "notResolved", action: "replace", persistence };
+    }
+    protectedProfileSource = undefined;
+    protectedProfileSourceKey = undefined;
+    return { status: "resolved", action: "replace", persistence };
+  }
+
+  function abandonProtectedProfileCheckpoint(): ProfileProtectedRecoveryResult {
+    const recheck = recheckProtectedProfileSource();
+    if (recheck !== "unchanged") return { status: "notAttempted", reason: recheck };
+    const persistence = writeVerifiedProfileCollection([], []);
+    retainProfileSnapshotIntent();
+    if (persistence.status !== "persisted") {
+      retainProfileWriteOutcome(persistence);
+      return { status: "notResolved", action: "abandon", persistence };
+    }
+    state = { ...state, savedProfiles: [] };
+    quarantinedProfiles = [];
+    retainProfileWriteOutcome(persistence);
+    protectedProfileSource = undefined;
+    protectedProfileSourceKey = undefined;
+    notify();
+    return { status: "resolved", action: "abandon", persistence };
+  }
+
+  function removeQuarantinedProfile(quarantineId: string): QuarantineRemovalResult {
+    if (profileIngressStatus.status === "recoveryRequired") {
+      return { status: "notAttempted", reason: "profileRecovery" };
+    }
+    const index = getQuarantinedProfiles().findIndex((entry) => entry.quarantineId === quarantineId);
+    if (index === -1) return { status: "notAttempted", reason: "missingEntry" };
+    quarantinedProfiles = quarantinedProfiles.filter((_, candidateIndex) => candidateIndex !== index);
+    retainProfileSnapshotIntent();
+    const persistence = persistProfiles(state.savedProfiles, quarantinedProfiles);
+    retainProfileWriteOutcome(persistence);
+    if (persistence.status !== "persisted") {
+      transitionProfileIngress({ status: "accepted",
+        quarantinedEntryCount: quarantinedProfiles.length });
+    }
+    notify();
+    return { status: "removed", quarantineId, persistence,
+      remainingCount: quarantinedProfiles.length };
+  }
+
   function subscribe(listener: (state: DayFrameState) => void): () => void {
     listeners.add(listener);
 
@@ -202,6 +762,14 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   }
 
   function commitAuthoredSetup(authoredSetup: CommitAuthoredSetupInput): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, authoredSetup);
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
+    const activeCandidate = instantiateActiveSetup(candidate, allocateIncarnation);
     state = {
       ...state,
       schedulingPreferences: {
@@ -210,23 +778,63 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       previewRange: {
         ...authoredSetup.previewRange,
       },
-      shiftDefinitions: cloneShiftDefinitions(authoredSetup.shiftDefinitions),
-      shiftCycles: cloneShiftCycles(authoredSetup.shiftCycles),
-      blockTemplates: cloneBlockTemplates(authoredSetup.blockTemplates),
-      blockRecurrences: cloneBlockRecurrences(authoredSetup.blockRecurrences),
+      shiftDefinitions: activeCandidate.shiftDefinitions,
+      shiftCycles: activeCandidate.shiftCycles,
+      blockTemplates: activeCandidate.blockTemplates,
+      blockRecurrences: activeCandidate.blockRecurrences,
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
+  }
+
+  function commitAuthoredSetupTransaction(
+    transaction: CommitAuthoredSetupTransactionInput,
+  ): StoreMutationResult {
+    validateSetupLifecycleTransaction(
+      projectActiveToPattern(getActiveSetup(state)),
+      buildAuthoredCandidate(state, transaction.authoredSetup),
+      transaction.lifecycle.operations,
+    );
+    const prior = getActiveSetup(state);
+    const candidate = buildAuthoredCandidate(state, transaction.authoredSetup);
+    const rejection = getValidationRejection(candidate);
+    if (rejection) return rejection;
+    const active = instantiateActiveSetup(candidate, allocateIncarnation);
+    preserveUpdatedIncarnations(active, prior, transaction.lifecycle.operations);
+    state = {
+      ...state,
+      schedulingPreferences: active.schedulingPreferences,
+      previewRange: active.previewRange,
+      shiftDefinitions: active.shiftDefinitions,
+      shiftCycles: active.shiftCycles,
+      blockTemplates: active.blockTemplates,
+      blockRecurrences: active.blockRecurrences,
+      preview: markPreviewStale(state.preview),
+    };
+    retainActiveSnapshotIntent();
+    const persistence = persistActiveState();
+    return { status: "applied", state: notify(), persistence };
   }
 
   function setSchedulingPreferences(
     schedulingPreferences: Partial<DayFrameSchedulingPreferences>,
   ): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, {
+      schedulingPreferences: {
+        ...state.schedulingPreferences,
+        ...schedulingPreferences,
+      },
+    });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
       schedulingPreferences: {
@@ -237,13 +845,19 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
   function setPreviewRange(previewRange: DayFramePreviewRange): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { previewRange });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
       previewRange: {
@@ -253,91 +867,170 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
   function setShiftDefinitions(
-    shiftDefinitions: DayFrameState["shiftDefinitions"],
+    shiftDefinitions: DayFrameAuthoredPattern["shiftDefinitions"],
   ): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { shiftDefinitions });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
-      shiftDefinitions: cloneShiftDefinitions(shiftDefinitions),
+      shiftDefinitions: instantiateActiveSetup(candidate, allocateIncarnation).shiftDefinitions,
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
-  function setShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): StoreMutationResult {
+  function setShiftCycles(shiftCycles: DayFrameAuthoredPattern["shiftCycles"]): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { shiftCycles });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
-      shiftCycles: cloneShiftCycles(shiftCycles),
+      shiftCycles: instantiateActiveSetup(candidate, allocateIncarnation).shiftCycles,
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
-  function setBlockTemplates(blockTemplates: DayFrameState["blockTemplates"]): StoreMutationResult {
+  function setBlockTemplates(blockTemplates: DayFrameAuthoredPattern["blockTemplates"]): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { blockTemplates });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
-      blockTemplates: cloneBlockTemplates(blockTemplates),
+      blockTemplates: instantiateActiveSetup(candidate, allocateIncarnation).blockTemplates,
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
   function setBlockRecurrences(
-    blockRecurrences: DayFrameState["blockRecurrences"],
+    blockRecurrences: DayFrameAuthoredPattern["blockRecurrences"],
   ): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { blockRecurrences });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
-      blockRecurrences: cloneBlockRecurrences(blockRecurrences),
+      blockRecurrences: instantiateActiveSetup(candidate, allocateIncarnation).blockRecurrences,
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
   function setManualEvents(manualEvents: ManualCalendarEvent[]): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { manualEvents });
+    const activeEvents = instantiateActiveSetup(candidate, allocateIncarnation).manualEvents;
+    return applyManualEvents(activeEvents);
+  }
+
+  function applyManualEvents(activeEvents: DayFrameState["manualEvents"]): StoreMutationResult {
+    const candidate = buildAuthoredCandidate(state, { manualEvents: activeEvents });
+    const rejection = getValidationRejection(candidate);
+
+    if (rejection) {
+      return rejection;
+    }
+
     state = {
       ...state,
-      manualEvents: cloneManualEvents(manualEvents),
+      manualEvents: cloneManualEvents(activeEvents),
       preview: markPreviewStale(state.preview),
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return { status: "applied", state: notify(), persistence };
   }
 
-  function saveProfile(input: { name: string; savedAt: string }): StoreMutationResult {
+  function mutateManualEvent(mutation: ManualEventLifecycleMutation): StoreMutationResult {
+    const currentIndex =
+      mutation.operation === "delete"
+        ? state.manualEvents.findIndex((event) => event.id === mutation.sourceId)
+        : state.manualEvents.findIndex((event) => event.id === mutation.event.id);
+
+    if (mutation.operation === "create") {
+      if (currentIndex !== -1) {
+        throw new RangeError("Cannot create a manual event whose source ID is already active.");
+      }
+      return applyManualEvents([
+        ...state.manualEvents,
+        { ...mutation.event, incarnationId: allocateIncarnation() },
+      ]);
+    }
+
+    if (mutation.operation === "update") {
+      if (currentIndex === -1) {
+        throw new RangeError("Cannot update a missing manual event.");
+      }
+      return applyManualEvents(state.manualEvents.map((event, index) =>
+        index === currentIndex ? { ...mutation.event, incarnationId: event.incarnationId } : event));
+    }
+
+    if (mutation.operation === "replace") {
+      return applyManualEvents(
+        currentIndex === -1
+          ? [...state.manualEvents, { ...mutation.event, incarnationId: allocateIncarnation() }]
+          : state.manualEvents.map((event, index) =>
+              index === currentIndex ? { ...mutation.event, incarnationId: allocateIncarnation() } : event,
+            ),
+      );
+    }
+
+    if (currentIndex === -1) {
+      throw new RangeError("Cannot delete a missing manual event.");
+    }
+    return applyManualEvents(state.manualEvents.filter((_, index) => index !== currentIndex));
+  }
+
+  function saveProfile(input: { name: string; savedAt: string }): ProfileMutationResult {
     const trimmedName = input.name.trim();
 
     if (!trimmedName) {
       throw new RangeError("Profile name is required.");
+    }
+    if (profileIngressStatus.status === "recoveryRequired") {
+      return { status: "blocked", reason: "profileRecovery", state: getState(),
+        persistence: { status: "notAttempted", reason: "profileRecovery" } };
     }
 
     const existingProfile = state.savedProfiles.find((profile) => profile.name === trimmedName);
@@ -358,13 +1051,13 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     };
 
     retainProfileSnapshotIntent();
-    const persistence = persistProfiles(state.savedProfiles);
+    const persistence = persistProfiles(state.savedProfiles, quarantinedProfiles);
     retainProfileWriteOutcome(persistence);
 
     return { state: notify(), persistence };
   }
 
-  function loadProfile(profileId: string): StoreMutationResult {
+  function loadProfile(profileId: string): ProfileLoadResult {
     const profile = state.savedProfiles.find((currentProfile) => currentProfile.id === profileId);
 
     if (!profile) {
@@ -372,28 +1065,52 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     }
 
     const clonedProfileData = cloneDayFrameAuthoredSetup(profile.data);
+    const validation = validateDayFrameAuthoredSetup(clonedProfileData);
+
+    if (validation.status === "invalid") {
+      return {
+        status: "recoveryRequired",
+        reason: "invalidAuthoredState",
+        validation,
+      };
+    }
+
+    let activated: DayFrameState;
+    try {
+      activated = instantiateState(clonedProfileData, allocateIncarnation);
+    } catch {
+      return { status: "activationFailed", reason: "allocationFailure" };
+    }
 
     state = {
-      ...createInitialDayFrameState(clonedProfileData),
+      ...activated,
       savedProfiles: cloneSavedProfiles(state.savedProfiles),
       preview: null,
     };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return {
+      status: "loaded",
+      state: notify(),
+      persistence,
+      advisories: validation.advisories,
+    };
   }
 
-  function deleteProfile(profileId: string): StoreMutationResult {
+  function deleteProfile(profileId: string): ProfileMutationResult {
+    if (profileIngressStatus.status === "recoveryRequired") {
+      return { status: "blocked", reason: "profileRecovery", state: getState(),
+        persistence: { status: "notAttempted", reason: "profileRecovery" } };
+    }
     state = {
       ...state,
       savedProfiles: state.savedProfiles.filter((profile) => profile.id !== profileId),
     };
 
     retainProfileSnapshotIntent();
-    const persistence = persistProfiles(state.savedProfiles);
+    const persistence = persistProfiles(state.savedProfiles, quarantinedProfiles);
     retainProfileWriteOutcome(persistence);
 
     return { state: notify(), persistence };
@@ -405,43 +1122,78 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       activeState: "absent",
       profiles: "absent",
     };
-    const activeState = clearPersistedState();
+    const activeState = removeActiveState();
     const profiles = clearPersistedProfiles();
+    const planDecisions = planDecisionSurface.clearPlanDecisions();
+    if (profiles.status === "removed") {
+      transitionProfileIngress({ status: "noSource", reason: "missing" });
+      quarantinedProfiles = [];
+      protectedProfileSource = undefined;
+      protectedProfileSourceKey = undefined;
+    }
     updateDurabilityStatus({
-      activeState: mapRemovalOutcomeToDurability(activeState),
+      activeState:
+        activeState.status === "blocked"
+          ? durabilityStatus.activeState
+          : mapRemovalOutcomeToDurability(activeState),
       profiles: mapRemovalOutcomeToDurability(profiles),
     });
     const removedCount =
-      Number(activeState.status === "removed") + Number(profiles.status === "removed");
+      Number(activeState.status === "removed") + Number(profiles.status === "removed") +
+      Number(planDecisions.status === "removed");
 
     return {
       state: notify(),
       activeState,
       profiles,
+      planDecisions,
       durability:
-        removedCount === 2 ? "cleared" : removedCount === 1 ? "partiallyCleared" : "notCleared",
+        removedCount === 3 ? "cleared" : removedCount > 0 ? "partiallyCleared" : "notCleared",
     } as const;
   }
 
   function exportBackup(exportedAt: string) {
-    return createDayFrameBackup(getAuthoredSetup(state), exportedAt);
+    return createDayFrameBackupV2(getActiveSetup(state), exportedAt);
   }
 
-  function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): StoreMutationResult {
-    const validatedBackup = validateDayFrameBackup(backup);
-    const clonedBackupData = cloneDayFrameAuthoredSetup(validatedBackup.data);
+  function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): BackupImportResult {
+    let validatedBackup: ReturnType<typeof validateDayFrameBackup>;
+    try {
+      validatedBackup = validateDayFrameBackup(backup);
+    } catch (error) {
+      return { status: "rejected", reason: error instanceof DayFrameBackupValidationError
+        ? error.category : "envelopeValidationFailure" };
+    }
+    const validation = validateDayFrameAuthoredSetup(validatedBackup.data);
 
-    state = {
-      ...createInitialDayFrameState(clonedBackupData),
-      savedProfiles: cloneSavedProfiles(state.savedProfiles),
-      preview: null,
-    };
+    if (validation.status === "invalid") {
+      return { status: "rejected", reason: "authoredValidationFailure" };
+    }
+    if (isActiveCheckpointProtected()) {
+      return { status: "rejected", reason: "activeLocalRecovery" };
+    }
+
+    let restored: ActiveDayFrameAuthoredSetup;
+    try {
+      restored = validatedBackup.version === 2
+        ? cloneActiveSetup(validatedBackup.data)
+        : instantiateActiveSetup(cloneDayFrameAuthoredSetup(validatedBackup.data),
+            allocateIncarnation);
+    } catch {
+      return { status: "rejected", reason: validatedBackup.version === 1
+        ? "allocationFailure" : "incarnationValidationFailure" };
+    }
+    state = { ...restored, savedProfiles: cloneSavedProfiles(state.savedProfiles), preview: null };
 
     retainActiveSnapshotIntent();
-    const persistence = persistState(state);
-    retainActiveWriteOutcome(persistence);
+    const persistence = persistActiveState();
 
-    return { state: notify(), persistence };
+    return {
+      status: validatedBackup.version === 2 ? "restored" : "instantiatedFromLegacy",
+      state: notify(),
+      persistence,
+      advisories: validation.advisories,
+    };
   }
 
   function generatePreview(input: GeneratePreviewActionInput): DayFrameState {
@@ -460,6 +1212,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
       dayBoundaryStartTime: state.schedulingPreferences.dayBoundaryStartTime,
       weekStartsOn: state.schedulingPreferences.weekStartsOn,
       generatedAt: input.generatedAt,
+      planDecisions: planDecisionSurface.getPlanDecisions(),
     });
 
     state = {
@@ -481,6 +1234,10 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   function applySuggestedFixToPreview(input: ApplyPreviewFixActionInput): DayFrameState {
     if (!state.preview) {
       throw new RangeError("Cannot apply a suggested fix without a current preview");
+    }
+
+    if (state.preview.isStale) {
+      return getState();
     }
 
     const revisedPreviewResult = reviseSchedulePreview({
@@ -528,12 +1285,26 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
   return {
     getState,
     getDurabilityStatus,
+    getActiveLocalIngressStatus,
+    getProfileIngressStatus,
+    getQuarantinedProfiles,
+    exportProtectedProfileSource,
+    exportQuarantinedProfile,
+    recheckProtectedProfileSource,
     getDesiredDurableCondition,
     retryActivePersistence,
     retryProfilePersistence,
     subscribeDurability,
+    subscribeActiveLocalIngress,
+    subscribeProfileIngress,
     subscribe,
+    replaceProtectedActiveCheckpointWithCurrentState,
+    abandonProtectedActiveCheckpointAndReset,
+    replaceProtectedProfileCheckpointWithCurrentProfiles,
+    abandonProtectedProfileCheckpoint,
+    removeQuarantinedProfile,
     commitAuthoredSetup,
+    commitAuthoredSetupTransaction,
     setSchedulingPreferences,
     setPreviewRange,
     setShiftDefinitions,
@@ -541,6 +1312,7 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     setBlockTemplates,
     setBlockRecurrences,
     setManualEvents,
+    mutateManualEvent,
     saveProfile,
     loadProfile,
     deleteProfile,
@@ -549,21 +1321,24 @@ export function createDayFrameStore(initialState?: Partial<DayFrameState>): DayF
     importBackup,
     generatePreview,
     applySuggestedFixToPreview,
+    ...planDecisionSurface,
   };
 }
 
-function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState {
-  const baseState = createInitialDayFrameState(loadPersistedState());
-  const savedProfiles = loadPersistedProfiles();
-
+function mergeInitialState(
+  baseState: DayFrameState,
+  initialState?: DayFrameStoreInitialState,
+  allocate: SourceIncarnationAllocator = createSourceIncarnationId,
+  persistedProfiles: DayFrameSavedProfile[] = [],
+): DayFrameState {
   if (!initialState) {
     return {
       ...baseState,
-      savedProfiles,
+      savedProfiles: cloneSavedProfiles(persistedProfiles),
     };
   }
 
-  return {
+  const mergedPattern = {
     schedulingPreferences: {
       ...baseState.schedulingPreferences,
       ...initialState.schedulingPreferences,
@@ -572,45 +1347,300 @@ function mergeInitialState(initialState?: Partial<DayFrameState>): DayFrameState
       ? { ...baseState.previewRange, ...initialState.previewRange }
       : { ...baseState.previewRange },
     shiftDefinitions: initialState.shiftDefinitions
-      ? cloneShiftDefinitions(initialState.shiftDefinitions)
-      : baseState.shiftDefinitions,
+      ? initialState.shiftDefinitions
+      : projectActiveToPattern(getActiveSetup(baseState)).shiftDefinitions,
     shiftCycles: initialState.shiftCycles
-      ? cloneShiftCycles(initialState.shiftCycles)
-      : baseState.shiftCycles,
+      ? initialState.shiftCycles
+      : projectActiveToPattern(getActiveSetup(baseState)).shiftCycles,
     blockTemplates: initialState.blockTemplates
-      ? cloneBlockTemplates(initialState.blockTemplates)
-      : baseState.blockTemplates,
+      ? initialState.blockTemplates
+      : projectActiveToPattern(getActiveSetup(baseState)).blockTemplates,
     blockRecurrences: initialState.blockRecurrences
-      ? cloneBlockRecurrences(initialState.blockRecurrences)
-      : baseState.blockRecurrences,
+      ? initialState.blockRecurrences
+      : projectActiveToPattern(getActiveSetup(baseState)).blockRecurrences,
     manualEvents: initialState.manualEvents
-      ? cloneManualEvents(initialState.manualEvents)
-      : baseState.manualEvents,
+      ? initialState.manualEvents
+      : projectActiveToPattern(getActiveSetup(baseState)).manualEvents,
+  };
+  const active = instantiateActiveSetup(mergedPattern, allocate);
+  return {
+    ...active,
     savedProfiles: initialState.savedProfiles
       ? cloneSavedProfiles(initialState.savedProfiles)
-      : savedProfiles,
+      : cloneSavedProfiles(persistedProfiles),
     preview: initialState.preview ? clonePreview(initialState.preview) : null,
   };
 }
 
-function loadPersistedState(): Partial<PersistedDayFrameState> | undefined {
-  const storage = getStorage();
+function instantiateState(
+  pattern: import("./types.js").DayFrameAuthoredPattern,
+  allocate: SourceIncarnationAllocator,
+): DayFrameState {
+  return { ...instantiateActiveSetup(pattern, allocate), savedProfiles: [], preview: null };
+}
+
+type ActiveLocalIngressRead = {
+  state: DayFrameState;
+  status: ActiveLocalIngressStatus;
+  protectedSource?: string;
+  protectedSourceKey?: string;
+  activeDurability: SurfaceDurabilityStatus;
+};
+
+function loadActiveLocalIngress(
+  allocate: SourceIncarnationAllocator,
+  serializeActiveV2: (value: unknown) => string,
+): ActiveLocalIngressRead {
+  let storage: StorageLike | undefined;
+
+  try {
+    storage = getStorage();
+  } catch {
+    return createProtectedFallback("readFailure", false, false);
+  }
 
   if (!storage) {
-    return undefined;
+    return {
+      state: createInitialDayFrameState(),
+      status: { status: "noSource", reason: "storageUnavailable" },
+      activeDurability: "unknown",
+    };
+  }
+
+  let rawState: string | null;
+
+  try {
+    const rawV2 = storage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+    if (rawV2 !== null) {
+      try {
+        const parsedV2 = JSON.parse(rawV2) as unknown;
+        if (isObjectRecord(parsedV2) && parsedV2.version !== 2) {
+          return createProtectedFallback("unsupportedVersion", true, true, rawV2, DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+        }
+        const active = validateActiveV2(parsedV2);
+        return {
+          state: { ...active.data, savedProfiles: [], preview: null },
+          status: { status: "accepted", advisories: [] },
+          activeDurability: "durable",
+        };
+      } catch {
+        return createProtectedFallback("structurallyInvalid", true, true, rawV2, DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+      }
+    }
+    if (storage.getItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY) === "1") {
+      return {
+        state: createInitialDayFrameState(),
+        status: { status: "noSource", reason: "missing" },
+        activeDurability: "unknown",
+      };
+    }
+    rawState = storage.getItem(DAYFRAME_STORAGE_KEY);
+  } catch {
+    return createProtectedFallback("readFailure", false, false);
+  }
+
+  if (rawState === null) {
+    return {
+      state: createInitialDayFrameState(),
+      status: { status: "noSource", reason: "missing" },
+      activeDurability: "unknown",
+    };
+  }
+
+  let parsedState: unknown;
+
+  try {
+    parsedState = JSON.parse(rawState) as unknown;
+  } catch {
+    return createProtectedFallback("corruptJson", true, true, rawState, DAYFRAME_STORAGE_KEY, "parseFailure");
+  }
+
+  if (!isPersistedStateRecord(parsedState)) {
+    return createProtectedFallback("structurallyInvalid", true, true, rawState);
   }
 
   try {
-    const rawState = storage.getItem(DAYFRAME_STORAGE_KEY);
+    const pattern = normalizePersistedDayFramePattern(parsedState);
+    const validation = validateDayFrameAuthoredSetup(pattern);
 
-    if (!rawState) {
-      return undefined;
+    if (validation.status === "invalid") {
+      return {
+        state: createInitialDayFrameState(),
+        status: {
+          status: "recoveryRequired",
+          reason: "invalidAuthoredState",
+          activationBlocked: true,
+          sourceReadable: true,
+          sourcePreserved: true,
+          migrationFailureDetail: "validationFailure",
+          validation,
+        },
+        protectedSource: rawState,
+        protectedSourceKey: DAYFRAME_STORAGE_KEY,
+        activeDurability: "unknown",
+      };
     }
 
-    return JSON.parse(rawState) as PersistedDayFrameState;
-  } catch {
-    return undefined;
+    let active: ReturnType<typeof instantiateActiveSetup>;
+    try {
+      active = instantiateActiveSetup(pattern, allocate);
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "allocationFailure");
+    }
+
+    let envelope: ReturnType<typeof createActiveV2>;
+    try {
+      envelope = validateActiveV2(createActiveV2(active));
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "constructionFailure");
+    }
+
+    let serialized: string;
+    try {
+      serialized = serializeActiveV2(envelope);
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "serializationFailure");
+    }
+
+    try {
+      storage.setItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY, serialized);
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "writeFailure");
+    }
+
+    let reread: string | null;
+    try {
+      reread = storage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+    } catch {
+      return createProtectedFallback("migrationFailure", false, true, serialized, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadFailure");
+    }
+    if (reread === null) {
+      return createProtectedFallback("migrationFailure", true, false, serialized, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadFailure");
+    }
+    try {
+      validateActiveV2(JSON.parse(reread) as unknown);
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadValidationFailure");
+    }
+    if (reread !== serialized) {
+      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "verificationFailure");
+    }
+    try {
+      storage.setItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY, "1");
+    } catch {
+      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "writeFailure");
+    }
+    return {
+      state: { ...active, savedProfiles: [], preview: null },
+      status: { status: "accepted", advisories: validation.advisories },
+      activeDurability: "durable",
+    };
+  } catch (error) {
+    if (!(error instanceof TypeError || error instanceof RangeError)) {
+      throw error;
+    }
+
+    return createProtectedFallback("structurallyInvalid", true, true, rawState);
   }
+}
+
+function createProtectedFallback(
+  reason: Extract<ActiveLocalIngressStatus, { status: "recoveryRequired" }>["reason"],
+  sourceReadable: boolean,
+  sourcePreserved: boolean,
+  protectedSource?: string,
+  protectedSourceKey = DAYFRAME_STORAGE_KEY,
+  migrationFailureDetail?: Extract<ActiveLocalIngressStatus, { status: "recoveryRequired" }>["migrationFailureDetail"],
+): ActiveLocalIngressRead {
+  return {
+    state: createInitialDayFrameState(),
+    status: {
+      status: "recoveryRequired",
+      reason,
+      activationBlocked: true,
+      sourceReadable,
+      sourcePreserved,
+      ...(migrationFailureDetail ? { migrationFailureDetail } : {}),
+    },
+    ...(protectedSource === undefined ? {} : { protectedSource, protectedSourceKey }),
+    activeDurability: "unknown",
+  };
+}
+
+function readActiveLocalSource(key: string):
+  | { status: "readable"; raw: string | null }
+  | { status: "unreadable" } {
+  try {
+    const storage = getStorage();
+
+    if (!storage) {
+      return { status: "unreadable" };
+    }
+
+    return { status: "readable", raw: storage.getItem(key) };
+  } catch {
+    return { status: "unreadable" };
+  }
+}
+
+function cloneInvalidValidation(
+  validation: Extract<ReturnType<typeof validateDayFrameAuthoredSetup>, { status: "invalid" }>,
+): Extract<ReturnType<typeof validateDayFrameAuthoredSetup>, { status: "invalid" }> {
+  return {
+    status: "invalid",
+    issues: validation.issues.map((issue) => ({ ...issue })),
+    advisories: validation.advisories.map((advisory) => ({ ...advisory })),
+  };
+}
+
+function isPersistedStateRecord(value: unknown): value is Partial<PersistedDayFrameState> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const state = value as Record<string, unknown>;
+  const arrayFields = [
+    "shiftDefinitions",
+    "shiftCycles",
+    "blockTemplates",
+    "blockRecurrences",
+    "manualEvents",
+  ];
+
+  return (
+    arrayFields.every((field) => state[field] === undefined || Array.isArray(state[field])) &&
+    (state.schedulingPreferences === undefined || isObjectRecord(state.schedulingPreferences)) &&
+    (state.previewRange === undefined || isObjectRecord(state.previewRange)) &&
+    (state.shiftCycle === undefined ||
+      state.shiftCycle === null ||
+      isObjectRecord(state.shiftCycle))
+  );
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function cloneActiveLocalIngressStatus(status: ActiveLocalIngressStatus): ActiveLocalIngressStatus {
+  if (status.status === "accepted") {
+    return {
+      status: "accepted",
+      advisories: status.advisories.map((advisory) => ({ ...advisory })),
+    };
+  }
+
+  if (status.status === "recoveryRequired" && status.validation) {
+    return {
+      ...status,
+      validation: {
+        status: "invalid",
+        issues: status.validation.issues.map((issue) => ({ ...issue })),
+        advisories: status.validation.advisories.map((advisory) => ({ ...advisory })),
+      },
+    };
+  }
+
+  return { ...status };
 }
 
 export function persistState(state: DayFrameState): PersistenceWriteOutcome {
@@ -622,60 +1652,162 @@ export function persistState(state: DayFrameState): PersistenceWriteOutcome {
 
   const { storage } = storageAccess;
 
-  const persistedState: PersistedDayFrameState = {
-    schedulingPreferences: {
-      ...state.schedulingPreferences,
-    },
-    previewRange: {
-      ...state.previewRange,
-    },
-    shiftDefinitions: cloneShiftDefinitions(state.shiftDefinitions),
-    shiftCycles: cloneShiftCycles(state.shiftCycles),
-    blockTemplates: cloneBlockTemplates(state.blockTemplates),
-    blockRecurrences: cloneBlockRecurrences(state.blockRecurrences),
-    manualEvents: cloneManualEvents(state.manualEvents),
-  };
-
   let serializedState: string;
 
   try {
-    serializedState = JSON.stringify(persistedState);
+    validateIncarnationGraph(getActiveSetup(state));
+    serializedState = JSON.stringify(createActiveV2(getActiveSetup(state)));
   } catch {
     return { status: "serializationFailure" };
   }
 
   try {
-    storage.setItem(DAYFRAME_STORAGE_KEY, serializedState);
+    storage.setItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY, serializedState);
+    storage.setItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY, "1");
     return { status: "persisted" };
   } catch {
     return { status: "storageFailure" };
   }
 }
 
-function loadPersistedProfiles(): DayFrameSavedProfile[] {
-  const storage = getStorage();
+type ProfileIngressRead = {
+  profiles: DayFrameSavedProfile[];
+  quarantinedProfiles: unknown[];
+  status: ProfileIngressStatus;
+  durability: SurfaceDurabilityStatus;
+  protectedSource?: string;
+  protectedSourceKey?: string;
+};
+
+function loadPersistedProfiles(serializeV2: (value: unknown) => string): ProfileIngressRead {
+  const empty = (status: ProfileIngressStatus, protectedSource?: string,
+    protectedSourceKey?: string): ProfileIngressRead => ({
+    profiles: [], quarantinedProfiles: [], status, durability: "unknown",
+    ...(protectedSource !== undefined ? { protectedSource } : {}),
+    ...(protectedSourceKey !== undefined ? { protectedSourceKey } : {}),
+  });
+  let storage: StorageLike | undefined;
+
+  try {
+    storage = getStorage();
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "readFailure", sourcePreserved: false });
+  }
 
   if (!storage) {
-    return [];
+    return empty({ status: "noSource", reason: "storageUnavailable" });
+  }
+
+  let rawV2: string | null;
+  try {
+    rawV2 = storage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "readFailure", sourcePreserved: false });
+  }
+  if (rawV2 !== null) {
+    try {
+      const parsed = JSON.parse(rawV2) as unknown;
+      if (isObjectRecord(parsed) && parsed.version !== 2) {
+        return empty({ status: "recoveryRequired", reason: "unsupportedVersion", sourcePreserved: true },
+          rawV2, DAYFRAME_PROFILES_V2_STORAGE_KEY);
+      }
+      const validated = validateDayFrameProfilesStorageV2(parsed);
+      return {
+        profiles: cloneSavedProfiles(validated.profiles),
+        quarantinedProfiles: structuredClone(validated.quarantinedProfiles),
+        status: { status: "accepted", quarantinedEntryCount: validated.quarantinedProfiles.length },
+        durability: "durable",
+      };
+    } catch {
+      return empty({ status: "recoveryRequired", reason: "invalidV2", sourcePreserved: true },
+        rawV2, DAYFRAME_PROFILES_V2_STORAGE_KEY);
+    }
   }
 
   try {
-    const rawProfiles = storage.getItem(DAYFRAME_PROFILES_STORAGE_KEY);
-
-    if (!rawProfiles) {
-      return [];
+    if (storage.getItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY) === "1") {
+      return empty({ status: "noSource", reason: "missing" });
     }
-
-    const parsedProfiles = validateDayFrameProfilesStorage(JSON.parse(rawProfiles) as unknown);
-
-    return parsedProfiles ? cloneSavedProfiles(parsedProfiles.profiles) : [];
   } catch {
-    return [];
+    return empty({ status: "recoveryRequired", reason: "readFailure", sourcePreserved: false });
   }
+
+  let rawV1: string | null;
+  try {
+    rawV1 = storage.getItem(DAYFRAME_PROFILES_STORAGE_KEY);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "readFailure", sourcePreserved: false });
+  }
+  if (rawV1 === null) return empty({ status: "noSource", reason: "missing" });
+
+  let converted: ReturnType<typeof convertDayFrameProfilesStorageV1>;
+  try {
+    converted = convertDayFrameProfilesStorageV1(JSON.parse(rawV1) as unknown);
+  } catch (error) {
+    return empty({ status: "recoveryRequired",
+      reason: error instanceof SyntaxError ? "corruptJson" : "invalidCollection",
+      sourcePreserved: true }, rawV1, DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  const envelope = createDayFrameProfilesStorageV2(converted.profiles, converted.quarantinedProfiles);
+  let serialized: string;
+  try {
+    serialized = serializeV2(envelope);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "serializationFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  try {
+    storage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, serialized);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "writeFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  let reread: string | null;
+  try {
+    reread = storage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "rereadFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  if (reread === null) {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "rereadFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  try {
+    validateDayFrameProfilesStorageV2(JSON.parse(reread) as unknown);
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "rereadValidationFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  if (reread !== serialized) {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "verificationFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  try {
+    storage.setItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY, "1");
+  } catch {
+    return empty({ status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "writeFailure", sourcePreserved: true }, rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY);
+  }
+  return { profiles: cloneSavedProfiles(converted.profiles),
+    quarantinedProfiles: structuredClone(converted.quarantinedProfiles),
+    status: { status: "accepted", quarantinedEntryCount: converted.quarantinedProfiles.length },
+    durability: "durable" };
 }
 
 function getAuthoredSetup(state: DayFrameState) {
-  return cloneDayFrameAuthoredSetup({
+  return projectActiveToPattern(getActiveSetup(state));
+}
+
+function getActiveSetup(state: DayFrameState): DayFrameAuthoredSetup {
+  return {
     schedulingPreferences: state.schedulingPreferences,
     previewRange: state.previewRange,
     shiftDefinitions: state.shiftDefinitions,
@@ -683,10 +1815,13 @@ function getAuthoredSetup(state: DayFrameState) {
     blockTemplates: state.blockTemplates,
     blockRecurrences: state.blockRecurrences,
     manualEvents: state.manualEvents,
-  });
+  };
 }
 
-export function persistProfiles(profiles: DayFrameSavedProfile[]): PersistenceWriteOutcome {
+export function persistProfiles(
+  profiles: DayFrameSavedProfile[],
+  quarantinedProfiles: unknown[] = [],
+): PersistenceWriteOutcome {
   const storageAccess = getStorageForPersistence();
 
   if (storageAccess.status !== "available") {
@@ -698,13 +1833,14 @@ export function persistProfiles(profiles: DayFrameSavedProfile[]): PersistenceWr
   let serializedProfiles: string;
 
   try {
-    serializedProfiles = JSON.stringify(createDayFrameProfilesStorage(profiles));
+    serializedProfiles = JSON.stringify(createDayFrameProfilesStorageV2(profiles, quarantinedProfiles));
   } catch {
     return { status: "serializationFailure" };
   }
 
   try {
-    storage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, serializedProfiles);
+    storage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, serializedProfiles);
+    storage.setItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY, "1");
     return { status: "persisted" };
   } catch {
     return { status: "storageFailure" };
@@ -721,7 +1857,9 @@ export function clearPersistedState(): PersistenceRemovalOutcome {
   const { storage } = storageAccess;
 
   try {
+    storage.removeItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
     storage.removeItem(DAYFRAME_STORAGE_KEY);
+    storage.setItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY, "1");
     return { status: "removed" };
   } catch {
     return { status: "storageFailure" };
@@ -738,7 +1876,9 @@ export function clearPersistedProfiles(): PersistenceRemovalOutcome {
   const { storage } = storageAccess;
 
   try {
+    storage.removeItem(DAYFRAME_PROFILES_V2_STORAGE_KEY);
     storage.removeItem(DAYFRAME_PROFILES_STORAGE_KEY);
+    storage.setItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY, "1");
     return { status: "removed" };
   } catch {
     return { status: "storageFailure" };
@@ -828,21 +1968,33 @@ function clonePreviewResult(result: DayFramePreview["result"]): DayFramePreview[
   return {
     generatedWorkBlocks: result.generatedWorkBlocks.map((generatedWorkBlock) => ({
       ...generatedWorkBlock,
+      ...(generatedWorkBlock.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(generatedWorkBlock.occurrenceIdentity) }
+        : {}),
       startsAt: new Date(generatedWorkBlock.startsAt),
       endsAt: new Date(generatedWorkBlock.endsAt),
     })),
     blockCandidates: result.blockCandidates.map((blockCandidate) => ({
       ...blockCandidate,
+      ...(blockCandidate.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+        : {}),
       externalResources: [...blockCandidate.externalResources],
     })),
     scheduledBlocks: result.scheduledBlocks.map((scheduledBlock) => ({
       ...scheduledBlock,
+      ...(scheduledBlock.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(scheduledBlock.occurrenceIdentity) }
+        : {}),
       startsAt: new Date(scheduledBlock.startsAt),
       endsAt: new Date(scheduledBlock.endsAt),
       externalResources: [...scheduledBlock.externalResources],
     })),
     unplacedCandidates: result.unplacedCandidates.map((blockCandidate) => ({
       ...blockCandidate,
+      ...(blockCandidate.occurrenceIdentity
+        ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+        : {}),
       externalResources: [...blockCandidate.externalResources],
     })),
     frictionPoints: result.frictionPoints.map((frictionPoint) => ({
@@ -850,8 +2002,13 @@ function clonePreviewResult(result: DayFramePreview["result"]): DayFramePreview[
       suggestedFixes: frictionPoint.suggestedFixes.map((suggestedFix) => ({
         ...suggestedFix,
         ...(suggestedFix.parameters ? { parameters: { ...suggestedFix.parameters } } : {}),
+        ...(suggestedFix.decisionContext
+          ? { decisionContext: { ...suggestedFix.decisionContext } }
+          : {}),
       })),
     })),
+    planDecisionResults: result.planDecisionResults.map((replayResult) =>
+      structuredClone(replayResult)),
   };
 }
 
@@ -864,7 +2021,16 @@ function cloneShiftDefinitions(
 }
 
 function cloneShiftCycles(shiftCycles: DayFrameState["shiftCycles"]): DayFrameState["shiftCycles"] {
-  return cloneNormalizedShiftCycles(shiftCycles);
+  return shiftCycles.map((cycle) => ({
+    ...cycle,
+    segments: cycle.segments.map((segment) => ({
+      ...segment,
+      ...(segment.schedulePreferences
+        ? { schedulePreferences: { ...segment.schedulePreferences } }
+        : {}),
+    })),
+    sequence: (cycle.sequence ?? []).map((entry) => ({ ...entry })),
+  }));
 }
 
 function cloneBlockTemplates(

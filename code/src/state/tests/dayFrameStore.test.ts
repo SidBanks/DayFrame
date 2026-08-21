@@ -1,17 +1,32 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDayFrameBackup, parseDayFrameBackupJson } from "../dayFrameBackup.js";
+import { createDayFrameBackup, parseDayFrameBackupJson,
+  validateDayFrameBackupV2 } from "../dayFrameBackup.js";
 import { createInitialDayFrameState } from "../createInitialDayFrameState.js";
 import {
   clearPersistedProfiles,
   clearPersistedState,
   createDayFrameStore,
+  DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+  DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY,
   DAYFRAME_PROFILES_STORAGE_KEY,
+  DAYFRAME_PROFILES_V2_STORAGE_KEY,
+  DAYFRAME_PROFILES_V2_ESTABLISHED_KEY,
   DAYFRAME_STORAGE_KEY,
   persistProfiles,
   persistState,
 } from "../dayFrameStore.js";
-import type { DayFrameSavedProfile, DayFrameState } from "../types.js";
+import { projectActiveToPattern } from "../activeV2.js";
+import type {
+  AppliedStoreMutationResult,
+  BackupImportResult,
+  DayFrameAuthoredSetup,
+  DayFrameAuthoredPattern,
+  DayFrameSavedProfile,
+  DayFrameState,
+  ProfileLoadResult,
+  StoreMutationResult,
+} from "../types.js";
 import type { BlockRecurrence, BlockTemplate } from "../../core/blocks/types.js";
 import type { ShiftCycle } from "../../core/cycles/types.js";
 import type { ShiftDefinition } from "../../core/shifts/types.js";
@@ -20,6 +35,41 @@ const baseTimestamps = {
   createdAt: "2026-05-03T00:00:00-05:00",
   updatedAt: "2026-05-03T00:00:00-05:00",
 } as const;
+
+function currentPattern(state: DayFrameState): DayFrameAuthoredPattern {
+  return projectActiveToPattern(state);
+}
+
+function currentActiveSetup(state: DayFrameState): DayFrameAuthoredSetup {
+  const { schedulingPreferences, previewRange, shiftDefinitions, shiftCycles, blockTemplates,
+    blockRecurrences, manualEvents } = state;
+  return { schedulingPreferences, previewRange, shiftDefinitions, shiftCycles, blockTemplates,
+    blockRecurrences, manualEvents };
+}
+
+function readActiveV2Data(storage: ReturnType<typeof createLocalStorageMock>): DayFrameAuthoredSetup {
+  const envelope = JSON.parse(storage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY) ?? "{}") as {
+    data: DayFrameAuthoredSetup;
+  };
+  return envelope.data;
+}
+
+function expectApplied(result: StoreMutationResult): asserts result is AppliedStoreMutationResult {
+  expect(result.status).toBe("applied");
+}
+
+function expectProfileLoaded(
+  result: ProfileLoadResult,
+): asserts result is Extract<ProfileLoadResult, { status: "loaded" }> {
+  expect(result.status).toBe("loaded");
+}
+
+function expectBackupImported(
+  result: BackupImportResult,
+): asserts result is Extract<BackupImportResult,
+  { status: "instantiatedFromLegacy" | "restored" }> {
+  expect(["instantiatedFromLegacy", "restored"]).toContain(result.status);
+}
 
 afterEach(() => {
   delete (globalThis as { localStorage?: unknown }).localStorage;
@@ -94,10 +144,11 @@ describe("dayFrameStore", () => {
     expect(state.shiftCycles).toHaveLength(1);
     expect(state.shiftCycles[0]?.name).toBe("Day Rotation");
     expect(state.preview).toBeNull();
+    expect(store.getActiveLocalIngressStatus()).toEqual({ status: "accepted", advisories: [] });
 
     store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
 
-    const rewrittenState = JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}");
+    const rewrittenState = readActiveV2Data(localStorage);
 
     expect(rewrittenState.shiftCycles).toEqual(state.shiftCycles);
     expect(rewrittenState).not.toHaveProperty("shiftCycle");
@@ -161,7 +212,7 @@ describe("dayFrameStore", () => {
       manualEvents: [],
     });
 
-    expect(state.shiftCycles).toEqual([
+    expect(currentPattern(state).shiftCycles).toEqual([
       expect.objectContaining({
         id: "cycle_legacy",
         mode: "manualSegments",
@@ -195,7 +246,7 @@ describe("dayFrameStore", () => {
       savedAt: "2026-05-05T09:00:00-05:00",
     });
 
-    expect(store.getState().manualEvents).toEqual([
+    expect(currentPattern(store.getState()).manualEvents).toEqual([
       {
         id: "manual_event_1",
         title: "Doctor Appointment",
@@ -208,11 +259,11 @@ describe("dayFrameStore", () => {
       },
     ]);
 
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
-      manualEvents: store.getState().manualEvents,
+    expect(readActiveV2Data(localStorage)).toMatchObject({
+      manualEvents: currentPattern(store.getState()).manualEvents,
     });
     expect(store.getState().savedProfiles[0]?.data.manualEvents).toEqual(
-      store.getState().manualEvents,
+      currentPattern(store.getState()).manualEvents,
     );
   });
 
@@ -251,7 +302,7 @@ describe("dayFrameStore", () => {
 
     installLocalStorageMock(localStorage);
 
-    expect(createDayFrameStore().getState().manualEvents).toEqual([
+    expect(currentPattern(createDayFrameStore().getState()).manualEvents).toEqual([
       {
         id: "manual_event_legacy",
         title: "Legacy Appointment",
@@ -393,6 +444,7 @@ describe("dayFrameStore", () => {
     };
 
     store.setShiftDefinitions(shiftDefinitions);
+    store.setShiftDefinitions(buildShiftDefinitions());
     store.setShiftCycles([shiftCycle]);
     store.setSchedulingPreferences({
       dayBoundaryStartTime: "04:00",
@@ -415,10 +467,13 @@ describe("dayFrameStore", () => {
       startDate: "2026-05-04",
       endDate: "2026-05-11",
     });
-    expect(state.shiftDefinitions).toEqual(shiftDefinitions);
-    expect(state.shiftCycles).toEqual([shiftCycle]);
+    expect(currentPattern(state).shiftDefinitions).toEqual(shiftDefinitions);
+    expect(currentPattern(state).shiftCycles).toEqual([shiftCycle]);
     expect(state.preview).toBeNull();
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
+    const persistedState = readActiveV2Data(localStorage);
+
+    expect(persistedState).toEqual(currentActiveSetup(store.getState()));
+    expect(projectActiveToPattern(persistedState)).toMatchObject({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
@@ -490,6 +545,7 @@ describe("dayFrameStore", () => {
       blockTemplates,
       blockRecurrences,
     });
+    expectApplied(result);
     const { state } = result;
 
     shiftDefinitions[0]!.name = "Mutated after commit";
@@ -518,25 +574,15 @@ describe("dayFrameStore", () => {
     expect(result.persistence).toEqual({ status: "persisted" });
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith(state);
-    expect(setItem).toHaveBeenCalledTimes(1);
-    expect(setItem).toHaveBeenCalledWith(
-      DAYFRAME_STORAGE_KEY,
-      JSON.stringify({
-        schedulingPreferences: state.schedulingPreferences,
-        previewRange: state.previewRange,
-        shiftDefinitions: state.shiftDefinitions,
-        shiftCycles: state.shiftCycles,
-        blockTemplates: state.blockTemplates,
-        blockRecurrences: state.blockRecurrences,
-        manualEvents: state.manualEvents,
-      }),
-    );
+    expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
+    expect(setItem).not.toHaveBeenCalledWith(DAYFRAME_STORAGE_KEY, expect.any(String));
+    expect(readActiveV2Data(localStorage)).toEqual(currentActiveSetup(state));
   });
 
   it("commits authored setup without creating a preview", () => {
     const store = createDayFrameStore();
 
-    const { state } = store.commitAuthoredSetup({
+    const result = store.commitAuthoredSetup({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
@@ -551,6 +597,8 @@ describe("dayFrameStore", () => {
       blockTemplates: buildBlockTemplates(),
       blockRecurrences: buildBlockRecurrences(),
     });
+    expectApplied(result);
+    const { state } = result;
 
     expect(state.preview).toBeNull();
   });
@@ -671,10 +719,11 @@ describe("dayFrameStore", () => {
       ...baseTimestamps,
     };
 
+    store.setShiftDefinitions(buildShiftDefinitions());
     store.setShiftCycles([shiftCycle]);
 
-    expect(store.getState().shiftCycles).toEqual([shiftCycle]);
-    const persistedState = JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}");
+    expect(currentPattern(store.getState()).shiftCycles).toEqual([shiftCycle]);
+    const persistedState = readActiveV2Data(localStorage);
 
     expect(persistedState).toMatchObject({
       shiftCycles: [shiftCycle],
@@ -697,9 +746,11 @@ describe("dayFrameStore", () => {
       generatedAt: "2026-05-03T13:00:00-05:00",
     });
 
-    const { state } = store.setSchedulingPreferences({
+    const result = store.setSchedulingPreferences({
       dayBoundaryStartTime: "04:00",
     });
+    expectApplied(result);
+    const { state } = result;
 
     expect(state.preview?.generatedAt).toBe("2026-05-03T13:00:00-05:00");
     expect(state.preview?.isStale).toBe(true);
@@ -717,31 +768,13 @@ describe("dayFrameStore", () => {
     store.setBlockTemplates(buildBlockTemplates());
     store.setBlockRecurrences(buildBlockRecurrences());
 
+    const activeBefore = currentActiveSetup(store.getState());
     const backup = store.exportBackup("2026-05-05T10:00:00-05:00");
 
-    expect(backup.data.shiftCycles).toEqual([buildShiftCycle()]);
+    expect(backup).toMatchObject({ app: "DayFrame", surface: "backup", version: 2,
+      exportedAt: "2026-05-05T10:00:00-05:00" });
+    expect(backup.data).toEqual(activeBefore);
     expect(backup.data).not.toHaveProperty("shiftCycle");
-    expect(backup).toEqual(
-      createDayFrameBackup(
-        {
-          schedulingPreferences: {
-            dayBoundaryStartTime: "04:00",
-            weekStartsOn: "monday",
-          },
-          previewRange: {
-            preset: "threeDays",
-            startDate: "2026-05-04",
-            endDate: "2026-05-06",
-          },
-          manualEvents: [],
-          shiftDefinitions: buildShiftDefinitions(),
-          shiftCycles: [buildShiftCycle()],
-          blockTemplates: buildBlockTemplates(),
-          blockRecurrences: buildBlockRecurrences(),
-        },
-        "2026-05-05T10:00:00-05:00",
-      ),
-    );
   });
 
   it("imports a literal singular-only V1 backup into plural runtime authority", () => {
@@ -759,13 +792,15 @@ describe("dayFrameStore", () => {
         data: legacyData,
       }),
     );
-    const { state } = createDayFrameStore().importBackup(backup);
+    const result = createDayFrameStore().importBackup(backup);
+    expectBackupImported(result);
+    const { state } = result;
 
-    expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+    expect(currentPattern(state).shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
+    expect(readActiveV2Data(localStorage)).toMatchObject({
       shiftCycles: [buildNormalizedLegacyShiftCycle()],
     });
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).not.toHaveProperty(
+    expect(readActiveV2Data(localStorage)).not.toHaveProperty(
       "shiftCycle",
     );
   });
@@ -793,7 +828,7 @@ describe("dayFrameStore", () => {
       generatedAt: "2026-05-03T13:00:00-05:00",
     });
 
-    const { state } = store.importBackup(
+    const result = store.importBackup(
       createDayFrameBackup(
         {
           schedulingPreferences: {
@@ -814,6 +849,8 @@ describe("dayFrameStore", () => {
         "2026-05-05T10:00:00-05:00",
       ),
     );
+    expectBackupImported(result);
+    const { state } = result;
 
     expect(state.preview).toBeNull();
     expect(state.schedulingPreferences).toEqual({
@@ -827,7 +864,9 @@ describe("dayFrameStore", () => {
     });
     expect(state.savedProfiles).toHaveLength(1);
     expect(state.savedProfiles[0]?.name).toBe("Week A");
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
+    const persistedState = readActiveV2Data(localStorage);
+
+    expect(projectActiveToPattern(persistedState)).toEqual({
       schedulingPreferences: {
         dayBoundaryStartTime: "04:00",
         weekStartsOn: "monday",
@@ -870,7 +909,7 @@ describe("dayFrameStore", () => {
     expect(store.getState().savedProfiles[0]?.data.shiftCycles).toEqual([buildShiftCycle()]);
     expect(store.getState().savedProfiles[0]?.data).not.toHaveProperty("shiftCycle");
     const persistedProfileData = JSON.parse(
-      localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "{}",
+      localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}",
     ).profiles?.[0]?.data;
 
     expect(persistedProfileData.shiftCycles).toEqual([buildShiftCycle()]);
@@ -885,17 +924,19 @@ describe("dayFrameStore", () => {
       dayBoundaryStartTime: "04:00",
       weekStartsOn: "monday",
     });
-    expect(store.getState().blockTemplates).toEqual(buildBlockTemplates());
-    expect(store.getState().blockRecurrences).toEqual(buildBlockRecurrences());
+    expect(currentPattern(store.getState()).blockTemplates).toEqual(buildBlockTemplates());
+    expect(currentPattern(store.getState()).blockRecurrences).toEqual(buildBlockRecurrences());
     expect(store.getState().preview).toBeNull();
 
     store.deleteProfile(store.getState().savedProfiles[0]!.id);
 
     expect(store.getState().savedProfiles).toEqual([]);
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "{}")).toEqual({
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}")).toEqual({
       app: "DayFrame",
-      version: 1,
+      surface: "profiles",
+      version: 2,
       profiles: [],
+      quarantinedProfiles: [],
     });
   });
 
@@ -922,11 +963,13 @@ describe("dayFrameStore", () => {
     installLocalStorageMock(localStorage);
 
     const store = createDayFrameStore();
-    const { state } = store.loadProfile("profile_legacy");
+    const result = store.loadProfile("profile_legacy");
+    expectProfileLoaded(result);
+    const { state } = result;
 
-    expect(state.shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
+    expect(currentPattern(state).shiftCycles).toEqual([buildNormalizedLegacyShiftCycle()]);
     expect(state.preview).toBeNull();
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toMatchObject({
+    expect(readActiveV2Data(localStorage)).toMatchObject({
       shiftCycles: [buildNormalizedLegacyShiftCycle()],
     });
   });
@@ -1056,7 +1099,9 @@ describe("dayFrameStore", () => {
     expect(state.preview?.isStale).toBe(false);
     expect(state.preview?.result.scheduledBlocks).toHaveLength(2);
     expect(state.preview?.result.frictionPoints).toEqual([]);
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_STORAGE_KEY) ?? "{}")).toEqual({
+    const persistedState = readActiveV2Data(localStorage);
+
+    expect(projectActiveToPattern(persistedState)).toEqual({
       schedulingPreferences: {
         dayBoundaryStartTime: "03:00",
         weekStartsOn: "saturday",
@@ -1068,13 +1113,66 @@ describe("dayFrameStore", () => {
       },
       shiftDefinitions,
       shiftCycles: [shiftCycle],
-      blockTemplates: blockTemplates.map((blockTemplate) => ({
-        ...blockTemplate,
-        requiresWorkAnchor: blockTemplate.requiresWorkAnchor ?? false,
-      })),
+      blockTemplates,
       blockRecurrences,
       manualEvents: [],
     });
+    expect(JSON.stringify(persistedState)).not.toContain("occurrenceIdentity");
+
+    const returnedIdentity = state.preview?.result.scheduledBlocks[0]?.occurrenceIdentity;
+    expect(returnedIdentity).toBeDefined();
+    if (returnedIdentity && "slot" in returnedIdentity) {
+      returnedIdentity.slot = 99;
+      expect(store.getState().preview?.result.scheduledBlocks[0]?.occurrenceIdentity).not.toEqual(
+        returnedIdentity,
+      );
+    }
+  });
+
+  it("rejects a suggested fix against a stale preview without mutation, persistence, or notification", () => {
+    const localStorage = createLocalStorageMock();
+    const setItemSpy = vi.spyOn(localStorage, "setItem");
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore({
+      shiftDefinitions: buildShiftDefinitions(),
+      shiftCycles: [buildShiftCycle()],
+      blockTemplates: buildBlockTemplates(),
+      blockRecurrences: buildBlockRecurrences(),
+    });
+    store.generatePreview({
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-05",
+      planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+      planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+      generatedAt: "2026-05-03T13:00:00-05:00",
+    });
+    store.setSchedulingPreferences({ weekStartsOn: "monday" });
+
+    const stateBefore = store.getState();
+    const durabilityBefore = store.getDurabilityStatus();
+    const persistedBefore = localStorage.getItem(DAYFRAME_STORAGE_KEY);
+    const stateListener = vi.fn();
+    const durabilityListener = vi.fn();
+    store.subscribe(stateListener);
+    store.subscribeDurability(durabilityListener);
+    setItemSpy.mockClear();
+
+    const result = store.applySuggestedFixToPreview({
+      selectedFrictionPointId: "stale_friction",
+      selectedSuggestedFixId: "stale_fix",
+      revisedAt: "2026-05-03T14:00:00-05:00",
+    });
+
+    expect(stateBefore.preview?.isStale).toBe(true);
+    expect(result).toEqual(stateBefore);
+    expect(result).not.toBe(stateBefore);
+    expect(store.getState()).toEqual(stateBefore);
+    expect(store.getDurabilityStatus()).toEqual(durabilityBefore);
+    expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(persistedBefore);
+    expect(setItemSpy).not.toHaveBeenCalled();
+    expect(stateListener).not.toHaveBeenCalled();
+    expect(durabilityListener).not.toHaveBeenCalled();
   });
 
   it("stores review guidance without marking the preview revised for Review fixed time", () => {
@@ -1119,6 +1217,7 @@ describe("dayFrameStore", () => {
             },
           ],
           unplacedCandidates: [],
+          planDecisionResults: [],
           frictionPoints: [
             {
               id: "friction_conflict_work_fixed",
@@ -1235,6 +1334,7 @@ describe("dayFrameStore", () => {
       state: createInitialDayFrameState(),
       activeState: { status: "removed" },
       profiles: { status: "removed" },
+      planDecisions: { status: "removed" },
       durability: "cleared",
     });
     expect(store.getDurabilityStatus()).toEqual({
@@ -1253,8 +1353,8 @@ describe("dayFrameStore", () => {
 
       expect(persistState(createInitialDayFrameState())).toEqual({ status: "persisted" });
       expect(persistProfiles([buildSavedProfile()])).toEqual({ status: "persisted" });
-      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).not.toBeNull();
-      expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
+      expect(localStorage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY)).not.toBeNull();
+      expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).not.toBeNull();
     });
 
     it("reports unavailable storage for active-state and profile persistence", () => {
@@ -1353,6 +1453,7 @@ describe("dayFrameStore", () => {
       store.subscribe(listener);
 
       const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(result);
       const { state } = result;
 
       expect(state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
@@ -1364,6 +1465,101 @@ describe("dayFrameStore", () => {
   });
 
   describe("store mutation persistence results", () => {
+    it("rejects invalid complete authored state without any runtime or infrastructure effect", () => {
+      const localStorage = createLocalStorageMock();
+      const setItem = vi.spyOn(localStorage, "setItem");
+      installLocalStorageMock(localStorage);
+      const store = createDayFrameStore({
+        shiftDefinitions: buildShiftDefinitions(),
+        shiftCycles: [buildShiftCycle()],
+        blockTemplates: buildBlockTemplates(),
+        blockRecurrences: buildBlockRecurrences(),
+      });
+      store.generatePreview({
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+      });
+      const stateBefore = store.getState();
+      const durabilityBefore = store.getDurabilityStatus();
+      const desiredBefore = store.getDesiredDurableCondition();
+      const stateListener = vi.fn();
+      const durabilityListener = vi.fn();
+      store.subscribe(stateListener);
+      store.subscribeDurability(durabilityListener);
+      setItem.mockClear();
+
+      const duplicate = buildShiftDefinitions()[0]!;
+      const result = store.setShiftDefinitions([duplicate, { ...duplicate }]);
+
+      expect(result).toMatchObject({
+        status: "rejected",
+        reason: "invalidAuthoredState",
+        validation: {
+          status: "invalid",
+          issues: [{ code: "duplicateSourceId", sourceId: duplicate.id }],
+        },
+      });
+      expect(store.getState()).toEqual(stateBefore);
+      expect(store.getState().preview).toEqual(stateBefore.preview);
+      expect(store.getDurabilityStatus()).toEqual(durabilityBefore);
+      expect(store.getDesiredDurableCondition()).toEqual(desiredBefore);
+      expect(setItem).not.toHaveBeenCalled();
+      expect(stateListener).not.toHaveBeenCalled();
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+
+    it("rejects orphan-producing narrow deletion and accepts an atomic relationship deletion", () => {
+      const store = createDayFrameStore({
+        shiftDefinitions: buildShiftDefinitions(),
+        shiftCycles: [buildShiftCycle()],
+        blockTemplates: buildBlockTemplates(),
+        blockRecurrences: buildBlockRecurrences(),
+      });
+
+      const rejectedShift = store.setShiftDefinitions([]);
+      const rejectedTemplate = store.setBlockTemplates([]);
+
+      expect(rejectedShift.status).toBe("rejected");
+      expect(rejectedTemplate.status).toBe("rejected");
+
+      const applied = store.commitAuthoredSetup({
+        schedulingPreferences: store.getState().schedulingPreferences,
+        previewRange: store.getState().previewRange,
+        shiftDefinitions: [],
+        shiftCycles: [],
+        blockTemplates: [],
+        blockRecurrences: [],
+      });
+
+      expect(applied.status).toBe("applied");
+      expect(store.getState()).toMatchObject({
+        shiftDefinitions: [],
+        shiftCycles: [],
+        blockTemplates: [],
+        blockRecurrences: [],
+      });
+    });
+
+    it("applies unsupported declared recurrence intent because its diagnostic is advisory", () => {
+      const store = createDayFrameStore({
+        blockTemplates: buildBlockTemplates(),
+      });
+
+      const result = store.setBlockRecurrences([
+        {
+          id: "rec_unsupported",
+          blockTemplateId: buildBlockTemplates()[0]!.id,
+          frequency: "custom",
+        },
+      ]);
+
+      expect(result.status).toBe("applied");
+      expect(store.getState().blockRecurrences[0]?.frequency).toBe("custom");
+    });
+
     it("returns unavailable with the applied active mutation and one notification", () => {
       const store = createDayFrameStore();
       const listener = vi.fn();
@@ -1375,6 +1571,7 @@ describe("dayFrameStore", () => {
         startDate: "2026-05-04",
         endDate: "2026-05-11",
       });
+      expectApplied(result);
 
       expect(result.persistence).toEqual({ status: "unavailable" });
       expect(result.state.previewRange.preset).toBe("oneWeek");
@@ -1390,6 +1587,7 @@ describe("dayFrameStore", () => {
       installLocalStorageMock(localStorage);
 
       const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(result);
 
       expect(result.persistence).toEqual({ status: "serializationFailure" });
       expect(result.state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
@@ -1399,7 +1597,7 @@ describe("dayFrameStore", () => {
       const localStorage = createLocalStorageMock();
 
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY) {
           throw new RangeError("Injected profile storage failure");
         }
       });
@@ -1431,16 +1629,17 @@ describe("dayFrameStore", () => {
         savedAt: "2026-05-05T09:00:00-05:00",
       });
       const setItem = vi.spyOn(localStorage, "setItem").mockImplementation((key: string) => {
-        if (key === DAYFRAME_STORAGE_KEY) {
+        if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
           throw new RangeError("Injected active storage failure");
         }
       });
 
       const loadResult = store.loadProfile(saveResult.state.savedProfiles[0]!.id);
+      expectProfileLoaded(loadResult);
 
       expect(loadResult.persistence).toEqual({ status: "storageFailure" });
       expect(loadResult.state.savedProfiles).toHaveLength(1);
-      expect(setItem).toHaveBeenLastCalledWith(DAYFRAME_STORAGE_KEY, expect.any(String));
+      expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
     });
 
     it("reports active-state persistence after a valid backup import", () => {
@@ -1455,6 +1654,7 @@ describe("dayFrameStore", () => {
       const result = store.importBackup(
         createDayFrameBackup(buildSavedProfile().data, "2026-05-05T10:00:00-05:00"),
       );
+      expectBackupImported(result);
 
       expect(result.persistence).toEqual({ status: "storageFailure" });
       expect(result.state.preview).toBeNull();
@@ -1478,7 +1678,7 @@ describe("dayFrameStore", () => {
       {
         activeFailure: true,
         profileFailure: true,
-        durability: "notCleared",
+        durability: "partiallyCleared",
         activeStatus: "storageFailure",
         profileStatus: "storageFailure",
       },
@@ -1489,7 +1689,7 @@ describe("dayFrameStore", () => {
 
         localStorage.removeItem = vi.fn((key: string) => {
           if (
-            (key === DAYFRAME_STORAGE_KEY && activeFailure) ||
+            (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY && activeFailure) ||
             (key === DAYFRAME_PROFILES_STORAGE_KEY && profileFailure)
           ) {
             throw new RangeError("Injected removal failure");
@@ -1502,6 +1702,7 @@ describe("dayFrameStore", () => {
         expect(result.state).toEqual(createInitialDayFrameState());
         expect(result.activeState.status).toBe(activeStatus);
         expect(result.profiles.status).toBe(profileStatus);
+        expect(result.planDecisions.status).toBe("removed");
         expect(result.durability).toBe(durability);
       },
     );
@@ -1524,6 +1725,7 @@ describe("dayFrameStore", () => {
       installThrowingLocalStorageAccessor();
 
       const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(result);
 
       expect(result.state.schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
       expect(result.persistence).toEqual({ status: "storageFailure" });
@@ -1560,10 +1762,11 @@ describe("dayFrameStore", () => {
         blockTemplates: buildBlockTemplates(),
         blockRecurrences: buildBlockRecurrences(),
       });
+      expectApplied(setupResult);
 
       expect(setupResult.persistence).toEqual({ status: "storageFailure" });
       expect(setupResult.state.schedulingPreferences.weekStartsOn).toBe("monday");
-      expect(setupResult.state.shiftDefinitions).toEqual(buildShiftDefinitions());
+      expect(currentPattern(setupResult.state).shiftDefinitions).toEqual(buildShiftDefinitions());
       expect(setupStore.getDurabilityStatus().activeState).toBe("storageFailure");
       expect(setupStore.getDesiredDurableCondition().activeState).toBe("snapshot");
       expect(setupListener).toHaveBeenCalledTimes(1);
@@ -1576,6 +1779,7 @@ describe("dayFrameStore", () => {
       installThrowingLocalStorageAccessor();
 
       const manualResult = manualStore.setManualEvents([]);
+      expectApplied(manualResult);
 
       expect(manualResult.persistence).toEqual({ status: "storageFailure" });
       expect(manualResult.state.manualEvents).toEqual([]);
@@ -1622,6 +1826,7 @@ describe("dayFrameStore", () => {
       installThrowingLocalStorageAccessor();
 
       const loaded = store.loadProfile(profile.id);
+      expectProfileLoaded(loaded);
 
       expect(loaded.persistence).toEqual({ status: "storageFailure" });
       expect(loaded.state.savedProfiles).toEqual([profile]);
@@ -1637,6 +1842,7 @@ describe("dayFrameStore", () => {
       const imported = store.importBackup(
         createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"),
       );
+      expectBackupImported(imported);
 
       expect(imported.persistence).toEqual({ status: "storageFailure" });
       expect(imported.state.schedulingPreferences).toEqual(profile.data.schedulingPreferences);
@@ -1679,9 +1885,10 @@ describe("dayFrameStore", () => {
           state: createInitialDayFrameState(),
           activeState: { status: activeStatus },
           profiles: { status: profileStatus },
+          planDecisions: { status: failureSurface === "both" ? "unavailable" : "removed" },
           durability: aggregate,
         });
-        expect(accessCount).toBe(2);
+        expect(accessCount).toBe(3);
         expect(store.getDesiredDurableCondition()).toEqual({
           activeState: "absent",
           profiles: "absent",
@@ -1694,10 +1901,19 @@ describe("dayFrameStore", () => {
       },
     );
 
-    it("leaves read-path accessor failure exceptional", () => {
+    it("classifies read-path accessor failure without claiming a readable checkpoint", () => {
       installThrowingLocalStorageAccessor();
 
-      expect(() => createDayFrameStore()).toThrow("Injected storage accessor failure");
+      const store = createDayFrameStore();
+
+      expect(store.getState()).toEqual(createInitialDayFrameState());
+      expect(store.getActiveLocalIngressStatus()).toEqual({
+        status: "recoveryRequired",
+        reason: "readFailure",
+        activationBlocked: true,
+        sourceReadable: false,
+        sourcePreserved: false,
+      });
     });
   });
 
@@ -1726,10 +1942,10 @@ describe("dayFrameStore", () => {
       };
       const listener = vi.fn();
       const successfulSet = vi.fn((key: string, value: string) => {
-        if (key === DAYFRAME_STORAGE_KEY) {
-          const parsed = JSON.parse(value) as { previewRange: { preset: string } };
-          expect(parsed.previewRange.preset).toBe("oneWeek");
-          expect(parsed).toMatchObject({
+        if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
+          const parsed = JSON.parse(value) as { data: { previewRange: { preset: string }; schedulingPreferences: object } };
+          expect(parsed.data.previewRange.preset).toBe("oneWeek");
+          expect(parsed.data).toMatchObject({
             schedulingPreferences: { dayBoundaryStartTime: "04:00" },
           });
         }
@@ -1745,7 +1961,7 @@ describe("dayFrameStore", () => {
         desiredCondition: "snapshot",
         persistence: { status: "persisted" },
       });
-      expect(successfulSet).toHaveBeenCalledTimes(1);
+      expect(successfulSet).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
       expect(store.getState()).toEqual(stateBeforeRetry);
       expect(store.getDurabilityStatus()).toEqual({
         activeState: "durable",
@@ -1807,7 +2023,7 @@ describe("dayFrameStore", () => {
         desiredCondition: "snapshot",
         persistence: { status: "persisted" },
       });
-      expect(setItem).toHaveBeenCalledTimes(1);
+      expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
       expect(store.getDurabilityStatus().activeState).toBe("durable");
     });
 
@@ -1815,7 +2031,7 @@ describe("dayFrameStore", () => {
       const localStorage = createLocalStorageMock();
 
       localStorage.removeItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_STORAGE_KEY) {
+        if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
           throw new RangeError("Injected active removal failure");
         }
       });
@@ -1839,9 +2055,9 @@ describe("dayFrameStore", () => {
         desiredCondition: "absent",
         persistence: { status: "removed" },
       });
-      expect(removeItem).toHaveBeenCalledOnce();
+      expect(removeItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
       expect(removeItem).toHaveBeenCalledWith(DAYFRAME_STORAGE_KEY);
-      expect(setItem).not.toHaveBeenCalled();
+      expect(setItem).toHaveBeenCalledWith(expect.any(String), "1");
       expect(store.getDurabilityStatus()).toEqual({
         activeState: "durable",
         profiles: profileStatusBefore,
@@ -1857,7 +2073,7 @@ describe("dayFrameStore", () => {
       const localStorage = createLocalStorageMock();
 
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY) {
           throw new RangeError("Injected profile write failure");
         }
       });
@@ -1876,7 +2092,7 @@ describe("dayFrameStore", () => {
       const setItem = vi.fn(localStorage.setItem);
 
       setItem.mockImplementation((key: string, value: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY) {
           const parsed = JSON.parse(value) as { profiles: Array<{ name: string }> };
           expect(parsed.profiles.map((profile) => profile.name)).toEqual([
             "Profile A",
@@ -1893,7 +2109,7 @@ describe("dayFrameStore", () => {
         desiredCondition: "snapshot",
         persistence: { status: "persisted" },
       });
-      expect(setItem).toHaveBeenCalledTimes(1);
+      expect(setItem).toHaveBeenCalledTimes(2);
       expect(store.getDurabilityStatus()).toEqual({
         activeState: activeInfrastructureBefore.status,
         profiles: "durable",
@@ -1909,7 +2125,7 @@ describe("dayFrameStore", () => {
       const localStorage = createLocalStorageMock();
 
       localStorage.removeItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY) {
           throw new RangeError("Injected profile removal failure");
         }
       });
@@ -1930,9 +2146,10 @@ describe("dayFrameStore", () => {
         desiredCondition: "absent",
         persistence: { status: "removed" },
       });
-      expect(removeItem).toHaveBeenCalledOnce();
+      expect(removeItem).toHaveBeenCalledTimes(2);
+      expect(removeItem).toHaveBeenCalledWith(DAYFRAME_PROFILES_V2_STORAGE_KEY);
       expect(removeItem).toHaveBeenCalledWith(DAYFRAME_PROFILES_STORAGE_KEY);
-      expect(setItem).not.toHaveBeenCalled();
+      expect(setItem).toHaveBeenCalledOnce();
       expect(store.getDurabilityStatus()).toEqual({
         activeState: "durable",
         profiles: "durable",
@@ -2079,9 +2296,7 @@ describe("dayFrameStore", () => {
         activeState: "unavailable",
         profiles: "unknown",
       });
-      expect(observedDuringCallback).toEqual([
-        { activeState: "unavailable", profiles: "unknown" },
-      ]);
+      expect(observedDuringCallback).toEqual([{ activeState: "unavailable", profiles: "unknown" }]);
       expect(stateListener).toHaveBeenCalledOnce();
     });
 
@@ -2118,7 +2333,7 @@ describe("dayFrameStore", () => {
       let shouldFail = true;
 
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY && shouldFail) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY && shouldFail) {
           throw new RangeError("Injected profile storage failure");
         }
       });
@@ -2319,9 +2534,7 @@ describe("dayFrameStore", () => {
       const localStorage = createLocalStorageMock();
 
       installLocalStorageMock(localStorage);
-      store.importBackup(
-        createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"),
-      );
+      store.importBackup(createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"));
       expect(durabilityListener).toHaveBeenCalledOnce();
       expect(durabilityListener).toHaveBeenCalledWith({
         activeState: "durable",
@@ -2433,6 +2646,7 @@ describe("dayFrameStore", () => {
       store.subscribe(listener);
 
       const failed = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(failed);
 
       expect(failed.persistence.status).toBe("storageFailure");
       expect(store.getDurabilityStatus()).toEqual({
@@ -2446,6 +2660,7 @@ describe("dayFrameStore", () => {
         startDate: "2026-05-04",
         endDate: "2026-05-11",
       });
+      expectApplied(converged);
 
       expect(converged.persistence.status).toBe("persisted");
       expect(store.getDurabilityStatus().activeState).toBe("durable");
@@ -2484,7 +2699,7 @@ describe("dayFrameStore", () => {
       let shouldFailProfiles = true;
 
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY && shouldFailProfiles) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY && shouldFailProfiles) {
           throw new RangeError("Injected profile storage failure");
         }
       });
@@ -2530,7 +2745,7 @@ describe("dayFrameStore", () => {
       });
 
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_STORAGE_KEY) {
+        if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
           throw new RangeError("Injected active storage failure");
         }
       });
@@ -2645,14 +2860,16 @@ describe("dayFrameStore", () => {
       store.subscribe(listener);
       store.clearLocalData();
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_STORAGE_KEY) {
+        if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
           throw new RangeError("Injected active storage failure");
         }
       });
 
       const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(result);
 
       expect(result).toEqual({
+        status: "applied",
         state: expect.objectContaining({
           schedulingPreferences: {
             dayBoundaryStartTime: "04:00",
@@ -2707,7 +2924,7 @@ describe("dayFrameStore", () => {
       expectActiveSnapshotAfterClear(() => store.setShiftDefinitions(buildShiftDefinitions()));
       expectActiveSnapshotAfterClear(() => store.setShiftCycles([]));
       expectActiveSnapshotAfterClear(() => store.setBlockTemplates(buildBlockTemplates()));
-      expectActiveSnapshotAfterClear(() => store.setBlockRecurrences(buildBlockRecurrences()));
+      expectActiveSnapshotAfterClear(() => store.setBlockRecurrences([]));
       expectActiveSnapshotAfterClear(() => store.setManualEvents([]));
     });
 
@@ -2720,7 +2937,7 @@ describe("dayFrameStore", () => {
 
       store.clearLocalData();
       localStorage.setItem = vi.fn((key: string) => {
-        if (key === DAYFRAME_PROFILES_STORAGE_KEY) {
+        if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY) {
           throw new RangeError("Injected profile storage failure");
         }
       });
@@ -2778,7 +2995,7 @@ describe("dayFrameStore", () => {
     it.each([
       [false, false, "cleared", "durable", "durable"],
       [false, true, "partiallyCleared", "durable", "storageFailure"],
-      [true, true, "notCleared", "storageFailure", "storageFailure"],
+      [true, true, "partiallyCleared", "storageFailure", "storageFailure"],
     ] as const)(
       "retains absence for clear failures active=%s profiles=%s",
       (activeFailure, profileFailure, aggregate, activeStatus, profileStatus) => {
@@ -2786,7 +3003,7 @@ describe("dayFrameStore", () => {
 
         localStorage.removeItem = vi.fn((key: string) => {
           if (
-            (key === DAYFRAME_STORAGE_KEY && activeFailure) ||
+            (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY && activeFailure) ||
             (key === DAYFRAME_PROFILES_STORAGE_KEY && profileFailure)
           ) {
             throw new RangeError("Injected removal failure");
@@ -2829,6 +3046,7 @@ describe("dayFrameStore", () => {
         state: createInitialDayFrameState(),
         activeState: { status: "removed" },
         profiles: { status: "removed" },
+        planDecisions: { status: "removed" },
         durability: "cleared",
       });
       expect(store.getDesiredDurableCondition()).toEqual({
@@ -2906,6 +3124,7 @@ describe("dayFrameStore", () => {
       installThrowingLocalStorageAccessor();
 
       const result = store.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" });
+      expectApplied(result);
 
       expect(result.persistence).toEqual({ status: "storageFailure" });
       expect(store.getDesiredDurableCondition()).toEqual({
@@ -2919,9 +3138,1320 @@ describe("dayFrameStore", () => {
       expect(listener).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe("active local historical ingress protection", () => {
+    it("distinguishes a missing key from unavailable storage", () => {
+      const localStorage = createLocalStorageMock();
+      installLocalStorageMock(localStorage);
+
+      expect(createDayFrameStore().getActiveLocalIngressStatus()).toEqual({
+        status: "noSource",
+        reason: "missing",
+      });
+
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+
+      expect(createDayFrameStore().getActiveLocalIngressStatus()).toEqual({
+        status: "noSource",
+        reason: "storageUnavailable",
+      });
+    });
+
+    it("activates valid current and advisory-only persisted checkpoints", () => {
+      const localStorage = createLocalStorageMock();
+      const validData = buildValidHistoricalAuthoredSetup();
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(validData));
+      installLocalStorageMock(localStorage);
+
+      const validStore = createDayFrameStore();
+
+      expect(validStore.getActiveLocalIngressStatus()).toEqual({
+        status: "accepted",
+        advisories: [],
+      });
+      expect(currentPattern(validStore.getState()).shiftCycles).toEqual(validData.shiftCycles);
+
+      validData.blockRecurrences = [
+        {
+          id: "rec_advisory",
+          blockTemplateId: validData.blockTemplates[0]!.id,
+          frequency: "perShiftSegment",
+        },
+      ];
+      localStorage.removeItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+      localStorage.removeItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY);
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(validData));
+
+      const advisoryStore = createDayFrameStore();
+
+      expect(advisoryStore.getActiveLocalIngressStatus()).toMatchObject({
+        status: "accepted",
+        advisories: [expect.objectContaining({ code: "unsupportedRecurrenceFrequency" })],
+      });
+      expect(
+        advisoryStore.setSchedulingPreferences({ dayBoundaryStartTime: "04:00" }),
+      ).toMatchObject({ status: "applied", persistence: { status: "persisted" } });
+    });
+
+    it.each([
+      [
+        "semantic-invalid",
+        () => {
+          const data = buildValidHistoricalAuthoredSetup();
+          data.shiftDefinitions = [];
+          return JSON.stringify(data);
+        },
+      ],
+      [
+        "ambiguous",
+        () => {
+          const data = buildValidHistoricalAuthoredSetup();
+          const template = data.blockTemplates[0]!;
+          data.blockTemplates = [template, { ...template }];
+          data.blockRecurrences = [
+            { id: "rec_ambiguous", blockTemplateId: template.id, frequency: "daily" },
+          ];
+          return JSON.stringify(data);
+        },
+      ],
+    ])("blocks %s authored checkpoints and retains validation evidence", (_label, buildRaw) => {
+      const localStorage = createLocalStorageMock();
+      const raw = buildRaw();
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+      const status = store.getActiveLocalIngressStatus();
+
+      expect(store.getState()).toEqual(createInitialDayFrameState());
+      expect(status).toMatchObject({
+        status: "recoveryRequired",
+        reason: "invalidAuthoredState",
+        activationBlocked: true,
+        sourceReadable: true,
+        sourcePreserved: true,
+        validation: { status: "invalid" },
+      });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+    });
+
+    it.each([
+      ["malformed JSON", "{", "corruptJson"],
+      ["structurally invalid JSON", '{"shiftDefinitions":{}}', "structurallyInvalid"],
+    ] as const)("uses protected fallback for %s", (_label, raw, reason) => {
+      const localStorage = createLocalStorageMock();
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      expect(store.getState()).toEqual(createInitialDayFrameState());
+      expect(store.getActiveLocalIngressStatus()).toMatchObject({
+        status: "recoveryRequired",
+        reason,
+        sourceReadable: true,
+        sourcePreserved: true,
+      });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+    });
+
+    it("protects against getItem failure conservatively", () => {
+      const localStorage = createLocalStorageMock();
+      localStorage.getItem = vi.fn(() => {
+        throw new RangeError("Injected read failure");
+      });
+      installLocalStorageMock(localStorage);
+
+      const store = createDayFrameStore();
+
+      expect(store.getActiveLocalIngressStatus()).toMatchObject({
+        status: "recoveryRequired",
+        reason: "readFailure",
+        sourceReadable: false,
+        sourcePreserved: false,
+      });
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "recoveryProtected",
+      });
+    });
+
+    it("preserves exact bytes through runtime mutation, retry, and Preview generation", () => {
+      const localStorage = createLocalStorageMock();
+      const raw = "{ invalid historical checkpoint";
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+      const setItem = vi.spyOn(localStorage, "setItem");
+      const store = createDayFrameStore();
+      const ingressListener = vi.fn();
+      const durabilityListener = vi.fn();
+      store.subscribeActiveLocalIngress(ingressListener);
+      store.subscribeDurability(durabilityListener);
+      const valid = buildValidHistoricalAuthoredSetup();
+
+      const mutation = store.commitAuthoredSetup({
+        schedulingPreferences: valid.schedulingPreferences,
+        previewRange: valid.previewRange,
+        shiftDefinitions: valid.shiftDefinitions,
+        shiftCycles: valid.shiftCycles,
+        blockTemplates: valid.blockTemplates,
+        blockRecurrences: valid.blockRecurrences,
+      });
+      expectApplied(mutation);
+      expect(mutation.persistence).toEqual({
+        status: "blocked",
+        reason: "activeLocalRecovery",
+      });
+      expect(currentPattern(store.getState()).shiftDefinitions).toEqual(valid.shiftDefinitions);
+      expect(store.getDurabilityStatus()).toEqual({ activeState: "unknown", profiles: "unknown" });
+      expect(store.getDesiredDurableCondition().activeState).toBe("snapshot");
+      expect(store.retryActivePersistence()).toEqual({
+        status: "notAttempted",
+        reason: "recoveryProtected",
+      });
+
+      store.generatePreview({
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+      });
+
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+      expect(setItem).not.toHaveBeenCalled();
+      expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+      expect(ingressListener).not.toHaveBeenCalled();
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+
+    it("keeps profile persistence independent and guards profile/backup active replacement", () => {
+      const localStorage = createLocalStorageMock();
+      const raw = "{";
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+      const profile = buildSavedProfile({
+        ...createInitialDayFrameState(),
+        ...buildValidHistoricalAuthoredSetup(),
+      });
+      const store = createDayFrameStore({ savedProfiles: [profile] });
+
+      const saved = store.saveProfile({
+        name: "Fallback Session",
+        savedAt: "2026-05-05T09:00:00-05:00",
+      });
+      expect(saved.persistence).toEqual({ status: "persisted" });
+      expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).not.toBeNull();
+
+      const loaded = store.loadProfile(profile.id);
+      expectProfileLoaded(loaded);
+      expect(loaded.persistence).toEqual({
+        status: "blocked",
+        reason: "activeLocalRecovery",
+      });
+
+      const imported = store.importBackup(
+        createDayFrameBackup(profile.data, "2026-05-05T10:00:00-05:00"),
+      );
+      expect(imported).toEqual({ status: "rejected", reason: "activeLocalRecovery" });
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+      expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+    });
+
+    it("guards active removal while preserving explicit profile removal", () => {
+      const localStorage = createLocalStorageMock();
+      const raw = "invalid";
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+      const store = createDayFrameStore();
+      store.saveProfile({ name: "Profile", savedAt: "2026-05-05T09:00:00-05:00" });
+
+      const result = store.clearLocalData();
+
+      expect(result.activeState).toEqual({
+        status: "blocked",
+        reason: "activeLocalRecovery",
+      });
+      expect(result.profiles).toEqual({ status: "removed" });
+      expect(result.durability).toBe("partiallyCleared");
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+      expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).toBeNull();
+      expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+    });
+
+    describe("explicit active-local recovery", () => {
+      it("replaces the protected checkpoint with the latest current session", () => {
+        const localStorage = createLocalStorageMock();
+        const raw = "{ protected checkpoint";
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+        installLocalStorageMock(localStorage);
+        const setItem = vi.spyOn(localStorage, "setItem");
+        const store = createDayFrameStore();
+        const valid = buildValidHistoricalAuthoredSetup();
+        const mutation = store.commitAuthoredSetup(valid);
+        expectApplied(mutation);
+        store.generatePreview({
+          rangeStartDate: "2026-05-04",
+          rangeEndDate: "2026-05-05",
+          planningWindowStart: new Date(2026, 4, 4),
+          planningWindowEnd: new Date(2026, 4, 6),
+          generatedAt: "2026-05-03T13:00:00-05:00",
+        });
+        const stateBefore = store.getState();
+        const stateListener = vi.fn();
+        const ingressListener = vi.fn();
+        const durabilityListener = vi.fn();
+        store.subscribe(stateListener);
+        store.subscribeActiveLocalIngress(ingressListener);
+        store.subscribeDurability(durabilityListener);
+
+        const result = store.replaceProtectedActiveCheckpointWithCurrentState();
+
+        expect(result).toMatchObject({
+          status: "resolved",
+          resolution: "replaceWithCurrentState",
+          persistence: { status: "persisted" },
+          ingress: { status: "accepted", advisories: [] },
+        });
+        expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
+        expect(readActiveV2Data(localStorage)).toEqual(currentActiveSetup(store.getState()));
+        expect(store.getState()).toEqual(stateBefore);
+        expect(stateListener).not.toHaveBeenCalled();
+        expect(durabilityListener).toHaveBeenCalledTimes(1);
+        expect(ingressListener).toHaveBeenCalledTimes(1);
+        expect(store.getDesiredDurableCondition().activeState).toBe("snapshot");
+        expect(store.getDurabilityStatus().activeState).toBe("durable");
+        expect(store.retryActivePersistence()).toEqual({
+          status: "notAttempted",
+          reason: "alreadyDurable",
+        });
+        expect(store.setPreviewRange(valid.previewRange)).toMatchObject({
+          status: "applied",
+          persistence: { status: "persisted" },
+        });
+      });
+
+      it("retains advisory validation in accepted ingress after replacement", () => {
+        const localStorage = createLocalStorageMock();
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+        installLocalStorageMock(localStorage);
+        const valid = buildValidHistoricalAuthoredSetup();
+        valid.blockRecurrences = [
+          {
+            id: "rec_advisory_recovery",
+            blockTemplateId: valid.blockTemplates[0]!.id,
+            frequency: "perShiftSegment",
+          },
+        ];
+        const store = createDayFrameStore(valid);
+
+        const result = store.replaceProtectedActiveCheckpointWithCurrentState();
+
+        expect(result.status).toBe("resolved");
+        expect(store.getActiveLocalIngressStatus()).toMatchObject({
+          status: "accepted",
+          advisories: [expect.objectContaining({ code: "unsupportedRecurrenceFrequency" })],
+        });
+      });
+
+      it("rejects an invalid current replacement before reading or writing storage", () => {
+        const localStorage = createLocalStorageMock();
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+        installLocalStorageMock(localStorage);
+        const invalid = buildValidHistoricalAuthoredSetup();
+        invalid.shiftDefinitions = [];
+        const store = createDayFrameStore(invalid);
+        const getItem = vi.spyOn(localStorage, "getItem");
+        const setItem = vi.spyOn(localStorage, "setItem");
+
+        const result = store.replaceProtectedActiveCheckpointWithCurrentState();
+
+        expect(result).toMatchObject({
+          status: "notAttempted",
+          reason: "invalidReplacement",
+          validation: { status: "invalid" },
+        });
+        expect(getItem).not.toHaveBeenCalled();
+        expect(setItem).not.toHaveBeenCalled();
+        expect(store.getDurabilityStatus().activeState).toBe("unknown");
+      });
+
+      it.each(["replace", "abandon"] as const)(
+        "rejects %s when the protected source changed externally",
+        (command) => {
+          const localStorage = createLocalStorageMock();
+          localStorage.setItem(DAYFRAME_STORAGE_KEY, "payload A");
+          installLocalStorageMock(localStorage);
+          const store = createDayFrameStore();
+          localStorage.setItem(DAYFRAME_STORAGE_KEY, "payload B");
+          const setItem = vi.spyOn(localStorage, "setItem");
+          const removeItem = vi.spyOn(localStorage, "removeItem");
+
+          const result =
+            command === "replace"
+              ? store.replaceProtectedActiveCheckpointWithCurrentState()
+              : store.abandonProtectedActiveCheckpointAndReset();
+
+          expect(result).toEqual({ status: "notAttempted", reason: "sourceChanged" });
+          expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe("payload B");
+          expect(setItem).not.toHaveBeenCalled();
+          expect(removeItem).not.toHaveBeenCalled();
+          expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+          expect(store.getDurabilityStatus().activeState).toBe("unknown");
+        },
+      );
+
+      it("rejects unreadable source recheck without changing infrastructure truth", () => {
+        const localStorage = createLocalStorageMock();
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+        installLocalStorageMock(localStorage);
+        const store = createDayFrameStore();
+        localStorage.getItem = vi.fn(() => {
+          throw new RangeError("Injected recovery read failure");
+        });
+
+        expect(store.replaceProtectedActiveCheckpointWithCurrentState()).toEqual({
+          status: "notAttempted",
+          reason: "sourceUnreadable",
+        });
+        expect(store.getDurabilityStatus().activeState).toBe("unknown");
+        expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+      });
+
+      it("requires renewed authority when an initially unreadable source becomes readable", () => {
+        const localStorage = createLocalStorageMock();
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "newly readable payload");
+        const originalGetItem = localStorage.getItem;
+        localStorage.getItem = vi
+          .fn()
+          .mockImplementationOnce(() => {
+            throw new RangeError("Injected startup read failure");
+          })
+          .mockImplementation(originalGetItem);
+        installLocalStorageMock(localStorage);
+        const store = createDayFrameStore();
+        const setItem = vi.spyOn(localStorage, "setItem");
+
+        expect(store.replaceProtectedActiveCheckpointWithCurrentState()).toEqual({
+          status: "notAttempted",
+          reason: "sourceChanged",
+        });
+        expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe("newly readable payload");
+        expect(setItem).not.toHaveBeenCalled();
+      });
+
+      it("retains protection and explicit snapshot intent after replacement write failure", () => {
+        const localStorage = createLocalStorageMock();
+        const raw = "{";
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+        installLocalStorageMock(localStorage);
+        const store = createDayFrameStore();
+        localStorage.setItem = vi.fn(() => {
+          throw new RangeError("Injected recovery write failure");
+        });
+
+        expect(store.replaceProtectedActiveCheckpointWithCurrentState()).toEqual({
+          status: "notResolved",
+          resolution: "replaceWithCurrentState",
+          persistence: { status: "storageFailure" },
+        });
+        expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+        expect(store.getDesiredDurableCondition().activeState).toBe("snapshot");
+        expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+        expect(store.retryActivePersistence()).toEqual({
+          status: "notAttempted",
+          reason: "recoveryProtected",
+        });
+      });
+
+      it.each(["replace", "abandon"] as const)(
+        "reports unavailable when storage disappears after the %s source recheck",
+        (command) => {
+          const localStorage = createLocalStorageMock();
+          const raw = "{";
+          localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+          installLocalStorageMock(localStorage);
+          const store = createDayFrameStore();
+          let accessCount = 0;
+          Object.defineProperty(globalThis, "localStorage", {
+            configurable: true,
+            get() {
+              accessCount += 1;
+              return accessCount === 1 ? localStorage : undefined;
+            },
+          });
+
+          const result =
+            command === "replace"
+              ? store.replaceProtectedActiveCheckpointWithCurrentState()
+              : store.abandonProtectedActiveCheckpointAndReset();
+
+          expect(result).toMatchObject({
+            status: "notResolved",
+            resolution: command === "replace" ? "replaceWithCurrentState" : "abandonAndReset",
+            persistence: { status: "unavailable" },
+          });
+          expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+          expect(store.getDurabilityStatus().activeState).toBe("unavailable");
+          expect(store.getActiveLocalIngressStatus().status).toBe("recoveryRequired");
+        },
+      );
+
+      it("reports replacement serialization failure without writing the checkpoint", () => {
+        const localStorage = createLocalStorageMock();
+        const raw = "{";
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+        installLocalStorageMock(localStorage);
+        const store = createDayFrameStore({
+          schedulingPreferences: {
+            ...createInitialDayFrameState().schedulingPreferences,
+            unsafeValue: 1n,
+          } as DayFrameState["schedulingPreferences"],
+        });
+        const setItem = vi.spyOn(localStorage, "setItem");
+
+        expect(store.replaceProtectedActiveCheckpointWithCurrentState()).toEqual({
+          status: "notResolved",
+          resolution: "replaceWithCurrentState",
+          persistence: { status: "serializationFailure" },
+        });
+        expect(setItem).not.toHaveBeenCalled();
+        expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+        expect(store.getDurabilityStatus().activeState).toBe("serializationFailure");
+      });
+
+      it("abandons only the active checkpoint and resets runtime after removal succeeds", () => {
+        const localStorage = createLocalStorageMock();
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+        localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, "preserved profiles");
+        installLocalStorageMock(localStorage);
+        const profile = buildSavedProfile({
+          ...createInitialDayFrameState(),
+          ...buildValidHistoricalAuthoredSetup(),
+        });
+        const store = createDayFrameStore({
+          ...buildValidHistoricalAuthoredSetup(),
+          savedProfiles: [profile],
+        });
+        store.generatePreview({
+          rangeStartDate: "2026-05-04",
+          rangeEndDate: "2026-05-05",
+          planningWindowStart: new Date(2026, 4, 4),
+          planningWindowEnd: new Date(2026, 4, 6),
+          generatedAt: "2026-05-03T13:00:00-05:00",
+        });
+        const removeItem = vi.spyOn(localStorage, "removeItem");
+        const stateListener = vi.fn();
+        const ingressListener = vi.fn();
+        store.subscribe(stateListener);
+        store.subscribeActiveLocalIngress(ingressListener);
+        const profileDurabilityBefore = store.getDurabilityStatus().profiles;
+
+        const result = store.abandonProtectedActiveCheckpointAndReset();
+
+        expect(result).toMatchObject({
+          status: "resolved",
+          resolution: "abandonAndReset",
+          persistence: { status: "removed" },
+          ingress: { status: "noSource", reason: "resolvedByAbandonment" },
+        });
+        expect(removeItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+        expect(removeItem).toHaveBeenCalledWith(DAYFRAME_STORAGE_KEY);
+        expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
+        expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).toBe("preserved profiles");
+        expect(store.getState()).toEqual({
+          ...createInitialDayFrameState(),
+          savedProfiles: [profile],
+        });
+        expect(stateListener).toHaveBeenCalledTimes(1);
+        expect(ingressListener).toHaveBeenCalledTimes(1);
+        expect(store.getDesiredDurableCondition().activeState).toBe("absent");
+        expect(store.getDurabilityStatus()).toEqual({
+          activeState: "durable",
+          profiles: profileDurabilityBefore,
+        });
+        expect(
+          store.setPreviewRange(buildValidHistoricalAuthoredSetup().previewRange),
+        ).toMatchObject({
+          status: "applied",
+          persistence: { status: "persisted" },
+        });
+      });
+
+      it("does not reset runtime or profiles when abandonment removal fails", () => {
+        const localStorage = createLocalStorageMock();
+        const raw = "{";
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
+        installLocalStorageMock(localStorage);
+        const profile = buildSavedProfile({
+          ...createInitialDayFrameState(),
+          ...buildValidHistoricalAuthoredSetup(),
+        });
+        const store = createDayFrameStore({
+          ...buildValidHistoricalAuthoredSetup(),
+          savedProfiles: [profile],
+        });
+        const stateBefore = store.getState();
+        const stateListener = vi.fn();
+        store.subscribe(stateListener);
+        localStorage.removeItem = vi.fn(() => {
+          throw new RangeError("Injected recovery removal failure");
+        });
+
+        expect(store.abandonProtectedActiveCheckpointAndReset()).toEqual({
+          status: "notResolved",
+          resolution: "abandonAndReset",
+          persistence: { status: "storageFailure" },
+        });
+        expect(store.getState()).toEqual(stateBefore);
+        expect(stateListener).not.toHaveBeenCalled();
+        expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(raw);
+        expect(store.getDesiredDurableCondition().activeState).toBe("absent");
+        expect(store.getDurabilityStatus().activeState).toBe("storageFailure");
+        expect(store.retryActivePersistence()).toEqual({
+          status: "notAttempted",
+          reason: "recoveryProtected",
+        });
+      });
+
+      it("is a storage-free no-op for healthy stores and after successful resolution", () => {
+        const localStorage = createLocalStorageMock();
+        installLocalStorageMock(localStorage);
+        const healthy = createDayFrameStore();
+        const getItem = vi.spyOn(localStorage, "getItem");
+        const setItem = vi.spyOn(localStorage, "setItem");
+        const removeItem = vi.spyOn(localStorage, "removeItem");
+
+        expect(healthy.replaceProtectedActiveCheckpointWithCurrentState()).toEqual({
+          status: "notAttempted",
+          reason: "notRecoveryRequired",
+        });
+        expect(healthy.abandonProtectedActiveCheckpointAndReset()).toEqual({
+          status: "notAttempted",
+          reason: "notRecoveryRequired",
+        });
+        expect(getItem).not.toHaveBeenCalled();
+        expect(setItem).not.toHaveBeenCalled();
+        expect(removeItem).not.toHaveBeenCalled();
+
+        localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+        const protectedStore = createDayFrameStore();
+        expect(protectedStore.replaceProtectedActiveCheckpointWithCurrentState().status).toBe(
+          "resolved",
+        );
+        setItem.mockClear();
+        removeItem.mockClear();
+        expect(protectedStore.abandonProtectedActiveCheckpointAndReset()).toEqual({
+          status: "notAttempted",
+          reason: "notRecoveryRequired",
+        });
+        expect(setItem).not.toHaveBeenCalled();
+        expect(removeItem).not.toHaveBeenCalled();
+      });
+
+      it.each(["profile", "backup"] as const)(
+        "promotes the latest session prepared from a %s without source-specific recovery",
+        (source) => {
+          const localStorage = createLocalStorageMock();
+          localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
+          installLocalStorageMock(localStorage);
+          const recovered = buildValidHistoricalAuthoredSetup();
+          recovered.schedulingPreferences.dayBoundaryStartTime = "04:30";
+          const profile = buildSavedProfile({
+            ...createInitialDayFrameState(),
+            ...recovered,
+          });
+          const store = createDayFrameStore({ savedProfiles: [profile] });
+
+          if (source === "profile") {
+            expectProfileLoaded(store.loadProfile(profile.id));
+          } else {
+            expect(store.importBackup(
+              createDayFrameBackup(recovered, "2026-05-05T10:00:00-05:00"),
+            )).toEqual({ status: "rejected", reason: "activeLocalRecovery" });
+          }
+
+          const mutation = store.setSchedulingPreferences({ dayBoundaryStartTime: "05:15" });
+          expectApplied(mutation);
+          expect(mutation.persistence).toEqual({
+            status: "blocked",
+            reason: "activeLocalRecovery",
+          });
+          expect(store.replaceProtectedActiveCheckpointWithCurrentState().status).toBe("resolved");
+          expect(
+            readActiveV2Data(localStorage).schedulingPreferences,
+          ).toMatchObject({ dayBoundaryStartTime: "05:15" });
+        },
+      );
+    });
+  });
+
+  describe("profile and backup semantic ingress", () => {
+    it("rejects a semantic-invalid selected profile without any active-session effect", () => {
+      const localStorage = createLocalStorageMock();
+      const invalidProfile = buildSavedProfile();
+      invalidProfile.data.blockRecurrences = [
+        { id: "rec_orphan", blockTemplateId: "missing_template", frequency: "daily" },
+      ];
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, "preserved-active-checkpoint");
+      installLocalStorageMock(localStorage);
+      const setItem = vi.spyOn(localStorage, "setItem");
+      const store = createDayFrameStore({
+        ...buildValidHistoricalAuthoredSetup(),
+        savedProfiles: [invalidProfile],
+      });
+      store.generatePreview({
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+      });
+      const beforeState = store.getState();
+      const beforeDurability = store.getDurabilityStatus();
+      const beforeDesired = store.getDesiredDurableCondition();
+      const stateListener = vi.fn();
+      const durabilityListener = vi.fn();
+      store.subscribe(stateListener);
+      store.subscribeDurability(durabilityListener);
+
+      const result = store.loadProfile(invalidProfile.id);
+
+      expect(result).toMatchObject({
+        status: "recoveryRequired",
+        reason: "invalidAuthoredState",
+        validation: { status: "invalid" },
+      });
+      expect(store.getState()).toEqual(beforeState);
+      expect(store.getState().savedProfiles).toEqual([invalidProfile]);
+      expect(store.getDurabilityStatus()).toEqual(beforeDurability);
+      expect(store.getDesiredDurableCondition()).toEqual(beforeDesired);
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe("preserved-active-checkpoint");
+      expect(setItem).not.toHaveBeenCalled();
+      expect(stateListener).not.toHaveBeenCalled();
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+
+    it("rejects ambiguous duplicate profile referents with validator evidence", () => {
+      const profile = buildSavedProfile();
+      const template = buildBlockTemplates()[0]!;
+      profile.data.blockTemplates = [template, { ...template }];
+      profile.data.blockRecurrences = [
+        { id: "rec_ambiguous", blockTemplateId: template.id, frequency: "daily" },
+      ];
+      const store = createDayFrameStore({ savedProfiles: [profile] });
+
+      const result = store.loadProfile(profile.id);
+
+      expect(result.status).toBe("recoveryRequired");
+      if (result.status === "recoveryRequired") {
+        expect(result.validation.issues).toEqual(
+          expect.arrayContaining([expect.objectContaining({ code: "duplicateSourceId" })]),
+        );
+      }
+    });
+
+    it("loads advisory-only profile data and returns the advisory unchanged", () => {
+      const profile = buildSavedProfile();
+      profile.data = buildValidHistoricalAuthoredSetup();
+      profile.data.blockRecurrences = [
+        {
+          id: "rec_advisory",
+          blockTemplateId: profile.data.blockTemplates[0]!.id,
+          frequency: "perShiftSegment",
+        },
+      ];
+      const store = createDayFrameStore({ savedProfiles: [profile] });
+
+      const result = store.loadProfile(profile.id);
+      expectProfileLoaded(result);
+
+      expect(result.advisories).toEqual([
+        expect.objectContaining({ code: "unsupportedRecurrenceFrequency" }),
+      ]);
+      expect(currentPattern(result.state).blockRecurrences).toEqual(profile.data.blockRecurrences);
+    });
+
+    it("rejects a semantic-invalid backup atomically and leaves its artifact untouched", () => {
+      const localStorage = createLocalStorageMock();
+      localStorage.setItem(DAYFRAME_STORAGE_KEY, "preserved-active-checkpoint");
+      installLocalStorageMock(localStorage);
+      const setItem = vi.spyOn(localStorage, "setItem");
+      const store = createDayFrameStore(buildValidHistoricalAuthoredSetup());
+      store.generatePreview({
+        rangeStartDate: "2026-05-04",
+        rangeEndDate: "2026-05-05",
+        planningWindowStart: new Date(2026, 4, 4, 0, 0, 0, 0),
+        planningWindowEnd: new Date(2026, 4, 5, 23, 59, 0, 0),
+        generatedAt: "2026-05-03T13:00:00-05:00",
+      });
+      const invalidData = buildValidHistoricalAuthoredSetup();
+      invalidData.shiftDefinitions = [];
+      const backup = createDayFrameBackup(invalidData, "2026-05-05T10:00:00-05:00");
+      const artifactBefore = JSON.stringify(backup);
+      const beforeState = store.getState();
+      const beforeDurability = store.getDurabilityStatus();
+      const beforeDesired = store.getDesiredDurableCondition();
+      const stateListener = vi.fn();
+      const durabilityListener = vi.fn();
+      store.subscribe(stateListener);
+      store.subscribeDurability(durabilityListener);
+
+      const result = store.importBackup(backup);
+
+      expect(result).toEqual({ status: "rejected", reason: "authoredValidationFailure" });
+      expect(store.getState()).toEqual(beforeState);
+      expect(store.getDurabilityStatus()).toEqual(beforeDurability);
+      expect(store.getDesiredDurableCondition()).toEqual(beforeDesired);
+      expect(JSON.stringify(backup)).toBe(artifactBefore);
+      expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe("preserved-active-checkpoint");
+      expect(setItem).not.toHaveBeenCalled();
+      expect(stateListener).not.toHaveBeenCalled();
+      expect(durabilityListener).not.toHaveBeenCalled();
+    });
+
+    it("rejects ambiguous duplicate backup referents without partial import", () => {
+      const data = buildValidHistoricalAuthoredSetup();
+      const template = data.blockTemplates[0]!;
+      data.blockTemplates = [template, { ...template }];
+      data.blockRecurrences = [
+        { id: "rec_ambiguous", blockTemplateId: template.id, frequency: "daily" },
+      ];
+      const store = createDayFrameStore();
+
+      const result = store.importBackup(createDayFrameBackup(data, "2026-05-05T10:00:00-05:00"));
+
+      expect(result).toEqual({ status: "rejected", reason: "authoredValidationFailure" });
+      expect(store.getState()).toEqual(createInitialDayFrameState());
+    });
+
+    it("imports advisory-only backup data and returns the advisory unchanged", () => {
+      const data = buildValidHistoricalAuthoredSetup();
+      data.blockRecurrences = [
+        {
+          id: "rec_advisory",
+          blockTemplateId: data.blockTemplates[0]!.id,
+          frequency: "custom",
+        },
+      ];
+      const store = createDayFrameStore();
+
+      const result = store.importBackup(createDayFrameBackup(data, "2026-05-05T10:00:00-05:00"));
+      expectBackupImported(result);
+
+      expect(result.advisories).toEqual([
+        expect.objectContaining({ code: "unsupportedRecurrenceFrequency" }),
+      ]);
+      expect(currentPattern(result.state).blockRecurrences).toEqual(data.blockRecurrences);
+    });
+  });
 });
 
-function buildSavedProfile(state = createInitialDayFrameState()): DayFrameSavedProfile {
+describe("Profile V2 reusable-pattern persistence", () => {
+  it("migrates V1 only after verified V2 persistence and retains the V1 source", () => {
+    const localStorage = createLocalStorageMock();
+    const legacy = { app: "DayFrame", version: 1, profiles: [buildSavedProfile(
+      buildValidHistoricalAuthoredSetup())] };
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify(legacy));
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+    const v2 = JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "null") as {
+      surface: string; version: number; profiles: DayFrameSavedProfile[]; quarantinedProfiles: unknown[] };
+
+    expect(store.getProfileIngressStatus()).toEqual({ status: "accepted", quarantinedEntryCount: 0 });
+    expect(v2).toMatchObject({ surface: "profiles", version: 2, quarantinedProfiles: [] });
+    expect(v2.profiles[0]?.data).not.toHaveProperty("incarnationId");
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "null")).toEqual(legacy);
+  });
+
+  it("protects corrupt V2 without falling back to a valid V1 collection", () => {
+    const localStorage = createLocalStorageMock();
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+
+    expect(store.getState().savedProfiles).toEqual([]);
+    expect(store.getProfileIngressStatus()).toEqual({
+      status: "recoveryRequired", reason: "invalidV2", sourcePreserved: true,
+    });
+    expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("{");
+  });
+
+  it("does not expose migrated profiles when V2 migration serialization fails", () => {
+    const localStorage = createLocalStorageMock();
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore(undefined, {
+      serializeProfilesV2: () => { throw new RangeError("injected"); },
+    });
+
+    expect(store.getState().savedProfiles).toEqual([]);
+    expect(store.getProfileIngressStatus()).toMatchObject({
+      status: "recoveryRequired", reason: "migrationFailure",
+      failureDetail: "serializationFailure", sourcePreserved: true,
+    });
+    expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
+    expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBeNull();
+  });
+
+  it.each([
+    ["writeFailure", "throw-write"],
+    ["rereadFailure", "throw-reread"],
+    ["rereadValidationFailure", "invalid-reread"],
+    ["verificationFailure", "different-valid-reread"],
+  ] as const)("protects V1 when migration ends in %s", (failureDetail, mode) => {
+    const localStorage = createLocalStorageMock();
+    const originalGet = localStorage.getItem.bind(localStorage);
+    const originalSet = localStorage.setItem.bind(localStorage);
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+    let wroteV2 = false;
+    localStorage.setItem = (key, value) => {
+      if (key !== DAYFRAME_PROFILES_V2_STORAGE_KEY) return originalSet(key, value);
+      if (mode === "throw-write") throw new RangeError("injected write failure");
+      wroteV2 = true;
+      if (mode === "invalid-reread") return originalSet(key, "{");
+      if (mode === "different-valid-reread") {
+        return originalSet(key, JSON.stringify(JSON.parse(value), null, 2));
+      }
+      originalSet(key, value);
+    };
+    localStorage.getItem = (key) => {
+      if (key === DAYFRAME_PROFILES_V2_STORAGE_KEY && wroteV2 && mode === "throw-reread") {
+        throw new RangeError("injected reread failure");
+      }
+      return originalGet(key);
+    };
+    installLocalStorageMock(localStorage);
+
+    const store = createDayFrameStore();
+
+    expect(store.getState().savedProfiles).toEqual([]);
+    expect(store.getProfileIngressStatus()).toMatchObject({
+      status: "recoveryRequired", reason: "migrationFailure", failureDetail,
+      sourcePreserved: true,
+    });
+    expect(originalGet(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
+  });
+
+  it("prevents cleared V1 profiles from resurrecting after Profile V2 authority was established", () => {
+    const localStorage = createLocalStorageMock();
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+    installLocalStorageMock(localStorage);
+    const store = createDayFrameStore();
+
+    expect(store.getState().savedProfiles).toHaveLength(1);
+    expect(store.clearLocalData().profiles).toEqual({ status: "removed" });
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+
+    expect(createDayFrameStore().getState().savedProfiles).toEqual([]);
+  });
+
+  it("instantiates fresh active incarnations on every load while preserving authored identities", () => {
+    const localStorage = createLocalStorageMock();
+    installLocalStorageMock(localStorage);
+    let allocation = 0;
+    const pattern = buildValidHistoricalAuthoredSetup();
+    pattern.shiftCycles[0]!.sequence = [
+      { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+    ];
+    pattern.manualEvents = [{ id: "manual_event_1", title: "Appointment",
+      userDayDate: "2026-05-06", startTime: "09:30", endTime: "10:30", allDay: false,
+      ...baseTimestamps }];
+    const store = createDayFrameStore({ savedProfiles: [buildSavedProfile(pattern)] }, {
+      allocateSourceIncarnationId: () => `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never,
+    });
+    const profile = store.getState().savedProfiles[0]!;
+
+    const first = store.loadProfile(profile.id);
+    expectProfileLoaded(first);
+    const firstIncarnations = collectIncarnations(first.state);
+    const second = store.loadProfile(profile.id);
+    expectProfileLoaded(second);
+    const secondIncarnations = collectIncarnations(second.state);
+
+    expect(firstIncarnations).toHaveLength(7);
+    expect(secondIncarnations).toHaveLength(7);
+    expect(secondIncarnations.every((id) => !firstIncarnations.includes(id))).toBe(true);
+    expect(currentPattern(second.state)).toEqual(profile.data);
+    expect(second.state.preview).toBeNull();
+  });
+});
+
+describe("Profile V2 recovery authority", () => {
+  it("exports exact protected bytes without mutation or notification", () => {
+    const localStorage = createLocalStorageMock();
+    const raw = "{ preserved invalid profile bytes";
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, raw);
+    installLocalStorageMock(localStorage);
+    const store = createDayFrameStore();
+    const stateListener = vi.fn();
+    const durabilityListener = vi.fn();
+    const ingressListener = vi.fn();
+    store.subscribe(stateListener);
+    store.subscribeDurability(durabilityListener);
+    store.subscribeProfileIngress(ingressListener);
+
+    expect(store.exportProtectedProfileSource()).toEqual({ status: "exported", raw });
+    expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe(raw);
+    expect(stateListener).not.toHaveBeenCalled();
+    expect(durabilityListener).not.toHaveBeenCalled();
+    expect(ingressListener).not.toHaveBeenCalled();
+  });
+
+  it("rechecks and verifies explicit replacement while preserving current quarantine", () => {
+    const localStorage = createLocalStorageMock();
+    const raw = "{";
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, raw);
+    installLocalStorageMock(localStorage);
+    const profile = buildSavedProfile();
+    const store = createDayFrameStore({ savedProfiles: [profile] });
+
+    expect(store.replaceProtectedProfileCheckpointWithCurrentProfiles()).toEqual({
+      status: "resolved", action: "replace", persistence: { status: "persisted" },
+    });
+    expect(store.getProfileIngressStatus()).toEqual({
+      status: "accepted", quarantinedEntryCount: 0,
+    });
+    const restarted = createDayFrameStore();
+    expect(restarted.getState().savedProfiles).toEqual([profile]);
+  });
+
+  it.each(["replace", "abandon"] as const)(
+    "rejects stale protected-source authority before %s", (action) => {
+      const localStorage = createLocalStorageMock();
+      localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
+      installLocalStorageMock(localStorage);
+      const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+      localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "externally changed");
+
+      const result = action === "replace"
+        ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
+        : store.abandonProtectedProfileCheckpoint();
+
+      expect(result).toEqual({ status: "notAttempted", reason: "sourceChanged" });
+      expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("externally changed");
+      expect(store.getProfileIngressStatus().status).toBe("recoveryRequired");
+    },
+  );
+
+  it("establishes restart-safe empty V2 authority after explicit abandonment", () => {
+    const localStorage = createLocalStorageMock();
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
+    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
+    }));
+    installLocalStorageMock(localStorage);
+    const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+
+    expect(store.abandonProtectedProfileCheckpoint()).toEqual({
+      status: "resolved", action: "abandon", persistence: { status: "persisted" },
+    });
+    expect(store.getState().savedProfiles).toEqual([]);
+    expect(localStorage.getItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY)).toBe("1");
+    expect(createDayFrameStore().getState().savedProfiles).toEqual([]);
+  });
+
+  it.each(["replace", "abandon"] as const)(
+    "retains protection when %s cannot write its verified recovery checkpoint", (action) => {
+      const localStorage = createLocalStorageMock();
+      const raw = "{";
+      localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, raw);
+      installLocalStorageMock(localStorage);
+      const store = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+      localStorage.setItem = vi.fn(() => { throw new RangeError("injected"); });
+
+      const result = action === "replace"
+        ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
+        : store.abandonProtectedProfileCheckpoint();
+
+      expect(result).toMatchObject({ status: "notResolved", action,
+        persistence: { status: "storageFailure" } });
+      expect(store.getProfileIngressStatus().status).toBe("recoveryRequired");
+      expect(store.exportProtectedProfileSource()).toEqual({ status: "exported", raw });
+      expect(store.getState().savedProfiles).toHaveLength(1);
+    },
+  );
+
+  it("exports and removes quarantine independently while retaining valid profiles and active state", () => {
+    const localStorage = createLocalStorageMock();
+    const profile = buildSavedProfile();
+    const invalidA = { id: "invalid_a", name: "Invalid A", data: null };
+    const invalidB = { unexpected: true };
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
+      quarantinedProfiles: [invalidA, invalidB],
+    }));
+    installLocalStorageMock(localStorage);
+    const store = createDayFrameStore();
+    const activeBefore = currentActiveSetup(store.getState());
+    const entries = store.getQuarantinedProfiles();
+
+    expect(entries).toHaveLength(2);
+    expect(store.exportQuarantinedProfile(entries[0]!.quarantineId)).toEqual({
+      status: "exported", entry: expect.objectContaining({ raw: invalidA,
+        reason: "invalidProfileEntry", originalProfileId: "invalid_a" }),
+    });
+    const removed = store.removeQuarantinedProfile(entries[0]!.quarantineId);
+    expect(removed).toMatchObject({ status: "removed", persistence: { status: "persisted" },
+      remainingCount: 1 });
+    expect(store.getState().savedProfiles).toEqual([profile]);
+    expect(currentActiveSetup(store.getState())).toEqual(activeBefore);
+    expect(store.getQuarantinedProfiles()[0]?.raw).toEqual(invalidB);
+  });
+
+  it("retains quarantine-removal intent for retry after persistence failure", () => {
+    const localStorage = createLocalStorageMock();
+    const profile = buildSavedProfile();
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
+      quarantinedProfiles: [{ id: "remove_me", data: null }],
+    }));
+    installLocalStorageMock(localStorage);
+    const store = createDayFrameStore();
+    const entry = store.getQuarantinedProfiles()[0]!;
+    const originalSet = localStorage.setItem;
+    localStorage.setItem = vi.fn(() => { throw new RangeError("injected"); });
+
+    expect(store.removeQuarantinedProfile(entry.quarantineId)).toMatchObject({
+      status: "removed", persistence: { status: "storageFailure" }, remainingCount: 0,
+    });
+    expect(store.getQuarantinedProfiles()).toEqual([]);
+    localStorage.setItem = originalSet;
+    expect(store.retryProfilePersistence()).toMatchObject({
+      status: "attempted", persistence: { status: "persisted" },
+    });
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}").quarantinedProfiles)
+      .toEqual([]);
+  });
+
+  it("blocks ordinary save/delete and retry from overwriting protected ingress", () => {
+    const localStorage = createLocalStorageMock();
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
+    installLocalStorageMock(localStorage);
+    const profile = buildSavedProfile();
+    const store = createDayFrameStore({ savedProfiles: [profile] });
+
+    expect(store.saveProfile({ name: "Blocked", savedAt: "2026-08-20" })).toMatchObject({
+      status: "blocked", reason: "profileRecovery",
+      persistence: { status: "notAttempted" },
+    });
+    expect(store.deleteProfile(profile.id)).toMatchObject({ status: "blocked" });
+    expect(store.retryProfilePersistence()).toEqual({
+      status: "notAttempted", reason: "recoveryProtected",
+    });
+    expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("{");
+    expect(store.getState().savedProfiles).toEqual([profile]);
+  });
+});
+
+describe("Backup V2 lifetime-preserving restore", () => {
+  function fullPattern(): DayFrameAuthoredPattern {
+    const pattern = buildValidHistoricalAuthoredSetup();
+    pattern.shiftCycles[0]!.sequence = [
+      { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+    ];
+    pattern.manualEvents = [{ id: "manual_event_1", title: "Appointment",
+      userDayDate: "2026-05-06", startTime: "09:30", endTime: "10:30", allDay: false,
+      ...baseTimestamps }];
+    return pattern;
+  }
+
+  it("exports and repeatedly restores the exact seven-kind lifetime graph", () => {
+    const source = createDayFrameStore(fullPattern());
+    const sourceState = source.getState();
+    const backup = source.exportBackup("2026-08-20T12:00:00-05:00");
+    const serializedBefore = JSON.stringify(backup);
+
+    expect(validateDayFrameBackupV2(backup)).toEqual(backup);
+    expect(backup).toMatchObject({ app: "DayFrame", surface: "backup", version: 2 });
+    expect(collectIncarnations(sourceState)).toHaveLength(7);
+    expect(collectIncarnations(backup.data)).toEqual(
+      collectIncarnations(sourceState));
+    expect(backup.data).not.toHaveProperty("shiftCycle");
+    expect(backup.data).not.toHaveProperty("savedProfiles");
+    expect(backup.data).not.toHaveProperty("preview");
+
+    const target = createDayFrameStore({ savedProfiles: [buildSavedProfile()] });
+    const first = target.importBackup(backup);
+    expect(first.status).toBe("restored");
+    if (first.status !== "restored") throw new RangeError("expected restore");
+    expect(collectIncarnations(first.state)).toEqual(collectIncarnations(sourceState));
+    expect(first.state.savedProfiles).toEqual([buildSavedProfile()]);
+    const second = target.importBackup(backup);
+    expect(second.status).toBe("restored");
+    if (second.status !== "restored") throw new RangeError("expected restore");
+    expect(collectIncarnations(second.state)).toEqual(collectIncarnations(sourceState));
+    expect(JSON.stringify(backup)).toBe(serializedBefore);
+  });
+
+  it("restores V2 without using the source-incarnation allocator", () => {
+    const backup = createDayFrameStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    const target = createDayFrameStore(undefined, {
+      allocateSourceIncarnationId: () => { throw new RangeError("must not allocate"); },
+    });
+
+    expect(target.importBackup(backup).status).toBe("restored");
+  });
+
+  it("rejects Active/Profile/unknown envelopes without mutating active authority", () => {
+    const backup = createDayFrameStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    const target = createDayFrameStore(fullPattern());
+    const before = target.getState();
+    const candidates = [
+      { ...backup, surface: "active" },
+      { app: "DayFrame", surface: "profiles", version: 2, profiles: [], quarantinedProfiles: [] },
+      { ...backup, version: 99 },
+    ];
+
+    expect(target.importBackup(candidates[0])).toEqual({ status: "rejected",
+      reason: "envelopeValidationFailure" });
+    expect(target.importBackup(candidates[1])).toEqual({ status: "rejected",
+      reason: "envelopeValidationFailure" });
+    expect(target.importBackup(candidates[2])).toEqual({ status: "rejected",
+      reason: "unsupportedVersion" });
+    expect(target.getState()).toEqual(before);
+  });
+
+  it("keeps export/import objects isolated and preserves Profile V2 quarantine", () => {
+    const localStorage = createLocalStorageMock();
+    const profile = buildSavedProfile();
+    const quarantined = { id: "invalid", data: null };
+    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
+      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
+      quarantinedProfiles: [quarantined],
+    }));
+    installLocalStorageMock(localStorage);
+    const source = createDayFrameStore(fullPattern());
+    const backup = source.exportBackup("2026-08-20T12:00:00-05:00");
+    const target = createDayFrameStore();
+    const result = target.importBackup(backup);
+    expect(result.status).toBe("restored");
+    if (result.status !== "restored") throw new RangeError("expected restore");
+    const restoredBeforeMutation = target.getState();
+    backup.data.shiftDefinitions[0]!.name = "Mutated caller artifact";
+
+    expect(target.getState()).toEqual(restoredBeforeMutation);
+    expect(target.getState().savedProfiles).toEqual([profile]);
+    expect(target.getQuarantinedProfiles()[0]?.raw).toEqual(quarantined);
+    expect(source.getState().shiftDefinitions[0]?.name).not.toBe("Mutated caller artifact");
+  });
+
+  it("imports Backup V1 as disjoint fresh lifetimes on every import", () => {
+    let allocation = 0;
+    const store = createDayFrameStore(undefined, { allocateSourceIncarnationId: () =>
+      `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never });
+    const backup = createDayFrameBackup(fullPattern(), "2026-08-20T12:00:00-05:00");
+    const first = store.importBackup(backup);
+    expect(first.status).toBe("instantiatedFromLegacy");
+    if (first.status !== "instantiatedFromLegacy") throw new RangeError("expected V1 import");
+    const second = store.importBackup(backup);
+    expect(second.status).toBe("instantiatedFromLegacy");
+    if (second.status !== "instantiatedFromLegacy") throw new RangeError("expected V1 import");
+    expect(collectIncarnations(first.state).every((id) =>
+      !collectIncarnations(second.state).includes(id))).toBe(true);
+  });
+
+  it("rejects Backup V1 allocation failure before mutation or persistence", () => {
+    const store = createDayFrameStore(undefined, { allocateSourceIncarnationId: () => {
+      throw new RangeError("injected");
+    } });
+    const before = store.getState();
+    const backup = createDayFrameBackup(fullPattern(), "2026-08-20T12:00:00-05:00");
+
+    expect(store.importBackup(backup)).toEqual({ status: "rejected", reason: "allocationFailure" });
+    expect(store.getState()).toEqual(before);
+  });
+
+  it.each(["missing", "malformed", "duplicate"] as const)(
+    "rejects %s Backup V2 incarnation atomically", (kind) => {
+      const backup = createDayFrameStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+      const invalid = structuredClone(backup);
+      if (kind === "missing") delete (invalid.data.shiftDefinitions[0] as Partial<
+        typeof invalid.data.shiftDefinitions[number]>).incarnationId;
+      if (kind === "malformed") invalid.data.shiftDefinitions[0]!.incarnationId = "INVALID" as never;
+      if (kind === "duplicate") invalid.data.shiftCycles[0]!.incarnationId =
+        invalid.data.shiftDefinitions[0]!.incarnationId;
+      const target = createDayFrameStore(fullPattern());
+      const before = target.getState();
+
+      expect(target.importBackup(invalid)).toEqual({ status: "rejected",
+        reason: "incarnationValidationFailure" });
+      expect(target.getState()).toEqual(before);
+    },
+  );
+
+  it("keeps restored lifetime authority after Active V2 failure and retries it exactly", () => {
+    const localStorage = createLocalStorageMock();
+    installLocalStorageMock(localStorage);
+    const backup = createDayFrameStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    let failActive = true;
+    const originalSet = localStorage.setItem;
+    localStorage.setItem = (key, value) => {
+      if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY && failActive) throw new RangeError("injected");
+      originalSet(key, value);
+    };
+    const target = createDayFrameStore();
+    const result = target.importBackup(backup);
+    expect(result.status).toBe("restored");
+    if (result.status !== "restored") throw new RangeError("expected restore");
+    expect(result.persistence).toEqual({ status: "storageFailure" });
+    expect(collectIncarnations(result.state)).toEqual(collectIncarnations(backup.data));
+    failActive = false;
+    expect(target.retryActivePersistence()).toMatchObject({ status: "attempted",
+      persistence: { status: "persisted" } });
+    expect(collectIncarnations(readActiveV2Data(localStorage))).toEqual(
+      collectIncarnations(backup.data));
+  });
+
+  it("preserves scheduling and OccurrenceIdentity V1 semantics across a V2 roundtrip", () => {
+    const generation = {
+      rangeStartDate: "2026-05-04",
+      rangeEndDate: "2026-05-07",
+      planningWindowStart: new Date(2026, 4, 4),
+      planningWindowEnd: new Date(2026, 4, 8),
+      generatedAt: "2026-05-03T13:00:00-05:00",
+    } as const;
+    const source = createDayFrameStore(fullPattern());
+    const expected = source.generatePreview(generation).preview!.result;
+    const backup = source.exportBackup("2026-08-20T12:00:00-05:00");
+    const target = createDayFrameStore();
+    expect(target.importBackup(backup).status).toBe("restored");
+    const restored = target.generatePreview(generation).preview!.result;
+
+    expect(restored).toEqual(expected);
+    expect(JSON.stringify(restored)).not.toContain("incarnationId");
+  });
+});
+
+function collectIncarnations(state: DayFrameAuthoredSetup): string[] {
+  return [
+    ...state.shiftDefinitions.map(({ incarnationId }) => incarnationId),
+    ...state.shiftCycles.flatMap((cycle) => [cycle.incarnationId,
+      ...cycle.segments.map(({ incarnationId }) => incarnationId),
+      ...(cycle.sequence ?? []).map(({ incarnationId }) => incarnationId)]),
+    ...state.blockTemplates.map(({ incarnationId }) => incarnationId),
+    ...state.blockRecurrences.map(({ incarnationId }) => incarnationId),
+    ...state.manualEvents.map(({ incarnationId }) => incarnationId),
+  ];
+}
+
+function buildSavedProfile(
+  state: DayFrameAuthoredPattern = createInitialDayFrameState(),
+): DayFrameSavedProfile {
   return {
     id: "profile_outcome",
     name: "Outcome Profile",
@@ -2938,6 +4468,20 @@ function buildSavedProfile(state = createInitialDayFrameState()): DayFrameSavedP
   };
 }
 
+function buildValidHistoricalAuthoredSetup(): DayFrameAuthoredPattern {
+  const state = createInitialDayFrameState();
+
+  return {
+    schedulingPreferences: state.schedulingPreferences,
+    previewRange: state.previewRange,
+    shiftDefinitions: buildShiftDefinitions(),
+    shiftCycles: [buildShiftCycle()],
+    blockTemplates: buildBlockTemplates(),
+    blockRecurrences: buildBlockRecurrences(),
+    manualEvents: [],
+  };
+}
+
 function buildSerializationFailureState(): DayFrameState {
   const state = createInitialDayFrameState();
   const blockTemplate = buildBlockTemplates()[0]!;
@@ -2945,6 +4489,7 @@ function buildSerializationFailureState(): DayFrameState {
   state.blockTemplates = [
     {
       ...blockTemplate,
+      incarnationId: "00000000-0000-4000-8000-000000000099" as DayFrameState["blockTemplates"][number]["incarnationId"],
       externalResources: [
         {
           id: "resource_invalid",
@@ -3124,3 +4669,74 @@ function installThrowingLocalStorageAccessor(): void {
     },
   });
 }
+
+describe("lifecycle-aware manual-event mutations", () => {
+  const event = {
+    id: "manual_event_1",
+    title: "Event",
+    userDayDate: "2026-08-20" as const,
+    allDay: true,
+    ...baseTimestamps,
+  };
+
+  it("requires create and update to match the explicit active-source condition", () => {
+    const store = createDayFrameStore();
+
+    expect(store.mutateManualEvent({ operation: "create", event }).status).toBe("applied");
+    expect(() => store.mutateManualEvent({ operation: "create", event })).toThrow("already active");
+    expect(
+      store.mutateManualEvent({ operation: "update", event: { ...event, title: "Updated" } })
+        .status,
+    ).toBe("applied");
+    expect(store.getState().manualEvents[0]?.title).toBe("Updated");
+  });
+
+  it("makes deletion and same-ID replacement explicit", () => {
+    const store = createDayFrameStore({ manualEvents: [event] });
+
+    expect(store.mutateManualEvent({ operation: "delete", sourceId: event.id }).status).toBe(
+      "applied",
+    );
+    expect(() =>
+      store.mutateManualEvent({ operation: "update", event: { ...event, title: "Recreated" } }),
+    ).toThrow("missing");
+    expect(
+      store.mutateManualEvent({ operation: "replace", event: { ...event, title: "Recreated" } })
+        .status,
+    ).toBe("applied");
+  });
+});
+
+describe("lifecycle-aware Setup commit", () => {
+  it("rejects a snapshot whose explicit transaction does not cover its source lifecycle", () => {
+    const store = createDayFrameStore({
+      shiftDefinitions: [
+        {
+          id: "shift_1",
+          userId: "user_001",
+          name: "Shift",
+          startTime: "09:00",
+          endTime: "17:00",
+          workDays: ["monday"],
+          crossesMidnight: false,
+          ...baseTimestamps,
+        },
+      ],
+    });
+    const state = store.getState();
+
+    expect(() =>
+      store.commitAuthoredSetupTransaction({
+        authoredSetup: {
+          schedulingPreferences: state.schedulingPreferences,
+          previewRange: state.previewRange,
+          shiftDefinitions: state.shiftDefinitions,
+          shiftCycles: state.shiftCycles,
+          blockTemplates: state.blockTemplates,
+          blockRecurrences: state.blockRecurrences,
+        },
+        lifecycle: { operations: [] },
+      }),
+    ).toThrow("does not cover shiftDefinition::shift_1");
+  });
+});

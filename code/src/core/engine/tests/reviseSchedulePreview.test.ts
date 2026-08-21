@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { GenerateSchedulePreviewResult } from "../generateSchedulePreview.js";
 import { reviseSchedulePreview } from "../reviseSchedulePreview.js";
+import { createTemplateOccurrenceIdentity } from "../../occurrences/occurrenceIdentity.js";
 
 describe("reviseSchedulePreview", () => {
   it("applies a reduce-duration fix and refreshes friction detection", () => {
@@ -11,6 +12,14 @@ describe("reviseSchedulePreview", () => {
       scheduledBlocks: [
         {
           id: "scheduled_workout",
+          occurrenceIdentity: createTemplateOccurrenceIdentity({
+            templateId: "template_workout",
+            recurrenceId: "rec_workout",
+            frequency: "daily",
+            userDayDate: "2026-05-05",
+            userWeekStartDate: "2026-05-02",
+            slot: 0,
+          }),
           userId: "user_001",
           templateId: "template_workout",
           source: "template",
@@ -41,6 +50,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_scheduled_workout_scheduled_errands",
@@ -80,6 +90,12 @@ describe("reviseSchedulePreview", () => {
     );
     expect(result.preview.frictionPoints).toEqual([]);
     expect(result.didRevise).toBe(true);
+    expect(result.preview.scheduledBlocks[0]?.occurrenceIdentity).toEqual(
+      preview.scheduledBlocks[0]?.occurrenceIdentity,
+    );
+    expect(result.preview.scheduledBlocks[0]?.occurrenceIdentity).not.toBe(
+      preview.scheduledBlocks[0]?.occurrenceIdentity,
+    );
     expect(preview.scheduledBlocks[0]?.endsAt.getTime()).toBe(
       new Date(2026, 4, 5, 15, 0, 0, 0).getTime(),
     );
@@ -158,6 +174,7 @@ describe("reviseSchedulePreview", () => {
           userWeekStartDate: "2026-05-02",
         },
       ],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_unplaced_candidate_workout",
@@ -240,6 +257,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_work_shift_day_2026-05-05_scheduled_workout",
@@ -303,6 +321,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_1",
@@ -376,6 +395,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_scheduled_workout_scheduled_errands",
@@ -461,6 +481,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_scheduled_workout_scheduled_errands",
@@ -543,6 +564,7 @@ describe("reviseSchedulePreview", () => {
         },
       ],
       unplacedCandidates: [],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_work_fixed",

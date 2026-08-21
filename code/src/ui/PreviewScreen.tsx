@@ -7,6 +7,7 @@ import type { CalendarHoliday } from "../core/calendar/types.js";
 import type { DayFramePreview } from "../state/types.js";
 import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { DayVisualizer } from "./DayVisualizer.js";
+import type { AcceptedDecisionViewModel } from "./acceptedDecisionPresentation.js";
 import {
   formatHumanTimeRange,
   formatPlanningWindow,
@@ -20,6 +21,14 @@ export type PreviewScreenProps = {
     selectedFrictionPointId: string;
     selectedSuggestedFixId: string;
   }) => void;
+  pendingPlanDecisionAcceptance?: boolean;
+  onAcceptPlanDecision?: () => void;
+  planDecisionFeedback?: { message: string; tone: "info" | "warning" } | null;
+  planDecisionRetryAvailable?: boolean;
+  onRetryPlanDecisionDurability?: () => void;
+  acceptedDecisions?: AcceptedDecisionViewModel[];
+  decisionRemovalProtected?: boolean;
+  onRemoveAcceptedDecision?: (decisionId: AcceptedDecisionViewModel["decisionId"]) => void;
   rangeWarnings?: PreviewRangeWarning[];
   visibleRangeStartDate?: LocalDateString | null;
   visibleRangeEndDate?: LocalDateString | null;
@@ -50,6 +59,14 @@ export function PreviewScreen({
   preview,
   getDayBoundaryStartTimeForUserDayDate,
   onApplySuggestedFix,
+  pendingPlanDecisionAcceptance = false,
+  onAcceptPlanDecision,
+  planDecisionFeedback = null,
+  planDecisionRetryAvailable = false,
+  onRetryPlanDecisionDurability,
+  acceptedDecisions = [],
+  decisionRemovalProtected = false,
+  onRemoveAcceptedDecision,
   rangeWarnings = [],
   visibleRangeStartDate = null,
   visibleRangeEndDate = null,
@@ -65,6 +82,18 @@ export function PreviewScreen({
             Generate a preview to see work blocks, placed life blocks, and any friction that still
             needs review.
           </p>
+          {planDecisionFeedback ? (
+            <div className={planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"} role="status">
+              <p>{planDecisionFeedback.message}</p>
+              {planDecisionRetryAvailable ? (
+                <button className="df-secondary-button" onClick={onRetryPlanDecisionDurability} type="button">
+                  Retry accepted choice save
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          <AcceptedChoicesSection decisions={acceptedDecisions}
+            onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
         </section>
       </main>
     );
@@ -91,7 +120,9 @@ export function PreviewScreen({
           Review the draft schedule day by day, then apply suggested fixes if anything conflicts.
         </p>
         {preview.isStale ? (
-          <p className="df-danger-message">Setup changed. Generate a new preview to see updates.</p>
+          <p className="df-danger-message">
+            Setup changed. Generate a new preview to see updates and apply current suggestions.
+          </p>
         ) : null}
         {preview.actionFeedback ? (
           <p
@@ -102,6 +133,26 @@ export function PreviewScreen({
             {preview.actionFeedback.message}
           </p>
         ) : null}
+        {pendingPlanDecisionAcceptance && !preview.isStale ? (
+          <div className="df-confirmation">
+            <p>You are trying this choice in the current preview.</p>
+            <button className="df-primary-button" onClick={onAcceptPlanDecision} type="button">
+              Accept this choice
+            </button>
+          </div>
+        ) : null}
+        {planDecisionFeedback ? (
+          <div className={planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"} role="status">
+            <p>{planDecisionFeedback.message}</p>
+            {planDecisionRetryAvailable ? (
+              <button className="df-secondary-button" onClick={onRetryPlanDecisionDurability} type="button">
+                Retry accepted choice save
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        <AcceptedChoicesSection decisions={acceptedDecisions}
+          onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
         {rangeWarnings.length > 0 ? (
           <div className="df-form-stack">
             <p className="df-warning-message">Preview range warnings:</p>
@@ -173,6 +224,7 @@ export function PreviewScreen({
                           occurrence.frictionPoint.suggestedFixes.map((suggestedFix) => (
                             <button
                               className="df-fix-button"
+                              disabled={preview.isStale}
                               key={suggestedFix.id}
                               onClick={createSuggestedFixHandler(
                                 occurrence.frictionPoint.id,
@@ -181,7 +233,7 @@ export function PreviewScreen({
                               )}
                               type="button"
                             >
-                              {suggestedFix.label}
+                              {formatSuggestedFixLabel(suggestedFix)}
                             </button>
                           ))
                         ) : (
@@ -351,6 +403,7 @@ export function PreviewScreen({
                             frictionPoint.suggestedFixes.map((suggestedFix) => (
                               <button
                                 className="df-fix-button"
+                                disabled={preview.isStale}
                                 key={suggestedFix.id}
                                 onClick={createSuggestedFixHandler(
                                   frictionPoint.id,
@@ -359,7 +412,7 @@ export function PreviewScreen({
                                 )}
                                 type="button"
                               >
-                                {suggestedFix.label}
+                                {formatSuggestedFixLabel(suggestedFix)}
                               </button>
                             ))
                           ) : (
@@ -379,6 +432,40 @@ export function PreviewScreen({
         ))}
       </div>
     </main>
+  );
+}
+
+function AcceptedChoicesSection({ decisions, onRemove, removalProtected }: {
+  decisions: AcceptedDecisionViewModel[];
+  onRemove: ((decisionId: AcceptedDecisionViewModel["decisionId"]) => void) | undefined;
+  removalProtected: boolean;
+}): ReactElement | null {
+  if (decisions.length === 0) return null;
+  return (
+    <section aria-labelledby="accepted-choices-heading" className="df-accepted-choices">
+      <h2 className="df-panel-title" id="accepted-choices-heading">
+        Accepted choices ({decisions.length})
+      </h2>
+      {removalProtected ? (
+        <p className="df-danger-message">Accepted choices are protected by recovery-required stored data.</p>
+      ) : null}
+      <ul className="df-accepted-choice-list">
+        {decisions.map((decision) => (
+          <li className="df-accepted-choice" key={decision.decisionId}>
+            <div>
+              <strong>{decision.summary}</strong>
+              <p className="df-muted">{decision.occurrenceContext}</p>
+              <p className="df-meta">Status: {decision.statusLabel}</p>
+            </div>
+            <button aria-label={`Remove accepted choice for ${decision.targetSummary}`}
+              className="df-secondary-button" disabled={removalProtected}
+              onClick={() => onRemove?.(decision.decisionId)} type="button">
+              Remove
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -585,6 +672,18 @@ function createSuggestedFixHandler(
       selectedSuggestedFixId,
     });
   };
+}
+
+function formatSuggestedFixLabel(
+  suggestedFix: DayFramePreview["result"]["frictionPoints"][number]["suggestedFixes"][number],
+): string {
+  if (suggestedFix.decisionContext?.relationship === "superseding") {
+    return `Revise accepted choice: ${suggestedFix.label}`;
+  }
+  if (suggestedFix.decisionContext?.relationship === "unblocking") {
+    return `May unblock accepted choice: ${suggestedFix.label}`;
+  }
+  return suggestedFix.label;
 }
 
 function createDateFromLocalDate(userDayDate: string): Date {

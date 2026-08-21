@@ -116,16 +116,18 @@ describe("generateSchedulePreview", () => {
   it("does not generate sleep when the sleep template is disabled", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Empty Cycle",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Empty Cycle",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -164,16 +166,18 @@ describe("generateSchedulePreview", () => {
   it("does generate sleep when the sleep template is enabled", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Empty Cycle",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Empty Cycle",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -576,16 +580,18 @@ describe("generateSchedulePreview", () => {
 
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Empty Cycle",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Empty Cycle",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents,
@@ -605,22 +611,38 @@ describe("generateSchedulePreview", () => {
       "manual",
       "manual",
     ]);
+    expect(
+      result.scheduledBlocks.map((scheduledBlock) => scheduledBlock.occurrenceIdentity),
+    ).toEqual([
+      {
+        version: 1,
+        sourceKind: "manualEvent",
+        manualEventId: "manual_event_doctor",
+      },
+      {
+        version: 1,
+        sourceKind: "manualEvent",
+        manualEventId: "manual_event_birthday",
+      },
+    ]);
     expect(result.frictionPoints).toEqual([]);
   });
 
   it("keeps conflicting manual events in the preview while still surfacing friction", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Empty Cycle",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Empty Cycle",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1125,16 +1147,18 @@ describe("generateSchedulePreview", () => {
   it("keeps sunday sleep recurrence in the sunday preview group", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Empty Cycle",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Empty Cycle",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1191,24 +1215,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Day Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_day",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_day",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Day Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_day",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_day",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1272,24 +1298,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1347,24 +1375,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1458,24 +1488,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "template_wind_down",
@@ -1533,24 +1565,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1634,24 +1668,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1718,24 +1754,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Night Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_night",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_night",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Night Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_night",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_night",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "default_sleep",
@@ -1808,24 +1846,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Early Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_early",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_early",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Early Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_early",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_early",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "template_maintenance",
@@ -1889,24 +1929,26 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_001",
-        userId: "user_001",
-        name: "Day Rotation",
-        type: "fixedSegments",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-31",
-        segments: [
-          {
-            id: "segment_day",
-            shiftCycleId: "cycle_001",
-            shiftDefinitionId: "shift_day",
-            startsOnDate: "2026-05-01",
-            endsOnDate: "2026-05-31",
-          },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_001",
+          userId: "user_001",
+          name: "Day Rotation",
+          type: "fixedSegments",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-31",
+          segments: [
+            {
+              id: "segment_day",
+              shiftCycleId: "cycle_001",
+              shiftDefinitionId: "shift_day",
+              startsOnDate: "2026-05-01",
+              endsOnDate: "2026-05-31",
+            },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [],
       blockRecurrences: [],
       manualEvents: [
@@ -1971,23 +2013,25 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_sequence",
-        userId: "user_001",
-        name: "DDNNOO",
-        type: "fixedSegments",
-        mode: "repeatingSequence",
-        startsOnDate: "2026-05-05",
-        endsOnDate: "2026-05-10",
-        segments: [],
-        sequenceAnchorDate: "2026-05-01",
-        sequence: [
-          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
-          { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_night" },
-          { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_sequence",
+          userId: "user_001",
+          name: "DDNNOO",
+          type: "fixedSegments",
+          mode: "repeatingSequence",
+          startsOnDate: "2026-05-05",
+          endsOnDate: "2026-05-10",
+          segments: [],
+          sequenceAnchorDate: "2026-05-01",
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+            { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: "shift_night" },
+            { id: "sequence_day_3", dayOffset: 2, shiftDefinitionId: null },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [],
       blockRecurrences: [],
       planningWindowStart: new Date(2026, 4, 5, 0, 0, 0, 0),
@@ -2120,22 +2164,24 @@ describe("generateSchedulePreview", () => {
           ...baseTimestamps,
         },
       ],
-      shiftCycles: [{
-        id: "cycle_off_days",
-        userId: "user_001",
-        name: "4 On 4 Off",
-        type: "fixedSegments",
-        mode: "repeatingSequence",
-        startsOnDate: "2026-05-01",
-        endsOnDate: "2026-05-04",
-        segments: [],
-        sequenceAnchorDate: "2026-05-01",
-        sequence: [
-          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
-          { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
-        ],
-        ...baseTimestamps,
-      }],
+      shiftCycles: [
+        {
+          id: "cycle_off_days",
+          userId: "user_001",
+          name: "4 On 4 Off",
+          type: "fixedSegments",
+          mode: "repeatingSequence",
+          startsOnDate: "2026-05-01",
+          endsOnDate: "2026-05-04",
+          segments: [],
+          sequenceAnchorDate: "2026-05-01",
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
+            { id: "sequence_day_2", dayOffset: 1, shiftDefinitionId: null },
+          ],
+          ...baseTimestamps,
+        },
+      ],
       blockTemplates: [
         {
           id: "template_read",

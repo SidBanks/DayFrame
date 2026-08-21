@@ -7,6 +7,7 @@ import type {
   PlaceBlockCandidatesInput,
   PlaceBlockCandidatesResult,
 } from "./types.js";
+import { cloneOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlockCandidatesResult {
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
@@ -14,7 +15,11 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
   const scheduledBlocks: DraftScheduledBlock[] = [];
   const deferredSleepCandidates: BlockCandidate[] = [];
   const unplacedCandidates: BlockCandidate[] = [];
-  const sortedBlockCandidates = [...input.blockCandidates].sort(compareBlockCandidates);
+  const sortedBlockCandidates = [...input.blockCandidates].sort((left, right) => {
+    const hardDifference = Number(input.hardPlacementCandidateIds?.has(right.id) ?? false) -
+      Number(input.hardPlacementCandidateIds?.has(left.id) ?? false);
+    return hardDifference || compareBlockCandidates(left, right);
+  });
 
   for (const blockCandidate of sortedBlockCandidates) {
     if (
@@ -95,6 +100,15 @@ function placeBlockCandidate(
     );
     const endsAt = addMinutes(startsAt, blockCandidate.durationMinutes);
 
+    if (input.hardPlacementCandidateIds?.has(blockCandidate.id)) {
+      const occupied = [
+        ...getPlacementOccupiedBlocks(scheduledBlocks, input.generatedWorkBlocks, input),
+        ...(input.additionalOccupiedBlocks ?? []),
+      ];
+      if (occupied.some((block) => startsAt.getTime() < block.endsAt.getTime() &&
+          endsAt.getTime() > block.startsAt.getTime())) return null;
+    }
+
     return buildScheduledBlock(blockCandidate, startsAt, endsAt);
   }
 
@@ -159,6 +173,9 @@ function buildScheduledBlock(
 
   return {
     id: `scheduled_${blockCandidate.id}`,
+    ...(blockCandidate.occurrenceIdentity
+      ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
+      : {}),
     userId: blockCandidate.userId,
     templateId: blockCandidate.templateId,
     source: "template",

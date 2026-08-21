@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PreviewScreen } from "../PreviewScreen.js";
 import type { DayFramePreview } from "../../state/types.js";
+import type { SuggestedFix } from "../../core/friction/types.js";
 
 afterEach(() => {
   cleanup();
@@ -147,13 +148,120 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Move block" }));
+    const suggestedFixButton = screen.getByRole("button", { name: "Move block" });
+
+    expect(suggestedFixButton).toBeEnabled();
+    fireEvent.click(suggestedFixButton);
 
     expect(onApplySuggestedFix).toHaveBeenCalledTimes(1);
     expect(onApplySuggestedFix).toHaveBeenCalledWith({
       selectedFrictionPointId: "friction_conflict_1",
       selectedSuggestedFixId: "fix_move_scheduled_workout",
     });
+  });
+
+  it("exposes a native Accept control only for a pending supported Try", () => {
+    const onAcceptPlanDecision = vi.fn();
+    const { rerender } = render(
+      <PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onAcceptPlanDecision={onAcceptPlanDecision} onApplySuggestedFix={vi.fn()}
+        pendingPlanDecisionAcceptance preview={buildPreview()} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Accept this choice" }));
+    expect(onAcceptPlanDecision).toHaveBeenCalledTimes(1);
+    const stale = buildPreview(); stale.isStale = true;
+    rerender(<PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onAcceptPlanDecision={onAcceptPlanDecision} onApplySuggestedFix={vi.fn()}
+      pendingPlanDecisionAcceptance preview={stale} />);
+    expect(screen.queryByRole("button", { name: "Accept this choice" })).not.toBeInTheDocument();
+  });
+
+  it("keeps accepted choices visible without a Preview and exposes contextual removal", () => {
+    const onRemoveAcceptedDecision = vi.fn();
+    render(<PreviewScreen acceptedDecisions={[{ decisionId: "00000000-0000-4000-8000-000000000001" as never,
+      summary: "Omit Workout", targetSummary: "Workout", occurrenceContext: "Occurrence on 2026-05-05",
+      status: "notEvaluated", statusLabel: "Generate a preview to evaluate this choice" }]}
+      getDayBoundaryStartTimeForUserDayDate={() => "03:00"} onApplySuggestedFix={vi.fn()}
+      onRemoveAcceptedDecision={onRemoveAcceptedDecision} preview={null} />);
+    expect(screen.getByRole("heading", { name: "Accepted choices (1)" })).toBeInTheDocument();
+    expect(screen.getByText("Omit Workout")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Remove accepted choice for Workout" }));
+    expect(onRemoveAcceptedDecision).toHaveBeenCalledWith("00000000-0000-4000-8000-000000000001");
+  });
+
+  it("disables accepted-choice removal while decision ingress is protected", () => {
+    render(<PreviewScreen acceptedDecisions={[{ decisionId: "00000000-0000-4000-8000-000000000001" as never,
+      summary: "Omit Workout", targetSummary: "Workout", occurrenceContext: "Occurrence on 2026-05-05",
+      status: "notEvaluated", statusLabel: "Generate a preview to evaluate this choice" }]}
+      decisionRemovalProtected getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onApplySuggestedFix={vi.fn()} preview={null} />);
+    expect(screen.getByRole("button", { name: "Remove accepted choice for Workout" })).toBeDisabled();
+    expect(screen.getByText(/protected by recovery-required stored data/)).toBeInTheDocument();
+  });
+
+  it("labels a superseding recommendation as revising an accepted choice", () => {
+    const preview = buildPreview();
+    preview.result.frictionPoints[0]!.suggestedFixes[0]!.decisionContext = {
+      relationship: "superseding",
+      decisionId: "00000000-0000-4000-8000-000000000001" as never,
+      replayStatus: "applied",
+      explanationCode: "sameTarget",
+    };
+    render(<PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onApplySuggestedFix={vi.fn()} preview={preview} />);
+    expect(screen.getByRole("button", { name: "Revise accepted choice: Move block" })).toBeInTheDocument();
+  });
+
+  it("keeps stale preview guidance visible and disables its suggested fixes", () => {
+    const onApplySuggestedFix = vi.fn();
+    const preview = buildPreview();
+    preview.isStale = true;
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={onApplySuggestedFix}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+      ),
+    ).toBeInTheDocument();
+
+    const suggestedFixButton = screen.getByRole("button", { name: "Move block" });
+    expect(suggestedFixButton).toBeDisabled();
+    fireEvent.click(suggestedFixButton);
+    expect(onApplySuggestedFix).not.toHaveBeenCalled();
+  });
+
+  it("disables stale Review fixed time suggestions", () => {
+    const onApplySuggestedFix = vi.fn();
+    const preview = buildPreview([
+      {
+        id: "fix_change_fixed_time_scheduled_workout",
+        label: "Review fixed time",
+        action: "changeFixedTime" as const,
+      },
+    ]);
+    preview.isStale = true;
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        preview={preview}
+        onApplySuggestedFix={onApplySuggestedFix}
+      />,
+    );
+
+    const reviewButton = screen.getByRole("button", { name: "Review fixed time" });
+    expect(reviewButton).toBeDisabled();
+    fireEvent.click(reviewButton);
+    expect(onApplySuggestedFix).not.toHaveBeenCalled();
   });
 
   it("renders preview action guidance when present", () => {
@@ -525,10 +633,40 @@ describe("PreviewScreen", () => {
 
     expect(onApplySuggestedFix).toHaveBeenCalled();
   });
+
+  it("disables grouped and individual suggested fixes when the preview is stale", () => {
+    const onApplySuggestedFix = vi.fn();
+    const preview = buildPreview();
+    preview.isStale = true;
+    preview.result.frictionPoints.push({
+      ...preview.result.frictionPoints[0]!,
+      id: "friction_conflict_2",
+      affectedBlockIds: [],
+      affectedUserDayDate: "2026-05-06",
+      suggestedFixes: [{ id: "fix_move_day_2", label: "Move block", action: "moveBlock" }],
+    });
+
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        now={new Date(2026, 4, 3, 16, 0, 0, 0)}
+        onApplySuggestedFix={onApplySuggestedFix}
+        preview={preview}
+      />,
+    );
+
+    const buttons = screen.getAllByRole("button", { name: "Move block" });
+    expect(buttons.length).toBeGreaterThan(1);
+    for (const button of buttons) {
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
+    }
+    expect(onApplySuggestedFix).not.toHaveBeenCalled();
+  });
 });
 
 function buildPreview(
-  suggestedFixes = [
+  suggestedFixes: SuggestedFix[] = [
     {
       id: "fix_move_scheduled_workout",
       label: "Move block",
@@ -592,6 +730,7 @@ function buildPreview(
           userWeekStartDate: "2026-05-02",
         },
       ],
+      planDecisionResults: [],
       frictionPoints: [
         {
           id: "friction_conflict_1",
