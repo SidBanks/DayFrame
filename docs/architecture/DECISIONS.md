@@ -523,3 +523,17 @@ Source deletion, source recreation, restart, and Backup V3 restore do not remove
 `clearLocalData()` is asynchronous and returns only after terminal outcomes exist for Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan. Its canonical `authorities` result enumerates all five; Preview is a separate derived-state guarantee. Five successes mean `cleared`, mixed successes/failures mean `partiallyCleared`, and zero successes mean `failed`. Compatibility flat fields and durability labels are derived from that canonical result.
 
 ExecutionHistory clear establishes empty IndexedDB authority before legacy evidence is removed and retains the anti-resurrection marker. HistoricalPlan clear settles an empty ledger and supersedes pending publications. Clear uses the shared runtime-authority notification transaction, does not erase restore evidence, and creates neither planning publication nor execution evidence.
+# Task 4.8 — Planner Convergence V1 Is the Next Product Boundary
+
+The post-Task-4.7 product supports two independently useful enduring concepts:
+Planner for forward-looking authored/operational work and Summary for read-only
+historical interpretation. Summary V1 is sufficiently mature; another analytical
+projection is not a prerequisite. Existing Setup and Preview capabilities can be
+composed under Planner with Plan/Schedule subviews while preserving the shared
+draft, explicit save/generate behavior, stale Preview visibility, PlanDecision,
+HistoricalPlan, ExecutionHistory, Backup, restore, and clear semantics.
+
+Phase 4 remains open because its broader Learn roadmap is not complete. Task 4.9
+is authorized only as bounded composition-first Planner Convergence V1. Engine,
+persistence, Settings/Pattern Library redesign, router, autosave, drag/drop, new
+analytics, Goals, Progress, Recommendations, and learning remain deferred.

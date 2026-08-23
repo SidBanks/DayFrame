@@ -2,6 +2,98 @@
 
 # Current State
 
+## Phase 4 — Historical Intelligence Foundation and Planner/Summary Product Architecture
+
+**Status:** Phase 4 complete with non-blocking deferred scope and residual debt
+**Current through:** Task 4.11
+**Last reviewed:** 2026-08-23
+
+Historical Intelligence is implemented as a pure, deterministic projection of
+HistoricalPlan and ExecutionHistory under an explicit metric-policy version and
+resolved user-day query. Task 4.2 provides explicit complete/incomplete/unavailable
+plan coverage and categorical completion distribution over scheduled occurrences;
+partial, skipped, retracted/unknown, and not reported remain distinct, with exact
+reference provenance and conservative protected/quarantine handling. It creates no
+third historical authority and requires no new Backup or clear participant.
+Task 4.3 exposes this governed projection in a third bounded top-level Summary
+destination with explicit date selection, coverage disclosure, five categorical
+counts, reporting coverage, frozen-context category drill-down, missing dates, and
+planner-exclusion explanations. Queries refresh from both historical authorities,
+reject stale async results, and suppress misleading output during protection or
+quarantine. Scheduling realization, planned allocation, scores, adherence, trends,
+Goals, Progress, Recommendations, and automatic learning remain unimplemented.
+
+Task 4.4 confirmed that the Planner/Summary direction remains sound and that
+Summary should remain read-only for now. It also found a bounded product issue:
+Preview combines draft-schedule review with operational reporting and a
+date-filtered ExecutionHistory aggregate whose `Not reported` meaning differs from
+Summary's HistoricalPlan-denominated category. Top-level navigation also mixes the
+Generate Preview command with Setup/Summary destinations. Task 4.5 should clarify
+those responsibilities, scopes, and labels before another metric is authorized.
+
+Task 4.5 completed that refinement. Top-level navigation is now destination-only
+(`Setup`, `Preview`, `Summary`); generation/regeneration is explicit within Setup
+or Preview and navigation never generates. Preview retains contextual current and
+past-plan reporting plus renamed `Report history`, while its ambiguous broad
+ExecutionHistory aggregate was removed. Summary remains read-only and its selected-
+date reporting coverage and Scheduled outcomes semantics are unchanged. The next
+governed candidate is Scheduling Realization V1.
+
+Task 4.6 implements that candidate as a non-durable HistoricalPlan-only query.
+Its denominator conserves every intended occurrence across scheduled, unplaced,
+omitted, and blocked; coverage/cutoff semantics match Task 4.2. No UI, outcome,
+score, reason, trend, capacity, or allocation meaning is inferred. Task 4.7 is
+the next bounded integration audit.
+
+Task 4.7 completes that integration. One Summary range/cutoff and shared plan
+coverage support Planning/Scheduling realization and Execution/Scheduled outcomes
+as peer, denominator-separated projections. Planning categories have frozen
+read-only evidence; no cause, score, funnel, mutation, or new durability was
+added. Next is a bounded product/roadmap review of Planner convergence versus
+further Historical Intelligence, not an automatic new metric.
+
+Task 4.8 selected Product Architecture Determination A. Summary is sufficient as
+an independent V1, and another metric has lower immediate value than converging
+the fragmented operational journey. Setup and Preview can be composed under one
+Planner destination without changing the engine, draft model, explicit
+generation, stale Preview, authorities, persistence, Backup, or Summary. Phase 4
+remains open because its broader Learn promises are not complete. Task 4.9 is the
+bounded composition-first Planner Convergence V1 implementation.
+
+Task 4.9 implements the canonical top-level `Planner / Summary` model. Planner
+contains transient `Plan / Schedule` modes and composes the existing Setup and
+Preview workflows around one app-owned draft. Explicit save/generation, saved-
+state Schedule regeneration, stale Preview, friction decisions, operational
+reporting, all authorities, Backup/restore/clear, and read-only Summary remain
+unchanged. Task 4.10 should audit the converged product and decide Phase 4 closure
+and sequencing.
+
+Task 4.10 accepts Planner V1 with non-blocking UX debt and finds the implemented
+Phase 4 boundary conceptually mature. No additional feature or metric is required
+for closure. Phase 4 remains open for exactly one governance task: Task 4.11 must
+publish the achieved Historical Intelligence Foundation and Planner/Summary
+Product Architecture identity, explicitly retain deferred aspirations, verify the
+final evidence, and define the design-first Phase 5 entry boundary.
+
+Task 4.11 independently confirms and publishes the completed phase boundary.
+Planner (`Plan / Schedule`) and Summary are the canonical product model: Planner
+owns operational planning/reporting and Summary owns read-only derived historical
+understanding. Historical Intelligence remains deterministic, policy-versioned,
+explainable, ephemeral projection over HistoricalPlan and ExecutionHistory. Plan
+coverage, Scheduling Realization, Scheduled Outcomes, reporting coverage, and
+frozen provenance constitute the mature V1 foundation. Planner V1 is accepted
+with non-blocking UX debt.
+
+Planned Allocation, comparisons/trends, Capacity, Goals, Progress,
+Recommendations, and learning/adaptation are not implemented and are explicitly
+deferred. Phase 5 begins design-first with Task 5.1, defining Goals, Progress,
+Recommendations, and Adaptive Planning boundaries while keeping descriptive
+evidence separate from prescriptive policy and preserving user control.
+
+Canonical publication: `docs/checkpoints/CHECKPOINT_Phase_4_COMPLETE.md`.
+
+---
+
 ## Phase 3 — Execution and History Semantic Foundation
 
 **Status:** Phase 3 complete

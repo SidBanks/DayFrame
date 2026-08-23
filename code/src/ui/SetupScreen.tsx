@@ -108,6 +108,7 @@ export type SetupScreenProps = {
   draft: SetupDraft;
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
+  onGeneratePreview?: () => void;
   saveMessage: string;
   saveMessageTone?: "success" | "failure";
   isDirty?: boolean;
@@ -121,6 +122,7 @@ export function SetupScreen({
   draft,
   setDraft,
   onSave,
+  onGeneratePreview,
   saveMessage,
   saveMessageTone = "success",
   isDirty = false,
@@ -164,10 +166,9 @@ export function SetupScreen({
   return (
     <main className="df-screen">
       <header className="df-panel df-screen-header">
-        <h1 className="df-screen-title">Setup</h1>
+        <h2 className="df-screen-title">Setup</h2>
         <p className="df-screen-subtitle">
-          Edit your authored setup in one place. Generate Preview will save the current draft
-          automatically.
+          Edit your authored setup in one place. Generate Preview saves the current draft first.
         </p>
         <p className="df-support">
           Setup includes schedule preferences, shifts, cycles, templates, and recurrences.
@@ -179,6 +180,11 @@ export function SetupScreen({
           <button className="df-action-button" onClick={onSave} type="button">
             Save Setup
           </button>
+          {onGeneratePreview ? (
+            <button className="df-action-button" onClick={onGeneratePreview} type="button">
+              Generate Preview
+            </button>
+          ) : null}
           <button
             className="df-secondary-button"
             onClick={() => {

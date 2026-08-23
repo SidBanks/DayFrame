@@ -75,6 +75,8 @@ import type { DayFrameAuthoredSetup } from "./types.js";
 import { createPlanDecisionSurface } from "./planDecisionSurface.js";
 import type { PlanDecisionIdAllocator } from "../core/decisions/planDecision.js";
 import { createExecutionHistorySurface } from "./executionHistorySurface.js";
+import { createHistoricalIntelligenceQuery, createHistoricalSchedulingRealizationQuery } from
+  "./historicalIntelligenceQuery.js";
 import type { ExecutionHistoryIndexedDb } from "./executionHistoryIndexedDb.js";
 import { createBootstrapPlaceholderState, type DayFrameReadiness,
   type DayFrameReadyResult } from "./dayFrameReadiness.js";
@@ -350,6 +352,13 @@ export function createDayFrameStore(
   });
   const historicalPlanSurface = options.historicalPlanSurface ?? createHistoricalPlanSurface({
     notificationScheduler,
+  });
+  const getHistoricalCompletionDistribution = createHistoricalIntelligenceQuery({
+    historicalPlan: historicalPlanSurface,
+    executionHistory: executionHistorySurface,
+  });
+  const getHistoricalSchedulingRealization = createHistoricalSchedulingRealizationQuery({
+    historicalPlan: historicalPlanSurface,
   });
   let lastHistoricalPlanPublicationResult: HistoricalPlanPublicationResult |
     Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
@@ -1617,6 +1626,8 @@ export function createDayFrameStore(
     retryPendingPublications: historicalPlanSurface.retryPendingPublications,
     getHistoricalPlanDay: historicalPlanSurface.getHistoricalPlanDay,
     getHistoricalPlanRange: historicalPlanSurface.getHistoricalPlanRange,
+    getHistoricalCompletionDistribution,
+    getHistoricalSchedulingRealization,
     exportHistoricalPlan: historicalPlanSurface.exportHistoricalPlan,
     abandonProtectedHistoricalPlan: historicalPlanSurface.abandonProtectedHistoricalPlan,
     exportProtectedSource: historicalPlanSurface.exportProtectedSource,

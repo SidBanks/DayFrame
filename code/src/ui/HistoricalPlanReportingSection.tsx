@@ -36,13 +36,13 @@ export function HistoricalPlanReportingSection({ initialDate, store, now = syste
   }, [store]);
 
   return <section aria-labelledby="historical-plan-reporting-heading" className="df-summary-bar">
-    <h2 className="df-panel-title" id="historical-plan-reporting-heading">Report from plan history</h2>
-    <p className="df-muted">These are occurrences DayFrame previously recorded as planned.</p>
-    <label className="df-field">Published plan date
-      <input aria-label="Published plan date" onChange={(event) => setDate(event.target.value)} type="date" value={date} />
+    <h2 className="df-panel-title" id="historical-plan-reporting-heading">Report a past planned occurrence</h2>
+    <p className="df-muted">Record what happened to something DayFrame previously had in a planned schedule.</p>
+    <label className="df-field">Past planned date
+      <input aria-label="Past planned date" onChange={(event) => setDate(event.target.value)} type="date" value={date} />
     </label>
     {!query ? <p className="df-muted">Historical plan reporting is unavailable.</p> : null}
-    {loading ? <p aria-live="polite">Loading published plan history…</p> : null}
+    {loading ? <p aria-live="polite">Loading the past planned schedule…</p> : null}
     {!loading && result?.status === "unavailableNoPublication" ?
       <p className="df-empty">No published plan history is available for this day.</p> : null}
     {!loading && result?.status === "available" && result.day.occurrences.length === 0 ?

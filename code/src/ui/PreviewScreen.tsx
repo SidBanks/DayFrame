@@ -10,7 +10,6 @@ import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { DayVisualizer } from "./DayVisualizer.js";
 import { ExecutionReportControl, type ExecutionReportingStore } from "./ExecutionReportControl.js";
 import { ExecutionHistoryPanel } from "./ExecutionHistoryPanel.js";
-import { ExecutionSummarySection } from "./ExecutionSummarySection.js";
 import { HistoricalPlanReportingSection } from "./HistoricalPlanReportingSection.js";
 import type { AcceptedDecisionViewModel } from "./acceptedDecisionPresentation.js";
 import {
@@ -103,8 +102,6 @@ export function PreviewScreen({
           ) : null}
           <AcceptedChoicesSection decisions={acceptedDecisions}
             onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
-          {authoredSetup && executionReportingStore ? <ExecutionSummarySection authoredSetup={authoredSetup}
-            preview={null} store={executionReportingStore} /> : null}
           {executionReportingStore ? <HistoricalPlanReportingSection initialDate={today(now)}
             store={executionReportingStore} /> : null}
           {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
@@ -216,11 +213,6 @@ export function PreviewScreen({
           </div>
         </div>
       </section>
-
-      {authoredSetup && executionReportingStore ? <ExecutionSummarySection authoredSetup={authoredSetup}
-        preview={preview} store={executionReportingStore} /> : null}
-      {executionReportingStore ? <HistoricalPlanReportingSection initialDate={preview.rangeEndDate}
-        store={executionReportingStore} /> : null}
 
       {groupedFrictionPatterns.length > 0 ? (
         <section aria-labelledby="grouped-friction-heading" className="df-summary-bar">
@@ -459,6 +451,8 @@ export function PreviewScreen({
           </section>
         ))}
       </div>
+      {executionReportingStore ? <HistoricalPlanReportingSection initialDate={preview.rangeEndDate}
+        store={executionReportingStore} /> : null}
       {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
     </main>
   );

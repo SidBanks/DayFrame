@@ -34,6 +34,7 @@ import type {
 import type { DayFrameReadiness } from "../state/dayFrameReadiness.js";
 import type { PlanDecisionIngressStatus } from "../state/planDecisionSurface.js";
 import { PreviewScreen } from "./PreviewScreen.js";
+import { HistoricalIntelligenceSummary } from "./HistoricalIntelligenceSummary.js";
 import { buildAcceptedDecisionViewModels } from "./acceptedDecisionPresentation.js";
 import { getPreviewRangeWarnings } from "./previewRangeWarnings.js";
 import {
@@ -104,9 +105,13 @@ export type DayFrameAppStore = Pick<
   | "subscribeExecutionHistory"
   | "subscribeExecutionHistoryDurability"
   | "subscribeExecutionHistoryIngress"
+  | "getHistoricalCompletionDistribution"
+  | "getHistoricalSchedulingRealization"
+  | "subscribeHistory"
 >;
 
-type DayFrameScreen = "setup" | "preview";
+type DayFrameScreen = "planner" | "summary";
+type PlannerMode = "plan" | "schedule";
 type ProfileDurabilityFeedback = {
   category: DurabilitySemanticCategory;
   operation: "save" | "load" | "delete";
@@ -244,7 +249,8 @@ function ReadyDayFrameApp({
   const [setupDurabilityFeedback, setSetupDurabilityFeedback] =
     useState<DurabilitySemanticCategory | null>(null);
   const [setupValidationMessage, setSetupValidationMessage] = useState("");
-  const [currentScreen, setCurrentScreen] = useState<DayFrameScreen>("setup");
+  const [currentScreen, setCurrentScreen] = useState<DayFrameScreen>("planner");
+  const [plannerMode, setPlannerMode] = useState<PlannerMode>("plan");
   const [previewGuardrailMissingItems, setPreviewGuardrailMissingItems] = useState<string[]>([]);
   const [isConfirmingClearLocalData, setIsConfirmingClearLocalData] = useState(false);
   const [clearDurabilityFeedback, setClearDurabilityFeedback] =
@@ -317,6 +323,14 @@ function ReadyDayFrameApp({
       )
     : [];
   const isSetupDirty = hasUnsavedSetupChanges(setupDraft, stateSnapshot);
+  const authoredStateFingerprint = JSON.stringify({
+    schedulingPreferences: stateSnapshot.schedulingPreferences,
+    previewRange: stateSnapshot.previewRange,
+    shiftDefinitions: stateSnapshot.shiftDefinitions,
+    shiftCycles: stateSnapshot.shiftCycles,
+    blockTemplates: stateSnapshot.blockTemplates,
+    blockRecurrences: stateSnapshot.blockRecurrences,
+  });
   const savedRangeWarnings = getPreviewRangeWarnings({
     previewRange: stateSnapshot.previewRange,
     schedulingPreferences: stateSnapshot.schedulingPreferences,
@@ -388,14 +402,7 @@ function ReadyDayFrameApp({
 
   useEffect(() => {
     setSetupDraft(buildSetupDraft(stateSnapshot, createIsoTimestamp()));
-  }, [
-    stateSnapshot.schedulingPreferences,
-    stateSnapshot.previewRange,
-    stateSnapshot.shiftDefinitions,
-    stateSnapshot.shiftCycles,
-    stateSnapshot.blockTemplates,
-    stateSnapshot.blockRecurrences,
-  ]);
+  }, [authoredStateFingerprint]);
 
   function resetShellMessages(): void {
     setSetupDurabilityFeedback(null);
@@ -411,21 +418,29 @@ function ReadyDayFrameApp({
     setProfileErrorMessage("");
   }
 
-  function openSetupScreen(): void {
-    setCurrentScreen("setup");
+  function openPlanMode(): void {
+    setCurrentScreen("planner");
+    setPlannerMode("plan");
     setFocusedTemplateField(null);
     resetShellMessages();
   }
 
-  function openPreviewScreen(): void {
-    setCurrentScreen("preview");
+  function openScheduleMode(): void {
+    setCurrentScreen("planner");
+    setPlannerMode("schedule");
+    setFocusedTemplateField(null);
+    resetShellMessages();
+  }
+
+  function openSummaryScreen(): void {
+    setCurrentScreen("summary");
     setFocusedTemplateField(null);
     resetShellMessages();
   }
 
   function openFullPreviewScreen(): void {
     clearPreviewSelection();
-    openPreviewScreen();
+    openScheduleMode();
   }
 
   function clearPreviewSelection(): void {
@@ -524,7 +539,8 @@ function ReadyDayFrameApp({
       return;
     }
 
-    setCurrentScreen("preview");
+    setCurrentScreen("planner");
+    setPlannerMode("schedule");
     setFocusedTemplateField(null);
     setBackupMessage("");
     setBackupErrorMessage("");
@@ -536,7 +552,8 @@ function ReadyDayFrameApp({
   }
 
   function openSetupForFixedTime(templateId: string): void {
-    setCurrentScreen("setup");
+    setCurrentScreen("planner");
+    setPlannerMode("plan");
     setFocusedTemplateField({
       templateId,
       field: "fixedStartTime",
@@ -567,7 +584,8 @@ function ReadyDayFrameApp({
       setPendingPreviewRangeStartDate(null);
     }
 
-    setCurrentScreen("preview");
+    setCurrentScreen("planner");
+    setPlannerMode("schedule");
     setFocusedTemplateField(null);
     openManualEventPanel(userDayDate);
     resetShellMessages();
@@ -1176,7 +1194,8 @@ function ReadyDayFrameApp({
                                 return;
                               }
 
-                              setCurrentScreen("setup");
+                              setCurrentScreen("planner");
+                              setPlannerMode("plan");
                               clearPreviewSelection();
                               setSetupDurabilityFeedback(null);
                               setProfileDurabilityFeedback({
@@ -1299,6 +1318,7 @@ function ReadyDayFrameApp({
                     setProfileErrorMessage,
                     setClearDurabilityFeedback,
                     setCurrentScreen,
+                    setPlannerMode,
                     clearPreviewSelection,
                     setPreviewGuardrailMissingItems,
                     setIsConfirmingClearLocalData,
@@ -1320,7 +1340,8 @@ function ReadyDayFrameApp({
                       onClick={async () => {
                         setIsClearBusy(true);
                         const result = await storeRef.current.clearLocalData();
-                        setCurrentScreen("setup");
+                        setCurrentScreen("planner");
+                        setPlannerMode("plan");
                         clearPreviewSelection();
                         setSetupDurabilityFeedback(null);
                         setPreviewGuardrailMissingItems([]);
@@ -1393,46 +1414,50 @@ function ReadyDayFrameApp({
               <div className="df-workflow-status">
                 <p className="df-workflow-eyebrow">Workspace</p>
                 <h2 className="df-panel-title">
-                  {currentScreen === "setup" ? "Setup your schedule inputs" : "Review your preview"}
+                  {currentScreen === "planner"
+                    ? plannerMode === "plan" ? "Build your plan" : "Review your schedule"
+                    : "Review your history"}
                 </h2>
                 <p className="df-support">
-                  {currentScreen === "setup"
-                    ? "Save edits in Setup, then switch to Preview when you're ready to generate or review a schedule draft."
-                    : "Use Preview to generate a schedule draft from your saved setup and review any friction that needs attention."}
+                  {currentScreen === "planner"
+                    ? plannerMode === "plan"
+                      ? "Edit and save planning inputs, then explicitly generate a derived schedule."
+                      : "Review the generated schedule, resolve friction, and report outcomes."
+                    : "Inspect plan coverage, scheduled outcomes, and the evidence behind the counts."}
                 </p>
               </div>
 
               <nav aria-label="App Sections" className="df-primary-nav">
                 <button
-                  aria-label="Setup"
-                  aria-pressed={currentScreen === "setup"}
+                  aria-label="Planner"
+                  aria-pressed={currentScreen === "planner"}
                   className={
-                    currentScreen === "setup"
+                    currentScreen === "planner"
                       ? "df-primary-nav-button is-active"
                       : "df-primary-nav-button"
                   }
-                  onClick={openSetupScreen}
+                  onClick={openPlanMode}
                   type="button"
                 >
-                  <span className="df-primary-nav-title">Setup</span>
+                  <span className="df-primary-nav-title">Planner</span>
                   <span aria-hidden="true" className="df-primary-nav-detail">
-                    Edit shifts, cycle, templates, and range
+                    Build your plan and review its generated schedule
                   </span>
                 </button>
                 <button
-                  aria-label="Generate Preview"
-                  aria-pressed={currentScreen === "preview"}
+                  aria-label="Summary"
+                  aria-pressed={currentScreen === "summary"}
                   className={
-                    currentScreen === "preview"
+                    currentScreen === "summary"
                       ? "df-primary-nav-button is-active"
                       : "df-primary-nav-button"
                   }
-                  onClick={generatePreviewFromCurrentDraft}
+                  onClick={openSummaryScreen}
                   type="button"
                 >
-                  <span className="df-primary-nav-title">Generate Preview</span>
+                  <span className="df-primary-nav-title">Summary</span>
                   <span aria-hidden="true" className="df-primary-nav-detail">
-                    Save this draft, generate, and open the preview
+                    Inspect plan coverage and scheduled outcomes
                   </span>
                 </button>
               </nav>
@@ -1783,13 +1808,36 @@ function ReadyDayFrameApp({
           </div>
         </header>
 
-        {currentScreen === "setup" ? (
+        {currentScreen === "planner" ? <section className="df-panel df-planner-header"
+          aria-labelledby="planner-heading">
+          <div className="df-screen-header">
+            <p className="df-workflow-eyebrow">Operational workspace</p>
+            <h1 className="df-screen-title" id="planner-heading">Planner</h1>
+            <p className="df-screen-subtitle">Author your plan, then generate and review a derived schedule.</p>
+          </div>
+          <nav aria-label="Planner modes" className="df-planner-mode-nav">
+            <button aria-pressed={plannerMode === "plan"}
+              className={plannerMode === "plan" ? "df-secondary-button is-active" : "df-secondary-button"}
+              onClick={openPlanMode} type="button">Plan</button>
+            <button aria-pressed={plannerMode === "schedule"}
+              className={plannerMode === "schedule" ? "df-secondary-button is-active" : "df-secondary-button"}
+              onClick={openScheduleMode} type="button">Schedule</button>
+          </nav>
+          <p className={isSetupDirty ? "df-warning-message" : "df-support"}>
+            {isSetupDirty ? "Plan has unsaved changes. Schedule actions continue to use the saved plan."
+              : stateSnapshot.preview?.isStale ? "Plan changed. Regenerate the schedule to see updates."
+                : stateSnapshot.preview ? "The generated schedule reflects the saved plan."
+                  : "No generated schedule yet."}
+          </p>
+        </section> : null}
+        {currentScreen === "planner" && plannerMode === "plan" ? (
           <div className="df-workflow-block df-workflow-block--setup">
             <SetupScreen
               draft={setupDraft}
               focusedTemplateField={focusedTemplateField}
               isDirty={isSetupDirty}
               onSave={saveCurrentSetup}
+              onGeneratePreview={generatePreviewFromCurrentDraft}
               saveMessage={
                 setupValidationMessage ||
                 (setupDurabilityFeedback
@@ -1811,13 +1859,13 @@ function ReadyDayFrameApp({
             />
           </div>
         ) : null}
-        {currentScreen === "preview" ? (
+        {currentScreen === "planner" && plannerMode === "schedule" ? (
           <div className="df-screen df-workflow-block df-workflow-block--preview">
             <div className="df-panel">
               <div className="df-screen-header">
-                <h1 className="df-screen-title">Preview</h1>
+                <h2 className="df-screen-title">Schedule</h2>
                 <p className="df-screen-subtitle">
-                  Generate a draft schedule preview from your saved shifts, cycle, and templates.
+                  Generate and review a derived schedule from your saved plan.
                 </p>
               </div>
               <div className="df-screen-actions">
@@ -1826,12 +1874,12 @@ function ReadyDayFrameApp({
                   onClick={generatePreviewFromSavedState}
                   type="button"
                 >
-                  Regenerate Preview
+                  {stateSnapshot.preview ? "Regenerate Preview" : "Generate Preview"}
                 </button>
               </div>
               <p className="df-support">
-                Preview uses your current setup only. It does not export or save anything to your
-                calendar.
+                Schedule generation uses the saved plan, not unsaved Plan changes. It does not
+                export or save anything to your calendar.
               </p>
               {previewGuardrailMissingItems.length > 0 ? (
                 <div className="df-form-stack">
@@ -1875,6 +1923,11 @@ function ReadyDayFrameApp({
               visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
               visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
             />
+          </div>
+        ) : null}
+        {currentScreen === "summary" ? (
+          <div className="df-screen df-workflow-block df-workflow-block--summary">
+            <HistoricalIntelligenceSummary now={getNow} store={activeStore} />
           </div>
         ) : null}
       </div>
@@ -2268,6 +2321,7 @@ async function handleBackupFileSelection(
   setProfileErrorMessage: (message: string) => void,
   setClearDurabilityFeedback: (feedback: ClearDurabilitySemanticClassification | null) => void,
   setCurrentScreen: (screen: DayFrameScreen) => void,
+  setPlannerMode: (mode: PlannerMode) => void,
   clearPreviewSelection: () => void,
   setPreviewGuardrailMissingItems: (items: string[]) => void,
   setIsConfirmingClearLocalData: (value: boolean) => void,
@@ -2291,7 +2345,8 @@ async function handleBackupFileSelection(
       setBackupDurabilityFeedback(null); setBackupErrorMessage("");
       setSetupDurabilityFeedback(null); setClearDurabilityFeedback(null);
       setProfileMessage(""); setProfileDurabilityFeedback(null); setProfileErrorMessage("");
-      setCurrentScreen("setup"); clearPreviewSelection(); setPreviewGuardrailMissingItems([]);
+      setCurrentScreen("planner"); setPlannerMode("plan"); clearPreviewSelection();
+      setPreviewGuardrailMissingItems([]);
       setIsConfirmingClearLocalData(false); return;
     }
 
@@ -2333,7 +2388,8 @@ async function handleBackupFileSelection(
     setProfileMessage("");
     setProfileDurabilityFeedback(null);
     setProfileErrorMessage("");
-    setCurrentScreen("setup");
+    setCurrentScreen("planner");
+    setPlannerMode("plan");
     clearPreviewSelection();
     setPreviewGuardrailMissingItems([]);
     setIsConfirmingClearLocalData(false);

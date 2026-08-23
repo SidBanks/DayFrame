@@ -14,6 +14,125 @@ record.
 
 ---
 
+# 2026-08-23 — Phase 4 Completed and Published
+
+Closed Phase 4 as Historical Intelligence Foundation and Planner/Summary Product
+Architecture after fresh focused and canonical validation. Published the
+deterministic derived-intelligence boundary, accepted Planner/Summary ownership,
+and explicitly reclassified Planned Allocation, trends, Capacity, Goals,
+Progress, Recommendations, learning/adaptation, and Planner polish as future work.
+Phase 5 now begins with a design-first architecture task; no feature, authority,
+persistence, or schema change was introduced by closure.
+
+---
+
+# 2026-08-23 — Planner V1 Accepted; Phase 4 Closure Sequenced
+
+Accepted Planner V1 with non-blocking UX debt after auditing its operational
+journeys, derived Schedule communication, Summary boundary, and retained
+authorities. Determined that Phase 4 needs no additional feature implementation
+and remains open only for Task 4.11, a closure audit and publication checkpoint
+that will publish the achieved phase identity and the design-first Phase 5 entry
+boundary.
+
+---
+
+# 2026-08-22 — Planner Convergence V1 Implemented
+
+Replaced top-level Setup/Preview destinations with one Planner destination and
+accessible Plan/Schedule modes. Existing authored draft, explicit save/generation,
+stale schedule, review, friction, current/past reporting, and Report history were
+composed without changing authority, persistence, Backup, or Summary semantics.
+
+---
+
+# 2026-08-22 — Planner Convergence V1 Selected as Next Product Boundary
+
+Audited the complete post-Task-4.7 product and selected Planner Convergence over
+another Historical Intelligence projection. Summary is independently useful;
+Setup and Preview are ready for composition-first convergence under a Planner
+destination while preserving explicit generation, stale schedules, friction,
+reporting, all authorities, and Backup. Phase 4 remains open and Task 4.9 is next.
+
+---
+
+# 2026-08-22 — Scheduling Realization Integrated into Summary
+
+Added peer Planning/Scheduling realization and Execution/Scheduled outcomes under
+one historical range, cutoff, and plan-coverage view. Four planning disposition
+counts now expose frozen read-only evidence with accessible drill-down while
+reporting coverage and completion semantics remain separate.
+
+---
+
+# 2026-08-22 — Scheduling Realization Projection V1
+
+Implemented a pure HistoricalPlan-only projection over an explicit historical
+window/cutoff. It conserves all intended occurrences across scheduled, unplaced,
+omitted, and blocked, shares governed coverage, and retains frozen identity. No
+UI, persistence, Backup data, score, reason inference, or execution dependency
+was introduced.
+
+---
+
+# 2026-08-22 — Preview Navigation and Operational Reporting Clarified
+
+Separated destination navigation (`Setup`, `Preview`, `Summary`) from explicit
+Generate/Regenerate commands while preserving Setup save-before-generate and stale
+Preview behavior. Removed Preview's ambiguous broad report aggregate, retained
+contextual current and frozen past-plan reporting, renamed operational history
+around report correction/retraction, clarified selected-date Summary coverage, and
+added keyboard focus for expanded Summary evidence. No metric, authority,
+persistence, Backup, or full Planner migration was introduced.
+
+---
+
+# 2026-08-22 — Summary and Outcome-Surface UX Audit
+
+Audited the post-Task-4.3 Setup, Preview, Summary, historical reporting, report
+history, and outcome surfaces. Confirmed that Preview's report-centric aggregate
+and Summary's HistoricalPlan-denominated distribution are distinct, but identified
+ambiguous `Not reported` semantics, overloaded Preview responsibility, and mixed
+destination/command navigation. Selected Product Architecture Determination B:
+complete one bounded navigation, scope-copy, naming, and reporting-responsibility
+refinement before authorizing another Historical Intelligence metric.
+
+---
+
+# 2026-08-22 — Historical Intelligence Bounded Summary Integration
+
+Exposed Historical Coverage and Completion Distribution V1 through a third,
+bounded top-level Summary destination. The accessible responsive experience uses
+explicit dates and evaluation cutoffs, distinguishes coverage and authority
+states, presents five categorical counts plus reporting coverage, and provides
+frozen-evidence drill-down for eligible and excluded occurrences. It refreshes on
+HistoricalPlan and ExecutionHistory changes with stale-query rejection and adds no
+metric persistence, Backup field, score, trend, goal, recommendation, or learning.
+
+---
+
+# 2026-08-22 — Historical Coverage and Completion Distribution V1
+
+Implemented the first pure Historical Intelligence projection with explicit
+policy/metric identity, inclusive user-day/as-of queries, complete/incomplete/
+unavailable plan coverage, scheduled-only eligibility, categorical completed/
+partial/skipped/unknown/not-reported distribution, current-outcome coverage, and
+deterministic frozen-reference provenance. Protected or quarantined authority is
+never interpreted as empty; no persistence, Backup change, score, or UI was added.
+
+---
+
+# 2026-08-22 — Phase 4 Historical Intelligence Architecture Defined
+
+Defined Historical Intelligence as deterministic, policy-versioned, non-durable
+projection over HistoricalPlan and ExecutionHistory. Adopted explicit user-day
+windows, coverage disclosure, multiple question-specific denominators,
+categorical outcomes, and evidence provenance. Authorized a bounded first
+implementation of historical coverage and completion distribution while deferring
+scores, adherence, trends, Goals, Progress, Recommendations, and learning.
+
+---
+
 # 2026-08-22 — Phase 3 Complete
 
 Closed Phase 3 after an independent authority, recovery, reachability,

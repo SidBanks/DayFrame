@@ -17,6 +17,13 @@ import type { ExecutionHistorySurface } from "./executionHistorySurface.js";
 import type { HistoricalPlanSurface, HistoricalPlanPublicationResult } from "./historicalPlanSurface.js";
 import type { MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
 import type { DayFrameReadinessApi } from "./dayFrameReadiness.js";
+import type { HistoricalCompletionDistributionQueryV1 } from
+  "../core/historicalIntelligence/completionDistribution.js";
+import type { HistoricalSchedulingRealizationQueryV1 } from
+  "../core/historicalIntelligence/schedulingRealization.js";
+import type { HistoricalCompletionDistributionQueryResultV1,
+  HistoricalSchedulingRealizationQueryResultV1 } from
+  "./historicalIntelligenceQuery.js";
 
 export type DayFrameSchedulingPreferences = {
   dayBoundaryStartTime: TimeString;
@@ -487,6 +494,10 @@ export type DayFrameStore = DayFrameReadinessApi & {
   applySuggestedFixToPreview: (input: ApplyPreviewFixActionInput) => DayFrameState;
   getLastHistoricalPlanPublicationResult: () => HistoricalPlanPublicationResult |
     Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
+  getHistoricalCompletionDistribution: (query: HistoricalCompletionDistributionQueryV1) =>
+    Promise<HistoricalCompletionDistributionQueryResultV1>;
+  getHistoricalSchedulingRealization: (query: HistoricalSchedulingRealizationQueryV1) =>
+    Promise<HistoricalSchedulingRealizationQueryResultV1>;
 } & Omit<ExecutionHistorySurface, "clearExecutionHistory" | "getRuntimeAuthorityAdapter"> & Pick<HistoricalPlanSurface,
   "initialize" | "retryPendingPublications" | "getHistoricalPlanDay" | "getHistoricalPlanRange" |
   "exportHistoricalPlan" | "abandonProtectedHistoricalPlan" | "getStatus" | "getPendingPublications" |

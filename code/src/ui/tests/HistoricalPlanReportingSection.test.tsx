@@ -29,7 +29,7 @@ describe("HistoricalPlanReportingSection", () => {
     render(<HistoricalPlanReportingSection initialDate="2026-08-20" store={{ ...base, getHistoricalPlanDay }}
       now={() => new Date("2026-08-22T12:00:00.000Z")} />);
     expect(await screen.findByText("No published plan history is available for this day.")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Published plan date"), { target: { value: "2026-08-21" } });
+    fireEvent.change(screen.getByLabelText("Past planned date"), { target: { value: "2026-08-21" } });
     expect(await screen.findByText("No occurrences were published for this day.")).toBeInTheDocument();
   });
 
@@ -46,7 +46,7 @@ describe("HistoricalPlanReportingSection", () => {
       now={() => new Date("2026-08-22T12:00:00.000Z")} />);
     expect(await screen.findByText("Archived shift")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Report outcome" }));
-    fireEvent.click(screen.getByRole("button", { name: "Submit report" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Submit report" }));
     await waitFor(() => expect(base.getExecutionHistory()).toHaveLength(1));
     expect(base.getExecutionHistory()[0]).toMatchObject({ subject: { kind: "planned", reference },
       snapshot: { title: "Archived shift" }, outcome: "completed" });

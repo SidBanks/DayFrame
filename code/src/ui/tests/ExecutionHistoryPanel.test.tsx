@@ -23,7 +23,7 @@ describe("ExecutionHistoryPanel", () => {
         plan: { state: "unplanned" } } });
     expect(accepted.status).toBe("accepted");
     render(<ExecutionHistoryPanel store={store} />);
-    expect(screen.getByRole("heading", { name: "Execution history" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Report history" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review history for Archived activity" }));
     expect(screen.getByText("Unplanned activity · Aug 20, 2026")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Correct report" }));

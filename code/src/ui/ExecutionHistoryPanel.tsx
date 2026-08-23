@@ -60,7 +60,8 @@ export function ExecutionHistoryPanel({ store }: { store: ExecutionReportingStor
   }
 
   return <section aria-labelledby="execution-history-heading" className="df-summary-bar df-execution-history">
-    <h2 className="df-panel-title" id="execution-history-heading">Execution history</h2>
+    <h2 className="df-panel-title" id="execution-history-heading">Report history</h2>
+    <p className="df-muted">Review outcomes you reported, correct them, or withdraw a report. Earlier revisions remain available.</p>
     {protectedIngress ? <p className="df-danger-message" role="status">Execution history needs recovery before it can be changed.</p> : null}
     {items.length === 0 ? <p className="df-empty">No outcomes reported yet.</p> : <ul className="df-plain-list df-history-list">
       {items.map((current) => <li key={current.subjectId}>

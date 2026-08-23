@@ -152,6 +152,74 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.df-planner-header {
+  display: grid;
+  gap: 16px;
+}
+
+.df-planner-mode-nav {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.df-planner-mode-nav .is-active {
+  background: var(--df-accent);
+  border-color: var(--df-accent);
+  color: var(--df-accent-text);
+}
+
+.df-history-summary,
+.df-history-summary .df-form-stack {
+  gap: 18px;
+}
+
+.df-history-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.df-history-evidence-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--df-border);
+  border-radius: 16px;
+  background: var(--df-panel-alt);
+}
+
+.df-history-distribution {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.df-history-category {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  text-align: left;
+  background: var(--df-panel);
+}
+
+.df-history-category strong {
+  font-size: 1.4rem;
+}
+
+.df-history-detail-list {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+}
+
+.df-history-detail-list li {
+  display: grid;
+  gap: 3px;
+}
+
 .df-primary-nav-button {
   display: grid;
   gap: 6px;
@@ -1100,6 +1168,15 @@ textarea {
   }
 
   .df-primary-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .df-planner-mode-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .df-history-range,
+  .df-history-distribution {
     grid-template-columns: 1fr;
   }
 

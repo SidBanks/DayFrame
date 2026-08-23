@@ -88,33 +88,75 @@ materialization. At that point, minimal explicit reporting UI was next; Tasks
 
 ---
 
-# Phase 4 — Historical Intelligence
+# Phase 4 — Historical Intelligence Foundation and Planner/Summary Product Architecture
 
-**Status:** Planned
+**Status:** Complete through Task 4.11 with non-blocking deferred scope and residual debt
 
-### Goal
+### Delivered boundary
 
-Develop the Learn pillar into a comprehensive analytical system.
+* Deterministic, policy-versioned Historical Intelligence over HistoricalPlan and ExecutionHistory
+* explicit plan coverage and frozen provenance
+* Scheduling Realization and Scheduled Outcomes with separate denominators
+* read-only Summary with explanation and drill-down
+* canonical Planner (`Plan / Schedule`) and Summary product architecture
+* preserved explicit generation, stale Schedule, friction, reporting, Backup V3, restore, and clear semantics
 
-### Objectives
+### Deferred beyond Phase 4
 
-* Historical analyses
-* Trend analyses
-* Planning Insights
-* Recommendation Proposal refinement
-* Explainable learning
+* Planned Allocation and historical comparisons/trends
+* Capacity semantics
+* Goals and Progress architecture
+* Recommendations and learning/adaptation policy
+* Planner Settings/Pattern Library, inline editing/drag-drop, autosave, router, and non-blocking polish
 
-### Deliverables
+### Phase 4 implementation sequence
 
-* Complete analytical pipeline
-* Explainable recommendations
-* Long-term behavioral understanding
+1. Task 4.2 — Historical Coverage and Completion Distribution Projection V1 — complete
+2. Task 4.3 — Historical Intelligence Explanation, Drill-Down, and Bounded UI Integration — complete
+3. Task 4.4 — Summary Experience, Historical Reporting, and Outcome-Surface UX Audit — complete
+4. Task 4.5 — Clarify Planner/Preview Navigation, Outcome Scope, and Operational Reporting Responsibilities V1 — complete
+5. Task 4.6 — Scheduling Realization Projection V1 — complete
+6. Task 4.7 — Scheduling Realization explanation and bounded Summary integration audit — complete
+7. Task 4.8 — Phase 4 Roadmap and Planner Convergence Readiness Review — complete; Determination A
+8. Task 4.9 — Planner Convergence V1: Compose Plan and Schedule Under One Operational Destination — complete
+9. Task 4.10 — Planner Convergence V1 Product Audit and Phase 4 Completion/Sequencing Review — complete; Planner V1 accepted with non-blocking UX debt
+10. Task 4.11 — Phase 4 Closure Audit and Publication Checkpoint — complete; Determination B
+11. Planned Allocation only after explicit semantic authorization in a future phase
+12. Comparative/trend semantics and projections in a future phase
+13. Goals architecture, then Progress, in a future phase
+14. Recommendation policy and learning only after adequate evidence safeguards
+
+Historical Intelligence remains derived from HistoricalPlan and ExecutionHistory.
+Phase 4 begins with transparent counts, coverage, and provenance—not adherence,
+composite scores, causal claims, or automatic planning changes.
+
+Task 4.8 determined that the Historical Intelligence/Summary V1 is functionally
+mature but the broader Phase 4 Learn promises remain open. Product coherence now
+takes precedence over adding another metric: Task 4.9 will converge existing Setup
+and Preview workflows composition-first under Planner while preserving all engine,
+authority, persistence, Backup, and Summary semantics.
+
+Task 4.9 completed that bounded composition: Planner now contains Plan/Schedule
+modes while Summary remains independent. Task 4.10 must assess the resulting
+product before Phase 4 closure or any renewed analytical expansion.
+
+Task 4.10 accepted Planner V1 with non-blocking UX debt and determined that no
+additional Phase 4 feature is needed. Phase 4 is not yet closed: Task 4.11 is the
+single remaining closure/publication checkpoint. It will publish the retrospective
+phase identity as Historical Intelligence Foundation and Planner/Summary Product
+Architecture, preserve deferred analytical aspirations explicitly, and define the
+design-first Phase 5 entry boundary.
+
+Task 4.11 closed Phase 4 under its achieved retrospective identity. The original
+comprehensive Learn aspirations are not claimed as delivered; they are explicitly
+reclassified above. The next task is Task 5.1, a design-first architecture
+definition for Goals, Progress, Recommendations, and Adaptive Planning boundaries.
 
 ---
 
 # Phase 5 — Adaptive Planning
 
-**Status:** Planned
+**Status:** Ready for design-first Task 5.1
 
 ### Goal
 
@@ -130,6 +172,14 @@ Improve planning quality through accumulated historical understanding while pres
 ### Deliverables
 
 * Higher-quality generated plans
+
+### Entry task
+
+**Task 5.1 — Phase 5 Architecture Definition: Goals, Progress, Recommendations,
+and Adaptive Planning Boundaries.** Define semantics and safety before any
+implementation. Descriptive intelligence must remain separate from prescriptive
+policy; recommendations must be explainable, reversible, subordinate to
+user-defined priorities, and unable to mutate schedules invisibly.
 * More personalized planning assistance
 * Improved long-term scheduling outcomes
 
