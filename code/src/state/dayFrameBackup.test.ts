@@ -54,7 +54,7 @@ describe("dayFrameBackup", () => {
       parseDayFrameBackupJson(
         JSON.stringify({
           app: "DayFrame",
-          version: 3,
+          version: 99,
           exportedAt: "2026-05-05T10:00:00-05:00",
           data: buildAuthoredSetup(),
         }),
@@ -100,6 +100,8 @@ describe("dayFrameBackup", () => {
     const parsedBackup = parseDayFrameBackupJson(
       JSON.stringify(createDayFrameBackup(authoredSetup, "2026-05-05T10:00:00-05:00")),
     );
+    expect(parsedBackup.version).toBe(1);
+    if (parsedBackup.version !== 1) throw new Error("Expected Backup V1.");
 
     expect(parsedBackup.data.shiftCycles[0]).toMatchObject({
       mode: "repeatingSequence",

@@ -7,7 +7,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDayFrameBackup } from "../../state/dayFrameBackup.js";
 import {
-  createDayFrameStore,
   DAYFRAME_ACTIVE_V2_STORAGE_KEY,
   DAYFRAME_PROFILES_STORAGE_KEY,
   DAYFRAME_PROFILES_V2_STORAGE_KEY,
@@ -19,10 +18,17 @@ import type {
   PersistenceWriteOutcome,
   StoreDurabilityStatus,
 } from "../../state/types.js";
-import { DayFrameApp } from "../DayFrameApp.js";
+import { DayFrameApp as ProductionDayFrameApp } from "../DayFrameApp.js";
+import { createControllableReadinessStore, createReadyDayFrameTestStore } from
+  "../../state/tests/dayFrameStoreTestUtils.js";
+
+function DayFrameApp(props: ComponentProps<typeof ProductionDayFrameApp>) {
+  return <ProductionDayFrameApp {...props}
+    store={props.store ?? createReadyDayFrameTestStore()} />;
+}
 
 function createExampleScheduleStore() {
-  return createDayFrameStore({
+  return createReadyDayFrameTestStore({
     shiftDefinitions: [
       {
         id: "shift_day",
@@ -179,6 +185,25 @@ describe("DayFrameApp", () => {
   const retiredGuardrailMessage =
     "Add at least one shift definition, an active shift cycle, at least one block template, and at least one block recurrence before generating a preview.";
 
+  it("renders only the loading shell until authority becomes ready", async () => {
+    const controlled = createControllableReadinessStore(createReadyDayFrameTestStore());
+    render(<DayFrameApp store={controlled.store} />);
+    expect(screen.getByText("Loading DayFrame…")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Setup" })).not.toBeInTheDocument();
+    controlled.transition({ status: "ready" });
+    expect(await screen.findByRole("button", { name: "Setup" })).toBeInTheDocument();
+  });
+
+  it("renders only the protected shell when authority needs recovery", () => {
+    const controlled = createControllableReadinessStore(createReadyDayFrameTestStore(), {
+      status: "protected", reason: "authorityRecoveryRequired",
+    });
+    render(<DayFrameApp store={controlled.store} />);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "DayFrame needs recovery before saved data can be used.");
+    expect(screen.queryByRole("button", { name: "Setup" })).not.toBeInTheDocument();
+  });
+
   it("renders the shell and opens on setup", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
@@ -195,7 +220,7 @@ describe("DayFrameApp", () => {
       screen.getByRole("button", { name: "Save Current Setup as Profile" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Saved Setup Profiles" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Export Setup Backup" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export Complete Backup" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Import Setup Backup" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Clear Local Data" })).toBeInTheDocument();
     expect(
@@ -263,7 +288,7 @@ describe("DayFrameApp", () => {
 
   it("requires replacement confirmation, supports cancel, and invokes replacement once", () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const replace = vi.spyOn(store, "replaceProtectedActiveCheckpointWithCurrentState");
     const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
     const mutateManualEvent = vi.spyOn(store, "mutateManualEvent");
@@ -319,7 +344,7 @@ describe("DayFrameApp", () => {
 
   it("confirms active-only abandonment and reflects the store-owned reset", () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     store.saveProfile({ name: "Kept Profile", savedAt: "2026-05-05T10:00:00-05:00" });
     const abandon = vi.spyOn(store, "abandonProtectedActiveCheckpointAndReset");
     render(<DayFrameApp store={store} />);
@@ -386,7 +411,7 @@ describe("DayFrameApp", () => {
     "presents replacement %s truthfully and requires fresh confirmation",
     (_label, result, copy) => {
       globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-      const baseStore = createDayFrameStore();
+      const baseStore = createReadyDayFrameTestStore();
       const replace = vi.fn(() => result as ActiveLocalReplacementRecoveryResult);
       render(
         <DayFrameApp
@@ -418,7 +443,7 @@ describe("DayFrameApp", () => {
 
   it("presents failed abandonment without resetting the current UI", () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const baseStore = createDayFrameStore({
+    const baseStore = createReadyDayFrameTestStore({
       shiftDefinitions: createExampleScheduleStore().getState().shiftDefinitions,
     });
     const abandon = vi.fn(
@@ -445,7 +470,7 @@ describe("DayFrameApp", () => {
 
   it("suppresses active durability Retry during recovery while preserving profile Retry", () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
     render(
       <DayFrameApp
         store={{
@@ -466,7 +491,7 @@ describe("DayFrameApp", () => {
     const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new RangeError("Injected startup read failure");
     });
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     getItem.mockRestore();
 
     render(<DayFrameApp store={store} />);
@@ -481,7 +506,7 @@ describe("DayFrameApp", () => {
 
   it("treats a stale not-recovery-required confirmation as benign", () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
     const replace = vi.fn(
       (): ActiveLocalReplacementRecoveryResult => ({
         status: "notAttempted",
@@ -507,9 +532,9 @@ describe("DayFrameApp", () => {
   });
 
   it("refreshes active-ingress awareness when the injected store is replaced", () => {
-    const healthyStore = createDayFrameStore();
+    const healthyStore = createReadyDayFrameTestStore();
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
-    const protectedStore = createDayFrameStore();
+    const protectedStore = createReadyDayFrameTestStore();
     const { rerender } = render(<DayFrameApp store={healthyStore} />);
 
     expect(screen.queryByRole("region", { name: "Saved setup needs recovery" })).toBeNull();
@@ -643,7 +668,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByDisplayValue("Persisted Custom Cycle")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Persisted Custom Sleep")).toBeInTheDocument();
 
-    const rehydratedState = createDayFrameStore().getState();
+    const rehydratedState = createReadyDayFrameTestStore().getState();
     const rehydratedPattern = projectActiveToPattern(rehydratedState);
     expect(rehydratedPattern.manualEvents).toEqual(persistedState.manualEvents);
     expect(rehydratedPattern.shiftDefinitions).toEqual(persistedState.shiftDefinitions);
@@ -795,7 +820,7 @@ describe("DayFrameApp", () => {
   });
 
   it("commits one complete authored setup transition when Setup is saved", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const commitAuthoredSetupTransaction = vi.spyOn(store, "commitAuthoredSetupTransaction");
 
     render(<DayFrameApp store={store} />);
@@ -890,7 +915,7 @@ describe("DayFrameApp", () => {
   });
 
   it("updates global schedule preferences after saving setup", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
@@ -909,7 +934,7 @@ describe("DayFrameApp", () => {
   });
 
   it("updates preview range after saving setup", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
@@ -930,7 +955,7 @@ describe("DayFrameApp", () => {
   });
 
   it("saves unified authored edits through the single setup action", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -1065,7 +1090,7 @@ describe("DayFrameApp", () => {
     const baseCycle = baseState.shiftCycles[0]!;
     const baseTemplate = baseState.blockTemplates[1]!;
 
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       ...baseState,
       shiftDefinitions: [
         { ...baseShift, id: "shift_1", name: "Shift 1" },
@@ -1164,7 +1189,7 @@ describe("DayFrameApp", () => {
     const baseState = createExampleScheduleStore().getState();
     const baseShift = baseState.shiftDefinitions[0]!;
     const cycle = baseState.shiftCycles[0]!;
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       ...baseState,
       shiftDefinitions: [
         { ...baseShift, id: "shift_1", name: "Shift 1" },
@@ -1202,7 +1227,7 @@ describe("DayFrameApp", () => {
     const pattern = projectActiveToPattern(createExampleScheduleStore().getState());
     const cycle = pattern.shiftCycles[0]!;
 
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       ...pattern,
       shiftCycles: [{
         ...cycle,
@@ -1276,7 +1301,7 @@ describe("DayFrameApp", () => {
   });
 
   it("generates preview work from a repeating sequence cycle", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_night",
@@ -1359,7 +1384,7 @@ describe("DayFrameApp", () => {
   });
 
   it("saves, loads, and deletes a local setup profile", async () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -1491,7 +1516,7 @@ describe("DayFrameApp", () => {
         manualEvents: currentState.manualEvents,
       },
     };
-    const store = createDayFrameStore({ ...currentState, savedProfiles: [invalidProfile] });
+    const store = createReadyDayFrameTestStore({ ...currentState, savedProfiles: [invalidProfile] });
     const before = store.getState();
 
     render(<DayFrameApp store={store} />);
@@ -1617,7 +1642,7 @@ describe("DayFrameApp", () => {
   });
 
   it("marks compact calendar friction days and restores the full visible range", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -1968,7 +1993,7 @@ describe("DayFrameApp", () => {
   });
 
   it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_night",
@@ -2150,7 +2175,7 @@ describe("DayFrameApp", () => {
   });
 
   it("persists the requires-work-shift setting from the template editor", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       blockTemplates: [
         {
           id: "template_workout",
@@ -2200,7 +2225,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows a clear setup message when preview data is incomplete", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
@@ -2216,7 +2241,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows only the missing setup items that still need attention", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -2246,7 +2271,7 @@ describe("DayFrameApp", () => {
   });
 
   it("generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_night",
@@ -2364,7 +2389,7 @@ describe("DayFrameApp", () => {
   });
 
   it("lets the user apply a suggested fix after generating a preview", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -2563,7 +2588,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows non-blocking preview range mismatch warnings only after preview generation", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       previewRange: {
         preset: "custom",
         startDate: "2026-06-01",
@@ -2652,7 +2677,7 @@ describe("DayFrameApp", () => {
   });
 
   it("blocks stale Review fixed time navigation until the preview is regenerated", async () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -2752,7 +2777,7 @@ describe("DayFrameApp", () => {
       .fn<() => string>()
       .mockReturnValueOnce("2026-05-03T13:00:00-05:00")
       .mockReturnValueOnce("2026-05-03T15:00:00-05:00");
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -2860,7 +2885,7 @@ describe("DayFrameApp", () => {
   });
 
   it("focuses the fixed-time input for the selected friction when multiple fixed templates exist", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -3147,7 +3172,7 @@ describe("DayFrameApp", () => {
       <DayFrameApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
-        store={createDayFrameStore()}
+        store={createReadyDayFrameTestStore()}
       />,
     );
 
@@ -3158,7 +3183,7 @@ describe("DayFrameApp", () => {
   });
 
   it("allows preview generation when sleep is intentionally disabled but another template is enabled", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -3258,7 +3283,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows a clear guardrail when all templates are disabled", () => {
-    const store = createDayFrameStore({
+    const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
           id: "shift_day",
@@ -3349,47 +3374,49 @@ describe("DayFrameApp", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
   });
 
-  it("clears local setup data after confirmation", () => {
+  it("clears local setup data after confirmation", async () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
 
-    expect(
+    await waitFor(() => expect(
       screen.queryByText("Clear all locally saved DayFrame setup data?"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Local DayFrame setup data cleared from this device."),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument());
+    expect(screen.getByText("Local DayFrame setup data cleared from this device.")).toBeInTheDocument();
     expect(
       screen.getByText("No shifts yet. Add your first shift definition to get started."),
     ).toBeInTheDocument();
   });
 
   it("exports authored setup as a json backup file", async () => {
-    render(<ExampleScheduleApp getExportedAt={() => "2026-05-05T10:00:00-05:00"} />);
+    render(<ExampleScheduleApp getExportedAt={() => "2026-05-05T15:00:00.000Z"} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Export Setup Backup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Export Complete Backup" }));
 
-    expect(createObjectUrlMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(createObjectUrlMock).toHaveBeenCalledTimes(1));
     expect(anchorClickMock).toHaveBeenCalledTimes(1);
     expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("DayFrame setup backup downloaded.")).toBeInTheDocument();
+    expect(screen.getByText("Complete DayFrame backup downloaded.")).toBeInTheDocument();
 
     const backupBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
     const backupJson = await backupBlob.text();
 
     const parsed = JSON.parse(backupJson) as { app: string; surface: string; version: number;
       exportedAt: string; data: Record<string, unknown> };
-    expect(parsed).toMatchObject({ app: "DayFrame", surface: "backup", version: 2,
-      exportedAt: "2026-05-05T10:00:00-05:00" });
-    expect(parsed.data).not.toHaveProperty("preview");
-    expect(parsed.data).not.toHaveProperty("savedProfiles");
+    expect(parsed).toMatchObject({ app: "DayFrame", surface: "backup", version: 3,
+      exportedAt: "2026-05-05T15:00:00.000Z" });
+    expect(parsed.data).toHaveProperty("active");
+    expect(parsed.data).toHaveProperty("profiles");
+    expect(parsed.data).toHaveProperty("planDecisions");
+    expect(parsed.data).toHaveProperty("executionHistory");
+    expect(parsed.data).toHaveProperty("historicalPlan");
+    expect(JSON.stringify(parsed.data)).not.toContain('"preview"');
     expect(JSON.stringify(parsed.data)).toContain("incarnationId");
   });
 
   it("imports a valid setup backup json file", async () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp store={store} />);
 
@@ -3459,7 +3486,7 @@ describe("DayFrameApp", () => {
   it("restores a Backup V2 file with lifetime-specific feedback", async () => {
     const source = createExampleScheduleStore();
     const backup = source.exportBackup("2026-05-05T10:00:00-05:00");
-    const target = createDayFrameStore();
+    const target = createReadyDayFrameTestStore();
     render(<DayFrameApp store={target} />);
 
     fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
@@ -3535,7 +3562,7 @@ describe("DayFrameApp", () => {
   ] as const)(
     "keeps a Setup commit in runtime while reflecting %s durability semantics",
     (status, expectedMessage) => {
-      const store = createDayFrameStore();
+      const store = createReadyDayFrameTestStore();
       const commitAuthoredSetupTransaction = store.commitAuthoredSetupTransaction;
       const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
       const workflowStore = {
@@ -3563,7 +3590,7 @@ describe("DayFrameApp", () => {
   );
 
   it("distinguishes a runtime profile save from retryable profile durability failure", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const saveProfile = store.saveProfile;
     const workflowStore = {
       ...store,
@@ -3629,7 +3656,7 @@ describe("DayFrameApp", () => {
   });
 
   it("retains profile delete and load runtime transitions while classifying durability", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     store.saveProfile({ name: "Runtime Profile", savedAt: "2026-05-05T10:00:00-05:00" });
     const loadProfile = store.loadProfile;
     const deleteProfile = store.deleteProfile;
@@ -3663,13 +3690,16 @@ describe("DayFrameApp", () => {
   });
 
   it("keeps a valid backup import in runtime while reflecting recovery-required semantics", async () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const importBackup = store.importBackup;
     const workflowStore = {
       ...store,
       importBackup: (...args: Parameters<typeof importBackup>) => ({
         ...importBackup(...args),
         persistence: { status: "serializationFailure" } as const,
+      }),
+      importBackupFile: async (value: unknown) => ({
+        ...importBackup(value), persistence: { status: "serializationFailure" } as const,
       }),
     };
     const backup = createDayFrameBackup(
@@ -3726,31 +3756,31 @@ describe("DayFrameApp", () => {
     ],
   ] as const)(
     "retains structured %s clear semantics after the runtime reset",
-    (durability, activeState, profiles, unresolvedText) => {
-      const store = createDayFrameStore({
+    async (durability, activeState, profiles, unresolvedText) => {
+      const store = createReadyDayFrameTestStore({
         schedulingPreferences: { dayBoundaryStartTime: "03:00", weekStartsOn: "monday" },
       });
       const clearLocalData = store.clearLocalData;
       const workflowStore = {
         ...store,
-        clearLocalData: () => ({
-          ...clearLocalData(),
-          activeState,
-          profiles,
-          durability,
-        }),
+        clearLocalData: async () => {
+          const result = await clearLocalData();
+          return { ...result, activeState, profiles, durability,
+            status: durability === "notCleared" ? "failed" as const : durability,
+            authorities: { ...result.authorities, active: activeState, profiles } };
+        },
       };
 
       render(<DayFrameApp store={workflowStore} />);
       fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
       fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
 
-      expect(store.getState().schedulingPreferences.weekStartsOn).toBe("saturday");
-      expect(
+      await waitFor(() => expect(
         screen.getByText(
           `Local data cleared for this session, but local removal is incomplete for ${unresolvedText}.`,
         ),
-      ).toHaveClass("df-danger-message");
+      ).toHaveClass("df-danger-message"));
+      expect(store.getState().schedulingPreferences.weekStartsOn).toBe("saturday");
       expect(
         screen.queryByText("Local DayFrame setup data cleared from this device."),
       ).not.toBeInTheDocument();
@@ -3758,14 +3788,14 @@ describe("DayFrameApp", () => {
   );
 
   it("suppresses persistent durability awareness for initial unknown and durable surfaces", () => {
-    const unknownStore = createDayFrameStore();
+    const unknownStore = createReadyDayFrameTestStore();
     const { rerender } = render(<DayFrameApp store={unknownStore} />);
 
     expect(
       screen.queryByRole("region", { name: "Some changes are not durably saved" }),
     ).not.toBeInTheDocument();
 
-    const durableStore = createDayFrameStore();
+    const durableStore = createReadyDayFrameTestStore();
     durableStore.setSchedulingPreferences({ weekStartsOn: "monday" });
     durableStore.saveProfile({ name: "Durable", savedAt: "2026-05-05T10:00:00-05:00" });
     rerender(<DayFrameApp store={durableStore} />);
@@ -3776,7 +3806,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows active storage failure persistently beside immediate feedback and clears on ordinary convergence", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -3801,7 +3831,7 @@ describe("DayFrameApp", () => {
   });
 
   it("keeps active durability awareness across workflow navigation", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -3821,7 +3851,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows profile failure independently and clears it after ordinary profile convergence", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -3855,7 +3885,7 @@ describe("DayFrameApp", () => {
   });
 
   it("represents both surfaces and suppresses mixed unknown or durable surfaces", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const combinedStore = {
       ...store,
       getDurabilityStatus: () => ({
@@ -3923,7 +3953,7 @@ describe("DayFrameApp", () => {
   });
 
   it("shows active recovery-required awareness without implying an action", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
 
     render(
       <DayFrameApp
@@ -3946,7 +3976,7 @@ describe("DayFrameApp", () => {
   });
 
   it("communicates both active and profile recovery-required session risks distinctly", () => {
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
 
     render(
       <DayFrameApp
@@ -3976,7 +4006,7 @@ describe("DayFrameApp", () => {
   });
 
   it("keeps recovery-required session-risk communication across in-app navigation", () => {
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
     const store = {
       ...baseStore,
       getDurabilityStatus: () => ({
@@ -3995,7 +4025,7 @@ describe("DayFrameApp", () => {
   });
 
   it("clears recovery-required session-risk communication after natural convergence", () => {
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
     let status: StoreDurabilityStatus = {
       activeState: "serializationFailure",
       profiles: "durable",
@@ -4031,7 +4061,7 @@ describe("DayFrameApp", () => {
   });
 
   it("retries active durability explicitly without replaying a workflow or notifying state subscribers", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -4057,7 +4087,7 @@ describe("DayFrameApp", () => {
 
   it("updates a retry failure from storage failure to unavailable", () => {
     const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -4082,7 +4112,7 @@ describe("DayFrameApp", () => {
   });
 
   it("retries profile snapshot durability through the profile store API", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -4102,7 +4132,7 @@ describe("DayFrameApp", () => {
   });
 
   it("keeps surface retries independent when both surfaces fail", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -4131,8 +4161,8 @@ describe("DayFrameApp", () => {
     ["profiles", DAYFRAME_PROFILES_STORAGE_KEY, "Retry saved profiles durability"],
   ] as const)(
     "retries a partial-clear %s removal without replaying clear",
-    (failedSurface, failedKey, retryName) => {
-      const store = createDayFrameStore();
+    async (failedSurface, failedKey, retryName) => {
+      const store = createReadyDayFrameTestStore();
       const originalRemoveItem = Storage.prototype.removeItem;
       const removeItem = vi.spyOn(Storage.prototype, "removeItem").mockImplementation(function (
         this: Storage,
@@ -4144,7 +4174,7 @@ describe("DayFrameApp", () => {
         originalRemoveItem.call(this, key);
       });
       const clearLocalData = vi.spyOn(store, "clearLocalData");
-      store.clearLocalData();
+      await store.clearLocalData();
       removeItem.mockRestore();
       const retryMethod =
         failedSurface === "active"
@@ -4163,7 +4193,7 @@ describe("DayFrameApp", () => {
   );
 
   it("performs one attempt for one failed Retry activation and leaves Retry available", () => {
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
@@ -4182,7 +4212,7 @@ describe("DayFrameApp", () => {
   });
 
   it("transitions Retry to recovery-required awareness when retry classification requires it", () => {
-    const baseStore = createDayFrameStore();
+    const baseStore = createReadyDayFrameTestStore();
     let status: StoreDurabilityStatus = {
       activeState: "storageFailure",
       profiles: "durable",
@@ -4217,8 +4247,8 @@ describe("DayFrameApp", () => {
   });
 
   it("cleans up durability subscriptions and follows a replacement store", () => {
-    const firstStore = createDayFrameStore();
-    const secondStore = createDayFrameStore();
+    const firstStore = createReadyDayFrameTestStore();
+    const secondStore = createReadyDayFrameTestStore();
     const firstUnsubscribe = vi.fn();
     const firstSubscribe = firstStore.subscribeDurability;
     vi.spyOn(firstStore, "subscribeDurability").mockImplementation((listener) => {

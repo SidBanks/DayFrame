@@ -13,6 +13,9 @@ import {
 import { resolveDurableOccurrenceReference } from "../core/occurrences/durableOccurrenceReference.js";
 import type { DayFrameAuthoredSetup, PersistenceRemovalOutcome, PersistenceWriteOutcome,
   SurfaceDurabilityStatus } from "./types.js";
+import type { DayFrameNotificationScheduler } from "./dayFrameNotificationScheduler.js";
+import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY, type RuntimeAuthorityAdapter } from
+  "./dayFrameRuntimeAuthority.js";
 
 export const DAYFRAME_PLAN_DECISIONS_STORAGE_KEY = "dayframe-plan-decisions-v1";
 export const PLAN_DECISION_SURFACE_VERSION = 1 as const;
@@ -62,6 +65,9 @@ export type PlanDecisionRecoveryResult =
   | { status: "notAttempted"; reason: "noProtectedSource" | "sourceUnreadable" | "sourceChanged" };
 
 export type PlanDecisionSurface = ReturnType<typeof createPlanDecisionSurface>;
+export type PlanDecisionRuntimeSnapshot = { decisions: PlanDecisionV1[];
+  quarantined: QuarantinedPlanDecision[]; ingress: PlanDecisionIngressStatus;
+  protectedRaw?: string; durability: SurfaceDurabilityStatus; desired: unknown[] };
 
 export function createPlanDecisionSurface(options: {
   getAuthoredSetup: () => DayFrameAuthoredSetup;
@@ -69,6 +75,7 @@ export function createPlanDecisionSurface(options: {
   now?: () => string;
   serialize?: (value: unknown) => string;
   onAuthorityChanged?: () => void;
+  notificationScheduler?: DayFrameNotificationScheduler;
 }) {
   const loaded = load(getStorage());
   let decisions = loaded.decisions;
@@ -83,6 +90,22 @@ export function createPlanDecisionSurface(options: {
   const allocate = options.allocatePlanDecisionId ?? createPlanDecisionId;
   const now = options.now ?? (() => new Date().toISOString());
   const serialize = options.serialize ?? JSON.stringify;
+
+  const runtimeAdapter: RuntimeAuthorityAdapter<PlanDecisionRuntimeSnapshot> = {
+    id: "planDecisions",
+    captureRuntimeSnapshot: () => structuredClone({ decisions, quarantined, ingress,
+      ...(protectedRaw === undefined ? {} : { protectedRaw }), durability, desired }),
+    installRuntimeExact: (target) => {
+      decisions = target.decisions.map(clonePlanDecision);
+      quarantined = target.quarantined.map(cloneQuarantine);
+      ingress = { ...target.ingress }; protectedRaw = target.protectedRaw;
+      durability = target.durability; desired = structuredClone(target.desired);
+      options.notificationScheduler?.notify("planDecisions", () => {
+        notifyDecisions(); for (const listener of durabilityListeners) listener(durability);
+        for (const listener of ingressListeners) listener(getPlanDecisionIngressStatus());
+      });
+    },
+  };
 
   const getPlanDecisions = () => decisions.map(clonePlanDecision);
   const getQuarantinedPlanDecisions = () => quarantined.map(cloneQuarantine);
@@ -234,7 +257,40 @@ export function createPlanDecisionSurface(options: {
     subscribePlanDecisions(listener: (value: PlanDecisionV1[]) => void) { decisionListeners.add(listener); return () => decisionListeners.delete(listener); },
     subscribePlanDecisionDurability(listener: (value: SurfaceDurabilityStatus) => void) { durabilityListeners.add(listener); return () => durabilityListeners.delete(listener); },
     subscribePlanDecisionIngress(listener: (value: PlanDecisionIngressStatus) => void) { ingressListeners.add(listener); return () => ingressListeners.delete(listener); },
+    getRuntimeAuthorityAdapter(capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) {
+      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) throw new Error("Invalid runtime authority capability.");
+      return runtimeAdapter;
+    },
   };
+}
+
+export function buildPlanDecisionRuntimeTarget(value: unknown):
+  { status: "valid"; target: PlanDecisionRuntimeSnapshot; envelope: PlanDecisionEnvelopeV1 } |
+  { status: "invalid"; reason: string } {
+  if (!record(value) || !exact(value, ["app", "surface", "version", "decisions"]) ||
+      value.app !== "DayFrame" || value.surface !== "planDecisions" ||
+      value.version !== PLAN_DECISION_SURFACE_VERSION || !Array.isArray(value.decisions))
+    return { status: "invalid", reason: "invalidEnvelope" };
+  const decisions: PlanDecisionV1[] = []; const quarantined: QuarantinedPlanDecision[] = [];
+  const ids = new Set<string>(); const targets = new Set<string>();
+  value.decisions.forEach((entry, index) => {
+    const validation = validatePlanDecision(entry);
+    let reason: QuarantinedPlanDecision["reason"] | undefined;
+    if (validation.status === "unsupportedVersion") reason = "unsupportedDecisionVersion";
+    else if (validation.status === "unsupportedTargetVersion") reason = "unsupportedTargetVersion";
+    else if (validation.status === "invalid") reason = "invalidDecision";
+    else { const target = getPlanDecisionTargetKey(validation.decision.target);
+      if (ids.has(validation.decision.id)) reason = "duplicateDecisionId";
+      else if (targets.has(target)) reason = "conflictingTarget";
+      else { decisions.push(validation.decision); ids.add(validation.decision.id); targets.add(target); } }
+    if (reason) quarantined.push({ quarantineId: `plan-decision-quarantine-${index}`,
+      reason, raw: cloneRaw(entry) });
+  });
+  const ordered = decisions.sort(compareDecisions); const desired = cloneEntries(ordered, quarantined);
+  return { status: "valid", envelope: envelope(desired), target: { decisions: ordered.map(clonePlanDecision),
+    quarantined: quarantined.map(cloneQuarantine), desired: structuredClone(desired),
+    durability: "durable", ingress: { status: "accepted",
+      quarantinedEntryCount: quarantined.length } } };
 }
 
 function load(storage: Storage | undefined) {
@@ -294,3 +350,6 @@ function cloneRaw<T>(value: T): T { return value === undefined ? value : structu
 function compareDecisions(left: PlanDecisionV1, right: PlanDecisionV1) { return getPlanDecisionTargetKey(left.target).localeCompare(getPlanDecisionTargetKey(right.target)) || left.id.localeCompare(right.id); }
 function getStorage(): Storage | undefined { try { return globalThis.localStorage; } catch { return undefined; } }
 function record(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
+function exact(value: Record<string, unknown>, keys: string[]): boolean {
+  return Object.keys(value).length === keys.length && keys.every((key) => key in value);
+}

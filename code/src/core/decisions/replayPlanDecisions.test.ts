@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PlanDecisionId } from "./planDecision.js";
 import { createDurableOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
-import { createDayFrameStore } from "../../state/dayFrameStore.js";
+import { createReadyDayFrameTestStore } from "../../state/tests/dayFrameStoreTestUtils.js";
 import type { DayFrameAuthoredPattern } from "../../state/types.js";
 import { evaluatePlanDecisionApplicability } from "./replayPlanDecisions.js";
 
@@ -30,7 +30,7 @@ const range = { rangeStartDate: "2026-08-17" as const, rangeEndDate: "2026-08-18
 
 function store(seed = pattern) {
   let next = 1;
-  return createDayFrameStore(seed, {
+  return createReadyDayFrameTestStore(seed, {
     allocatePlanDecisionId: () => `10000000-0000-4000-8000-${String(next++).padStart(12, "0")}` as PlanDecisionId,
     planDecisionClock: () => "2026-08-17T01:00:00.000Z",
   });

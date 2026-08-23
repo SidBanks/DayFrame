@@ -438,6 +438,70 @@ textarea {
   background: var(--df-panel-alt);
 }
 
+.df-execution-report {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  min-width: 0;
+}
+
+.df-execution-report .df-form-stack {
+  border-left: 0.2rem solid var(--df-border, #cbd5e1);
+  padding-left: 0.75rem;
+}
+
+.df-history-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.df-history-item {
+  align-items: start;
+  background: var(--df-panel-alt);
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  color: var(--df-text);
+  cursor: pointer;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.df-history-detail {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  min-width: 0;
+}
+
+.df-execution-summary {
+  background: var(--df-panel);
+  border: 1px solid var(--df-border);
+  border-radius: 18px;
+  padding: 1rem;
+}
+
+.df-outcome-counts {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  margin: 0.75rem 0;
+}
+
+.df-outcome-counts div {
+  background: var(--df-panel-alt);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.df-outcome-counts dd {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0;
+}
+
 .df-checkbox-grid {
   display: flex;
   flex-wrap: wrap;

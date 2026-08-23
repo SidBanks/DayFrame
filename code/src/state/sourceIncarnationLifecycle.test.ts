@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SourceIncarnationId } from "../core/authored/sourceIncarnation.js";
 import { projectActiveToPattern, validateIncarnationGraph } from "./activeV2.js";
-import { createDayFrameStore } from "./dayFrameStore.js";
+import { createReadyDayFrameTestStore } from "./tests/dayFrameStoreTestUtils.js";
 import type { AuthoredSourceKind, DayFrameAuthoredPattern, DayFrameState } from "./types.js";
 
 const pattern: DayFrameAuthoredPattern = {
@@ -68,7 +68,7 @@ const setupOperations = (operation: "update" | "replace") => ([
 
 describe("source incarnation lifecycle authority", () => {
   it("makes all seven runtime incarnations mandatory and preserves them on explicit update", () => {
-    const store = createDayFrameStore(pattern, { allocateSourceIncarnationId: allocator() });
+    const store = createReadyDayFrameTestStore(pattern, { allocateSourceIncarnationId: allocator() });
     const before = identities(store.getState());
     const authored = projectActiveToPattern(store.getState());
     const setup = setupInput(authored);
@@ -83,7 +83,7 @@ describe("source incarnation lifecycle authority", () => {
   });
 
   it("allocates fresh setup lifetimes on replace and preserves nested identity through reorder", () => {
-    const store = createDayFrameStore(pattern, { allocateSourceIncarnationId: allocator() });
+    const store = createReadyDayFrameTestStore(pattern, { allocateSourceIncarnationId: allocator() });
     const before = identities(store.getState());
     const authored = projectActiveToPattern(store.getState());
     const setup = setupInput(authored);
@@ -96,7 +96,7 @@ describe("source incarnation lifecycle authority", () => {
   });
 
   it("implements create, update, replace, delete, and same-ID recreation for manual events", () => {
-    const store = createDayFrameStore({ ...pattern, manualEvents: [] },
+    const store = createReadyDayFrameTestStore({ ...pattern, manualEvents: [] },
       { allocateSourceIncarnationId: allocator() });
     const event = pattern.manualEvents[0]!;
     store.mutateManualEvent({ operation: "create", event });

@@ -157,15 +157,24 @@ describe("durability semantics", () => {
       },
     ],
   ] as const)("classifies structured clear result %#", (input, expected) => {
-    const result: ClearLocalDataResult = {
+    const legacyFields = {
       state: createInitialDayFrameState(),
       planDecisions: { status: "removed" },
+      executionHistory: { status: "removed" },
+      historicalPlan: { status: "removed" },
       ...input,
-    };
+    } as Omit<ClearLocalDataResult, "status" | "authorities" | "previewCleared">;
+    const result: ClearLocalDataResult = { ...legacyFields,
+      status: legacyFields.durability === "notCleared" ? "failed" : legacyFields.durability,
+      authorities: { active: legacyFields.activeState, profiles: legacyFields.profiles,
+        planDecisions: legacyFields.planDecisions, executionHistory: legacyFields.executionHistory,
+        historicalPlan: legacyFields.historicalPlan }, previewCleared: true };
 
     expect(classifyClearLocalDataResult(result)).toEqual({
       ...expected,
       planDecisions: "durableSuccess",
+      executionHistory: "durableSuccess",
+      historicalPlan: "durableSuccess",
     });
   });
 

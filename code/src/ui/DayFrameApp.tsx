@@ -7,7 +7,7 @@ import { createPlanDecisionAcceptanceCandidate } from "../core/decisions/createP
 import type { AcceptPlanDecisionInput, PlanDecisionV1 } from "../core/decisions/planDecision.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString } from "../core/shifts/types.js";
-import { parseDayFrameBackupJson, type DayFrameBackupV2 } from "../state/dayFrameBackup.js";
+import { parseDayFrameBackupJson, type DayFrameBackup } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
 import {
   classifyClearLocalDataResult,
@@ -31,6 +31,7 @@ import type {
   QuarantinedProfileEntry,
   SurfaceDurabilityStatus,
 } from "../state/types.js";
+import type { DayFrameReadiness } from "../state/dayFrameReadiness.js";
 import type { PlanDecisionIngressStatus } from "../state/planDecisionSurface.js";
 import { PreviewScreen } from "./PreviewScreen.js";
 import { buildAcceptedDecisionViewModels } from "./acceptedDecisionPresentation.js";
@@ -46,6 +47,9 @@ import "./dayFrameUi.css";
 
 export type DayFrameAppStore = Pick<
   DayFrameStore,
+  | "getReadiness"
+  | "subscribeReadiness"
+  | "whenReady"
   | "getState"
   | "getDurabilityStatus"
   | "getActiveLocalIngressStatus"
@@ -72,6 +76,9 @@ export type DayFrameAppStore = Pick<
   | "clearLocalData"
   | "exportBackup"
   | "importBackup"
+  | "exportBackupV3"
+  | "importBackupV3"
+  | "importBackupFile"
   | "mutateManualEvent"
   | "generatePreview"
   | "applySuggestedFixToPreview"
@@ -84,6 +91,19 @@ export type DayFrameAppStore = Pick<
   | "getPlanDecisions"
   | "subscribePlanDecisions"
   | "removePlanDecision"
+  | "getExecutionHistory"
+  | "getQuarantinedExecutionHistory"
+  | "getExecutionHistoryDurabilityStatus"
+  | "getExecutionHistoryIngressStatus"
+  | "findExecutionSubjectByPlannedReference"
+  | "getExecutionOutcome"
+  | "recordExecution"
+  | "correctExecutionRecord"
+  | "retractExecutionRecord"
+  | "retryExecutionHistoryPersistence"
+  | "subscribeExecutionHistory"
+  | "subscribeExecutionHistoryDurability"
+  | "subscribeExecutionHistoryIngress"
 >;
 
 type DayFrameScreen = "setup" | "preview";
@@ -167,20 +187,36 @@ function PersistentDurabilityAwareness({
   );
 }
 
-export function DayFrameApp({
+export function DayFrameApp(props: DayFrameAppProps): ReactElement {
+  const internalStoreRef = useRef<DayFrameAppStore | null>(null);
+  const activeStore = props.store ?? internalStoreRef.current ?? createDayFrameStore();
+  if (!props.store && internalStoreRef.current === null) internalStoreRef.current = activeStore;
+  const [readiness, setReadiness] = useState<DayFrameReadiness>(() =>
+    activeStore.getReadiness());
+
+  useEffect(() => {
+    setReadiness(activeStore.getReadiness());
+    return activeStore.subscribeReadiness(setReadiness);
+  }, [activeStore]);
+
+  if (readiness.status === "initializing") {
+    return <main aria-live="polite"><p>Loading DayFrame…</p></main>;
+  }
+  if (readiness.status === "protected") {
+    return <main role="alert"><p>DayFrame needs recovery before saved data can be used.</p></main>;
+  }
+  return <ReadyDayFrameApp {...props} store={activeStore} />;
+}
+
+function ReadyDayFrameApp({
   store,
   getGeneratedAt = createIsoTimestamp,
   getRevisedAt = createIsoTimestamp,
   getExportedAt = createIsoTimestamp,
   getNow = () => new Date(),
   getPreviewWindow,
-}: DayFrameAppProps): ReactElement {
-  const internalStoreRef = useRef<DayFrameAppStore | null>(null);
-  const activeStore = store ?? internalStoreRef.current ?? createDayFrameStore();
-
-  if (!store && internalStoreRef.current === null) {
-    internalStoreRef.current = activeStore;
-  }
+}: DayFrameAppProps & { store: DayFrameAppStore }): ReactElement {
+  const activeStore = store;
   const storeRef = useRef<DayFrameAppStore>(activeStore);
   storeRef.current = activeStore;
   const importInputRef = useRef<FileInputLike | null>(null);
@@ -217,6 +253,8 @@ export function DayFrameApp({
   const [backupDurabilityFeedback, setBackupDurabilityFeedback] =
     useState<DurabilitySemanticCategory | null>(null);
   const [backupErrorMessage, setBackupErrorMessage] = useState("");
+  const [isBackupBusy, setIsBackupBusy] = useState(false);
+  const [isClearBusy, setIsClearBusy] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
   const [profileDurabilityFeedback, setProfileDurabilityFeedback] =
@@ -1191,25 +1229,32 @@ export function DayFrameApp({
               <div className="df-screen-actions">
                 <button
                   className="df-secondary-button"
-                  onClick={() => {
-                    const backup = storeRef.current.exportBackup(getExportedAt());
-
-                    downloadDayFrameBackup(backup);
-                    setBackupMessage("DayFrame setup backup downloaded.");
-                    setBackupDurabilityFeedback(null);
-                    setBackupErrorMessage("");
-                    setProfileMessage("");
-                    setProfileDurabilityFeedback(null);
-                    setProfileErrorMessage("");
-                    setIsConfirmingClearLocalData(false);
-                    setClearDurabilityFeedback(null);
+                  disabled={isBackupBusy || isClearBusy}
+                  onClick={async () => {
+                    setIsBackupBusy(true);
+                    const result = await storeRef.current.exportBackupV3(getExportedAt());
+                    if (result.status === "exported") {
+                      downloadDayFrameBackup(result.backup);
+                      setBackupMessage("Complete DayFrame backup downloaded.");
+                      setBackupErrorMessage("");
+                    } else {
+                      setBackupMessage("");
+                      setBackupErrorMessage(result.status === "protectedSurface"
+                        ? `Backup is unavailable while ${result.surface} recovery is protected.`
+                        : "Backup is temporarily unavailable. Your DayFrame authority was preserved.");
+                    }
+                    setBackupDurabilityFeedback(null); setProfileMessage("");
+                    setProfileDurabilityFeedback(null); setProfileErrorMessage("");
+                    setIsConfirmingClearLocalData(false); setClearDurabilityFeedback(null);
+                    setIsBackupBusy(false);
                   }}
                   type="button"
                 >
-                  Export Setup Backup
+                  {isBackupBusy ? "Preparing Backup…" : "Export Complete Backup"}
                 </button>
                 <button
                   className="df-secondary-button"
+                  disabled={isBackupBusy || isClearBusy}
                   onClick={() => {
                     importInputRef.current?.click();
                   }}
@@ -1219,6 +1264,7 @@ export function DayFrameApp({
                 </button>
                 <button
                   className="df-secondary-button"
+                  disabled={isBackupBusy || isClearBusy}
                   onClick={() => {
                     setIsConfirmingClearLocalData(true);
                     setSetupDurabilityFeedback(null);
@@ -1240,6 +1286,7 @@ export function DayFrameApp({
                 aria-label="Import Setup Backup File"
                 hidden
                 onChange={async (event) => {
+                  setIsBackupBusy(true);
                   await handleBackupFileSelection(
                     event,
                     storeRef.current,
@@ -1256,6 +1303,7 @@ export function DayFrameApp({
                     setPreviewGuardrailMissingItems,
                     setIsConfirmingClearLocalData,
                   );
+                  setIsBackupBusy(false);
                 }}
                 ref={(node) => {
                   importInputRef.current = node as unknown as FileInputLike | null;
@@ -1268,8 +1316,10 @@ export function DayFrameApp({
                   <div className="df-confirmation-actions">
                     <button
                       className="df-danger-button"
-                      onClick={() => {
-                        const result = storeRef.current.clearLocalData();
+                      disabled={isClearBusy}
+                      onClick={async () => {
+                        setIsClearBusy(true);
+                        const result = await storeRef.current.clearLocalData();
                         setCurrentScreen("setup");
                         clearPreviewSelection();
                         setSetupDurabilityFeedback(null);
@@ -1283,13 +1333,15 @@ export function DayFrameApp({
                         setProfileDurabilityFeedback(null);
                         setProfileErrorMessage("");
                         setProfileName("");
+                        setIsClearBusy(false);
                       }}
                       type="button"
                     >
-                      Confirm Clear Local Data
+                      {isClearBusy ? "Clearing Local Data…" : "Confirm Clear Local Data"}
                     </button>
                     <button
                       className="df-secondary-button"
+                      disabled={isClearBusy}
                       onClick={() => {
                         setIsConfirmingClearLocalData(false);
                       }}
@@ -1321,8 +1373,9 @@ export function DayFrameApp({
                 <p className="df-success-message">{profileMessage}</p>
               ) : (
                 <p className="df-support">
-                  Save named profiles locally, or export and import authored setup as JSON. Preview
-                  data is not included.
+                  Complete backups include setup, profiles, accepted decisions, historical plans,
+                  execution outcomes, notes, and timestamps. Preview data is not included; protect
+                  the downloaded JSON as private personal data.
                 </p>
               )}
             </section>
@@ -1802,6 +1855,7 @@ export function DayFrameApp({
               ) : null}
             </div>
             <PreviewScreen
+              authoredSetup={stateSnapshot}
               acceptedDecisions={acceptedDecisionViewModels}
               decisionRemovalProtected={planDecisionIngress.status === "recoveryRequired"}
               getDayBoundaryStartTimeForUserDayDate={getDayBoundaryStartTimeForUserDayDate}
@@ -1816,6 +1870,7 @@ export function DayFrameApp({
                 planDecisionDurability === "storageFailure" || planDecisionDurability === "unavailable"
               }
               preview={stateSnapshot.preview}
+              executionReportingStore={activeStore}
               rangeWarnings={stateSnapshot.preview ? savedRangeWarnings : []}
               visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
               visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
@@ -2229,7 +2284,27 @@ async function handleBackupFileSelection(
   try {
     const backup = parseDayFrameBackupJson(await file.text());
 
-    const result = store.importBackup(backup);
+    const result = await store.importBackupFile(backup);
+
+    if (result.status === "restoredV3") {
+      setBackupMessage("Complete Backup V3 restored across setup and history.");
+      setBackupDurabilityFeedback(null); setBackupErrorMessage("");
+      setSetupDurabilityFeedback(null); setClearDurabilityFeedback(null);
+      setProfileMessage(""); setProfileDurabilityFeedback(null); setProfileErrorMessage("");
+      setCurrentScreen("setup"); clearPreviewSelection(); setPreviewGuardrailMissingItems([]);
+      setIsConfirmingClearLocalData(false); return;
+    }
+
+    if (result.status !== "rejected" && result.status !== "instantiatedFromLegacy" &&
+        result.status !== "restored") {
+      setBackupMessage(""); setBackupDurabilityFeedback(null); setClearDurabilityFeedback(null);
+      setBackupErrorMessage(result.status === "protectedCurrentState"
+        ? "Backup restore is blocked until protected local authority is explicitly resolved."
+        : result.status === "recoveryRequired"
+          ? "Backup restore requires recovery before DayFrame can continue safely."
+          : "Complete backup restore did not finish. Existing authority was not reported as restored.");
+      return;
+    }
 
     if (result.status === "rejected") {
       setBackupMessage("");
@@ -2283,6 +2358,8 @@ function getReplacementRecoveryMessage(result: ActiveLocalReplacementRecoveryRes
 
   if (result.status === "notResolved") {
     switch (result.persistence.status) {
+      case "pending":
+        return "DayFrame is still establishing durable replacement. The current session remains available.";
       case "serializationFailure":
         return "DayFrame could not prepare the current session for durable replacement. The current session remains available and the protected saved setup was not overwritten. Resolve the issue, then choose and confirm replacement again.";
       case "unavailable":
@@ -2422,6 +2499,15 @@ function getClearFeedbackMessage(feedback: ClearDurabilitySemanticClassification
     feedback.profiles === "durableSuccess"
       ? null
       : `saved profiles (${getRemovalFailureLabel(feedback.profiles)})`,
+    feedback.planDecisions === "durableSuccess"
+      ? null
+      : `accepted plan choices (${getRemovalFailureLabel(feedback.planDecisions)})`,
+    feedback.executionHistory === "durableSuccess"
+      ? null
+      : `execution history (${getRemovalFailureLabel(feedback.executionHistory)})`,
+    feedback.historicalPlan === "durableSuccess"
+      ? null
+      : `published plan history (${getRemovalFailureLabel(feedback.historicalPlan)})`,
   ].filter((surface): surface is string => surface !== null);
 
   return `Local data cleared for this session, but local removal is incomplete for ${unresolvedSurfaces.join(
@@ -2441,7 +2527,7 @@ function getRemovalFailureLabel(category: DurabilitySemanticCategory): string {
   return "storage failure";
 }
 
-function downloadDayFrameBackup(backup: DayFrameBackupV2): void {
+function downloadDayFrameBackup(backup: DayFrameBackup): void {
   const backupBlob = new Blob([JSON.stringify(backup, null, 2)], {
     type: "application/json",
   });
@@ -2458,7 +2544,7 @@ function downloadDayFrameBackup(backup: DayFrameBackupV2): void {
   }
 
   anchor.href = downloadUrl;
-  anchor.download = `dayframe-backup-${backup.exportedAt.slice(0, 10)}.json`;
+  anchor.download = `dayframe-backup-v${backup.version}-${backup.exportedAt.slice(0, 10)}.json`;
   anchor.click();
 
   globalThis.URL.revokeObjectURL(downloadUrl);

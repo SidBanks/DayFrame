@@ -5,8 +5,13 @@ import type { MouseEventHandler, ReactElement } from "react";
 import { getStaticHolidays } from "../core/calendar/getStaticHolidays.js";
 import type { CalendarHoliday } from "../core/calendar/types.js";
 import type { DayFramePreview } from "../state/types.js";
+import type { DayFrameAuthoredSetup } from "../state/types.js";
 import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { DayVisualizer } from "./DayVisualizer.js";
+import { ExecutionReportControl, type ExecutionReportingStore } from "./ExecutionReportControl.js";
+import { ExecutionHistoryPanel } from "./ExecutionHistoryPanel.js";
+import { ExecutionSummarySection } from "./ExecutionSummarySection.js";
+import { HistoricalPlanReportingSection } from "./HistoricalPlanReportingSection.js";
 import type { AcceptedDecisionViewModel } from "./acceptedDecisionPresentation.js";
 import {
   formatHumanTimeRange,
@@ -33,6 +38,8 @@ export type PreviewScreenProps = {
   visibleRangeStartDate?: LocalDateString | null;
   visibleRangeEndDate?: LocalDateString | null;
   now?: Date;
+  authoredSetup?: DayFrameAuthoredSetup;
+  executionReportingStore?: ExecutionReportingStore;
 };
 
 type PreviewDayGroup = {
@@ -71,6 +78,8 @@ export function PreviewScreen({
   visibleRangeStartDate = null,
   visibleRangeEndDate = null,
   now = new Date(),
+  authoredSetup,
+  executionReportingStore,
 }: PreviewScreenProps): ReactElement {
   if (!preview) {
     return (
@@ -94,6 +103,11 @@ export function PreviewScreen({
           ) : null}
           <AcceptedChoicesSection decisions={acceptedDecisions}
             onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
+          {authoredSetup && executionReportingStore ? <ExecutionSummarySection authoredSetup={authoredSetup}
+            preview={null} store={executionReportingStore} /> : null}
+          {executionReportingStore ? <HistoricalPlanReportingSection initialDate={today(now)}
+            store={executionReportingStore} /> : null}
+          {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
         </section>
       </main>
     );
@@ -151,8 +165,9 @@ export function PreviewScreen({
             ) : null}
           </div>
         ) : null}
-        <AcceptedChoicesSection decisions={acceptedDecisions}
-          onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
+        <AcceptedChoicesSection authoredSetup={authoredSetup} decisions={acceptedDecisions}
+          executionReportingStore={executionReportingStore} onRemove={onRemoveAcceptedDecision}
+          preview={preview} removalProtected={decisionRemovalProtected} />
         {rangeWarnings.length > 0 ? (
           <div className="df-form-stack">
             <p className="df-warning-message">Preview range warnings:</p>
@@ -201,6 +216,11 @@ export function PreviewScreen({
           </div>
         </div>
       </section>
+
+      {authoredSetup && executionReportingStore ? <ExecutionSummarySection authoredSetup={authoredSetup}
+        preview={preview} store={executionReportingStore} /> : null}
+      {executionReportingStore ? <HistoricalPlanReportingSection initialDate={preview.rangeEndDate}
+        store={executionReportingStore} /> : null}
 
       {groupedFrictionPatterns.length > 0 ? (
         <section aria-labelledby="grouped-friction-heading" className="df-summary-bar">
@@ -306,6 +326,8 @@ export function PreviewScreen({
                             ? "All day"
                             : formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
                           <span className="df-muted"> (Manual event)</span>
+                          {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
+                            preview={preview} selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }} store={executionReportingStore} /> : null}
                         </li>
                       ))}
                   </ul>
@@ -327,6 +349,8 @@ export function PreviewScreen({
                       <li key={workBlock.id}>
                         {workBlock.title}{" "}
                         {formatHumanTimeRange(workBlock.startsAt, workBlock.endsAt)}
+                        {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
+                          preview={preview} selection={{ kind: "workBlock", blockId: workBlock.id }} store={executionReportingStore} /> : null}
                       </li>
                     ))}
                   </ul>
@@ -356,6 +380,8 @@ export function PreviewScreen({
                             {" "}
                             {formatScheduledBlockDetails(scheduledBlock)}
                           </span>
+                          {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
+                            preview={preview} selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }} store={executionReportingStore} /> : null}
                         </li>
                       ))}
                   </ul>
@@ -377,6 +403,8 @@ export function PreviewScreen({
                       <li key={candidate.id}>
                         {candidate.title} - needs placement
                         <span className="df-muted"> {formatCandidateDetails(candidate)}</span>
+                        {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
+                          preview={preview} selection={{ kind: "unplacedCandidate", candidateId: candidate.id }} store={executionReportingStore} /> : null}
                       </li>
                     ))}
                   </ul>
@@ -431,14 +459,21 @@ export function PreviewScreen({
           </section>
         ))}
       </div>
+      {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
     </main>
   );
 }
 
-function AcceptedChoicesSection({ decisions, onRemove, removalProtected }: {
+function today(value: Date): string { return value.toISOString().slice(0, 10); }
+
+function AcceptedChoicesSection({ decisions, onRemove, removalProtected, authoredSetup, preview,
+  executionReportingStore }: {
   decisions: AcceptedDecisionViewModel[];
   onRemove: ((decisionId: AcceptedDecisionViewModel["decisionId"]) => void) | undefined;
   removalProtected: boolean;
+  authoredSetup?: DayFrameAuthoredSetup | undefined;
+  preview?: DayFramePreview | undefined;
+  executionReportingStore?: ExecutionReportingStore | undefined;
 }): ReactElement | null {
   if (decisions.length === 0) return null;
   return (
@@ -462,6 +497,10 @@ function AcceptedChoicesSection({ decisions, onRemove, removalProtected }: {
               onClick={() => onRemove?.(decision.decisionId)} type="button">
               Remove
             </button>
+            {authoredSetup && preview && executionReportingStore ? <ExecutionReportControl
+              authoredSetup={authoredSetup} preview={preview}
+              selection={{ kind: "planDecision", decisionId: decision.decisionId }}
+              store={executionReportingStore} /> : null}
           </li>
         ))}
       </ul>

@@ -14,6 +14,40 @@ record.
 
 ---
 
+# 2026-08-22 — Phase 3 Complete
+
+Closed Phase 3 after an independent authority, recovery, reachability,
+determinism, governance, and repository-validation audit. DayFrame now preserves
+planned history and observed execution as separate durable truths, supports
+immutable correction/retraction, complete Backup V3 restore, and restart-safe
+five-authority full clear. Historical metrics, adherence, Goals, Progress, and
+learning remain explicit future design work.
+
+---
+
+# 2026-08-22 — Phase 3 Validation Stabilization and Governance Reconciliation
+
+Replaced fixed wall-clock durability assumptions in the ExecutionHistory and
+HistoricalPlan test boundaries with deterministic operation-completion signals.
+Reconciled current-state, roadmap, and ADR applicability wording with completed
+HistoricalPlan, Backup V3, historical reporting, and five-authority full-clear
+behavior. Phase 3 remains pending only the Task 3.16 closure audit; historical
+metrics, adherence scoring, Goals, and Progress remain unimplemented.
+
+---
+
+# 2026-08-22 — Five-Authority Full-Clear Settlement
+
+Changed full clear from an immediate four-surface-shaped result to an awaited terminal five-authority contract. Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan are enumerable; Preview is separately cleared. ExecutionHistory retains empty established IndexedDB authority and its anti-resurrection marker, HistoricalPlan settles empty, mixed failures are explicit, and the UI prevents duplicate submission while awaiting completion.
+
+---
+
+# 2026-08-22 — HistoricalPlan-Backed Reporting Reachability
+
+Added a bounded date-selected production reporting path from current effective HistoricalPlan V1 days. Stored scheduled, unplaced, omitted, and blocked occurrences reuse their exact durable reference and frozen snapshot through the existing execution reporting workflow. Missing and explicitly empty publication states remain distinct; no plan mutation, publication, Preview generation, metric, or new persistence surface was added.
+
+---
+
 # 2026-08-20 — Phase 2 Lifetime-Safe Planning Authority Complete
 
 DayFrame completed Phase 2 through Task 2.40. The implementation now carries explicit source lifetimes across Active/Profile/Backup V2 boundaries, supports lifetime-safe durable occurrence references and independently persisted PlanDecision V1 authority, replays accepted intent deterministically, and provides explicit Try/Accept, persistent visibility/removal, and decision-aware recommendations.
@@ -627,6 +661,8 @@ Singular compatibility no longer competes with current architectural authority.
 # Phase 1 Task 1.4 — Obsolete Preview Path Removed
 
 ## Changed
+
+* Standard local backup export now produces complete-authority Backup V3 across Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan while retaining V1/V2 import compatibility.
 
 * Removed the obsolete `PreviewScreenContainer` application path after
   investigation established that it was not part of supported production Preview

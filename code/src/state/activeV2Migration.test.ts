@@ -5,8 +5,8 @@ import {
   DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY,
   DAYFRAME_ACTIVE_V2_STORAGE_KEY,
   DAYFRAME_STORAGE_KEY,
-  createDayFrameStore,
 } from "./dayFrameStore.js";
+import { createReadyDayFrameTestStore } from "./tests/dayFrameStoreTestUtils.js";
 
 describe("Active V1 to V2 migration", () => {
   const legacy = () => ({
@@ -28,7 +28,7 @@ describe("Active V1 to V2 migration", () => {
       shiftDefinitions: [], shiftCycles: [], blockTemplates: [], blockRecurrences: [], manualEvents: [],
     }));
 
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     const persisted = JSON.parse(localStorage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY)!) as Record<string, unknown>;
 
     expect(store.getActiveLocalIngressStatus().status).toBe("accepted");
@@ -41,11 +41,11 @@ describe("Active V1 to V2 migration", () => {
 
   it("rehydrates the exact V2 incarnation without allocating or remigrating V1", () => {
     localStorage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(legacy()));
-    const first = createDayFrameStore(undefined, { allocateSourceIncarnationId: () => id("1") });
+    const first = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () => id("1") });
     const incarnation = first.getState().manualEvents[0]!.incarnationId;
     const allocator = vi.fn(() => { throw new Error("must not allocate"); });
 
-    const second = createDayFrameStore(undefined, { allocateSourceIncarnationId: allocator });
+    const second = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: allocator });
 
     expect(second.getState().manualEvents[0]!.incarnationId).toBe(incarnation);
     expect(second.getDurabilityStatus().activeState).toBe("durable");
@@ -59,7 +59,7 @@ describe("Active V1 to V2 migration", () => {
     const raw = JSON.stringify(legacy());
     localStorage.setItem(DAYFRAME_STORAGE_KEY, raw);
 
-    const store = createDayFrameStore(undefined, options);
+    const store = createReadyDayFrameTestStore(undefined, options);
 
     expect(store.getActiveLocalIngressStatus()).toMatchObject({
       status: "recoveryRequired", reason: "migrationFailure", migrationFailureDetail: detail,
@@ -76,7 +76,7 @@ describe("Active V1 to V2 migration", () => {
       if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) throw new Error("write");
       return original.call(this, key, value);
     });
-    const store = createDayFrameStore(undefined, { allocateSourceIncarnationId: () => id("1") });
+    const store = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () => id("1") });
     expect(store.getActiveLocalIngressStatus()).toMatchObject({ migrationFailureDetail: "writeFailure" });
     expect(store.getState().manualEvents).toEqual([]);
   });
@@ -104,16 +104,16 @@ describe("Active V1 to V2 migration", () => {
       }
       return originalGet.call(this, key);
     });
-    const store = createDayFrameStore(undefined, { allocateSourceIncarnationId: () => id("1") });
+    const store = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () => id("1") });
     expect(store.getActiveLocalIngressStatus()).toMatchObject({ migrationFailureDetail: detail });
     expect(store.getState().manualEvents).toEqual([]);
   });
 
-  it("prevents retained V1 resurrection after clear and restart", () => {
+  it("prevents retained V1 resurrection after clear and restart", async () => {
     localStorage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify(legacy()));
-    const store = createDayFrameStore(undefined, { allocateSourceIncarnationId: () => id("1") });
-    expect(store.clearLocalData().durability).toBe("cleared");
-    const restarted = createDayFrameStore();
+    const store = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () => id("1") });
+    expect((await store.clearLocalData()).durability).toBe("cleared");
+    const restarted = createReadyDayFrameTestStore();
     expect(restarted.getActiveLocalIngressStatus()).toEqual({ status: "noSource", reason: "missing" });
     expect(restarted.getState().manualEvents).toEqual([]);
   });
@@ -122,7 +122,7 @@ describe("Active V1 to V2 migration", () => {
     localStorage.setItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY, JSON.stringify({ app: "DayFrame", surface: "active", version: 2, data: {} }));
     localStorage.setItem(DAYFRAME_STORAGE_KEY, JSON.stringify({ schedulingPreferences: { dayBoundaryStartTime: "09:00" } }));
 
-    const store = createDayFrameStore();
+    const store = createReadyDayFrameTestStore();
     expect(store.getActiveLocalIngressStatus()).toMatchObject({
       status: "recoveryRequired",
       activationBlocked: true,

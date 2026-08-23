@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlanDecisionId } from "../core/decisions/planDecision.js";
 import { createDurableOccurrenceReference } from "../core/occurrences/durableOccurrenceReference.js";
 import { createManualEventOccurrenceIdentity } from "../core/occurrences/occurrenceIdentity.js";
-import { createDayFrameStore } from "./dayFrameStore.js";
+import { createReadyDayFrameTestStore } from "./tests/dayFrameStoreTestUtils.js";
 import { DAYFRAME_PLAN_DECISIONS_STORAGE_KEY } from "./planDecisionSurface.js";
 
 const decisionId = (n: number) =>
@@ -18,7 +18,7 @@ beforeEach(() => {
 
 function storeWithManual(id = 1) {
   let next = id;
-  return createDayFrameStore({ manualEvents: [manual] }, {
+  return createReadyDayFrameTestStore({ manualEvents: [manual] }, {
     allocatePlanDecisionId: () => decisionId(next++),
     planDecisionClock: () => "2026-08-20T12:00:00.000Z",
   });
@@ -51,7 +51,7 @@ describe("store-owned PlanDecision surface", () => {
   it("rejects stale targets and retains valid stale decisions on startup", () => {
     const original = storeWithManual(); const target = manualTarget(original);
     original.acceptPlanDecision({ kind: "omitOccurrence", target, payload: {}, provenance: { source: "user" } });
-    const current = createDayFrameStore({ manualEvents: [] });
+    const current = createReadyDayFrameTestStore({ manualEvents: [] });
     expect(current.getPlanDecisions()).toHaveLength(1);
     expect(current.acceptPlanDecision({ kind: "omitOccurrence", target, payload: {},
       provenance: { source: "user" } })).toEqual({ status: "rejected", reason: "targetSourceMissing" });
@@ -76,7 +76,7 @@ describe("store-owned PlanDecision surface", () => {
     storage.setItem(DAYFRAME_PLAN_DECISIONS_STORAGE_KEY, JSON.stringify({ app: "DayFrame",
       surface: "planDecisions", version: 1, decisions: [valid, { ...valid },
         { ...valid, id: decisionId(2) }, { bad: true }] }));
-    const loaded = createDayFrameStore();
+    const loaded = createReadyDayFrameTestStore();
     expect(loaded.getPlanDecisions()).toHaveLength(1);
     expect(loaded.getQuarantinedPlanDecisions().map((entry) => entry.reason)).toEqual([
       "duplicateDecisionId", "conflictingTarget", "invalidDecision",
@@ -93,14 +93,14 @@ describe("store-owned PlanDecision surface", () => {
     expect(store.replaceProtectedPlanDecisionCheckpoint()).toEqual({ status: "notAttempted", reason: "sourceChanged" });
   });
 
-  it("removes explicitly and integrates the decision surface into full clear", () => {
+  it("removes explicitly and integrates the decision surface into full clear", async () => {
     const store = storeWithManual(); const target = manualTarget(store);
     const accepted = store.acceptPlanDecision({ kind: "omitOccurrence", target, payload: {}, provenance: { source: "user" } });
     if (accepted.status !== "accepted") throw new Error("accept failed");
     expect(store.removePlanDecision(accepted.decision.id).status).toBe("removed");
     expect(store.removePlanDecision(accepted.decision.id)).toEqual({ status: "notAttempted", reason: "notFound" });
     store.acceptPlanDecision({ kind: "omitOccurrence", target, payload: {}, provenance: { source: "user" } });
-    const cleared = store.clearLocalData();
+    const cleared = await store.clearLocalData();
     expect(cleared.planDecisions.status).toBe("removed");
     expect(storage.getItem(DAYFRAME_PLAN_DECISIONS_STORAGE_KEY)).toBeNull();
   });

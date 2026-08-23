@@ -5,6 +5,7 @@ import type { GenerateSchedulePreviewResult } from "../core/engine/generateSched
 import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { BackupValidationFailureCategory, DayFrameBackup } from "./dayFrameBackup.js";
+import type { DayFrameBackupV3 } from "./dayFrameBackupV3.js";
 import type { SuggestedFixFeedback } from "../core/friction/types.js";
 import type { AuthoredSnapshotValidationResult } from "../core/authored/validateDayFrameAuthoredSetup.js";
 import type { IncarnatedSource, SourceIncarnationId } from "../core/authored/sourceIncarnation.js";
@@ -12,6 +13,10 @@ import type { AcceptPlanDecisionInput, PlanDecisionId, PlanDecisionIdAllocator,
   PlanDecisionV1 } from "../core/decisions/planDecision.js";
 import type { AcceptPlanDecisionResult, PlanDecisionIngressStatus, PlanDecisionRecoveryResult,
   PlanDecisionRetryResult, QuarantinedPlanDecision, RemovePlanDecisionResult } from "./planDecisionSurface.js";
+import type { ExecutionHistorySurface } from "./executionHistorySurface.js";
+import type { HistoricalPlanSurface, HistoricalPlanPublicationResult } from "./historicalPlanSurface.js";
+import type { MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
+import type { DayFrameReadinessApi } from "./dayFrameReadiness.js";
 
 export type DayFrameSchedulingPreferences = {
   dayBoundaryStartTime: TimeString;
@@ -162,12 +167,14 @@ export type ManualEventLifecycleMutation =
 
 export type PersistenceWriteOutcome =
   | { status: "persisted" }
+  | { status: "pending" }
   | { status: "unavailable" }
   | { status: "serializationFailure" }
   | { status: "storageFailure" };
 
 export type PersistenceRemovalOutcome =
   | { status: "removed" }
+  | { status: "pending" }
   | { status: "unavailable" }
   | { status: "storageFailure" };
 
@@ -226,17 +233,46 @@ export type BackupImportResult =
   | { status: "rejected"; reason: BackupValidationFailureCategory | "allocationFailure" |
       "activeLocalRecovery" };
 
+export type BackupV3ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV3; semanticFingerprint: string }
+  | { status: "initializing" | "restoreBusy" }
+  | { status: "protectedSurface"; surface: "active" | "profiles" | "planDecisions" |
+      "executionHistory" | "historicalPlan" }
+  | { status: "validationFailure" | "exportFailure"; reason: string };
+
+export type BackupV3ImportResult =
+  | { status: "restoredV3"; semanticFingerprint: string }
+  | { status: "invalidBackup" | "unsupportedVersion" | "initializing" | "restoreBusy" |
+      "protectedCurrentState" | "stagingFailure" | "sourceChanged" | "persistenceFailure" |
+      "rollbackCompleted" | "recoveryRequired"; surface?: string };
+
+export type FullClearAuthorityResults = {
+  active: ActiveRemovalOutcome;
+  profiles: PersistenceRemovalOutcome;
+  planDecisions: PersistenceRemovalOutcome;
+  executionHistory: PersistenceRemovalOutcome;
+  historicalPlan: PersistenceRemovalOutcome;
+};
+
 export type ClearLocalDataResult = {
+  status: "cleared" | "partiallyCleared" | "failed";
+  authorities: FullClearAuthorityResults;
+  previewCleared: true;
   state: DayFrameState;
+  /** Compatibility aliases; `authorities` is the canonical five-surface contract. */
   activeState: ActiveRemovalOutcome;
   profiles: PersistenceRemovalOutcome;
   planDecisions: PersistenceRemovalOutcome;
+  executionHistory: PersistenceRemovalOutcome;
+  historicalPlan: PersistenceRemovalOutcome;
+  /** Compatibility aggregate; derived from `status`. */
   durability: "cleared" | "partiallyCleared" | "notCleared";
 };
 
 export type SurfaceDurabilityStatus =
   | "unknown"
   | "durable"
+  | "pending"
   | "unavailable"
   | "serializationFailure"
   | "storageFailure";
@@ -381,7 +417,7 @@ export type ActiveLocalAbandonmentRecoveryResult =
     }
   | ActiveLocalRecoveryNotAttempted;
 
-export type DayFrameStore = {
+export type DayFrameStore = DayFrameReadinessApi & {
   getState: () => DayFrameState;
   getDurabilityStatus: () => StoreDurabilityStatus;
   getActiveLocalIngressStatus: () => ActiveLocalIngressStatus;
@@ -441,12 +477,20 @@ export type DayFrameStore = {
   saveProfile: (input: { name: string; savedAt: string }) => ProfileMutationResult;
   loadProfile: (profileId: string) => ProfileLoadResult;
   deleteProfile: (profileId: string) => ProfileMutationResult;
-  clearLocalData: () => ClearLocalDataResult;
+  clearLocalData: () => Promise<ClearLocalDataResult>;
   exportBackup: (exportedAt: string) => Extract<DayFrameBackup, { version: 2 }>;
   importBackup: (backup: unknown) => BackupImportResult;
+  exportBackupV3: (exportedAt: string) => Promise<BackupV3ExportResult>;
+  importBackupV3: (backup: unknown) => Promise<BackupV3ImportResult>;
+  importBackupFile: (backup: unknown) => Promise<BackupImportResult | BackupV3ImportResult>;
   generatePreview: (input: GeneratePreviewActionInput) => DayFrameState;
   applySuggestedFixToPreview: (input: ApplyPreviewFixActionInput) => DayFrameState;
-};
+  getLastHistoricalPlanPublicationResult: () => HistoricalPlanPublicationResult |
+    Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
+} & Omit<ExecutionHistorySurface, "clearExecutionHistory" | "getRuntimeAuthorityAdapter"> & Pick<HistoricalPlanSurface,
+  "initialize" | "retryPendingPublications" | "getHistoricalPlanDay" | "getHistoricalPlanRange" |
+  "exportHistoricalPlan" | "abandonProtectedHistoricalPlan" | "getStatus" | "getPendingPublications" |
+  "exportProtectedSource" | "recheckProtectedSource" | "subscribeStatus" | "subscribeHistory">;
 
 export type { SourceIncarnationId };
 export type { PlanDecisionId, PlanDecisionIdAllocator, PlanDecisionV1 };

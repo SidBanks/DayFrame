@@ -7,6 +7,8 @@ import {
   cloneShiftCycles,
   normalizeShiftCycles as normalizeCycleArray,
 } from "../core/cycles/shiftCycleUtils.js";
+import { DAYFRAME_BACKUP_V3_VERSION, validateDayFrameBackupV3,
+  type DayFrameBackupV3 } from "./dayFrameBackupV3.js";
 
 export type DayFrameBackupV1 = {
   app: "DayFrame";
@@ -25,7 +27,7 @@ export type DayFrameBackupV2 = {
   data: ActiveDayFrameAuthoredSetup;
 };
 
-export type DayFrameBackup = DayFrameBackupV1 | DayFrameBackupV2;
+export type DayFrameBackup = DayFrameBackupV1 | DayFrameBackupV2 | DayFrameBackupV3;
 
 export type BackupValidationFailureCategory = "parseFailure" | "unsupportedVersion" |
   "envelopeValidationFailure" | "authoredValidationFailure" | "incarnationValidationFailure";
@@ -83,6 +85,7 @@ export function validateDayFrameBackup(value: unknown): DayFrameBackup {
   }
   if (value.version === 1) return validateDayFrameBackupV1(value);
   if (value.version === DAYFRAME_BACKUP_V2_VERSION) return validateDayFrameBackupV2(value);
+  if (value.version === DAYFRAME_BACKUP_V3_VERSION) return validateDayFrameBackupV3(value);
   throw new DayFrameBackupValidationError("unsupportedVersion",
     "Backup file version is not supported.");
 }

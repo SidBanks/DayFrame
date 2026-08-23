@@ -1,4 +1,5 @@
 import { generateSchedulePreview } from "../core/engine/generateSchedulePreview.js";
+import { materializePlanPublication, type MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
 import { reviseSchedulePreview } from "../core/engine/reviseSchedulePreview.js";
 import {
   cloneDayFrameAuthoredSetup,
@@ -37,8 +38,11 @@ import type {
   ActivePersistenceOutcome,
   ActiveRemovalOutcome,
   BackupImportResult,
+  BackupV3ExportResult,
+  BackupV3ImportResult,
   CommitAuthoredSetupInput,
   CommitAuthoredSetupTransactionInput,
+  ClearLocalDataResult,
   DayFramePreview,
   DayFrameAuthoredPattern,
   DayFramePreviewRange,
@@ -49,6 +53,7 @@ import type {
   DayFrameStore,
   DurabilityRetryResult,
   GeneratePreviewActionInput,
+  FullClearAuthorityResults,
   ManualEventLifecycleMutation,
   PersistenceRemovalOutcome,
   PersistenceWriteOutcome,
@@ -63,11 +68,32 @@ import type {
   StoreMutationResult,
   SurfaceDurabilityStatus,
 } from "./types.js";
+import { createHistoricalPlanSurface, type HistoricalPlanPublicationResult, type HistoricalPlanSurface } from "./historicalPlanSurface.js";
 import { cloneOccurrenceIdentity } from "../core/occurrences/occurrenceIdentity.js";
 import { validateDayFrameAuthoredSetup } from "../core/authored/validateDayFrameAuthoredSetup.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 import { createPlanDecisionSurface } from "./planDecisionSurface.js";
 import type { PlanDecisionIdAllocator } from "../core/decisions/planDecision.js";
+import { createExecutionHistorySurface } from "./executionHistorySurface.js";
+import type { ExecutionHistoryIndexedDb } from "./executionHistoryIndexedDb.js";
+import { createBootstrapPlaceholderState, type DayFrameReadiness,
+  type DayFrameReadyResult } from "./dayFrameReadiness.js";
+import { DayFrameMutationAdmissionError, getDayFrameMutationAdmission } from
+  "./dayFrameMutationAdmission.js";
+import { createDayFrameNotificationScheduler } from "./dayFrameNotificationScheduler.js";
+import { createDayFrameAuthorityTransaction } from "./dayFrameAuthorityTransaction.js";
+import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY, registerDayFrameRuntimeAuthorityController,
+  type DayFrameRuntimeAuthorityController, type RuntimeAuthorityAdapter } from "./dayFrameRuntimeAuthority.js";
+import type { ExecutionRecordIdAllocator, ExecutionSubjectIdAllocator } from
+  "../core/execution/executionRecord.js";
+import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
+import type { IndexedDbCollectionStorage } from "../infrastructure/storage/indexedDbCollectionStorage.js";
+import { createDayFrameRestoreComposition, createExecutionHistoryDurableRestorePayload,
+  createHistoricalPlanDurableRestorePayload, registerDayFrameRestoreComposition } from
+  "./dayFrameRestoreComposition.js";
+import { backupV3SemanticFingerprint, createDayFrameBackupV3,
+  DayFrameBackupV3ValidationError, profilesV2BackupData, validateDayFrameBackupV3 } from
+  "./dayFrameBackupV3.js";
 
 export const DAYFRAME_STORAGE_KEY = "dayframe-store-v1";
 export const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
@@ -260,8 +286,31 @@ export function createDayFrameStore(
     serializePlanDecisions?: (value: unknown) => string;
     allocatePlanDecisionId?: PlanDecisionIdAllocator;
     planDecisionClock?: () => string;
+    serializeExecutionHistory?: (value: unknown) => string;
+    allocateExecutionRecordId?: ExecutionRecordIdAllocator;
+    allocateExecutionSubjectId?: ExecutionSubjectIdAllocator;
+    executionHistoryClock?: () => string;
+    executionHistoryIndexedDb?: ExecutionHistoryIndexedDb;
+    historicalPlanSurface?: HistoricalPlanSurface;
+    bootstrapMode?: "resolved-test";
+    preBootstrapHook?: (context: { runtimeAuthority: DayFrameRuntimeAuthorityController }) => Promise<{ status: "continue" } | {
+      status: "protected"; reason: "authorityRecoveryRequired";
+    }>;
+    restoreStorage?: Storage;
+    restoreIndexedDb?: IndexedDbCollectionStorage;
+    restoreTransactionId?: () => string;
+    restoreClock?: () => string;
   } = {},
 ): DayFrameStore {
+  let readiness: DayFrameReadiness = options.bootstrapMode === "resolved-test"
+    ? { status: "ready" } : { status: "initializing" };
+  const readinessListeners = new Set<(value: DayFrameReadiness) => void>();
+  let settleReadiness: ((result: DayFrameReadyResult) => void) | undefined;
+  const readinessPromise: Promise<DayFrameReadyResult> = readiness.status === "ready"
+    ? Promise.resolve({ status: "ready" })
+    : new Promise((resolve) => { settleReadiness = resolve; });
+  const bootstrapPlaceholder = createBootstrapPlaceholderState();
+  const notificationScheduler = createDayFrameNotificationScheduler();
   const allocateIncarnation = options.allocateSourceIncarnationId ?? createSourceIncarnationId;
   const activeLocalIngress = loadActiveLocalIngress(
     allocateIncarnation,
@@ -289,7 +338,22 @@ export function createDayFrameStore(
       : {}),
     ...(options.planDecisionClock ? { now: options.planDecisionClock } : {}),
     ...(options.serializePlanDecisions ? { serialize: options.serializePlanDecisions } : {}),
+    notificationScheduler,
   });
+  const executionHistorySurface = createExecutionHistorySurface({
+    ...(options.allocateExecutionRecordId ? { allocateRecordId: options.allocateExecutionRecordId } : {}),
+    ...(options.allocateExecutionSubjectId ? { allocateSubjectId: options.allocateExecutionSubjectId } : {}),
+    ...(options.executionHistoryClock ? { now: options.executionHistoryClock } : {}),
+    ...(options.serializeExecutionHistory ? { serialize: options.serializeExecutionHistory } : {}),
+    ...(options.executionHistoryIndexedDb ? { indexedDb: options.executionHistoryIndexedDb } : {}),
+    notificationScheduler,
+  });
+  const historicalPlanSurface = options.historicalPlanSurface ?? createHistoricalPlanSurface({
+    notificationScheduler,
+  });
+  let lastHistoricalPlanPublicationResult: HistoricalPlanPublicationResult |
+    Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
+  let lastHistoricalPlanPublicationMillis = 0;
   let activeLocalIngressStatus = activeLocalIngress.status;
   let protectedActiveSource = activeLocalIngress.protectedSource;
   let protectedActiveSourceKey = activeLocalIngress.protectedSourceKey;
@@ -310,8 +374,98 @@ export function createDayFrameStore(
   const activeLocalIngressListeners = new Set<(status: ActiveLocalIngressStatus) => void>();
   const profileIngressListeners = new Set<(status: ProfileIngressStatus) => void>();
 
+  function captureActiveRuntime() {
+    const activeState = cloneState(state);
+    activeState.savedProfiles = [];
+    return structuredClone({ activeState, activeLocalIngressStatus, protectedActiveSource,
+      protectedActiveSourceKey, durability: durabilityStatus.activeState,
+      desired: desiredDurableCondition.activeState });
+  }
+  function installActiveRuntime(target: ReturnType<typeof captureActiveRuntime>) {
+    state = { ...structuredClone(target.activeState), savedProfiles: cloneSavedProfiles(state.savedProfiles) };
+    activeLocalIngressStatus = structuredClone(target.activeLocalIngressStatus);
+    protectedActiveSource = target.protectedActiveSource;
+    protectedActiveSourceKey = target.protectedActiveSourceKey;
+    durabilityStatus = { ...durabilityStatus, activeState: target.durability };
+    desiredDurableCondition = { ...desiredDurableCondition, activeState: target.desired };
+    notificationScheduler.notify("main", () => {
+      const snapshot = getState(); for (const listener of listeners) listener(snapshot);
+    });
+  }
+  function captureProfilesRuntime() {
+    return structuredClone({ profiles: cloneSavedProfiles(state.savedProfiles), profileIngressStatus,
+      quarantinedProfiles, protectedProfileSource, protectedProfileSourceKey,
+      durability: durabilityStatus.profiles, desired: desiredDurableCondition.profiles });
+  }
+  function installProfilesRuntime(target: ReturnType<typeof captureProfilesRuntime>) {
+    state = { ...state, savedProfiles: cloneSavedProfiles(target.profiles) };
+    profileIngressStatus = structuredClone(target.profileIngressStatus);
+    quarantinedProfiles = structuredClone(target.quarantinedProfiles);
+    protectedProfileSource = target.protectedProfileSource;
+    protectedProfileSourceKey = target.protectedProfileSourceKey;
+    durabilityStatus = { ...durabilityStatus, profiles: target.durability };
+    desiredDurableCondition = { ...desiredDurableCondition, profiles: target.desired };
+    notificationScheduler.notify("profiles", () => {
+      for (const listener of profileIngressListeners) listener({ ...profileIngressStatus });
+    });
+  }
+  const activeRuntimeAdapter: RuntimeAuthorityAdapter<ReturnType<typeof captureActiveRuntime>> = {
+    id: "active", captureRuntimeSnapshot: captureActiveRuntime, installRuntimeExact: installActiveRuntime,
+  };
+  const profilesRuntimeAdapter: RuntimeAuthorityAdapter<ReturnType<typeof captureProfilesRuntime>> = {
+    id: "profiles", captureRuntimeSnapshot: captureProfilesRuntime,
+    installRuntimeExact: installProfilesRuntime,
+  };
+  const runtimeParticipants = [activeRuntimeAdapter, profilesRuntimeAdapter,
+    planDecisionSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    executionHistorySurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    historicalPlanSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)];
+  const authorityTransaction = createDayFrameAuthorityTransaction({ scheduler: notificationScheduler,
+    participants: runtimeParticipants.map((participant) => ({ id: participant.id,
+      capture: () => participant.captureRuntimeSnapshot(),
+      installExact: (value: unknown) => participant.installRuntimeExact(value as never) })) });
+  const restoreStorage = options.restoreStorage ?? getOptionalStorage();
+  const restoreComposition = restoreStorage ? createDayFrameRestoreComposition({
+    storage: restoreStorage, indexedDb: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+    runtime: authorityTransaction,
+    sources: {
+      active: () => createActiveV2(getActiveSetup(state)),
+      profiles: () => createDayFrameProfilesStorageV2(state.savedProfiles, quarantinedProfiles),
+      planDecisions: () => ({ app: "DayFrame", surface: "planDecisions", version: 1,
+        decisions: [...planDecisionSurface.getPlanDecisions(),
+          ...planDecisionSurface.getQuarantinedPlanDecisions().map((entry) => structuredClone(entry.raw))] }),
+      executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope,
+      historicalPlan: historicalPlanSurface.exportHistoricalPlan,
+      readiness: (id) => {
+        if (id === "active") return activeLocalIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+        if (id === "profiles") return profileIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+        if (id === "planDecisions") return planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired" ? "protected" : "ready";
+        if (id === "executionHistory") return executionHistorySurface.getExecutionHistoryIngressStatus().status === "recoveryRequired" ? "protected" : "ready";
+        return historicalPlanSurface.getStatus().status === "protected" ? "protected" : "ready";
+      },
+    },
+    ...(options.restoreTransactionId ? { allocateId: options.restoreTransactionId } : {}),
+    ...(options.restoreClock ? { now: options.restoreClock } : {}),
+  }) : undefined;
+
   function getState(): DayFrameState {
-    return cloneState(state);
+    return readiness.status === "ready" ? cloneState(state) : cloneState(bootstrapPlaceholder);
+  }
+
+  function getReadiness(): DayFrameReadiness { return { ...readiness }; }
+  function subscribeReadiness(listener: (value: DayFrameReadiness) => void) {
+    readinessListeners.add(listener);
+    return () => readinessListeners.delete(listener);
+  }
+  function whenReady() { return readinessPromise; }
+  function transitionReadiness(next: Exclude<DayFrameReadiness, { status: "initializing" }>) {
+    if (readiness.status !== "initializing") return;
+    readiness = next;
+    const terminal: DayFrameReadyResult = next.status === "ready" ? { status: "ready" }
+      : { status: "protected", reason: next.reason };
+    settleReadiness?.(terminal); settleReadiness = undefined;
+    if (next.status === "ready") notify();
+    for (const listener of readinessListeners) listener({ ...next });
   }
 
   function getDurabilityStatus(): StoreDurabilityStatus {
@@ -1116,7 +1270,9 @@ export function createDayFrameStore(
     return { state: notify(), persistence };
   }
 
-  function clearLocalData() {
+  async function clearLocalData(): Promise<ClearLocalDataResult> {
+    const begun = authorityTransaction.begin("internalReplacement");
+    if (begun.status !== "begun") throw new DayFrameMutationAdmissionError("authorityTransactionActive");
     state = createInitialDayFrameState();
     desiredDurableCondition = {
       activeState: "absent",
@@ -1125,6 +1281,8 @@ export function createDayFrameStore(
     const activeState = removeActiveState();
     const profiles = clearPersistedProfiles();
     const planDecisions = planDecisionSurface.clearPlanDecisions();
+    const executionHistoryPromise = executionHistorySurface.clearExecutionHistory();
+    const historicalPlanPromise = historicalPlanSurface.clearHistoricalPlan();
     if (profiles.status === "removed") {
       transitionProfileIngress({ status: "noSource", reason: "missing" });
       quarantinedProfiles = [];
@@ -1138,22 +1296,105 @@ export function createDayFrameStore(
           : mapRemovalOutcomeToDurability(activeState),
       profiles: mapRemovalOutcomeToDurability(profiles),
     });
-    const removedCount =
-      Number(activeState.status === "removed") + Number(profiles.status === "removed") +
-      Number(planDecisions.status === "removed");
-
-    return {
-      state: notify(),
-      activeState,
-      profiles,
-      planDecisions,
-      durability:
-        removedCount === 3 ? "cleared" : removedCount > 0 ? "partiallyCleared" : "notCleared",
-    } as const;
+    const [executionHistory, historicalRaw] = await Promise.all([executionHistoryPromise, historicalPlanPromise]);
+    const historicalPlan: PersistenceRemovalOutcome = historicalRaw.status === "success"
+      ? { status: "removed" } : { status: "storageFailure" };
+    const authorities = { active: activeState, profiles, planDecisions, executionHistory,
+      historicalPlan } satisfies FullClearAuthorityResults;
+    const successes = Object.values(authorities).filter((value) => value.status === "removed").length;
+    const status = successes === 5 ? "cleared" as const : successes === 0 ? "failed" as const
+      : "partiallyCleared" as const;
+    const committed = authorityTransaction.commit();
+    if (committed.status !== "committed") throw new Error("Full-clear authority notification commit failed.");
+    const snapshot = notify();
+    return { status, authorities: structuredClone(authorities), previewCleared: true, state: snapshot,
+      activeState, profiles, planDecisions, executionHistory, historicalPlan,
+      durability: status === "failed" ? "notCleared" : status };
   }
 
   function exportBackup(exportedAt: string) {
     return createDayFrameBackupV2(getActiveSetup(state), exportedAt);
+  }
+
+  async function exportBackupV3(exportedAt: string): Promise<BackupV3ExportResult> {
+    if (readiness.status !== "ready") return { status: "initializing" };
+    if (!restoreComposition || authorityTransaction.getState().status !== "inactive" ||
+        restoreComposition.coordinator.getStatus() !== "idle") return { status: "restoreBusy" };
+    if (activeLocalIngressStatus.status === "recoveryRequired")
+      return { status: "protectedSurface", surface: "active" };
+    if (profileIngressStatus.status === "recoveryRequired")
+      return { status: "protectedSurface", surface: "profiles" };
+    if (planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired")
+      return { status: "protectedSurface", surface: "planDecisions" };
+    if (executionHistorySurface.getExecutionHistoryIngressStatus().status === "recoveryRequired")
+      return { status: "protectedSurface", surface: "executionHistory" };
+    if (historicalPlanSurface.getStatus().status === "protected")
+      return { status: "protectedSurface", surface: "historicalPlan" };
+    try {
+      const historical = await historicalPlanSurface.exportHistoricalPlan();
+      if (historical.status !== "exported") return historical.status === "protected"
+        ? { status: "protectedSurface", surface: "historicalPlan" }
+        : { status: "exportFailure", reason: "historicalPlanUnavailable" };
+      const backup = createDayFrameBackupV3({
+        active: { surfaceVersion: 2, data: getActiveSetup(state) },
+        profiles: profilesV2BackupData(state.savedProfiles, quarantinedProfiles),
+        planDecisions: { surfaceVersion: 1,
+          decisions: planDecisionSurface.getPlanDecisions(),
+          quarantinedDecisions: planDecisionSurface.getQuarantinedPlanDecisions() },
+        executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope(),
+        historicalPlan: { surfaceVersion: 1, batches: historical.batches },
+      }, exportedAt);
+      return { status: "exported", backup: structuredClone(backup),
+        semanticFingerprint: backupV3SemanticFingerprint(backup) };
+    } catch (error) { return { status: error instanceof DayFrameBackupV3ValidationError
+      ? "validationFailure" : "exportFailure", reason: error instanceof Error
+        ? error.message : "Backup V3 export failed." }; }
+  }
+
+  async function importBackupV3(backupValue: unknown): Promise<BackupV3ImportResult> {
+    if (!restoreComposition) return { status: "persistenceFailure" };
+    if (readiness.status !== "ready") return { status: "initializing" };
+    let backup;
+    try { backup = validateDayFrameBackupV3(structuredClone(backupValue)); }
+    catch { return { status: "invalidBackup" }; }
+    const target = {
+      active: createActiveV2(backup.data.active.data),
+      profiles: createDayFrameProfilesStorageV2(backup.data.profiles.profiles,
+        backup.data.profiles.quarantinedProfiles),
+      planDecisions: { app: "DayFrame" as const, surface: "planDecisions" as const,
+        version: 1 as const, decisions: [...backup.data.planDecisions.decisions,
+          ...backup.data.planDecisions.quarantinedDecisions.map((entry) =>
+            structuredClone(entry.raw))] },
+      executionHistory: createExecutionHistoryDurableRestorePayload(
+        backup.data.executionHistory),
+      historicalPlan: createHistoricalPlanDurableRestorePayload(
+        backup.data.historicalPlan.batches),
+    };
+    const result = await restoreComposition.coordinator.restore(target);
+    if (result.status === "completed") return { status: "restoredV3",
+      semanticFingerprint: backupV3SemanticFingerprint(backup) };
+    if (result.status === "busy") return { status: "restoreBusy" };
+    if (result.status === "participantNotReady") return { status: "initializing",
+      ...(result.participantId ? { surface: result.participantId } : {}) };
+    if (result.status === "participantProtected") return { status: "protectedCurrentState",
+      ...(result.participantId ? { surface: result.participantId } : {}) };
+    if (result.status === "invalidTarget") return { status: "invalidBackup",
+      ...(result.participantId ? { surface: result.participantId } : {}) };
+    if (result.status === "stagingFailed") return { status: "stagingFailure" };
+    if (result.status === "sourceChanged") return { status: "sourceChanged" };
+    if (result.status === "rolledBack") return { status: "rollbackCompleted" };
+    if (result.status === "rollbackFailed" || result.status === "recoveryRequired")
+      return { status: "recoveryRequired" };
+    return { status: "persistenceFailure" };
+  }
+
+  async function importBackupFile(backupValue: unknown) {
+    let validated;
+    try { validated = validateDayFrameBackup(backupValue); }
+    catch (error) { return { status: "rejected" as const,
+      reason: error instanceof DayFrameBackupValidationError ? error.category
+        : "envelopeValidationFailure" as const }; }
+    return validated.version === 3 ? importBackupV3(validated) : importBackup(validated);
   }
 
   function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): BackupImportResult {
@@ -1164,6 +1405,7 @@ export function createDayFrameStore(
       return { status: "rejected", reason: error instanceof DayFrameBackupValidationError
         ? error.category : "envelopeValidationFailure" };
     }
+    if (validatedBackup.version === 3) return { status: "rejected", reason: "unsupportedVersion" };
     const validation = validateDayFrameAuthoredSetup(validatedBackup.data);
 
     if (validation.status === "invalid") {
@@ -1228,7 +1470,17 @@ export function createDayFrameStore(
       },
     };
 
-    return notify();
+    const snapshot = notify();
+    const materialized = materializePlanPublication({ authoredSetup: getActiveSetup(state), preview: state.preview,
+      providers: { now: () => {
+        const next = Math.max(Date.now(), lastHistoricalPlanPublicationMillis + 1);
+        lastHistoricalPlanPublicationMillis = next;
+        return new Date(next).toISOString();
+      } } });
+    if (materialized.status === "materialized") {
+      void historicalPlanSurface.publish(materialized.batch).then((result) => { lastHistoricalPlanPublicationResult = result; });
+    } else lastHistoricalPlanPublicationResult = materialized;
+    return snapshot;
   }
 
   function applySuggestedFixToPreview(input: ApplyPreviewFixActionInput): DayFrameState {
@@ -1282,7 +1534,43 @@ export function createDayFrameStore(
     return snapshot;
   }
 
-  return {
+  async function bootstrapAuthority(): Promise<void> {
+    try {
+      const recovered = await restoreComposition?.coordinator.recoverAtStartup();
+      if (recovered?.status === "recoveryRequired") {
+        transitionReadiness({ status: "protected", reason: "authorityRecoveryRequired" });
+        return;
+      }
+      const hook = await (options.preBootstrapHook?.({ runtimeAuthority: authorityTransaction }) ?? Promise.resolve({ status: "continue" as const }));
+      if (hook.status === "protected") {
+        transitionReadiness({ status: "protected", reason: hook.reason });
+        return;
+      }
+      await Promise.all([
+        executionHistorySurface.initializeExecutionHistory(),
+        historicalPlanSurface.initialize(),
+      ]);
+      const executionStatus = executionHistorySurface.getExecutionHistoryMigrationStatus();
+      const historicalStatus = historicalPlanSurface.getStatus();
+      const protectedParticipant = activeLocalIngressStatus.status === "recoveryRequired" ||
+        profileIngressStatus.status === "recoveryRequired" ||
+        planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired" ||
+        executionStatus === "protected" || executionStatus === "unavailable" ||
+        historicalStatus.status === "protected" || historicalStatus.status === "unavailable";
+      transitionReadiness(protectedParticipant
+        ? { status: "protected", reason: "authorityInitializationFailed" }
+        : { status: "ready" });
+    } catch {
+      transitionReadiness({ status: "protected", reason: "authorityInitializationFailed" });
+    }
+  }
+
+  function getLastHistoricalPlanPublicationResult() { return lastHistoricalPlanPublicationResult; }
+
+  const api: DayFrameStore = {
+    getReadiness,
+    subscribeReadiness,
+    whenReady,
     getState,
     getDurabilityStatus,
     getActiveLocalIngressStatus,
@@ -1319,10 +1607,65 @@ export function createDayFrameStore(
     clearLocalData,
     exportBackup,
     importBackup,
+    exportBackupV3,
+    importBackupV3,
+    importBackupFile,
     generatePreview,
     applySuggestedFixToPreview,
+    getLastHistoricalPlanPublicationResult,
+    initialize: historicalPlanSurface.initialize,
+    retryPendingPublications: historicalPlanSurface.retryPendingPublications,
+    getHistoricalPlanDay: historicalPlanSurface.getHistoricalPlanDay,
+    getHistoricalPlanRange: historicalPlanSurface.getHistoricalPlanRange,
+    exportHistoricalPlan: historicalPlanSurface.exportHistoricalPlan,
+    abandonProtectedHistoricalPlan: historicalPlanSurface.abandonProtectedHistoricalPlan,
+    exportProtectedSource: historicalPlanSurface.exportProtectedSource,
+    recheckProtectedSource: historicalPlanSurface.recheckProtectedSource,
+    getStatus: historicalPlanSurface.getStatus,
+    getPendingPublications: historicalPlanSurface.getPendingPublications,
+    subscribeStatus: historicalPlanSurface.subscribeStatus,
+    subscribeHistory: historicalPlanSurface.subscribeHistory,
     ...planDecisionSurface,
+    ...executionHistorySurface,
   };
+  const gatedMethods = new Set<PropertyKey>([
+    "retryActivePersistence", "retryProfilePersistence",
+    "replaceProtectedActiveCheckpointWithCurrentState", "abandonProtectedActiveCheckpointAndReset",
+    "replaceProtectedProfileCheckpointWithCurrentProfiles", "abandonProtectedProfileCheckpoint",
+    "removeQuarantinedProfile", "commitAuthoredSetup", "commitAuthoredSetupTransaction",
+    "setSchedulingPreferences", "setPreviewRange", "setShiftDefinitions", "setShiftCycles",
+    "setBlockTemplates", "setBlockRecurrences", "setManualEvents", "mutateManualEvent",
+    "saveProfile", "loadProfile", "deleteProfile", "clearLocalData", "exportBackup", "importBackup",
+    "generatePreview", "applySuggestedFixToPreview", "acceptPlanDecision", "removePlanDecision",
+    "retryPlanDecisionPersistence", "removeQuarantinedPlanDecision",
+    "replaceProtectedPlanDecisionCheckpoint", "abandonProtectedPlanDecisionCheckpoint",
+    "recordExecution", "correctExecutionRecord", "retractExecutionRecord",
+    "retryExecutionHistoryPersistence", "removeQuarantinedExecutionHistory",
+    "replaceProtectedExecutionHistoryCheckpoint", "abandonProtectedExecutionHistoryCheckpoint",
+    "retryExecutionHistoryMigration", "replaceProtectedExecutionHistoryIndexedDbCheckpoint",
+    "abandonProtectedExecutionHistoryIndexedDbCheckpoint", "retryPendingPublications",
+    "abandonProtectedHistoricalPlan",
+  ]);
+  const wrappers = new Map<PropertyKey, unknown>();
+  const storeProxy = new Proxy(api, { get(target, property, receiver) {
+    const value = Reflect.get(target, property, receiver) as unknown;
+    if (!gatedMethods.has(property) || typeof value !== "function") return value;
+    if (!wrappers.has(property)) wrappers.set(property, (...args: unknown[]) => {
+      const admission = getDayFrameMutationAdmission(readiness,
+        authorityTransaction.getState().status !== "inactive");
+      if (!admission.allowed) throw new DayFrameMutationAdmissionError(admission.reason);
+      return (value as (...values: unknown[]) => unknown)(...args);
+    });
+    return wrappers.get(property);
+  } });
+  registerDayFrameRuntimeAuthorityController(storeProxy, authorityTransaction);
+  if (restoreComposition) registerDayFrameRestoreComposition(storeProxy, restoreComposition);
+  if (options.bootstrapMode !== "resolved-test") void bootstrapAuthority();
+  return storeProxy;
+}
+
+function getOptionalStorage(): Storage | undefined {
+  try { return globalThis.localStorage; } catch { return undefined; }
 }
 
 function mergeInitialState(

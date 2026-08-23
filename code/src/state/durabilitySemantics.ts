@@ -33,10 +33,13 @@ export type ClearDurabilitySemanticClassification = {
   activeState: DurabilitySemanticCategory;
   profiles: DurabilitySemanticCategory;
   planDecisions: DurabilitySemanticCategory;
+  executionHistory: DurabilitySemanticCategory;
+  historicalPlan: DurabilitySemanticCategory;
 };
 
 const writeOutcomeCategories = {
   persisted: "durableSuccess",
+  pending: "internalNoOp",
   unavailable: "retryableUnavailable",
   serializationFailure: "recoveryRequired",
   storageFailure: "retryableStorageFailure",
@@ -44,6 +47,7 @@ const writeOutcomeCategories = {
 
 const removalOutcomeCategories = {
   removed: "durableSuccess",
+  pending: "internalNoOp",
   unavailable: "retryableUnavailable",
   storageFailure: "retryableStorageFailure",
 } satisfies Record<PersistenceRemovalOutcome["status"], DurabilitySemanticCategory>;
@@ -51,6 +55,7 @@ const removalOutcomeCategories = {
 const retainedStatusCategories = {
   unknown: "internalNoOp",
   durable: "durableSuccess",
+  pending: "internalNoOp",
   unavailable: "retryableUnavailable",
   serializationFailure: "recoveryRequired",
   storageFailure: "retryableStorageFailure",
@@ -142,6 +147,8 @@ export function classifyClearLocalDataResult(
     activeState: classifyActiveRemovalOutcome(result.activeState),
     profiles: classifyPersistenceRemovalOutcome(result.profiles),
     planDecisions: classifyPersistenceRemovalOutcome(result.planDecisions),
+    executionHistory: classifyPersistenceRemovalOutcome(result.executionHistory),
+    historicalPlan: classifyPersistenceRemovalOutcome(result.historicalPlan),
   };
 }
 

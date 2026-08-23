@@ -2,6 +2,33 @@
 
 # Current State
 
+## Phase 3 — Execution and History Semantic Foundation
+
+**Status:** Phase 3 complete
+**Current through:** Task 3.16
+**Last reviewed:** 2026-08-22
+
+DayFrame now has a published epistemic and domain boundary between planning and
+reality. Preview and PlanDecision remain planning facts. The accepted Phase 3 V1
+direction is an independent `ExecutionRecord` surface with immutable correction
+revisions, derived current outcomes, lifetime-safe planned linkage, historical
+snapshot context, explicit provenance, and unknown-by-default semantics.
+
+Phase 3 now includes operative Preview planning and revisions; durable
+HistoricalPlan publications; HistoricalPlan- and Preview-backed execution
+reporting; IndexedDB ExecutionHistory with immutable correction/retraction chains;
+categorical Outcome Summary reporting; asynchronous readiness; journaled
+cross-storage restore; complete Backup V3; and terminal five-authority full clear.
+Task 3.15C replaced scheduler-dependent durability checks with deterministic
+completion observation, and Task 3.16 independently closed Phase 3 with a green
+validation baseline. Historical metrics, adherence scoring, Goals, Progress,
+streaks, and learning remain unimplemented and belong to future design work.
+
+Canonical publication:
+`docs/checkpoints/CHECKPOINT_Phase_3_COMPLETE.md`.
+
+---
+
 ## Phase 2 — Authoritative State and Lifetime-Safe Planning Authority
 
 **Status:** Complete with deferred release work
@@ -1555,3 +1582,81 @@ completeness.
 The next task should establish **which DayFrame state is authoritative, which is
 derived, and who owns invalidation and replacement** before substantial engine
 restructuring begins.
+
+---
+
+# Phase 3 Progress-Derivation Boundary
+
+ExecutionHistory V1 now supplies explicit categorical evidence, but DayFrame has
+no production progress, adherence, completion-rate, Goal, streak, or learning
+derivation. Current Preview Summary content remains planning/friction metadata.
+
+The accepted Task 3.7 boundary is:
+
+```text
+ExecutionHistory -> reported-evidence categorical summary
+fresh Preview + ExecutionHistory -> volatile current-Preview reporting coverage
+durable historical plan ledger -> required for historical plan follow-through
+explicit Goal domain -> required for Goal progress
+```
+
+Partial receives no arbitrary fractional credit. Not reported remains uncertainty.
+No scalar completion/adherence score is authorized. Derived values are
+non-authoritative and non-durable by default.
+
+**Evidence:** `CHECKPOINT_Phase_3_Progress_And_Adherence_Semantics.md`, Task 3.7.
+
+## Historical Plan Authority Readiness (Historical; superseded by Tasks 3.11–3.12)
+
+Task 3.9 determined that historical reporting denominators require an independent
+HistoricalPlanSurface. Current Preview, PlanDecision, and ExecutionHistory cannot
+reconstruct never-reported past planned occurrences.
+
+The accepted V1 model is append-only complete user-day publications grouped by an
+atomic fresh-Preview generation batch. Stale/Try Preview never publishes;
+identical day plans deduplicate; later publications supersede operative day
+authority without deleting revisions. Missing ledger coverage remains unknown.
+
+At Task 3.9, implementation was not yet authorized because collection scale,
+atomic batch writes, and indexed range/as-of queries exceeded the bounded
+localStorage prototype.
+The next prerequisite is a transactional Phase 3 collection storage foundation,
+preferably IndexedDB and shared with long-lived ExecutionHistory.
+
+**Evidence:** `CHECKPOINT_Phase_3_Historical_Plan_Ledger_Semantics.md`, Task 3.9.
+
+## Durable Collection Storage Foundation (Historical Task 3.10 state)
+
+Task 3.10 implemented a domain-neutral native IndexedDB infrastructure boundary
+with additive schema upgrades, lazy/injected opening, commit-aware atomic
+multi-store mutations, indexed bounded queries, structured-clone isolation,
+connection/versionchange handling, and normalized expected failures.
+
+At Task 3.10, no production object store or consumer existed yet. Active,
+Profiles, PlanDecision, and ExecutionHistory remained on localStorage. The
+transition was intentional:
+HistoricalPlan pure domain comes next, then its IndexedDB persistence;
+ExecutionHistory migration follows under a separate anti-resurrection contract
+before Backup V3 and broader release.
+
+**Evidence:** `CHECKPOINT_Phase_3_Durable_Collection_Storage_Foundation.md`, Task 3.10.
+
+## Durable Cross-Storage Restore Foundation (Historical prerequisite chronology)
+
+Task 3.14A provided an interruption-safe, domain-format-neutral authority replacement transaction across Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan. A strict startup journal, verified target/recovery staging, source recheck, atomic two-participant IndexedDB replacement, verified local writes, anti-resurrection preservation, deterministic roll-forward/rollback, and coherent runtime installation are executable. Store bootstrap recovery precedes ordinary authority initialization. Backup V3 was not yet implemented at this historical point; Task 3.14 subsequently completed it.
+
+**Evidence:** `CHECKPOINT_Phase_3_Durable_Cross_Storage_Restore_Foundation.md`, Task 3.14A.
+
+Task 3.14A.2 corrected the concrete restore seam: durable payloads no longer masquerade as private runtime snapshots. Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan each reconstruct settled runtime authority from verified durable evidence, and one store-owned coordinator is available before readiness for deterministic interrupted recovery. Backup V3 remained pending at that point and is now implemented by Task 3.14.
+
+## Complete Backup V3
+
+Task 3.14 provides strict complete-authority Backup V3 export/import across Active, Profiles, PlanDecision, ExecutionHistory quarantine/revisions, and HistoricalPlan. Standard UI export is V3; V1/V2 imports retain prior semantics. V3 is canonical, clone-isolated, JSON-safe, fingerprinted independently of `exportedAt`, blocks whole protected surfaces, includes accepted pending authority, clears Preview, and delegates transaction/recovery to Task 3.14A. No cloud, sync, metrics, Goals, or learning capability is implied.
+
+## HistoricalPlan-Backed Execution Reporting Reachability
+
+Task 3.15A makes current effective HistoricalPlan day authority a production reporting source. A bounded date-selected UI converts each stored scheduled, unplaced, omitted, or blocked occurrence directly into the existing historical execution target using its exact durable reference, frozen title/category/plan, and published user-day context. It does not consult current Active/Profile/Preview authority, publish or mutate HistoricalPlan, or introduce historical metrics. Preview-backed reporting remains unchanged and both paths converge on the existing ExecutionHistory workflow.
+
+## Five-Authority Full Clear
+
+Task 3.15B makes full clear an asynchronous terminal authority operation. Its canonical enumerable result covers Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan; Preview is separately guaranteed cleared. ExecutionHistory replaces established IndexedDB authority with verified empty established authority while retaining its anti-resurrection marker, and HistoricalPlan settles an empty ledger. Mixed terminal outcomes are partial; pending IndexedDB work is never reported as partial. Restore/authority transactions continue to block concurrent mutation. P3-GAP-002 is closed; Task 3.15C completed validation stabilization and governance reconciliation, leaving only Task 3.16 closure audit.

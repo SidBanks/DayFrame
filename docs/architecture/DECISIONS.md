@@ -391,3 +391,135 @@ DayFrame identifies authored source lifetimes explicitly and stores one-off acce
 PlanDecision replay is deterministic, stale references never retarget recreated sources, accepted choices remain visible/removable, and recommendation derivation suppresses equivalent suggestions while explicitly labeling proposed revisions. Backup V3 remains required before broader release because Backup V2 is a Setup-only recovery artifact.
 
 **Evidence:** Tasks 2.24–2.40 and `CHECKPOINT_Phase_2_Complete.md`.
+
+# ADR-3.1 — ExecutionRecord and Completion-History Semantics
+
+**Status:** Accepted
+**Date:** 2026-08-21
+
+DayFrame treats authored setup, Preview, and PlanDecision as planning knowledge,
+not evidence of execution. Phase 3 will use an independent, versioned
+`ExecutionRecord` surface: immutable outcome-record revisions plus a deterministic
+current-outcome projection. Missing evidence remains unknown; V1 does not infer or
+store `missed`. Planned linkage uses `DurableOccurrenceReference V1` together with
+an immutable historical snapshot and an independent execution identity.
+
+The complete decision and consequences are recorded in
+`docs/adr/ADR_EXECUTION_RECORD_AND_COMPLETION_HISTORY_SEMANTICS.md` and
+`docs/checkpoints/CHECKPOINT_Phase_3_Execution_History_Semantics.md`.
+
+**Evidence:** Task 3.1.
+
+# ADR-3.7 — Categorical Outcome Summaries Before Progress Scores
+
+**Status:** Accepted
+**Date:** 2026-08-21
+
+DayFrame will first derive categorical reported-outcome summaries. V1 does not
+assign fractional credit to Partial, treat Not reported as failure, or publish a
+scalar completion/productivity/adherence score. “Progress” is reserved for an
+explicit Goal domain; “plan follow-through” is the preferred term for a governed
+comparison with actionable scheduled occurrences.
+
+ExecutionHistory alone cannot reconstruct past planned occurrences that never
+received a report. Current-Preview reporting coverage may be derived when clearly
+labeled current and volatile; historical follow-through is blocked until a durable
+historical plan denominator exists. All derived metrics are non-authoritative and
+non-durable by default.
+
+**Current applicability:** HistoricalPlan now provides the denominator authority,
+but no historical metric or adherence policy has been authorized or implemented.
+
+The full decision is recorded in
+`docs/adr/ADR_PROGRESS_COMPLETION_AND_PLAN_FOLLOW_THROUGH_DERIVATION_SEMANTICS.md`.
+
+**Evidence:** Task 3.7 and `CHECKPOINT_Phase_3_Progress_And_Adherence_Semantics.md`.
+
+# ADR-3.9 — Historical Plan Ledger Uses Complete Day Publications
+
+**Status:** Accepted and implemented by Tasks 3.11–3.12
+**Date:** 2026-08-21
+
+DayFrame requires durable historical plan authority before arbitrary historical
+reporting coverage or plan follow-through can be truthful. V1 will preserve
+append-only complete user-day publications grouped by atomic fresh authoritative
+Preview generation batches. Stale and Try-only Preview are excluded; identical
+day plans deduplicate; missing/corrupt authority remains uncertainty.
+
+HistoricalPlan is independent of Active, Profiles, PlanDecision, and
+ExecutionHistory. It freezes effective scheduled/unplaced/omitted/blocked plan
+facts through DurableOccurrenceReference V1 but stores no metric policy. No
+historical backfill is fabricated.
+
+The volume and query model required transactional collection storage before ledger
+implementation; that prerequisite and the ledger are now implemented. The full decision is recorded in
+`docs/adr/ADR_HISTORICAL_PLAN_LEDGER_AND_DAY_PUBLICATION_SEMANTICS.md`.
+
+**Evidence:** Task 3.9 and `CHECKPOINT_Phase_3_Historical_Plan_Ledger_Semantics.md`.
+
+# ADR-3.10 — IndexedDB Durable Collection Storage Foundation
+
+**Status:** Accepted and implemented
+**Date:** 2026-08-21
+
+DayFrame uses native IndexedDB for future long-lived transactional collections.
+The infrastructure is domain-neutral, lazy, injected, additive-only during schema
+upgrade, commit-aware, indexed, clone-isolated, and explicit about expected
+failure. It allocates no domain data and owns no desired durable condition.
+
+Current localStorage surfaces do not migrate in Task 3.10. No empty domain store
+is reserved. ExecutionHistory migration is separately governed and requires an
+anti-resurrection authority marker before Backup V3.
+
+The full decision is recorded in
+`docs/adr/ADR_INDEXEDDB_DURABLE_COLLECTION_STORAGE_FOUNDATION.md`.
+
+**Evidence:** Task 3.10 and `CHECKPOINT_Phase_3_Durable_Collection_Storage_Foundation.md`.
+
+# ADR-3.14A — Durable Restore Uses Dual Staging and a Startup Journal
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-22
+
+Five-authority replacement stages both requested target and exact recovery authority before live mutation. A strict localStorage journal and durable IndexedDB/local staging drive deterministic startup roll-forward, rollback, cleanup, or recovery-required protection. ExecutionHistory and HistoricalPlan replace atomically; local authorities and anti-resurrection state are reread/verified; runtime installs through the shared five-participant transaction.
+
+**Evidence:** `ADR_DURABLE_CROSS_STORAGE_RESTORE_FOUNDATION.md` and Task 3.14A.
+
+## ADR-3.14 — Backup V3 Represents Complete Domain Authority
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-22
+
+Backup V3 contains storage-independent Active V2, Profiles V2, PlanDecision V1, ExecutionHistory V1 including quarantine, and HistoricalPlan V1 publication history. It excludes derived, durability, migration, physical, and restore-infrastructure state. Exact replacement is delegated to Task 3.14A; V1/V2 compatibility is unchanged.
+
+**Evidence:** `ADR_BACKUP_V3_COMPLETE_CROSS_SURFACE_AUTHORITY_RESTORE.md` and Task 3.14 resumed result.
+
+## ADR-3.14A.2 — Restore Translates Durable Authority Into Settled Runtime Authority
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-22
+
+Restore staging and verification use participant durable representations only. Every participant explicitly translates verified durable authority into its private settled runtime target; the coordinator installs those targets through the shared five-participant transaction. One store-owned composition serves interrupted startup recovery and future live restore. Runtime translation is infrastructure and will not become Backup V3 content.
+
+## ADR-3.15A — Historical Planned Authority Remains Actionable for Reporting
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-22
+
+Current effective HistoricalPlan V1 day projection is an execution-reporting source independent of current Active and Preview. Every stored scheduled, unplaced, omitted, or blocked occurrence is reportable because those are the same planned states supported by the existing Preview reporting workflow. Conversion reuses the exact stored `DurableOccurrenceReference`, frozen title/category/plan, and published user-day context; it creates only ExecutionHistory evidence.
+
+Source deletion, source recreation, restart, and Backup V3 restore do not remove reportability. Missing publication remains distinct from a published empty day. Historical selection does not regenerate Preview, republish or mutate HistoricalPlan, create a new identity/version/storage surface, or imply adherence or progress semantics.
+
+## ADR-3.15B — Full Clear Is a Settled Five-Authority Operation
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-22
+
+`clearLocalData()` is asynchronous and returns only after terminal outcomes exist for Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan. Its canonical `authorities` result enumerates all five; Preview is a separate derived-state guarantee. Five successes mean `cleared`, mixed successes/failures mean `partiallyCleared`, and zero successes mean `failed`. Compatibility flat fields and durability labels are derived from that canonical result.
+
+ExecutionHistory clear establishes empty IndexedDB authority before legacy evidence is removed and retains the anti-resurrection marker. HistoricalPlan clear settles an empty ledger and supersedes pending publications. Clear uses the shared runtime-authority notification transaction, does not erase restore evidence, and creates neither planning publication nor execution evidence.
