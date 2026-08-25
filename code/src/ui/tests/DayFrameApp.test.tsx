@@ -19,12 +19,13 @@ import type {
   StoreDurabilityStatus,
 } from "../../state/types.js";
 import { DayFrameApp as ProductionDayFrameApp } from "../DayFrameApp.js";
-import { createControllableReadinessStore, createReadyDayFrameTestStore } from
-  "../../state/tests/dayFrameStoreTestUtils.js";
+import {
+  createControllableReadinessStore,
+  createReadyDayFrameTestStore,
+} from "../../state/tests/dayFrameStoreTestUtils.js";
 
 function DayFrameApp(props: ComponentProps<typeof ProductionDayFrameApp>) {
-  return <ProductionDayFrameApp {...props}
-    store={props.store ?? createReadyDayFrameTestStore()} />;
+  return <ProductionDayFrameApp {...props} store={props.store ?? createReadyDayFrameTestStore()} />;
 }
 
 function createExampleScheduleStore() {
@@ -196,11 +197,13 @@ describe("DayFrameApp", () => {
 
   it("renders only the protected shell when authority needs recovery", () => {
     const controlled = createControllableReadinessStore(createReadyDayFrameTestStore(), {
-      status: "protected", reason: "authorityRecoveryRequired",
+      status: "protected",
+      reason: "authorityRecoveryRequired",
     });
     render(<DayFrameApp store={controlled.store} />);
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "DayFrame needs recovery before saved data can be used.");
+      "DayFrame needs recovery before saved data can be used.",
+    );
     expect(screen.queryByRole("button", { name: "Plan" })).not.toBeInTheDocument();
   });
 
@@ -208,13 +211,13 @@ describe("DayFrameApp", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
     expect(screen.getByRole("heading", { name: "DayFrame" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Plan" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Generate Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generate Schedule" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save Setup" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Save Current Setup as Profile" }),
@@ -225,16 +228,16 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("button", { name: "Clear Local Data" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Set up your shifts, connect them to a cycle, add repeatable life blocks, then generate a preview.",
+        "Set up your shifts, connect them to a cycle, add repeatable life blocks, then generate a schedule.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Preview Range: Expand" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Planning Range: Expand" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
-    expect(screen.getByRole("button", { name: "Cycles: Expand" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Work Schedule: Expand" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
@@ -660,10 +663,10 @@ describe("DayFrameApp", () => {
     expect(screen.getByLabelText("Day Boundary Start Time")).toHaveValue("04:30");
     expect(screen.getByLabelText("Week Starts On")).toHaveValue("monday");
     expect(screen.getByLabelText("Name")).toHaveValue("Persisted Custom Shift");
-    fireEvent.click(screen.getByRole("button", { name: "Preview Range: Expand" }));
-    const expandCycles = screen.queryByRole("button", { name: "Cycles: Expand" });
+    fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
+    const expandCycles = screen.queryByRole("button", { name: "Work Schedule: Expand" });
     if (expandCycles) fireEvent.click(expandCycles);
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
     expect(screen.getByLabelText("Start Date")).toHaveValue("2026-06-01");
     expect(screen.getByDisplayValue("Persisted Custom Cycle")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Persisted Custom Sleep")).toBeInTheDocument();
@@ -769,16 +772,20 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp />);
 
-    expect(screen.getByRole("heading", { name: "Saved profiles need recovery" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Saved profiles need recovery" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Export preserved profile data" }));
     const recoveryBlob = createObjectUrlMock.mock.calls.at(-1)?.[0] as Blob;
     expect(await recoveryBlob.text()).toBe(raw);
     expect(globalThis.localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe(raw);
 
     fireEvent.click(screen.getByRole("button", { name: "Abandon protected profiles" }));
-    expect(screen.getByRole("button", {
-      name: "Confirm abandon protected profiles",
-    })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Confirm abandon protected profiles",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("reports sourceChanged instead of overwriting externally changed protected profiles", () => {
@@ -798,22 +805,30 @@ describe("DayFrameApp", () => {
   });
 
   it("shows quarantine count and explicitly removes preserved invalid profile data", () => {
-    globalThis.localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", surface: "profiles", version: 2, profiles: [],
-      quarantinedProfiles: [{ id: "invalid_profile", name: "Invalid Profile", data: null }],
-    }));
+    globalThis.localStorage.setItem(
+      DAYFRAME_PROFILES_V2_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        surface: "profiles",
+        version: 2,
+        profiles: [],
+        quarantinedProfiles: [{ id: "invalid_profile", name: "Invalid Profile", data: null }],
+      }),
+    );
 
     render(<DayFrameApp />);
 
-    expect(screen.getByRole("heading", { name: "Some saved profiles need attention" }))
-      .toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Some saved profiles need attention" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/1 saved profile entry was preserved/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Export quarantined entry" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Remove quarantined entry" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm remove quarantined entry" }));
 
-    expect(screen.queryByRole("heading", { name: "Some saved profiles need attention" }))
-      .not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Some saved profiles need attention" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "Quarantined profile entry permanently removed",
     );
@@ -867,29 +882,29 @@ describe("DayFrameApp", () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
     expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Shift Definitions" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Preview Range: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
-    expect(screen.getByRole("heading", { name: "Preview Range" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Schedule Cycles" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Templates And Recurrences" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
+    expect(screen.getByRole("heading", { name: "Planning Range" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Work Schedule" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Advanced Commitment Fields" })).toBeInTheDocument();
     expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
     expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
     expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-06");
     expect(screen.getByDisplayValue("Day Rotation")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
-    expect(screen.getAllByLabelText("Include in Preview")[0]).toBeChecked();
+    expect(screen.getAllByLabelText("Include in Schedule")[0]).toBeChecked();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "DayFrame Preview" })).toBeInTheDocument();
-    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule details" })).toBeInTheDocument();
+    expect(screen.getAllByText("Needs attention")[0]!).toBeInTheDocument();
   });
 
   it("keeps unified setup draft edits when switching to preview and back", () => {
@@ -908,7 +923,7 @@ describe("DayFrameApp", () => {
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Baseline" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
 
     expect(screen.getByDisplayValue("Sleep Baseline")).toBeInTheDocument();
@@ -1052,7 +1067,7 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     expect(screen.getByLabelText("Cycle Type")).toHaveValue("manualSegments");
 
     fireEvent.change(screen.getByLabelText("Cycle Type"), {
@@ -1135,7 +1150,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Delete Shift Definition" })[1]!);
     fireEvent.click(screen.getByRole("button", { name: "Confirm Delete Shift Definition" }));
     fireEvent.click(screen.getByRole("button", { name: "Add Shift Definition" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     fireEvent.click(screen.getByRole("button", { name: "Add Shift Cycle" }));
     fireEvent.change(screen.getAllByLabelText("Cycle Start Date")[2]!, {
       target: { value: "2026-07-01" },
@@ -1153,8 +1168,11 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-01" },
     });
     fireEvent.click(screen.getAllByRole("button", { name: "Add Cycle Segment" })[0]!);
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Add Block Template" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Commitment" }));
+    fireEvent.change(document.getElementById("commitment-title")!, {
+      target: { value: "Template 4" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add to Plan" }));
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
     const state = store.getState();
@@ -1229,19 +1247,21 @@ describe("DayFrameApp", () => {
 
     const store = createReadyDayFrameTestStore({
       ...pattern,
-      shiftCycles: [{
-        ...cycle,
-        mode: "repeatingSequence",
-        segments: [{ ...cycle.segments[0]!, id: "sequence_day_2" }],
-        sequence: [
-          { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: null },
-          { id: "sequence_day_3", dayOffset: 1, shiftDefinitionId: null },
-        ],
-      }],
+      shiftCycles: [
+        {
+          ...cycle,
+          mode: "repeatingSequence",
+          segments: [{ ...cycle.segments[0]!, id: "sequence_day_2" }],
+          sequence: [
+            { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: null },
+            { id: "sequence_day_3", dayOffset: 1, shiftDefinitionId: null },
+          ],
+        },
+      ],
     });
     render(<DayFrameApp store={store} />);
 
-    const expandCycles = screen.queryByRole("button", { name: "Cycles: Expand" });
+    const expandCycles = screen.queryByRole("button", { name: "Work Schedule: Expand" });
     if (expandCycles) fireEvent.click(expandCycles);
     fireEvent.click(screen.getByRole("button", { name: "Add Sequence Day" }));
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
@@ -1269,7 +1289,7 @@ describe("DayFrameApp", () => {
         />,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+      fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
       fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
       fireEvent.change(screen.getByLabelText("Title"), { target: { value: "First Event" } });
       fireEvent.click(screen.getByRole("button", { name: "Save Event" }));
@@ -1364,9 +1384,9 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByRole("heading", { name: "DayFrame Preview" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule details" })).toBeInTheDocument();
     expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(2);
   });
 
@@ -1516,7 +1536,10 @@ describe("DayFrameApp", () => {
         manualEvents: currentState.manualEvents,
       },
     };
-    const store = createReadyDayFrameTestStore({ ...currentState, savedProfiles: [invalidProfile] });
+    const store = createReadyDayFrameTestStore({
+      ...currentState,
+      savedProfiles: [invalidProfile],
+    });
     const before = store.getState();
 
     render(<DayFrameApp store={store} />);
@@ -1540,11 +1563,11 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
-    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getAllByText("Needs attention")[0]!).toBeInTheDocument();
     expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM").length).toBeGreaterThan(0);
     expect(screen.getByText("Errands 2:30 PM - 3:30 PM")).toBeInTheDocument();
@@ -1552,7 +1575,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
     expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
     expect(screen.getByText("Visible Days")).toBeInTheDocument();
-    expect(screen.getByText("Open Full Preview")).toBeInTheDocument();
+    expect(screen.getByText("Open Review Schedule")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ })).toBeInTheDocument();
@@ -1566,7 +1589,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
@@ -1609,13 +1632,13 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(
       screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
@@ -1632,7 +1655,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ }));
     fireEvent.click(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ }));
 
@@ -1735,7 +1758,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     const conflictDayButton = screen.getByRole("button", {
       name: "Monday, May 4, 2026, has friction",
@@ -1750,9 +1773,9 @@ describe("DayFrameApp", () => {
     ).toHaveClass("is-selected", "is-conflict");
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Review Schedule" }));
 
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -1767,14 +1790,14 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     const todayButton = screen.getByRole("button", {
       name: "Tuesday, May 5, 2026, today",
     });
 
     expect(todayButton).toHaveAttribute("aria-current", "date");
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -1782,11 +1805,11 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
 
     expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -1804,24 +1827,24 @@ describe("DayFrameApp", () => {
       "aria-expanded",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Shifts: Collapse" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Work Hours: Collapse" })).toHaveAttribute(
       "aria-expanded",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Cycles: Expand" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Work Schedule: Expand" })).toHaveAttribute(
       "aria-expanded",
       "false",
     );
     expect(
-      screen.getByText("Connect shifts to dated manual ranges or repeating day-by-day rotations."),
+      screen.getByText("Advanced work schedule rotation and dated-period configuration."),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Buffer" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Collapse" }));
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Collapse" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
 
     expect(screen.getByDisplayValue("Sleep Buffer")).toBeInTheDocument();
   });
@@ -1838,7 +1861,7 @@ describe("DayFrameApp", () => {
       target: { value: "Saved Setup" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
@@ -1856,7 +1879,7 @@ describe("DayFrameApp", () => {
       screen.queryByRole("button", { name: /Tuesday, May 5, 2026, selected day/ }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
     expect(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ })).toHaveAttribute(
@@ -1880,7 +1903,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
   });
@@ -1893,8 +1916,8 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Preview Range: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     fireEvent.change(screen.getByLabelText("Cycle Start Date"), {
       target: { value: "2026-05-10" },
     });
@@ -1912,7 +1935,7 @@ describe("DayFrameApp", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 10-12, 2026").length).toBeGreaterThan(0);
   });
@@ -1923,11 +1946,11 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Cycles: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     fireEvent.change(screen.getByLabelText("Cycle End Date"), {
       target: { value: "2026-04-30" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(
       screen.getByText("Setup contains conflicting or incomplete authored data and was not saved."),
@@ -1945,7 +1968,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
 
     expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
@@ -1990,6 +2013,35 @@ describe("DayFrameApp", () => {
       expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
     });
     expect(screen.queryByText("Updated Appointment")).not.toBeInTheDocument();
+  });
+
+  it("opens the singular Event workflow from the selected Review Schedule user-day", async () => {
+    render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
+
+    const addEvent = screen.getByRole("button", { name: "Add event to Monday, 2026-05-04" });
+    fireEvent.click(addEvent);
+
+    expect(screen.getByRole("heading", { name: "Add Event" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Date")).toHaveValue("2026-05-04");
+    await waitFor(() => expect(screen.getByLabelText("Title")).toHaveFocus());
+  });
+
+  it("navigates from an exact scheduled occurrence to the reused lazy Commitment editor", async () => {
+    render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Review Schedule" })).toHaveFocus(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit commitment Errands" }));
+
+    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Return to Review Schedule" })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById("commitment-title")).toHaveValue("Errands"));
+    expect(document.getElementById("commitment-title")).toHaveFocus();
   });
 
   it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", () => {
@@ -2072,7 +2124,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(7);
@@ -2146,7 +2198,7 @@ describe("DayFrameApp", () => {
         target: { value: "2026-05-05" },
       });
       fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-      fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+      fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
       expect(screen.getAllByText(expectedPlanningWindowLabel).length).toBeGreaterThan(0);
       expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(
@@ -2168,7 +2220,7 @@ describe("DayFrameApp", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getByText("Sleep 2:15 PM - 10:15 PM")).toBeInTheDocument();
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
@@ -2213,7 +2265,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Templates: Expand" }));
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
 
     const requiresWorkShift = screen.getAllByLabelText("Requires Work Shift")[0]!;
 
@@ -2229,15 +2281,15 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.getByText("Finish setup before generating a schedule:")).toBeInTheDocument();
     expect(screen.getByText("Add at least one shift definition.")).toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+    expect(screen.getByText("No schedule generated yet.")).toBeInTheDocument();
   });
 
   it("shows only the missing setup items that still need attention", () => {
@@ -2259,15 +2311,15 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.getByText("Finish setup before generating a schedule:")).toBeInTheDocument();
     expect(screen.queryByText("Add at least one shift definition.")).not.toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
-    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+    expect(screen.getByText("No schedule generated yet.")).toBeInTheDocument();
   });
 
   it("generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks", () => {
@@ -2373,9 +2425,11 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.queryByText("Finish setup before generating a preview:")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Finish setup before generating a schedule:"),
+    ).not.toBeInTheDocument();
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("May 5-7, 2026").length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
@@ -2486,15 +2540,15 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Move block" }));
 
     expect(screen.getByText("Revised")).toBeInTheDocument();
     expect(screen.getByText("Today at 2:00 PM")).toBeInTheDocument();
-    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getAllByText("Needs attention")[0]!).toBeInTheDocument();
     expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
     expect(store.getPlanDecisions()).toHaveLength(0);
-    fireEvent.click(screen.getByRole("button", { name: "Accept this choice" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply Planning Change" }));
     expect(store.getPlanDecisions()).toHaveLength(1);
     expect(store.getPlanDecisions()[0]).toMatchObject({
       kind: "placeOccurrence",
@@ -2516,7 +2570,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
@@ -2524,12 +2578,12 @@ describe("DayFrameApp", () => {
       target: { value: "Updated Day Shift" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Review Schedule" }));
 
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+          "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
         ),
       ).toBeInTheDocument();
     });
@@ -2549,7 +2603,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM").length).toBeGreaterThan(0);
@@ -2559,24 +2613,24 @@ describe("DayFrameApp", () => {
       target: { value: "Sleep Recovery" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Review Schedule" }));
 
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+          "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
         ),
       ).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeEnabled();
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM").length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
 
     await waitFor(() => {
       expect(
         screen.queryByText(
-          "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+          "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
         ),
       ).not.toBeInTheDocument();
     });
@@ -2664,12 +2718,12 @@ describe("DayFrameApp", () => {
       screen.queryByText("This preview range does not overlap the active cycle."),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getAllByText("Preview range warnings:").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeEnabled();
+    expect(screen.getAllByText("Planning range warnings:").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeEnabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
 
     expect(
       screen.getAllByText("This preview range does not overlap the active cycle.").length,
@@ -2750,25 +2804,25 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     store.setSchedulingPreferences({ weekStartsOn: "monday" });
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Review fixed time" })).toBeDisabled();
     });
     fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
-    expect(screen.getByRole("button", { name: "Schedule" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
     const freshReviewButton = screen.getByRole("button", { name: "Review fixed time" });
     expect(freshReviewButton).toBeEnabled();
     fireEvent.click(freshReviewButton);
 
     expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
     expect(screen.getAllByLabelText("Fixed Start Time")[0]).toHaveFocus();
   });
 
@@ -2849,7 +2903,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(screen.getByRole("button", { name: "Review fixed time" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Review fixed time" }));
@@ -2857,24 +2911,24 @@ describe("DayFrameApp", () => {
       target: { value: "15:00" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Open Full Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Review Schedule" }));
 
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+          "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
         ),
       ).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Regenerate Preview" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeEnabled();
     expect(screen.getByText("Workout 6:00 AM - 7:00 AM")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
 
     await waitFor(() => {
       expect(
         screen.queryByText(
-          "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+          "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
         ),
       ).not.toBeInTheDocument();
     });
@@ -3093,7 +3147,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getAllByRole("button", { name: "Review fixed time" })[1]!);
 
     expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
@@ -3176,7 +3230,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 7:00 PM - 3:00 AM")).toHaveLength(3);
@@ -3275,7 +3329,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getByText("Errands 2:15 PM - 3:15 PM")).toBeInTheDocument();
@@ -3347,9 +3401,9 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
-    expect(screen.getByText("Finish setup before generating a preview:")).toBeInTheDocument();
+    expect(screen.getByText("Finish setup before generating a schedule:")).toBeInTheDocument();
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
   });
@@ -3380,10 +3434,14 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
 
-    await waitFor(() => expect(
-      screen.queryByText("Clear all locally saved DayFrame setup data?"),
-    ).not.toBeInTheDocument());
-    expect(screen.getByText("Local DayFrame setup data cleared from this device.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Clear all locally saved DayFrame setup data?"),
+      ).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText("Local DayFrame setup data cleared from this device."),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("No shifts yet. Add your first shift definition to get started."),
     ).toBeInTheDocument();
@@ -3402,11 +3460,22 @@ describe("DayFrameApp", () => {
     const backupBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
     const backupJson = await backupBlob.text();
 
-    const parsed = JSON.parse(backupJson) as { app: string; surface: string; version: number;
-      exportedAt: string; data: Record<string, unknown> };
-    expect(parsed).toMatchObject({ app: "DayFrame", surface: "backup", version: 3,
-      exportedAt: "2026-05-05T15:00:00.000Z" });
+    const parsed = JSON.parse(backupJson) as {
+      app: string;
+      surface: string;
+      version: number;
+      exportedAt: string;
+      data: Record<string, unknown>;
+    };
+    expect(parsed).toMatchObject({
+      app: "DayFrame",
+      surface: "backup",
+      version: 6,
+      exportedAt: "2026-05-05T15:00:00.000Z",
+    });
     expect(parsed.data).toHaveProperty("active");
+    expect(parsed.data).toHaveProperty("measurementDefinitions");
+    expect(parsed.data).toHaveProperty("goals");
     expect(parsed.data).toHaveProperty("profiles");
     expect(parsed.data).toHaveProperty("planDecisions");
     expect(parsed.data).toHaveProperty("executionHistory");
@@ -3467,8 +3536,9 @@ describe("DayFrameApp", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Legacy Backup V1 imported with fresh source lifetimes."))
-        .toBeInTheDocument();
+      expect(
+        screen.getByText("Legacy Backup V1 imported with fresh source lifetimes."),
+      ).toBeInTheDocument();
     });
 
     expect(store.getState().schedulingPreferences).toEqual({
@@ -3490,14 +3560,19 @@ describe("DayFrameApp", () => {
     render(<DayFrameApp store={target} />);
 
     fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
-      target: { files: [new File([JSON.stringify(backup)], "backup-v2.json",
-        { type: "application/json" })] },
+      target: {
+        files: [new File([JSON.stringify(backup)], "backup-v2.json", { type: "application/json" })],
+      },
     });
 
-    await waitFor(() => expect(screen.getByText(
-      "Backup V2 restored with its original source lifetimes.")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByText("Backup V2 restored with its original source lifetimes."),
+      ).toBeInTheDocument(),
+    );
     expect(target.getState().shiftDefinitions[0]?.incarnationId).toBe(
-      backup.data.shiftDefinitions[0]?.incarnationId);
+      backup.data.shiftDefinitions[0]?.incarnationId,
+    );
   });
 
   it("rejects a semantic-invalid backup without replacing the current workflow state", async () => {
@@ -3585,7 +3660,7 @@ describe("DayFrameApp", () => {
       expect(screen.getByText(expectedMessage)).toHaveClass("df-danger-message");
       expect(screen.queryByText("Setup saved.")).not.toBeInTheDocument();
       expect(retryActivePersistence).not.toHaveBeenCalled();
-      expect(screen.getByRole("heading", { name: "Setup" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
     },
   );
 
@@ -3626,7 +3701,7 @@ describe("DayFrameApp", () => {
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
     fireEvent.change(screen.getByLabelText("Title"), {
       target: { value: "Runtime Appointment" },
@@ -3699,7 +3774,8 @@ describe("DayFrameApp", () => {
         persistence: { status: "serializationFailure" } as const,
       }),
       importBackupFile: async (value: unknown) => ({
-        ...importBackup(value), persistence: { status: "serializationFailure" } as const,
+        ...importBackup(value),
+        persistence: { status: "serializationFailure" } as const,
       }),
     };
     const backup = createDayFrameBackup(
@@ -3765,9 +3841,14 @@ describe("DayFrameApp", () => {
         ...store,
         clearLocalData: async () => {
           const result = await clearLocalData();
-          return { ...result, activeState, profiles, durability,
-            status: durability === "notCleared" ? "failed" as const : durability,
-            authorities: { ...result.authorities, active: activeState, profiles } };
+          return {
+            ...result,
+            activeState,
+            profiles,
+            durability,
+            status: durability === "notCleared" ? ("failed" as const) : durability,
+            authorities: { ...result.authorities, active: activeState, profiles },
+          };
         },
       };
 
@@ -3775,11 +3856,13 @@ describe("DayFrameApp", () => {
       fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
       fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
 
-      await waitFor(() => expect(
-        screen.getByText(
-          `Local data cleared for this session, but local removal is incomplete for ${unresolvedText}.`,
-        ),
-      ).toHaveClass("df-danger-message"));
+      await waitFor(() =>
+        expect(
+          screen.getByText(
+            `Local data cleared for this session, but local removal is incomplete for ${unresolvedText}.`,
+          ),
+        ).toHaveClass("df-danger-message"),
+      );
       expect(store.getState().schedulingPreferences.weekStartsOn).toBe("saturday");
       expect(
         screen.queryByText("Local DayFrame setup data cleared from this device."),
@@ -3838,7 +3921,7 @@ describe("DayFrameApp", () => {
 
     render(<DayFrameApp store={store} />);
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(
       screen.getByText("Active setup is available for this session, but the durable save failed."),
@@ -4017,7 +4100,7 @@ describe("DayFrameApp", () => {
     };
 
     render(<DayFrameApp store={store} />);
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(
       screen.getByText(/Reloading or closing DayFrame may discard these session changes/),
@@ -4286,6 +4369,43 @@ describe("DayFrameApp", () => {
     expect(screen.queryByRole("heading", { name: "Preview" })).not.toBeInTheDocument();
   });
 
+  it("uses one accessible Planner, Today, and Summary navigation state", async () => {
+    render(<DayFrameApp getNow={() => new Date("2026-08-22T17:00:00.000Z")} />);
+    const navigation = screen.getByRole("navigation", { name: "App Sections" });
+    const planner = within(navigation).getByRole("button", { name: "Planner" });
+    const today = within(navigation).getByRole("button", { name: "Today" });
+    const summary = within(navigation).getByRole("button", { name: "Summary" });
+
+    expect(planner).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { level: 1, name: "Planner" })).toBeInTheDocument();
+    fireEvent.click(today);
+    expect(today).toHaveAttribute("aria-pressed", "true");
+    expect(planner).toHaveAttribute("aria-pressed", "false");
+    expect(await screen.findByRole("heading", { level: 1, name: "Today" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Report outcome" })).not.toBeInTheDocument();
+    fireEvent.click(summary);
+    expect(summary).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByRole("heading", { name: "History" })).toBeInTheDocument();
+    fireEvent.click(planner);
+    expect(planner).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("heading", { level: 1, name: "Planner" })).toBeInTheDocument();
+  });
+
+  it("preserves the app-owned Setup draft through Today without an implicit write", () => {
+    const store = createReadyDayFrameTestStore();
+    const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
+    render(<DayFrameApp store={store} />);
+
+    fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
+      target: { value: "04:30" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Today" }));
+    expect(commit).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Planner" }));
+    expect(screen.getByLabelText("Day Boundary Start Time")).toHaveValue("04:30");
+    expect(commit).not.toHaveBeenCalled();
+  });
+
   it("separates destination navigation from explicit Preview generation", async () => {
     const store = createExampleScheduleStore();
     const generate = vi.spyOn(store, "generatePreview");
@@ -4293,34 +4413,44 @@ describe("DayFrameApp", () => {
 
     const navigation = screen.getByRole("navigation", { name: "App Sections" });
     expect(within(navigation).getByRole("button", { name: "Planner" })).toHaveAttribute(
-      "aria-pressed", "true");
+      "aria-pressed",
+      "true",
+    );
     expect(within(navigation).queryByRole("button", { name: "Setup" })).not.toBeInTheDocument();
     expect(within(navigation).queryByRole("button", { name: "Preview" })).not.toBeInTheDocument();
     const modes = screen.getByRole("navigation", { name: "Planner modes" });
-    expect(within(modes).getByRole("button", { name: "Schedule" })).toHaveAttribute(
-      "aria-pressed", "false");
-    expect(within(navigation).queryByRole("button", { name: "Generate Preview" }))
-      .not.toBeInTheDocument();
+    expect(within(modes).getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(
+      within(navigation).queryByRole("button", { name: "Generate Schedule" }),
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(within(modes).getByRole("button", { name: "Schedule" }));
+    fireEvent.click(within(modes).getByRole("button", { name: "Review Schedule" }));
     expect(generate).not.toHaveBeenCalled();
-    expect(within(modes).getByRole("button", { name: "Schedule" })).toHaveAttribute(
-      "aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Generate Preview" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Report a past planned occurrence" }))
-      .toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Report history" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Reported outcomes" })).not.toBeInTheDocument();
+    expect(within(modes).getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Generate Schedule" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Report a past planned occurrence" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Report history" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /report outcome/i })).not.toBeInTheDocument();
 
     fireEvent.click(within(navigation).getByRole("button", { name: "Summary" }));
     expect(generate).not.toHaveBeenCalled();
     fireEvent.click(within(navigation).getByRole("button", { name: "Planner" }));
     const returnedModes = screen.getByRole("navigation", { name: "Planner modes" });
     fireEvent.click(within(returnedModes).getByRole("button", { name: "Plan" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(generate).toHaveBeenCalledTimes(1);
-    expect(within(returnedModes).getByRole("button", { name: "Schedule" })).toHaveAttribute(
-      "aria-pressed", "true");
+    expect(within(returnedModes).getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("preserves one dirty draft across Planner modes and Summary without implicit writes", async () => {
@@ -4329,13 +4459,18 @@ describe("DayFrameApp", () => {
     const generate = vi.spyOn(store, "generatePreview");
     render(<DayFrameApp getNow={() => new Date("2026-08-22T17:00:00.000Z")} store={store} />);
 
-    fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), { target: { value: "04:30" } });
-    expect(screen.getByText("Plan has unsaved changes. Schedule actions continue to use the saved plan."))
-      .toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Schedule" }));
+    fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
+      target: { value: "04:30" },
+    });
+    expect(
+      screen.getByText(
+        "Plan has unsaved changes. Schedule actions continue to use the saved plan.",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
     expect(generate).not.toHaveBeenCalled();
     expect(commit).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Schedule" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Review Schedule" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Summary" }));
     await screen.findByRole("heading", { name: "History" });
     fireEvent.click(screen.getByRole("button", { name: "Planner" }));
@@ -4347,14 +4482,26 @@ describe("DayFrameApp", () => {
   it("regenerates Schedule from saved Active without consuming the dirty Plan draft", () => {
     const store = createExampleScheduleStore();
     render(<DayFrameApp getGeneratedAt={() => "2026-08-22T17:00:00.000Z"} store={store} />);
-    fireEvent.click(screen.getByRole("button", { name: "Generate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
     const savedName = store.getState().shiftDefinitions[0]!.name;
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Unsaved Shift Name" } });
-    fireEvent.click(screen.getByRole("button", { name: "Schedule" }));
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate Preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
     expect(store.getState().shiftDefinitions[0]!.name).toBe(savedName);
     fireEvent.click(screen.getByRole("button", { name: "Plan" }));
     expect(screen.getByLabelText("Name")).toHaveValue("Unsaved Shift Name");
+  });
+
+  it("reviews one selected canonical user-day without execution outcome controls", () => {
+    render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    const day = screen.getByLabelText("Review one user-day");
+    const lastDay = day.getAttribute("max")!;
+    fireEvent.change(day, { target: { value: lastDay } });
+    expect(day).toHaveValue(lastDay);
+    expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /report outcome/i })).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(/reported completed|reported skipped|capacity/i);
   });
 });

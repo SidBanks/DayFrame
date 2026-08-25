@@ -21,6 +21,7 @@ import {
 export type PreviewScreenProps = {
   preview: DayFramePreview | null;
   getDayBoundaryStartTimeForUserDayDate: (userDayDate: string) => TimeString;
+  getUserDayWindowForUserDayDate?: (userDayDate: string) => { start: Date; end: Date };
   onApplySuggestedFix: (input: {
     selectedFrictionPointId: string;
     selectedSuggestedFixId: string;
@@ -39,6 +40,19 @@ export type PreviewScreenProps = {
   now?: Date;
   authoredSetup?: DayFrameAuthoredSetup;
   executionReportingStore?: ExecutionReportingStore;
+  onAddEvent?: (userDayDate: LocalDateString) => void;
+  onEditEvent?: (target: {
+    logicalId: string;
+    incarnationId?: string;
+    userDayDate: LocalDateString;
+  }) => void;
+  onEditCommitment?: (target: {
+    logicalId: string;
+    incarnationId: string;
+    recurrenceLogicalId: string;
+    recurrenceIncarnationId: string;
+  }) => void;
+  onEditWork?: () => void;
 };
 
 type PreviewDayGroup = {
@@ -64,6 +78,7 @@ type GroupedFrictionPattern = {
 export function PreviewScreen({
   preview,
   getDayBoundaryStartTimeForUserDayDate,
+  getUserDayWindowForUserDayDate,
   onApplySuggestedFix,
   pendingPlanDecisionAcceptance = false,
   onAcceptPlanDecision,
@@ -79,32 +94,54 @@ export function PreviewScreen({
   now = new Date(),
   authoredSetup,
   executionReportingStore,
+  onAddEvent,
+  onEditEvent,
+  onEditCommitment,
+  onEditWork,
 }: PreviewScreenProps): ReactElement {
   if (!preview) {
     return (
       <main className="df-screen">
         <section className="df-panel df-screen-header">
-          <h1 className="df-screen-title">DayFrame Preview</h1>
-          <p className="df-empty">No preview generated yet.</p>
+          <h2 className="df-screen-title">Schedule details</h2>
+          <p className="df-empty">No schedule generated yet.</p>
           <p className="df-support">
-            Generate a preview to see work blocks, placed life blocks, and any friction that still
-            needs review.
+            Generate a schedule to review work, placed commitments, and anything that still needs
+            attention.
           </p>
           {planDecisionFeedback ? (
-            <div className={planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"} role="status">
+            <div
+              className={
+                planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"
+              }
+              role="status"
+            >
               <p>{planDecisionFeedback.message}</p>
               {planDecisionRetryAvailable ? (
-                <button className="df-secondary-button" onClick={onRetryPlanDecisionDurability} type="button">
+                <button
+                  className="df-secondary-button"
+                  onClick={onRetryPlanDecisionDurability}
+                  type="button"
+                >
                   Retry accepted choice save
                 </button>
               ) : null}
             </div>
           ) : null}
-          <AcceptedChoicesSection decisions={acceptedDecisions}
-            onRemove={onRemoveAcceptedDecision} removalProtected={decisionRemovalProtected} />
-          {executionReportingStore ? <HistoricalPlanReportingSection initialDate={today(now)}
-            store={executionReportingStore} /> : null}
-          {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
+          <AcceptedChoicesSection
+            decisions={acceptedDecisions}
+            onRemove={onRemoveAcceptedDecision}
+            removalProtected={decisionRemovalProtected}
+          />
+          {executionReportingStore ? (
+            <HistoricalPlanReportingSection
+              initialDate={today(now)}
+              store={executionReportingStore}
+            />
+          ) : null}
+          {executionReportingStore ? (
+            <ExecutionHistoryPanel store={executionReportingStore} />
+          ) : null}
         </section>
       </main>
     );
@@ -115,6 +152,7 @@ export function PreviewScreen({
     getDayBoundaryStartTimeForUserDayDate,
     visibleRangeStartDate,
     visibleRangeEndDate,
+    getUserDayWindowForUserDayDate,
   );
   const visibleFrictionPoints = dayGroups.flatMap((dayGroup) => dayGroup.frictionPoints);
   const frictionCounts = countFrictionBySeverity(visibleFrictionPoints);
@@ -126,13 +164,15 @@ export function PreviewScreen({
   return (
     <main className="df-preview-layout">
       <header className="df-panel df-screen-header">
-        <h1 className="df-screen-title">DayFrame Preview</h1>
+        <h2 className="df-screen-title">Schedule details</h2>
         <p className="df-screen-subtitle">
-          Review the draft schedule day by day, then apply suggested fixes if anything conflicts.
+          Review planned geometry for the selected user-day and try bounded resolution options when
+          something conflicts.
         </p>
         {preview.isStale ? (
           <p className="df-danger-message">
-            Setup changed. Generate a new preview to see updates and apply current suggestions.
+            Your planning setup changed after this schedule was generated. Refresh the schedule to
+            see those changes.
           </p>
         ) : null}
         {preview.actionFeedback ? (
@@ -146,28 +186,40 @@ export function PreviewScreen({
         ) : null}
         {pendingPlanDecisionAcceptance && !preview.isStale ? (
           <div className="df-confirmation">
-            <p>You are trying this choice in the current preview.</p>
+            <p>You are trying this resolution option. It has not changed your saved plan.</p>
             <button className="df-primary-button" onClick={onAcceptPlanDecision} type="button">
-              Accept this choice
+              Apply Planning Change
             </button>
           </div>
         ) : null}
         {planDecisionFeedback ? (
-          <div className={planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"} role="status">
+          <div
+            className={planDecisionFeedback.tone === "warning" ? "df-danger-message" : "df-support"}
+            role="status"
+          >
             <p>{planDecisionFeedback.message}</p>
             {planDecisionRetryAvailable ? (
-              <button className="df-secondary-button" onClick={onRetryPlanDecisionDurability} type="button">
+              <button
+                className="df-secondary-button"
+                onClick={onRetryPlanDecisionDurability}
+                type="button"
+              >
                 Retry accepted choice save
               </button>
             ) : null}
           </div>
         ) : null}
-        <AcceptedChoicesSection authoredSetup={authoredSetup} decisions={acceptedDecisions}
-          executionReportingStore={executionReportingStore} onRemove={onRemoveAcceptedDecision}
-          preview={preview} removalProtected={decisionRemovalProtected} />
+        <AcceptedChoicesSection
+          authoredSetup={authoredSetup}
+          decisions={acceptedDecisions}
+          executionReportingStore={executionReportingStore}
+          onRemove={onRemoveAcceptedDecision}
+          preview={preview}
+          removalProtected={decisionRemovalProtected}
+        />
         {rangeWarnings.length > 0 ? (
           <div className="df-form-stack">
-            <p className="df-warning-message">Preview range warnings:</p>
+            <p className="df-warning-message">Planning range warnings:</p>
             <ul className="df-plain-list">
               {rangeWarnings.map((warning) => (
                 <li key={warning.id}>{warning.message}</li>
@@ -204,7 +256,7 @@ export function PreviewScreen({
             </span>
           </div>
           <div className="df-summary-item">
-            <strong>Friction Counts</strong>
+            <strong>Needs attention</strong>
             <span>
               {visibleFrictionPoints.length} total, {frictionCounts.critical} critical,{" "}
               {frictionCounts.warning} warning, {frictionCounts.info} info
@@ -217,7 +269,7 @@ export function PreviewScreen({
       {groupedFrictionPatterns.length > 0 ? (
         <section aria-labelledby="grouped-friction-heading" className="df-summary-bar">
           <h2 className="df-panel-title" id="grouped-friction-heading">
-            Repeated Friction Patterns
+            Repeated schedule conflicts
           </h2>
           <div className="df-form-stack">
             {groupedFrictionPatterns.map((pattern) => (
@@ -250,8 +302,8 @@ export function PreviewScreen({
                           ))
                         ) : (
                           <span className="df-muted">
-                            No automatic fix is available. Review the related setup and regenerate
-                            the preview.
+                            No resolution option is available. Review the related setup and refresh
+                            the schedule.
                           </span>
                         )}
                       </div>
@@ -274,6 +326,16 @@ export function PreviewScreen({
             <h2 className="df-panel-title" id={`day-group-${dayGroup.userDayDate}`}>
               {formatDayHeading(dayGroup.userDayDate)}
             </h2>
+            {onAddEvent ? (
+              <button
+                aria-label={`Add event to ${formatDayHeading(dayGroup.userDayDate)}`}
+                className="df-secondary-button"
+                onClick={() => onAddEvent(dayGroup.userDayDate as LocalDateString)}
+                type="button"
+              >
+                Add Event
+              </button>
+            ) : null}
             {dayGroup.holidays.length > 0 ? (
               <div
                 aria-label={`Holiday annotations for ${dayGroup.userDayDate}`}
@@ -296,6 +358,12 @@ export function PreviewScreen({
               scheduledBlocks={dayGroup.scheduledBlocks}
               selectedUserDayDate={dayGroup.userDayDate}
               workBlocks={dayGroup.workBlocks}
+              {...(getUserDayWindowForUserDayDate
+                ? {
+                    userDayStart: getUserDayWindowForUserDayDate(dayGroup.userDayDate).start,
+                    userDayEnd: getUserDayWindowForUserDayDate(dayGroup.userDayDate).end,
+                  }
+                : {})}
             />
 
             <div className="df-day-groups">
@@ -318,8 +386,17 @@ export function PreviewScreen({
                             ? "All day"
                             : formatHumanTimeRange(scheduledBlock.startsAt, scheduledBlock.endsAt)}
                           <span className="df-muted"> (Manual event)</span>
-                          {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
-                            preview={preview} selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }} store={executionReportingStore} /> : null}
+                          {onEditEvent
+                            ? renderEventEditAction(scheduledBlock, authoredSetup, onEditEvent)
+                            : null}
+                          {authoredSetup && executionReportingStore ? (
+                            <ExecutionReportControl
+                              authoredSetup={authoredSetup}
+                              preview={preview}
+                              selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }}
+                              store={executionReportingStore}
+                            />
+                          ) : null}
                         </li>
                       ))}
                   </ul>
@@ -341,8 +418,24 @@ export function PreviewScreen({
                       <li key={workBlock.id}>
                         {workBlock.title}{" "}
                         {formatHumanTimeRange(workBlock.startsAt, workBlock.endsAt)}
-                        {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
-                          preview={preview} selection={{ kind: "workBlock", blockId: workBlock.id }} store={executionReportingStore} /> : null}
+                        {onEditWork ? (
+                          <button
+                            aria-label={`Edit work configuration for ${workBlock.title}`}
+                            className="df-secondary-button"
+                            onClick={onEditWork}
+                            type="button"
+                          >
+                            Edit Work
+                          </button>
+                        ) : null}
+                        {authoredSetup && executionReportingStore ? (
+                          <ExecutionReportControl
+                            authoredSetup={authoredSetup}
+                            preview={preview}
+                            selection={{ kind: "workBlock", blockId: workBlock.id }}
+                            store={executionReportingStore}
+                          />
+                        ) : null}
                       </li>
                     ))}
                   </ul>
@@ -372,8 +465,17 @@ export function PreviewScreen({
                             {" "}
                             {formatScheduledBlockDetails(scheduledBlock)}
                           </span>
-                          {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
-                            preview={preview} selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }} store={executionReportingStore} /> : null}
+                          {onEditCommitment
+                            ? renderCommitmentEditAction(scheduledBlock, onEditCommitment)
+                            : null}
+                          {authoredSetup && executionReportingStore ? (
+                            <ExecutionReportControl
+                              authoredSetup={authoredSetup}
+                              preview={preview}
+                              selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }}
+                              store={executionReportingStore}
+                            />
+                          ) : null}
                         </li>
                       ))}
                   </ul>
@@ -385,18 +487,27 @@ export function PreviewScreen({
                 className="df-day-group"
               >
                 <h3 className="df-group-title" id={`unplaced-${dayGroup.userDayDate}`}>
-                  Unplaced
+                  Plan attention — Unplaced
                 </h3>
                 {dayGroup.unplacedCandidates.length === 0 ? (
-                  <p className="df-empty">No unplaced candidates.</p>
+                  <p className="df-empty">No unplaced commitments.</p>
                 ) : (
                   <ul className="df-plain-list">
                     {dayGroup.unplacedCandidates.map((candidate) => (
                       <li key={candidate.id}>
                         {candidate.title} - needs placement
                         <span className="df-muted"> {formatCandidateDetails(candidate)}</span>
-                        {authoredSetup && executionReportingStore ? <ExecutionReportControl authoredSetup={authoredSetup}
-                          preview={preview} selection={{ kind: "unplacedCandidate", candidateId: candidate.id }} store={executionReportingStore} /> : null}
+                        {onEditCommitment
+                          ? renderCommitmentEditAction(candidate, onEditCommitment)
+                          : null}
+                        {authoredSetup && executionReportingStore ? (
+                          <ExecutionReportControl
+                            authoredSetup={authoredSetup}
+                            preview={preview}
+                            selection={{ kind: "unplacedCandidate", candidateId: candidate.id }}
+                            store={executionReportingStore}
+                          />
+                        ) : null}
                       </li>
                     ))}
                   </ul>
@@ -408,10 +519,10 @@ export function PreviewScreen({
                 className="df-day-group"
               >
                 <h3 className="df-group-title" id={`friction-${dayGroup.userDayDate}`}>
-                  Friction
+                  Needs attention
                 </h3>
                 {dayGroup.frictionPoints.length === 0 ? (
-                  <p className="df-empty">No friction detected.</p>
+                  <p className="df-empty">No schedule conflicts detected.</p>
                 ) : (
                   <ul className="df-plain-list">
                     {dayGroup.frictionPoints.map((frictionPoint) => (
@@ -437,8 +548,8 @@ export function PreviewScreen({
                             ))
                           ) : (
                             <span className="df-muted">
-                              No automatic fix is available. Review the related setup and regenerate
-                              the preview.
+                              No resolution option is available. Review the related setup and
+                              refresh the schedule.
                             </span>
                           )}
                         </div>
@@ -451,17 +562,29 @@ export function PreviewScreen({
           </section>
         ))}
       </div>
-      {executionReportingStore ? <HistoricalPlanReportingSection initialDate={preview.rangeEndDate}
-        store={executionReportingStore} /> : null}
+      {executionReportingStore ? (
+        <HistoricalPlanReportingSection
+          initialDate={preview.rangeEndDate}
+          store={executionReportingStore}
+        />
+      ) : null}
       {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
     </main>
   );
 }
 
-function today(value: Date): string { return value.toISOString().slice(0, 10); }
+function today(value: Date): string {
+  return value.toISOString().slice(0, 10);
+}
 
-function AcceptedChoicesSection({ decisions, onRemove, removalProtected, authoredSetup, preview,
-  executionReportingStore }: {
+function AcceptedChoicesSection({
+  decisions,
+  onRemove,
+  removalProtected,
+  authoredSetup,
+  preview,
+  executionReportingStore,
+}: {
   decisions: AcceptedDecisionViewModel[];
   onRemove: ((decisionId: AcceptedDecisionViewModel["decisionId"]) => void) | undefined;
   removalProtected: boolean;
@@ -476,7 +599,9 @@ function AcceptedChoicesSection({ decisions, onRemove, removalProtected, authore
         Accepted choices ({decisions.length})
       </h2>
       {removalProtected ? (
-        <p className="df-danger-message">Accepted choices are protected by recovery-required stored data.</p>
+        <p className="df-danger-message">
+          Accepted choices are protected by recovery-required stored data.
+        </p>
       ) : null}
       <ul className="df-accepted-choice-list">
         {decisions.map((decision) => (
@@ -486,15 +611,23 @@ function AcceptedChoicesSection({ decisions, onRemove, removalProtected, authore
               <p className="df-muted">{decision.occurrenceContext}</p>
               <p className="df-meta">Status: {decision.statusLabel}</p>
             </div>
-            <button aria-label={`Remove accepted choice for ${decision.targetSummary}`}
-              className="df-secondary-button" disabled={removalProtected}
-              onClick={() => onRemove?.(decision.decisionId)} type="button">
+            <button
+              aria-label={`Remove accepted choice for ${decision.targetSummary}`}
+              className="df-secondary-button"
+              disabled={removalProtected}
+              onClick={() => onRemove?.(decision.decisionId)}
+              type="button"
+            >
               Remove
             </button>
-            {authoredSetup && preview && executionReportingStore ? <ExecutionReportControl
-              authoredSetup={authoredSetup} preview={preview}
-              selection={{ kind: "planDecision", decisionId: decision.decisionId }}
-              store={executionReportingStore} /> : null}
+            {authoredSetup && preview && executionReportingStore ? (
+              <ExecutionReportControl
+                authoredSetup={authoredSetup}
+                preview={preview}
+                selection={{ kind: "planDecision", decisionId: decision.decisionId }}
+                store={executionReportingStore}
+              />
+            ) : null}
           </li>
         ))}
       </ul>
@@ -507,6 +640,7 @@ function buildDayGroups(
   getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
   visibleRangeStartDate: PreviewScreenProps["visibleRangeStartDate"],
   visibleRangeEndDate: PreviewScreenProps["visibleRangeEndDate"],
+  getUserDayWindowForUserDayDate?: PreviewScreenProps["getUserDayWindowForUserDayDate"],
 ): PreviewDayGroup[] {
   const groups = new Map<string, PreviewDayGroup>();
   const visibleUserDayDates = getVisibleUserDayDates(
@@ -539,6 +673,7 @@ function buildDayGroups(
           scheduledBlock.endsAt,
           userDayDate,
           getDayBoundaryStartTimeForUserDayDate(userDayDate),
+          getUserDayWindowForUserDayDate?.(userDayDate),
         )
       ) {
         getOrCreateDayGroup(groups, userDayDate).scheduledBlocks.push(scheduledBlock);
@@ -558,6 +693,7 @@ function buildDayGroups(
       preview,
       visibleUserDayDates,
       getDayBoundaryStartTimeForUserDayDate,
+      getUserDayWindowForUserDayDate,
     );
 
     if (resolvedUserDayDate) {
@@ -730,6 +866,7 @@ function resolveFrictionGroupUserDayDate(
   preview: DayFramePreview,
   visibleUserDayDates: string[],
   getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
+  getUserDayWindowForUserDayDate?: PreviewScreenProps["getUserDayWindowForUserDayDate"],
 ): string | null {
   for (const userDayDate of visibleUserDayDates) {
     const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
@@ -742,6 +879,7 @@ function resolveFrictionGroupUserDayDate(
           scheduledBlock.endsAt,
           userDayDate,
           dayBoundaryStartTime,
+          getUserDayWindowForUserDayDate?.(userDayDate),
         ),
     );
 
@@ -752,7 +890,13 @@ function resolveFrictionGroupUserDayDate(
     const overlapsWorkBlock = preview.result.generatedWorkBlocks.some(
       (workBlock) =>
         frictionPoint.affectedBlockIds.includes(workBlock.id) &&
-        overlapsUserDay(workBlock.startsAt, workBlock.endsAt, userDayDate, dayBoundaryStartTime),
+        overlapsUserDay(
+          workBlock.startsAt,
+          workBlock.endsAt,
+          userDayDate,
+          dayBoundaryStartTime,
+          getUserDayWindowForUserDayDate?.(userDayDate),
+        ),
     );
 
     if (overlapsWorkBlock) {
@@ -785,11 +929,21 @@ function overlapsUserDay(
   endsAt: Date,
   userDayDate: string,
   dayBoundaryStartTime: TimeString,
+  canonicalWindow?: { start: Date; end: Date },
 ): boolean {
-  const userDayStart = getUserDayStartFromDateString(userDayDate, dayBoundaryStartTime);
-  const userDayEnd = new Date(userDayStart);
-
-  userDayEnd.setDate(userDayEnd.getDate() + 1);
+  const userDayStart =
+    canonicalWindow?.start ?? getUserDayStartFromDateString(userDayDate, dayBoundaryStartTime);
+  const userDayEnd =
+    canonicalWindow?.end ??
+    new Date(
+      userDayStart.getFullYear(),
+      userDayStart.getMonth(),
+      userDayStart.getDate() + 1,
+      userDayStart.getHours(),
+      userDayStart.getMinutes(),
+      0,
+      0,
+    );
 
   return startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime();
 }
@@ -829,6 +983,81 @@ function formatScheduledBlockDetails(
   }
 
   return `(${details.join(", ")})`;
+}
+
+function renderCommitmentEditAction(
+  item:
+    | DayFramePreview["result"]["scheduledBlocks"][number]
+    | DayFramePreview["result"]["unplacedCandidates"][number],
+  onEdit: (target: {
+    logicalId: string;
+    incarnationId: string;
+    recurrenceLogicalId: string;
+    recurrenceIncarnationId: string;
+  }) => void,
+): ReactElement | null {
+  const identity = item.occurrenceIdentity;
+  const navigationIdentity = item.commitmentNavigationIdentity;
+  if (!identity || identity.sourceKind !== "template" || !navigationIdentity) return null;
+  if (
+    identity.templateId !== navigationIdentity.templateId ||
+    identity.recurrenceId !== navigationIdentity.recurrenceId
+  )
+    return null;
+  return (
+    <button
+      aria-label={`Edit commitment ${item.title}`}
+      className="df-secondary-button"
+      onClick={() =>
+        onEdit({
+          logicalId: navigationIdentity.templateId,
+          incarnationId: navigationIdentity.templateIncarnationId,
+          recurrenceLogicalId: navigationIdentity.recurrenceId,
+          recurrenceIncarnationId: navigationIdentity.recurrenceIncarnationId,
+        })
+      }
+      type="button"
+    >
+      Edit Commitment
+    </button>
+  );
+}
+
+function renderEventEditAction(
+  item: DayFramePreview["result"]["scheduledBlocks"][number],
+  authoredSetup: DayFrameAuthoredSetup | undefined,
+  onEdit: (target: {
+    logicalId: string;
+    incarnationId?: string;
+    userDayDate: LocalDateString;
+  }) => void,
+): ReactElement | null {
+  const identity = item.occurrenceIdentity;
+  if (!identity || identity.sourceKind !== "manualEvent" || !authoredSetup) return null;
+  const event = authoredSetup.manualEvents.find((source) => source.id === identity.manualEventId);
+  if (!event) return null;
+  return (
+    <button
+      aria-label={`Edit event ${item.title}`}
+      className="df-secondary-button"
+      onClick={() =>
+        onEdit({
+          logicalId: event.id,
+          userDayDate: event.userDayDate,
+          ...(getIncarnationId(event) ? { incarnationId: getIncarnationId(event)! } : {}),
+        })
+      }
+      type="button"
+    >
+      Edit Event
+    </button>
+  );
+}
+
+function getIncarnationId(value: object): string | undefined {
+  return "incarnationId" in value && typeof value.incarnationId === "string"
+    ? value.incarnationId
+    : undefined;
 }
 
 function formatCandidateDetails(

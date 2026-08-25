@@ -3,11 +3,13 @@ import type { DurableOccurrenceReference } from "../occurrences/durableOccurrenc
 import type { LocalDateString } from "../shifts/types.js";
 import type { TimeString, Weekday } from "../time/types.js";
 import { validatePlanPublicationBatch } from "./historicalPlanValidation.js";
+import type { GoalId, GoalMeasurementPolicyReferenceV1, GoalStatus } from "../goals/goal.js";
 
 export const HISTORICAL_PLAN_SURFACE_VERSION = 1 as const;
 export const PLAN_PUBLICATION_BATCH_VERSION = 1 as const;
 export const HISTORICAL_PLAN_DAY_PUBLICATION_VERSION = 1 as const;
 export const HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION = 1 as const;
+export const HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION = 2 as const;
 export const HISTORICAL_PLAN_TITLE_MAX_LENGTH = 200;
 
 export type PlanPublicationBatchId = string & { readonly __planPublicationBatchId: unique symbol };
@@ -24,7 +26,46 @@ export type HistoricalPlannedOccurrenceSnapshotV1 = {
   title: string;
   category: BlockCategory;
   plan: HistoricalPlanContext;
+  goals?: HistoricalGoalProvenanceV1[];
 };
+export type HistoricalOccurrenceTimingV2 = { kind: "allDay" } | { kind: "timed" };
+export type HistoricalPlannedOccurrenceSnapshotV2 = Omit<
+  HistoricalPlannedOccurrenceSnapshotV1,
+  "version"
+> & {
+  version: typeof HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION;
+  timing: HistoricalOccurrenceTimingV2;
+};
+export type HistoricalPlannedOccurrenceSnapshot =
+  | HistoricalPlannedOccurrenceSnapshotV1
+  | HistoricalPlannedOccurrenceSnapshotV2;
+export type HistoricalOccurrenceTimingSemantics =
+  | { coverage: "unavailableLegacy" }
+  | { coverage: "available"; kind: HistoricalOccurrenceTimingV2["kind"] };
+
+export function historicalOccurrenceTimingSemantics(
+  snapshot: HistoricalPlannedOccurrenceSnapshot,
+): HistoricalOccurrenceTimingSemantics {
+  return snapshot.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION
+    ? { coverage: "available", kind: snapshot.timing.kind }
+    : { coverage: "unavailableLegacy" };
+}
+export type HistoricalGoalProvenanceV1 = {
+  version: 1;
+  goalId: GoalId;
+  goalRevision: number;
+  title: string;
+  status: GoalStatus;
+  measurementPolicy?: GoalMeasurementPolicyReferenceV1;
+};
+export type HistoricalGoalProvenanceCoverage = "available" | "unavailableLegacy";
+
+/** Presence of `goals`, including an empty array, proves Goal-aware publication. */
+export function historicalGoalProvenanceCoverage(
+  snapshot: HistoricalPlannedOccurrenceSnapshot,
+): HistoricalGoalProvenanceCoverage {
+  return snapshot.goals === undefined ? "unavailableLegacy" : "available";
+}
 
 export type HistoricalPlanDayPublicationV1 = {
   version: typeof HISTORICAL_PLAN_DAY_PUBLICATION_VERSION;
@@ -32,7 +73,7 @@ export type HistoricalPlanDayPublicationV1 = {
   dayBoundaryStartTime: TimeString;
   weekStartsOn: Weekday;
   utcOffsetMinutes: number;
-  occurrences: HistoricalPlannedOccurrenceSnapshotV1[];
+  occurrences: HistoricalPlannedOccurrenceSnapshot[];
 };
 
 export type PlanPublicationBatchV1 = {
@@ -49,10 +90,16 @@ export type HistoricalPlanConstructionProviders = {
   now?: () => string;
 };
 
-export type CreatePlanPublicationBatchInput = Omit<PlanPublicationBatchV1, "surfaceVersion" | "version" | "id" | "publishedAt">;
+export type CreatePlanPublicationBatchInput = Omit<
+  PlanPublicationBatchV1,
+  "surfaceVersion" | "version" | "id" | "publishedAt"
+>;
 export type CreatePlanPublicationBatchResult =
   | { status: "created"; batch: PlanPublicationBatchV1 }
-  | { status: "invalidInput"; issues: import("./historicalPlanValidation.js").HistoricalPlanValidationIssue[] }
+  | {
+      status: "invalidInput";
+      issues: import("./historicalPlanValidation.js").HistoricalPlanValidationIssue[];
+    }
   | { status: "allocationFailure"; reason: string };
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -63,9 +110,11 @@ export function isPlanPublicationBatchId(value: unknown): value is PlanPublicati
 
 export function createPlanPublicationBatchId(): PlanPublicationBatchId {
   const randomUUID = globalThis.crypto?.randomUUID;
-  if (!randomUUID) throw new Error("Cryptographic UUID generation is unavailable for PlanPublicationBatchId.");
+  if (!randomUUID)
+    throw new Error("Cryptographic UUID generation is unavailable for PlanPublicationBatchId.");
   const value = randomUUID.call(globalThis.crypto);
-  if (!isPlanPublicationBatchId(value)) throw new Error("Cryptographic UUID generation returned an invalid PlanPublicationBatchId.");
+  if (!isPlanPublicationBatchId(value))
+    throw new Error("Cryptographic UUID generation returned an invalid PlanPublicationBatchId.");
   return value;
 }
 
@@ -87,15 +136,28 @@ export function createPlanPublicationBatch(
       ? { status: "created", batch: validation.batch }
       : { status: "invalidInput", issues: validation.issues };
   } catch (error) {
-    return { status: "allocationFailure", reason: error instanceof Error ? error.message : "Unknown allocation failure" };
+    return {
+      status: "allocationFailure",
+      reason: error instanceof Error ? error.message : "Unknown allocation failure",
+    };
   }
 }
 
-export function cloneHistoricalPlanSnapshot(snapshot: HistoricalPlannedOccurrenceSnapshotV1): HistoricalPlannedOccurrenceSnapshotV1 {
-  return { ...snapshot, reference: structuredClone(snapshot.reference), plan: { ...snapshot.plan } };
+export function cloneHistoricalPlanSnapshot(
+  snapshot: HistoricalPlannedOccurrenceSnapshot,
+): HistoricalPlannedOccurrenceSnapshot {
+  return {
+    ...snapshot,
+    reference: structuredClone(snapshot.reference),
+    plan: { ...snapshot.plan },
+    ...(snapshot.version === 2 ? { timing: { ...snapshot.timing } } : {}),
+    ...(snapshot.goals === undefined ? {} : { goals: structuredClone(snapshot.goals) }),
+  };
 }
 
-export function cloneHistoricalPlanDay(day: HistoricalPlanDayPublicationV1): HistoricalPlanDayPublicationV1 {
+export function cloneHistoricalPlanDay(
+  day: HistoricalPlanDayPublicationV1,
+): HistoricalPlanDayPublicationV1 {
   return { ...day, occurrences: day.occurrences.map(cloneHistoricalPlanSnapshot) };
 }
 

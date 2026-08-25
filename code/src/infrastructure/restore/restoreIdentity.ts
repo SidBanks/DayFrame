@@ -10,6 +10,7 @@ export function createRestoreTransactionId(
   allocate: () => string = () => globalThis.crypto.randomUUID(),
 ): RestoreTransactionId {
   const value = allocate();
-  if (!isRestoreTransactionId(value)) throw new Error("Restore transaction allocator returned a non-canonical UUID-v4.");
+  if (!isRestoreTransactionId(value))
+    throw new Error("Restore transaction allocator returned a non-canonical UUID-v4.");
   return value;
 }

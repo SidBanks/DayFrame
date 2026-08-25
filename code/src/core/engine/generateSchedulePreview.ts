@@ -17,12 +17,16 @@ import type { FrictionPoint } from "../friction/types.js";
 import type { GeneratedCycleWorkBlock } from "../cycles/types.js";
 import type { ShiftDefinition } from "../shifts/types.js";
 import type { TimeString, Weekday } from "../time/types.js";
-import { getUserDayDate, getUserDayStart } from "../time/userDay.js";
+import { getUserDayDate } from "../time/userDay.js";
+import { resolveUserDayWindowForLabel } from "../time/canonicalUserDay.js";
 import type { LocalDateString } from "../shifts/types.js";
 import { createManualEventOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 import type { PlanDecisionV1 } from "../decisions/planDecision.js";
-import { finalizePlanDecisionResults, replayPlanDecisions,
-  type PlanDecisionReplayResult } from "../decisions/replayPlanDecisions.js";
+import {
+  finalizePlanDecisionResults,
+  replayPlanDecisions,
+  type PlanDecisionReplayResult,
+} from "../decisions/replayPlanDecisions.js";
 import { classifySuggestedFixes } from "../decisions/classifySuggestedFixes.js";
 import type { DayFrameAuthoredSetup } from "../../state/types.js";
 
@@ -53,6 +57,12 @@ export function generateSchedulePreview(
   input: GenerateSchedulePreviewInput,
 ): GenerateSchedulePreviewResult {
   const shiftCycles = input.shiftCycles ?? [];
+  const defaultSchedulingPreferences = {
+    dayBoundaryStartTime: input.dayBoundaryStartTime,
+    weekStartsOn: input.weekStartsOn,
+  };
+  const getCanonicalUserDayWindow = (userDayDate: LocalDateString) =>
+    resolveUserDayWindowForLabel({ shiftCycles, defaultSchedulingPreferences, userDayDate });
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   validateBlockTemplates(input.blockTemplates);
   const expandedPlanningWindow = expandPlanningWindow(
@@ -98,8 +108,10 @@ export function generateSchedulePreview(
     input.weekStartsOn,
   );
   const authoredSetup = {
-    schedulingPreferences: { dayBoundaryStartTime: input.dayBoundaryStartTime,
-      weekStartsOn: input.weekStartsOn },
+    schedulingPreferences: {
+      dayBoundaryStartTime: input.dayBoundaryStartTime,
+      weekStartsOn: input.weekStartsOn,
+    },
     previewRange: { preset: "custom", startDate: "2000-01-01", endDate: "2000-01-01" },
     shiftDefinitions: input.shiftDefinitions,
     shiftCycles,
@@ -107,10 +119,15 @@ export function generateSchedulePreview(
     blockRecurrences: input.blockRecurrences,
     manualEvents: input.manualEvents ?? [],
   } as unknown as DayFrameAuthoredSetup;
-  const replay = replayPlanDecisions({ decisions: input.planDecisions ?? [], authoredSetup,
-    blockCandidates, planningWindowStart: input.planningWindowStart,
+  const replay = replayPlanDecisions({
+    decisions: input.planDecisions ?? [],
+    authoredSetup,
+    blockCandidates,
+    planningWindowStart: input.planningWindowStart,
     planningWindowEnd: input.planningWindowEnd,
-    dayBoundaryStartTime: input.dayBoundaryStartTime, weekStartsOn: input.weekStartsOn });
+    dayBoundaryStartTime: input.dayBoundaryStartTime,
+    weekStartsOn: input.weekStartsOn,
+  });
   const placementResult = placeBlockCandidates({
     blockCandidates: replay.blockCandidates,
     generatedWorkBlocks,
@@ -128,11 +145,15 @@ export function generateSchedulePreview(
         },
         userDayDate,
       }).dayBoundaryStartTime,
+    getUserDayWindowForUserDayDate: getCanonicalUserDayWindow,
     hardPlacementCandidateIds: replay.hardPlacementCandidateIds,
     additionalOccupiedBlocks: manualScheduledBlocks,
   });
-  const planDecisionResults = finalizePlanDecisionResults(replay.pendingResults,
-    replay.exactDecisionCandidateIds, placementResult.scheduledBlocks);
+  const planDecisionResults = finalizePlanDecisionResults(
+    replay.pendingResults,
+    replay.exactDecisionCandidateIds,
+    placementResult.scheduledBlocks,
+  );
 
   const frictionDetectionResult = detectScheduleFriction({
     generatedWorkBlocks,
@@ -156,6 +177,7 @@ export function generateSchedulePreview(
         },
         userDayDate,
       }).dayBoundaryStartTime,
+    getUserDayWindowForUserDayDate: getCanonicalUserDayWindow,
   });
   const decisionAwareFrictionPoints = classifySuggestedFixes({
     frictionPoints: suggestedFixesResult.frictionPoints,
@@ -182,22 +204,13 @@ export function generateSchedulePreview(
   const filteredBlockCandidates = replay.blockCandidates.filter((candidate) =>
     visibleUserDayDates.has(candidate.userDayDate),
   );
-  const getDayBoundaryStartTimeForUserDayDate = (userDayDate: LocalDateString) =>
-    resolveEffectiveSchedulePreferencesForUserDayDate({
-      shiftCycles,
-      defaultSchedulingPreferences: {
-        dayBoundaryStartTime: input.dayBoundaryStartTime,
-        weekStartsOn: input.weekStartsOn,
-      },
-      userDayDate,
-    }).dayBoundaryStartTime;
   const allScheduledBlocks = [...placementResult.scheduledBlocks, ...manualScheduledBlocks];
   const filteredScheduledBlocks = allScheduledBlocks.filter((scheduledBlock) =>
     overlapsVisibleUserDay(
       scheduledBlock.startsAt,
       scheduledBlock.endsAt,
       visibleUserDayDates,
-      getDayBoundaryStartTimeForUserDayDate,
+      getCanonicalUserDayWindow,
     ),
   );
   const filteredUnplacedCandidates = placementResult.unplacedCandidates.filter((candidate) =>
@@ -248,25 +261,22 @@ function buildManualEventScheduledBlocks(
   return manualEvents
     .filter((manualEvent) => visibleUserDayDates.has(manualEvent.userDayDate))
     .map((manualEvent) => {
-      const effectiveDayBoundaryStartTime = resolveEffectiveSchedulePreferencesForUserDayDate({
+      const canonicalWindow = resolveUserDayWindowForLabel({
         shiftCycles,
         defaultSchedulingPreferences: {
           dayBoundaryStartTime,
           weekStartsOn,
         },
         userDayDate: manualEvent.userDayDate,
-      }).dayBoundaryStartTime;
-      const userDayStart = getUserDayStartFromLocalDateString(
-        manualEvent.userDayDate,
-        effectiveDayBoundaryStartTime,
-      );
+      });
+      const userDayStart = canonicalWindow.start;
       const startsAt =
         manualEvent.allDay || !manualEvent.startTime
           ? userDayStart
           : createDateTimeFromUserDay(manualEvent.userDayDate, manualEvent.startTime);
       const endsAt =
         manualEvent.allDay || !manualEvent.endTime
-          ? addCalendarDays(userDayStart, 1)
+          ? canonicalWindow.end
           : createDateTimeFromUserDay(
               manualEvent.userDayDate,
               manualEvent.endTime,
@@ -311,22 +321,6 @@ function createDateTimeFromUserDay(
     0,
     0,
   );
-}
-
-function getUserDayStartFromLocalDateString(
-  userDayDate: LocalDateString,
-  dayBoundaryStartTime: TimeString,
-): Date {
-  const [year, month, day] = userDayDate.split("-").map(Number);
-  const [hours, minutes] = dayBoundaryStartTime.split(":").map(Number);
-
-  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1, hours ?? 0, minutes ?? 0, 0, 0);
-}
-
-function addCalendarDays(date: Date, days: number): Date {
-  const nextDate = new Date(date);
-  nextDate.setDate(nextDate.getDate() + days);
-  return nextDate;
 }
 
 function getUserWeekStartDate(
@@ -425,7 +419,7 @@ function getOverlappingUserDayDates(input: {
 
   while (currentDate.getTime() <= lastDate.getTime()) {
     const userDayDate = getUserDayDate(currentDate, "00:00") as LocalDateString;
-    const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
+    const canonicalWindow = resolveUserDayWindowForLabel({
       shiftCycles: input.shiftCycles,
       defaultSchedulingPreferences: {
         dayBoundaryStartTime: input.dayBoundaryStartTime,
@@ -433,11 +427,7 @@ function getOverlappingUserDayDates(input: {
       },
       userDayDate,
     });
-    const userDayStart = getUserDayStart(
-      new Date(`${userDayDate}T12:00:00`),
-      preferences.dayBoundaryStartTime,
-    );
-    const userDayEnd = addDays(userDayStart, 1);
+    const { start: userDayStart, end: userDayEnd } = canonicalWindow;
 
     if (
       userDayStart.getTime() < input.planningWindowEnd.getTime() &&
@@ -453,7 +443,9 @@ function getOverlappingUserDayDates(input: {
 }
 
 function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * 24 * 60 * 60_000);
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 function overlapsVisiblePlanningWindow(
@@ -472,12 +464,10 @@ function overlapsVisibleUserDay(
   startsAt: Date,
   endsAt: Date,
   visibleUserDayDates: Set<LocalDateString>,
-  getDayBoundaryStartTimeForUserDayDate: (userDayDate: LocalDateString) => TimeString,
+  getCanonicalUserDayWindow: (userDayDate: LocalDateString) => { start: Date; end: Date },
 ): boolean {
   for (const userDayDate of visibleUserDayDates) {
-    const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
-    const userDayStart = getUserDayStart(new Date(`${userDayDate}T12:00:00`), dayBoundaryStartTime);
-    const userDayEnd = addDays(userDayStart, 1);
+    const { start: userDayStart, end: userDayEnd } = getCanonicalUserDayWindow(userDayDate);
 
     if (startsAt.getTime() < userDayEnd.getTime() && endsAt.getTime() > userDayStart.getTime()) {
       return true;

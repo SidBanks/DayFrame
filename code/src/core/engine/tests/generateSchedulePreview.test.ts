@@ -12,6 +12,78 @@ const baseTimestamps = {
 } as const;
 
 describe("generateSchedulePreview", () => {
+  it.each([
+    ["03:00", "06:00", 27],
+    ["06:00", "03:00", 21],
+  ] as const)(
+    "expands all-day events across a %s to %s canonical transition",
+    (outgoingBoundary, incomingBoundary, expectedHours) => {
+      const shiftDefinition: ShiftDefinition = {
+        id: "shift_transition",
+        userId: "user_001",
+        name: "Transition shift",
+        startTime: "10:00",
+        endTime: "11:00",
+        workDays: ["monday"],
+        crossesMidnight: false,
+        ...baseTimestamps,
+      };
+      const shiftCycle: ShiftCycle = {
+        id: "cycle_transition",
+        userId: "user_001",
+        name: "Boundary transition",
+        type: "fixedSegments",
+        mode: "manualSegments",
+        startsOnDate: "2026-05-05",
+        endsOnDate: "2026-05-06",
+        ...baseTimestamps,
+        segments: [
+          {
+            id: "segment_outgoing",
+            shiftCycleId: "cycle_transition",
+            shiftDefinitionId: shiftDefinition.id,
+            startsOnDate: "2026-05-05",
+            endsOnDate: "2026-05-05",
+            schedulePreferences: { dayBoundaryStartTime: outgoingBoundary },
+          },
+          {
+            id: "segment_incoming",
+            shiftCycleId: "cycle_transition",
+            shiftDefinitionId: shiftDefinition.id,
+            startsOnDate: "2026-05-06",
+            endsOnDate: "2026-05-06",
+            schedulePreferences: { dayBoundaryStartTime: incomingBoundary },
+          },
+        ],
+      };
+      const result = generateSchedulePreview({
+        shiftDefinitions: [shiftDefinition],
+        shiftCycles: [shiftCycle],
+        blockTemplates: [],
+        blockRecurrences: [],
+        manualEvents: [
+          {
+            id: "transition_all_day",
+            title: "Transition",
+            userDayDate: "2026-05-05",
+            allDay: true,
+            ...baseTimestamps,
+          },
+        ],
+        planningWindowStart: new Date(2026, 4, 5, 0),
+        planningWindowEnd: new Date(2026, 4, 7, 0),
+        dayBoundaryStartTime: "03:00",
+        weekStartsOn: "monday",
+        generatedAt: "2026-05-03T09:00:00-05:00",
+      });
+      const event = result.scheduledBlocks.find((block) => block.id === "transition_all_day")!;
+      expect(event.isAllDay).toBe(true);
+      expect((event.endsAt.getTime() - event.startsAt.getTime()) / 3_600_000).toBe(expectedHours);
+      expect(event.startsAt.getHours()).toBe(Number(outgoingBoundary.slice(0, 2)));
+      expect(event.endsAt.getHours()).toBe(Number(incomingBoundary.slice(0, 2)));
+    },
+  );
+
   it("runs the full preview pipeline and returns draft schedule output", () => {
     const shiftDefinitions: ShiftDefinition[] = [
       {

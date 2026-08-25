@@ -13,6 +13,29 @@ afterEach(() => {
 });
 
 describe("DayVisualizer", () => {
+  it("scales and labels a longer canonical user-day using its actual window", () => {
+    render(
+      <DayVisualizer
+        dayBoundaryStartTime="03:00"
+        scheduledBlocks={[
+          {
+            ...buildScheduledBlock(),
+            startsAt: new Date(2026, 4, 6, 3),
+            endsAt: new Date(2026, 4, 6, 6),
+          },
+        ]}
+        selectedUserDayDate="2026-05-05"
+        userDayStart={new Date(2026, 4, 5, 3)}
+        userDayEnd={new Date(2026, 4, 6, 6)}
+        workBlocks={[]}
+      />,
+    );
+    expect(screen.getByText("A read-only view across this 27-hour user-day.")).toBeInTheDocument();
+    const block = screen.getByLabelText("Scheduled block: Workout, 3:00 AM - 6:00 AM");
+    expect(Number.parseFloat((block as HTMLElement).style.top)).toBeCloseTo(88.89, 1);
+    expect(Number.parseFloat((block as HTMLElement).style.height)).toBeCloseTo(11.11, 1);
+  });
+
   it("renders an empty state when the selected day has no blocks", () => {
     render(
       <DayVisualizer

@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createDayFrameBackup, parseDayFrameBackupJson,
-  validateDayFrameBackupV2 } from "../dayFrameBackup.js";
+import {
+  createDayFrameBackup,
+  parseDayFrameBackupJson,
+  validateDayFrameBackupV2,
+} from "../dayFrameBackup.js";
 import { createInitialDayFrameState } from "../createInitialDayFrameState.js";
 import {
   clearPersistedProfiles,
@@ -41,13 +44,29 @@ function currentPattern(state: DayFrameState): DayFrameAuthoredPattern {
 }
 
 function currentActiveSetup(state: DayFrameState): DayFrameAuthoredSetup {
-  const { schedulingPreferences, previewRange, shiftDefinitions, shiftCycles, blockTemplates,
-    blockRecurrences, manualEvents } = state;
-  return { schedulingPreferences, previewRange, shiftDefinitions, shiftCycles, blockTemplates,
-    blockRecurrences, manualEvents };
+  const {
+    schedulingPreferences,
+    previewRange,
+    shiftDefinitions,
+    shiftCycles,
+    blockTemplates,
+    blockRecurrences,
+    manualEvents,
+  } = state;
+  return {
+    schedulingPreferences,
+    previewRange,
+    shiftDefinitions,
+    shiftCycles,
+    blockTemplates,
+    blockRecurrences,
+    manualEvents,
+  };
 }
 
-function readActiveV2Data(storage: ReturnType<typeof createLocalStorageMock>): DayFrameAuthoredSetup {
+function readActiveV2Data(
+  storage: ReturnType<typeof createLocalStorageMock>,
+): DayFrameAuthoredSetup {
   const envelope = JSON.parse(storage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY) ?? "{}") as {
     data: DayFrameAuthoredSetup;
   };
@@ -66,8 +85,10 @@ function expectProfileLoaded(
 
 function expectBackupImported(
   result: BackupImportResult,
-): asserts result is Extract<BackupImportResult,
-  { status: "instantiatedFromLegacy" | "restored" }> {
+): asserts result is Extract<
+  BackupImportResult,
+  { status: "instantiatedFromLegacy" | "restored" }
+> {
   expect(["instantiatedFromLegacy", "restored"]).toContain(result.status);
 }
 
@@ -771,8 +792,12 @@ describe("dayFrameStore", () => {
     const activeBefore = currentActiveSetup(store.getState());
     const backup = store.exportBackup("2026-05-05T10:00:00-05:00");
 
-    expect(backup).toMatchObject({ app: "DayFrame", surface: "backup", version: 2,
-      exportedAt: "2026-05-05T10:00:00-05:00" });
+    expect(backup).toMatchObject({
+      app: "DayFrame",
+      surface: "backup",
+      version: 2,
+      exportedAt: "2026-05-05T10:00:00-05:00",
+    });
     expect(backup.data).toEqual(activeBefore);
     expect(backup.data).not.toHaveProperty("shiftCycle");
   });
@@ -800,9 +825,7 @@ describe("dayFrameStore", () => {
     expect(readActiveV2Data(localStorage)).toMatchObject({
       shiftCycles: [buildNormalizedLegacyShiftCycle()],
     });
-    expect(readActiveV2Data(localStorage)).not.toHaveProperty(
-      "shiftCycle",
-    );
+    expect(readActiveV2Data(localStorage)).not.toHaveProperty("shiftCycle");
   });
 
   it("imports authored setup data and clears any current preview", () => {
@@ -1341,7 +1364,14 @@ describe("dayFrameStore", () => {
     });
     expect(result.status).toBe("cleared");
     expect(Object.keys(result.authorities)).toEqual([
-      "active", "profiles", "planDecisions", "executionHistory", "historicalPlan",
+      "active",
+      "profiles",
+      "planDecisions",
+      "executionHistory",
+      "historicalPlan",
+      "goals",
+      "measurementDefinitions",
+      "progressObservations",
     ]);
     expect(store.getDurabilityStatus()).toEqual({
       activeState: "durable",
@@ -1951,7 +1981,9 @@ describe("dayFrameStore", () => {
       const listener = vi.fn();
       const successfulSet = vi.fn((key: string, value: string) => {
         if (key === DAYFRAME_ACTIVE_V2_STORAGE_KEY) {
-          const parsed = JSON.parse(value) as { data: { previewRange: { preset: string }; schedulingPreferences: object } };
+          const parsed = JSON.parse(value) as {
+            data: { previewRange: { preset: string }; schedulingPreferences: object };
+          };
           expect(parsed.data.previewRange.preset).toBe("oneWeek");
           expect(parsed.data).toMatchObject({
             schedulingPreferences: { dayBoundaryStartTime: "04:00" },
@@ -1969,7 +2001,10 @@ describe("dayFrameStore", () => {
         desiredCondition: "snapshot",
         persistence: { status: "persisted" },
       });
-      expect(successfulSet).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
+      expect(successfulSet).toHaveBeenCalledWith(
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        expect.any(String),
+      );
       expect(store.getState()).toEqual(stateBeforeRetry);
       expect(store.getDurabilityStatus()).toEqual({
         activeState: "durable",
@@ -2929,7 +2964,9 @@ describe("dayFrameStore", () => {
           endDate: "2026-05-11",
         }),
       );
-      await expectActiveSnapshotAfterClear(() => store.setShiftDefinitions(buildShiftDefinitions()));
+      await expectActiveSnapshotAfterClear(() =>
+        store.setShiftDefinitions(buildShiftDefinitions()),
+      );
       await expectActiveSnapshotAfterClear(() => store.setShiftCycles([]));
       await expectActiveSnapshotAfterClear(() => store.setBlockTemplates(buildBlockTemplates()));
       await expectActiveSnapshotAfterClear(() => store.setBlockRecurrences([]));
@@ -3776,9 +3813,9 @@ describe("dayFrameStore", () => {
           if (source === "profile") {
             expectProfileLoaded(store.loadProfile(profile.id));
           } else {
-            expect(store.importBackup(
-              createDayFrameBackup(recovered, "2026-05-05T10:00:00-05:00"),
-            )).toEqual({ status: "rejected", reason: "activeLocalRecovery" });
+            expect(
+              store.importBackup(createDayFrameBackup(recovered, "2026-05-05T10:00:00-05:00")),
+            ).toEqual({ status: "rejected", reason: "activeLocalRecovery" });
           }
 
           const mutation = store.setSchedulingPreferences({ dayBoundaryStartTime: "05:15" });
@@ -3788,9 +3825,9 @@ describe("dayFrameStore", () => {
             reason: "activeLocalRecovery",
           });
           expect(store.replaceProtectedActiveCheckpointWithCurrentState().status).toBe("resolved");
-          expect(
-            readActiveV2Data(localStorage).schedulingPreferences,
-          ).toMatchObject({ dayBoundaryStartTime: "05:15" });
+          expect(readActiveV2Data(localStorage).schedulingPreferences).toMatchObject({
+            dayBoundaryStartTime: "05:15",
+          });
         },
       );
     });
@@ -3960,53 +3997,81 @@ describe("dayFrameStore", () => {
 describe("Profile V2 reusable-pattern persistence", () => {
   it("migrates V1 only after verified V2 persistence and retains the V1 source", () => {
     const localStorage = createLocalStorageMock();
-    const legacy = { app: "DayFrame", version: 1, profiles: [buildSavedProfile(
-      buildValidHistoricalAuthoredSetup())] };
+    const legacy = {
+      app: "DayFrame",
+      version: 1,
+      profiles: [buildSavedProfile(buildValidHistoricalAuthoredSetup())],
+    };
     localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify(legacy));
     installLocalStorageMock(localStorage);
 
     const store = createReadyDayFrameTestStore();
     const v2 = JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "null") as {
-      surface: string; version: number; profiles: DayFrameSavedProfile[]; quarantinedProfiles: unknown[] };
+      surface: string;
+      version: number;
+      profiles: DayFrameSavedProfile[];
+      quarantinedProfiles: unknown[];
+    };
 
-    expect(store.getProfileIngressStatus()).toEqual({ status: "accepted", quarantinedEntryCount: 0 });
+    expect(store.getProfileIngressStatus()).toEqual({
+      status: "accepted",
+      quarantinedEntryCount: 0,
+    });
     expect(v2).toMatchObject({ surface: "profiles", version: 2, quarantinedProfiles: [] });
     expect(v2.profiles[0]?.data).not.toHaveProperty("incarnationId");
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "null")).toEqual(legacy);
+    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "null")).toEqual(
+      legacy,
+    );
   });
 
   it("protects corrupt V2 without falling back to a valid V1 collection", () => {
     const localStorage = createLocalStorageMock();
     localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
     installLocalStorageMock(localStorage);
 
     const store = createReadyDayFrameTestStore();
 
     expect(store.getState().savedProfiles).toEqual([]);
     expect(store.getProfileIngressStatus()).toEqual({
-      status: "recoveryRequired", reason: "invalidV2", sourcePreserved: true,
+      status: "recoveryRequired",
+      reason: "invalidV2",
+      sourcePreserved: true,
     });
     expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("{");
   });
 
   it("does not expose migrated profiles when V2 migration serialization fails", () => {
     const localStorage = createLocalStorageMock();
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
     installLocalStorageMock(localStorage);
 
     const store = createReadyDayFrameTestStore(undefined, {
-      serializeProfilesV2: () => { throw new RangeError("injected"); },
+      serializeProfilesV2: () => {
+        throw new RangeError("injected");
+      },
     });
 
     expect(store.getState().savedProfiles).toEqual([]);
     expect(store.getProfileIngressStatus()).toMatchObject({
-      status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "serializationFailure", sourcePreserved: true,
+      status: "recoveryRequired",
+      reason: "migrationFailure",
+      failureDetail: "serializationFailure",
+      sourcePreserved: true,
     });
     expect(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
     expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBeNull();
@@ -4021,9 +4086,14 @@ describe("Profile V2 reusable-pattern persistence", () => {
     const localStorage = createLocalStorageMock();
     const originalGet = localStorage.getItem.bind(localStorage);
     const originalSet = localStorage.setItem.bind(localStorage);
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
     let wroteV2 = false;
     localStorage.setItem = (key, value) => {
       if (key !== DAYFRAME_PROFILES_V2_STORAGE_KEY) return originalSet(key, value);
@@ -4047,7 +4117,9 @@ describe("Profile V2 reusable-pattern persistence", () => {
 
     expect(store.getState().savedProfiles).toEqual([]);
     expect(store.getProfileIngressStatus()).toMatchObject({
-      status: "recoveryRequired", reason: "migrationFailure", failureDetail,
+      status: "recoveryRequired",
+      reason: "migrationFailure",
+      failureDetail,
       sourcePreserved: true,
     });
     expect(originalGet(DAYFRAME_PROFILES_STORAGE_KEY)).not.toBeNull();
@@ -4055,17 +4127,27 @@ describe("Profile V2 reusable-pattern persistence", () => {
 
   it("prevents cleared V1 profiles from resurrecting after Profile V2 authority was established", async () => {
     const localStorage = createLocalStorageMock();
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
     installLocalStorageMock(localStorage);
     const store = createReadyDayFrameTestStore();
 
     expect(store.getState().savedProfiles).toHaveLength(1);
     expect((await store.clearLocalData()).profiles).toEqual({ status: "removed" });
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
 
     expect(createReadyDayFrameTestStore().getState().savedProfiles).toEqual([]);
   });
@@ -4078,12 +4160,24 @@ describe("Profile V2 reusable-pattern persistence", () => {
     pattern.shiftCycles[0]!.sequence = [
       { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
     ];
-    pattern.manualEvents = [{ id: "manual_event_1", title: "Appointment",
-      userDayDate: "2026-05-06", startTime: "09:30", endTime: "10:30", allDay: false,
-      ...baseTimestamps }];
-    const store = createReadyDayFrameTestStore({ savedProfiles: [buildSavedProfile(pattern)] }, {
-      allocateSourceIncarnationId: () => `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never,
-    });
+    pattern.manualEvents = [
+      {
+        id: "manual_event_1",
+        title: "Appointment",
+        userDayDate: "2026-05-06",
+        startTime: "09:30",
+        endTime: "10:30",
+        allDay: false,
+        ...baseTimestamps,
+      },
+    ];
+    const store = createReadyDayFrameTestStore(
+      { savedProfiles: [buildSavedProfile(pattern)] },
+      {
+        allocateSourceIncarnationId: () =>
+          `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never,
+      },
+    );
     const profile = store.getState().savedProfiles[0]!;
 
     const first = store.loadProfile(profile.id);
@@ -4131,26 +4225,31 @@ describe("Profile V2 recovery authority", () => {
     const store = createReadyDayFrameTestStore({ savedProfiles: [profile] });
 
     expect(store.replaceProtectedProfileCheckpointWithCurrentProfiles()).toEqual({
-      status: "resolved", action: "replace", persistence: { status: "persisted" },
+      status: "resolved",
+      action: "replace",
+      persistence: { status: "persisted" },
     });
     expect(store.getProfileIngressStatus()).toEqual({
-      status: "accepted", quarantinedEntryCount: 0,
+      status: "accepted",
+      quarantinedEntryCount: 0,
     });
     const restarted = createReadyDayFrameTestStore();
     expect(restarted.getState().savedProfiles).toEqual([profile]);
   });
 
   it.each(["replace", "abandon"] as const)(
-    "rejects stale protected-source authority before %s", (action) => {
+    "rejects stale protected-source authority before %s",
+    (action) => {
       const localStorage = createLocalStorageMock();
       localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
       installLocalStorageMock(localStorage);
       const store = createReadyDayFrameTestStore({ savedProfiles: [buildSavedProfile()] });
       localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "externally changed");
 
-      const result = action === "replace"
-        ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
-        : store.abandonProtectedProfileCheckpoint();
+      const result =
+        action === "replace"
+          ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
+          : store.abandonProtectedProfileCheckpoint();
 
       expect(result).toEqual({ status: "notAttempted", reason: "sourceChanged" });
       expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("externally changed");
@@ -4161,14 +4260,21 @@ describe("Profile V2 recovery authority", () => {
   it("establishes restart-safe empty V2 authority after explicit abandonment", () => {
     const localStorage = createLocalStorageMock();
     localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, "{");
-    localStorage.setItem(DAYFRAME_PROFILES_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", version: 1, profiles: [buildSavedProfile()],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        version: 1,
+        profiles: [buildSavedProfile()],
+      }),
+    );
     installLocalStorageMock(localStorage);
     const store = createReadyDayFrameTestStore({ savedProfiles: [buildSavedProfile()] });
 
     expect(store.abandonProtectedProfileCheckpoint()).toEqual({
-      status: "resolved", action: "abandon", persistence: { status: "persisted" },
+      status: "resolved",
+      action: "abandon",
+      persistence: { status: "persisted" },
     });
     expect(store.getState().savedProfiles).toEqual([]);
     expect(localStorage.getItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY)).toBe("1");
@@ -4176,20 +4282,27 @@ describe("Profile V2 recovery authority", () => {
   });
 
   it.each(["replace", "abandon"] as const)(
-    "retains protection when %s cannot write its verified recovery checkpoint", (action) => {
+    "retains protection when %s cannot write its verified recovery checkpoint",
+    (action) => {
       const localStorage = createLocalStorageMock();
       const raw = "{";
       localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, raw);
       installLocalStorageMock(localStorage);
       const store = createReadyDayFrameTestStore({ savedProfiles: [buildSavedProfile()] });
-      localStorage.setItem = vi.fn(() => { throw new RangeError("injected"); });
+      localStorage.setItem = vi.fn(() => {
+        throw new RangeError("injected");
+      });
 
-      const result = action === "replace"
-        ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
-        : store.abandonProtectedProfileCheckpoint();
+      const result =
+        action === "replace"
+          ? store.replaceProtectedProfileCheckpointWithCurrentProfiles()
+          : store.abandonProtectedProfileCheckpoint();
 
-      expect(result).toMatchObject({ status: "notResolved", action,
-        persistence: { status: "storageFailure" } });
+      expect(result).toMatchObject({
+        status: "notResolved",
+        action,
+        persistence: { status: "storageFailure" },
+      });
       expect(store.getProfileIngressStatus().status).toBe("recoveryRequired");
       expect(store.exportProtectedProfileSource()).toEqual({ status: "exported", raw });
       expect(store.getState().savedProfiles).toHaveLength(1);
@@ -4201,10 +4314,16 @@ describe("Profile V2 recovery authority", () => {
     const profile = buildSavedProfile();
     const invalidA = { id: "invalid_a", name: "Invalid A", data: null };
     const invalidB = { unexpected: true };
-    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
-      quarantinedProfiles: [invalidA, invalidB],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_V2_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        surface: "profiles",
+        version: 2,
+        profiles: [profile],
+        quarantinedProfiles: [invalidA, invalidB],
+      }),
+    );
     installLocalStorageMock(localStorage);
     const store = createReadyDayFrameTestStore();
     const activeBefore = currentActiveSetup(store.getState());
@@ -4212,12 +4331,19 @@ describe("Profile V2 recovery authority", () => {
 
     expect(entries).toHaveLength(2);
     expect(store.exportQuarantinedProfile(entries[0]!.quarantineId)).toEqual({
-      status: "exported", entry: expect.objectContaining({ raw: invalidA,
-        reason: "invalidProfileEntry", originalProfileId: "invalid_a" }),
+      status: "exported",
+      entry: expect.objectContaining({
+        raw: invalidA,
+        reason: "invalidProfileEntry",
+        originalProfileId: "invalid_a",
+      }),
     });
     const removed = store.removeQuarantinedProfile(entries[0]!.quarantineId);
-    expect(removed).toMatchObject({ status: "removed", persistence: { status: "persisted" },
-      remainingCount: 1 });
+    expect(removed).toMatchObject({
+      status: "removed",
+      persistence: { status: "persisted" },
+      remainingCount: 1,
+    });
     expect(store.getState().savedProfiles).toEqual([profile]);
     expect(currentActiveSetup(store.getState())).toEqual(activeBefore);
     expect(store.getQuarantinedProfiles()[0]?.raw).toEqual(invalidB);
@@ -4226,26 +4352,39 @@ describe("Profile V2 recovery authority", () => {
   it("retains quarantine-removal intent for retry after persistence failure", () => {
     const localStorage = createLocalStorageMock();
     const profile = buildSavedProfile();
-    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
-      quarantinedProfiles: [{ id: "remove_me", data: null }],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_V2_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        surface: "profiles",
+        version: 2,
+        profiles: [profile],
+        quarantinedProfiles: [{ id: "remove_me", data: null }],
+      }),
+    );
     installLocalStorageMock(localStorage);
     const store = createReadyDayFrameTestStore();
     const entry = store.getQuarantinedProfiles()[0]!;
     const originalSet = localStorage.setItem;
-    localStorage.setItem = vi.fn(() => { throw new RangeError("injected"); });
+    localStorage.setItem = vi.fn(() => {
+      throw new RangeError("injected");
+    });
 
     expect(store.removeQuarantinedProfile(entry.quarantineId)).toMatchObject({
-      status: "removed", persistence: { status: "storageFailure" }, remainingCount: 0,
+      status: "removed",
+      persistence: { status: "storageFailure" },
+      remainingCount: 0,
     });
     expect(store.getQuarantinedProfiles()).toEqual([]);
     localStorage.setItem = originalSet;
     expect(store.retryProfilePersistence()).toMatchObject({
-      status: "attempted", persistence: { status: "persisted" },
+      status: "attempted",
+      persistence: { status: "persisted" },
     });
-    expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}").quarantinedProfiles)
-      .toEqual([]);
+    expect(
+      JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}")
+        .quarantinedProfiles,
+    ).toEqual([]);
   });
 
   it("blocks ordinary save/delete and retry from overwriting protected ingress", () => {
@@ -4256,12 +4395,14 @@ describe("Profile V2 recovery authority", () => {
     const store = createReadyDayFrameTestStore({ savedProfiles: [profile] });
 
     expect(store.saveProfile({ name: "Blocked", savedAt: "2026-08-20" })).toMatchObject({
-      status: "blocked", reason: "profileRecovery",
+      status: "blocked",
+      reason: "profileRecovery",
       persistence: { status: "notAttempted" },
     });
     expect(store.deleteProfile(profile.id)).toMatchObject({ status: "blocked" });
     expect(store.retryProfilePersistence()).toEqual({
-      status: "notAttempted", reason: "recoveryProtected",
+      status: "notAttempted",
+      reason: "recoveryProtected",
     });
     expect(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe("{");
     expect(store.getState().savedProfiles).toEqual([profile]);
@@ -4274,9 +4415,17 @@ describe("Backup V2 lifetime-preserving restore", () => {
     pattern.shiftCycles[0]!.sequence = [
       { id: "sequence_day_1", dayOffset: 0, shiftDefinitionId: "shift_day" },
     ];
-    pattern.manualEvents = [{ id: "manual_event_1", title: "Appointment",
-      userDayDate: "2026-05-06", startTime: "09:30", endTime: "10:30", allDay: false,
-      ...baseTimestamps }];
+    pattern.manualEvents = [
+      {
+        id: "manual_event_1",
+        title: "Appointment",
+        userDayDate: "2026-05-06",
+        startTime: "09:30",
+        endTime: "10:30",
+        allDay: false,
+        ...baseTimestamps,
+      },
+    ];
     return pattern;
   }
 
@@ -4289,8 +4438,7 @@ describe("Backup V2 lifetime-preserving restore", () => {
     expect(validateDayFrameBackupV2(backup)).toEqual(backup);
     expect(backup).toMatchObject({ app: "DayFrame", surface: "backup", version: 2 });
     expect(collectIncarnations(sourceState)).toHaveLength(7);
-    expect(collectIncarnations(backup.data)).toEqual(
-      collectIncarnations(sourceState));
+    expect(collectIncarnations(backup.data)).toEqual(collectIncarnations(sourceState));
     expect(backup.data).not.toHaveProperty("shiftCycle");
     expect(backup.data).not.toHaveProperty("savedProfiles");
     expect(backup.data).not.toHaveProperty("preview");
@@ -4309,16 +4457,22 @@ describe("Backup V2 lifetime-preserving restore", () => {
   });
 
   it("restores V2 without using the source-incarnation allocator", () => {
-    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup(
+      "2026-08-20T12:00:00-05:00",
+    );
     const target = createReadyDayFrameTestStore(undefined, {
-      allocateSourceIncarnationId: () => { throw new RangeError("must not allocate"); },
+      allocateSourceIncarnationId: () => {
+        throw new RangeError("must not allocate");
+      },
     });
 
     expect(target.importBackup(backup).status).toBe("restored");
   });
 
   it("rejects Active/Profile/unknown envelopes without mutating active authority", () => {
-    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup(
+      "2026-08-20T12:00:00-05:00",
+    );
     const target = createReadyDayFrameTestStore(fullPattern());
     const before = target.getState();
     const candidates = [
@@ -4327,12 +4481,18 @@ describe("Backup V2 lifetime-preserving restore", () => {
       { ...backup, version: 99 },
     ];
 
-    expect(target.importBackup(candidates[0])).toEqual({ status: "rejected",
-      reason: "envelopeValidationFailure" });
-    expect(target.importBackup(candidates[1])).toEqual({ status: "rejected",
-      reason: "envelopeValidationFailure" });
-    expect(target.importBackup(candidates[2])).toEqual({ status: "rejected",
-      reason: "unsupportedVersion" });
+    expect(target.importBackup(candidates[0])).toEqual({
+      status: "rejected",
+      reason: "envelopeValidationFailure",
+    });
+    expect(target.importBackup(candidates[1])).toEqual({
+      status: "rejected",
+      reason: "envelopeValidationFailure",
+    });
+    expect(target.importBackup(candidates[2])).toEqual({
+      status: "rejected",
+      reason: "unsupportedVersion",
+    });
     expect(target.getState()).toEqual(before);
   });
 
@@ -4340,10 +4500,16 @@ describe("Backup V2 lifetime-preserving restore", () => {
     const localStorage = createLocalStorageMock();
     const profile = buildSavedProfile();
     const quarantined = { id: "invalid", data: null };
-    localStorage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, JSON.stringify({
-      app: "DayFrame", surface: "profiles", version: 2, profiles: [profile],
-      quarantinedProfiles: [quarantined],
-    }));
+    localStorage.setItem(
+      DAYFRAME_PROFILES_V2_STORAGE_KEY,
+      JSON.stringify({
+        app: "DayFrame",
+        surface: "profiles",
+        version: 2,
+        profiles: [profile],
+        quarantinedProfiles: [quarantined],
+      }),
+    );
     installLocalStorageMock(localStorage);
     const source = createReadyDayFrameTestStore(fullPattern());
     const backup = source.exportBackup("2026-08-20T12:00:00-05:00");
@@ -4362,8 +4528,10 @@ describe("Backup V2 lifetime-preserving restore", () => {
 
   it("imports Backup V1 as disjoint fresh lifetimes on every import", () => {
     let allocation = 0;
-    const store = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () =>
-      `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never });
+    const store = createReadyDayFrameTestStore(undefined, {
+      allocateSourceIncarnationId: () =>
+        `00000000-0000-4000-8000-${String(++allocation).padStart(12, "0")}` as never,
+    });
     const backup = createDayFrameBackup(fullPattern(), "2026-08-20T12:00:00-05:00");
     const first = store.importBackup(backup);
     expect(first.status).toBe("instantiatedFromLegacy");
@@ -4371,14 +4539,19 @@ describe("Backup V2 lifetime-preserving restore", () => {
     const second = store.importBackup(backup);
     expect(second.status).toBe("instantiatedFromLegacy");
     if (second.status !== "instantiatedFromLegacy") throw new RangeError("expected V1 import");
-    expect(collectIncarnations(first.state).every((id) =>
-      !collectIncarnations(second.state).includes(id))).toBe(true);
+    expect(
+      collectIncarnations(first.state).every(
+        (id) => !collectIncarnations(second.state).includes(id),
+      ),
+    ).toBe(true);
   });
 
   it("rejects Backup V1 allocation failure before mutation or persistence", () => {
-    const store = createReadyDayFrameTestStore(undefined, { allocateSourceIncarnationId: () => {
-      throw new RangeError("injected");
-    } });
+    const store = createReadyDayFrameTestStore(undefined, {
+      allocateSourceIncarnationId: () => {
+        throw new RangeError("injected");
+      },
+    });
     const before = store.getState();
     const backup = createDayFrameBackup(fullPattern(), "2026-08-20T12:00:00-05:00");
 
@@ -4387,19 +4560,30 @@ describe("Backup V2 lifetime-preserving restore", () => {
   });
 
   it.each(["missing", "malformed", "duplicate"] as const)(
-    "rejects %s Backup V2 incarnation atomically", (kind) => {
-      const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    "rejects %s Backup V2 incarnation atomically",
+    (kind) => {
+      const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup(
+        "2026-08-20T12:00:00-05:00",
+      );
       const invalid = structuredClone(backup);
-      if (kind === "missing") delete (invalid.data.shiftDefinitions[0] as Partial<
-        typeof invalid.data.shiftDefinitions[number]>).incarnationId;
-      if (kind === "malformed") invalid.data.shiftDefinitions[0]!.incarnationId = "INVALID" as never;
-      if (kind === "duplicate") invalid.data.shiftCycles[0]!.incarnationId =
-        invalid.data.shiftDefinitions[0]!.incarnationId;
+      if (kind === "missing")
+        delete (
+          invalid.data.shiftDefinitions[0] as Partial<
+            (typeof invalid.data.shiftDefinitions)[number]
+          >
+        ).incarnationId;
+      if (kind === "malformed")
+        invalid.data.shiftDefinitions[0]!.incarnationId = "INVALID" as never;
+      if (kind === "duplicate")
+        invalid.data.shiftCycles[0]!.incarnationId =
+          invalid.data.shiftDefinitions[0]!.incarnationId;
       const target = createReadyDayFrameTestStore(fullPattern());
       const before = target.getState();
 
-      expect(target.importBackup(invalid)).toEqual({ status: "rejected",
-        reason: "incarnationValidationFailure" });
+      expect(target.importBackup(invalid)).toEqual({
+        status: "rejected",
+        reason: "incarnationValidationFailure",
+      });
       expect(target.getState()).toEqual(before);
     },
   );
@@ -4407,7 +4591,9 @@ describe("Backup V2 lifetime-preserving restore", () => {
   it("keeps restored lifetime authority after Active V2 failure and retries it exactly", () => {
     const localStorage = createLocalStorageMock();
     installLocalStorageMock(localStorage);
-    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup("2026-08-20T12:00:00-05:00");
+    const backup = createReadyDayFrameTestStore(fullPattern()).exportBackup(
+      "2026-08-20T12:00:00-05:00",
+    );
     let failActive = true;
     const originalSet = localStorage.setItem;
     localStorage.setItem = (key, value) => {
@@ -4421,10 +4607,13 @@ describe("Backup V2 lifetime-preserving restore", () => {
     expect(result.persistence).toEqual({ status: "storageFailure" });
     expect(collectIncarnations(result.state)).toEqual(collectIncarnations(backup.data));
     failActive = false;
-    expect(target.retryActivePersistence()).toMatchObject({ status: "attempted",
-      persistence: { status: "persisted" } });
+    expect(target.retryActivePersistence()).toMatchObject({
+      status: "attempted",
+      persistence: { status: "persisted" },
+    });
     expect(collectIncarnations(readActiveV2Data(localStorage))).toEqual(
-      collectIncarnations(backup.data));
+      collectIncarnations(backup.data),
+    );
   });
 
   it("preserves scheduling and OccurrenceIdentity V1 semantics across a V2 roundtrip", () => {
@@ -4450,9 +4639,11 @@ describe("Backup V2 lifetime-preserving restore", () => {
 function collectIncarnations(state: DayFrameAuthoredSetup): string[] {
   return [
     ...state.shiftDefinitions.map(({ incarnationId }) => incarnationId),
-    ...state.shiftCycles.flatMap((cycle) => [cycle.incarnationId,
+    ...state.shiftCycles.flatMap((cycle) => [
+      cycle.incarnationId,
       ...cycle.segments.map(({ incarnationId }) => incarnationId),
-      ...(cycle.sequence ?? []).map(({ incarnationId }) => incarnationId)]),
+      ...(cycle.sequence ?? []).map(({ incarnationId }) => incarnationId),
+    ]),
     ...state.blockTemplates.map(({ incarnationId }) => incarnationId),
     ...state.blockRecurrences.map(({ incarnationId }) => incarnationId),
     ...state.manualEvents.map(({ incarnationId }) => incarnationId),
@@ -4499,7 +4690,8 @@ function buildSerializationFailureState(): DayFrameState {
   state.blockTemplates = [
     {
       ...blockTemplate,
-      incarnationId: "00000000-0000-4000-8000-000000000099" as DayFrameState["blockTemplates"][number]["incarnationId"],
+      incarnationId:
+        "00000000-0000-4000-8000-000000000099" as DayFrameState["blockTemplates"][number]["incarnationId"],
       externalResources: [
         {
           id: "resource_invalid",

@@ -316,6 +316,7 @@ function applyMoveBlock(
       scheduledBlocks,
       input.generatedWorkBlocks,
       input.dayBoundaryStartTime,
+      input.getUserDayWindowForUserDayDate,
     );
 
     scheduledBlocks[scheduledBlockIndex] = movedBlock;
@@ -346,6 +347,7 @@ function applyMoveBlock(
       scheduledBlocks,
       input.generatedWorkBlocks,
       input.dayBoundaryStartTime,
+      input.getUserDayWindowForUserDayDate,
     );
 
     if (scheduledBlock) {
@@ -367,6 +369,7 @@ function moveScheduledBlockWithinUserDay(
   scheduledBlocks: DraftScheduledBlock[],
   generatedWorkBlocks: GeneratedWorkBlock[],
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"],
+  getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"],
 ): DraftScheduledBlock {
   const durationMinutes = getDurationMinutes(scheduledBlock.startsAt, scheduledBlock.endsAt);
   const targetStart = findFirstAvailableGapStart({
@@ -377,6 +380,7 @@ function moveScheduledBlockWithinUserDay(
     scheduledBlocks: scheduledBlocks.filter((block) => block.id !== scheduledBlock.id),
     generatedWorkBlocks,
     dayBoundaryStartTime,
+    getUserDayWindowForUserDayDate,
     searchStartAt: addMinutes(scheduledBlock.endsAt, scheduledBlock.bufferAfterMinutes ?? 0),
   });
 
@@ -397,6 +401,7 @@ function placeCandidateInFirstAvailableGap(
   scheduledBlocks: DraftScheduledBlock[],
   generatedWorkBlocks: GeneratedWorkBlock[],
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"],
+  getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"],
 ): DraftScheduledBlock | null {
   const targetStart = findFirstAvailableGapStart({
     userDayDate: candidate.userDayDate,
@@ -406,6 +411,7 @@ function placeCandidateInFirstAvailableGap(
     scheduledBlocks,
     generatedWorkBlocks,
     dayBoundaryStartTime,
+    getUserDayWindowForUserDayDate,
   });
 
   if (!targetStart) {
@@ -448,15 +454,16 @@ type FindGapInput = {
   scheduledBlocks: DraftScheduledBlock[];
   generatedWorkBlocks: GeneratedWorkBlock[];
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"];
+  getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"];
   searchStartAt?: Date;
 };
 
 function findFirstAvailableGapStart(input: FindGapInput): Date | null {
-  const userDayStart = getUserDayStartFromLocalDateString(
-    input.userDayDate,
-    input.dayBoundaryStartTime,
-  );
-  const userDayEnd = addMinutes(userDayStart, 24 * 60);
+  const canonicalWindow = input.getUserDayWindowForUserDayDate?.(input.userDayDate);
+  const userDayStart =
+    canonicalWindow?.start ??
+    getUserDayStartFromLocalDateString(input.userDayDate, input.dayBoundaryStartTime);
+  const userDayEnd = canonicalWindow?.end ?? addMinutes(userDayStart, 24 * 60);
   const occupiedBlocks = [
     ...input.generatedWorkBlocks.filter((workBlock) => workBlock.userDayDate === input.userDayDate),
     ...input.scheduledBlocks.filter(

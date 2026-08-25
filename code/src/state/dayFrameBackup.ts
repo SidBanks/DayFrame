@@ -7,8 +7,16 @@ import {
   cloneShiftCycles,
   normalizeShiftCycles as normalizeCycleArray,
 } from "../core/cycles/shiftCycleUtils.js";
-import { DAYFRAME_BACKUP_V3_VERSION, validateDayFrameBackupV3,
-  type DayFrameBackupV3 } from "./dayFrameBackupV3.js";
+import {
+  DAYFRAME_BACKUP_V3_VERSION,
+  validateDayFrameBackupV3,
+  type DayFrameBackupV3,
+} from "./dayFrameBackupV3.js";
+import {
+  DAYFRAME_BACKUP_V4_VERSION,
+  validateDayFrameBackupV4,
+  type DayFrameBackupV4,
+} from "./dayFrameBackupV4.js";
 
 export type DayFrameBackupV1 = {
   app: "DayFrame";
@@ -27,13 +35,24 @@ export type DayFrameBackupV2 = {
   data: ActiveDayFrameAuthoredSetup;
 };
 
-export type DayFrameBackup = DayFrameBackupV1 | DayFrameBackupV2 | DayFrameBackupV3;
+export type DayFrameBackup =
+  | DayFrameBackupV1
+  | DayFrameBackupV2
+  | DayFrameBackupV3
+  | DayFrameBackupV4;
 
-export type BackupValidationFailureCategory = "parseFailure" | "unsupportedVersion" |
-  "envelopeValidationFailure" | "authoredValidationFailure" | "incarnationValidationFailure";
+export type BackupValidationFailureCategory =
+  | "parseFailure"
+  | "unsupportedVersion"
+  | "envelopeValidationFailure"
+  | "authoredValidationFailure"
+  | "incarnationValidationFailure";
 
 export class DayFrameBackupValidationError extends RangeError {
-  constructor(public readonly category: BackupValidationFailureCategory, message: string) {
+  constructor(
+    public readonly category: BackupValidationFailureCategory,
+    message: string,
+  ) {
     super(message);
     this.name = "DayFrameBackupValidationError";
   }
@@ -52,10 +71,16 @@ export function createDayFrameBackupV2(
   };
 }
 
-export function createDayFrameBackupV1(authoredSetup: DayFrameAuthoredPattern,
-  exportedAt: string): DayFrameBackupV1 {
-  return { app: "DayFrame", version: 1, exportedAt,
-    data: cloneDayFrameAuthoredSetup(authoredSetup) };
+export function createDayFrameBackupV1(
+  authoredSetup: DayFrameAuthoredPattern,
+  exportedAt: string,
+): DayFrameBackupV1 {
+  return {
+    app: "DayFrame",
+    version: 1,
+    exportedAt,
+    data: cloneDayFrameAuthoredSetup(authoredSetup),
+  };
 }
 
 /** Historical Backup V1 fixture/compatibility creator. Current production export uses V2. */
@@ -75,43 +100,58 @@ export function parseDayFrameBackupJson(json: string): DayFrameBackup {
 
 export function validateDayFrameBackup(value: unknown): DayFrameBackup {
   if (!isRecord(value)) {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup file must contain a DayFrame backup object.");
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup file must contain a DayFrame backup object.",
+    );
   }
 
   if (value.app !== "DayFrame") {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup file is not a DayFrame backup.");
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup file is not a DayFrame backup.",
+    );
   }
   if (value.version === 1) return validateDayFrameBackupV1(value);
   if (value.version === DAYFRAME_BACKUP_V2_VERSION) return validateDayFrameBackupV2(value);
   if (value.version === DAYFRAME_BACKUP_V3_VERSION) return validateDayFrameBackupV3(value);
-  throw new DayFrameBackupValidationError("unsupportedVersion",
-    "Backup file version is not supported.");
+  if (value.version === DAYFRAME_BACKUP_V4_VERSION) return validateDayFrameBackupV4(value);
+  throw new DayFrameBackupValidationError(
+    "unsupportedVersion",
+    "Backup file version is not supported.",
+  );
 }
 
 export function validateDayFrameBackupV1(value: unknown): DayFrameBackupV1 {
   if (!isRecord(value) || value.app !== "DayFrame" || value.version !== 1) {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup V1 envelope is invalid.");
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup V1 envelope is invalid.",
+    );
   }
 
   if (typeof value.exportedAt !== "string") {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup file must include an exportedAt timestamp.");
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup file must include an exportedAt timestamp.",
+    );
   }
 
   if (!isRecord(value.data)) {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup file must include authored setup data.");
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup file must include authored setup data.",
+    );
   }
 
   let authoredSetup: DayFrameAuthoredPattern;
   try {
     authoredSetup = normalizeAuthoredSetup(value.data);
   } catch {
-    throw new DayFrameBackupValidationError("authoredValidationFailure",
-      "Backup V1 authored state is invalid.");
+    throw new DayFrameBackupValidationError(
+      "authoredValidationFailure",
+      "Backup V1 authored state is invalid.",
+    );
   }
 
   return {
@@ -123,32 +163,52 @@ export function validateDayFrameBackupV1(value: unknown): DayFrameBackupV1 {
 }
 
 export function validateDayFrameBackupV2(value: unknown): DayFrameBackupV2 {
-  if (!isRecord(value) || value.app !== "DayFrame" || value.surface !== "backup" ||
-      value.version !== DAYFRAME_BACKUP_V2_VERSION || typeof value.exportedAt !== "string" ||
-      !isRecord(value.data) || "shiftCycle" in value.data || !Array.isArray(value.data.shiftCycles)) {
-    throw new DayFrameBackupValidationError("envelopeValidationFailure",
-      "Backup V2 envelope is invalid.");
+  if (
+    !isRecord(value) ||
+    value.app !== "DayFrame" ||
+    value.surface !== "backup" ||
+    value.version !== DAYFRAME_BACKUP_V2_VERSION ||
+    typeof value.exportedAt !== "string" ||
+    !isRecord(value.data) ||
+    "shiftCycle" in value.data ||
+    !Array.isArray(value.data.shiftCycles)
+  ) {
+    throw new DayFrameBackupValidationError(
+      "envelopeValidationFailure",
+      "Backup V2 envelope is invalid.",
+    );
   }
   const data = value.data as unknown as ActiveDayFrameAuthoredSetup;
   try {
     validateIncarnationGraph(data);
   } catch {
-    throw new DayFrameBackupValidationError("incarnationValidationFailure",
-      "Backup V2 source incarnation graph is invalid.");
+    throw new DayFrameBackupValidationError(
+      "incarnationValidationFailure",
+      "Backup V2 source incarnation graph is invalid.",
+    );
   }
   let validation: ReturnType<typeof validateDayFrameAuthoredSetup>;
   try {
     validation = validateDayFrameAuthoredSetup(data);
   } catch {
-    throw new DayFrameBackupValidationError("authoredValidationFailure",
-      "Backup V2 authored state is invalid.");
+    throw new DayFrameBackupValidationError(
+      "authoredValidationFailure",
+      "Backup V2 authored state is invalid.",
+    );
   }
   if (validation.status === "invalid") {
-    throw new DayFrameBackupValidationError("authoredValidationFailure",
-      "Backup V2 authored state is invalid.");
+    throw new DayFrameBackupValidationError(
+      "authoredValidationFailure",
+      "Backup V2 authored state is invalid.",
+    );
   }
-  return { app: "DayFrame", surface: "backup", version: DAYFRAME_BACKUP_V2_VERSION,
-    exportedAt: value.exportedAt, data: cloneActiveSetup(data) };
+  return {
+    app: "DayFrame",
+    surface: "backup",
+    version: DAYFRAME_BACKUP_V2_VERSION,
+    exportedAt: value.exportedAt,
+    data: cloneActiveSetup(data),
+  };
 }
 
 export function cloneDayFrameAuthoredSetup(

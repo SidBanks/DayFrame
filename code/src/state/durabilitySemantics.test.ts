@@ -162,19 +162,34 @@ describe("durability semantics", () => {
       planDecisions: { status: "removed" },
       executionHistory: { status: "removed" },
       historicalPlan: { status: "removed" },
+      goals: { status: "removed" },
+      measurementDefinitions: { status: "removed" },
+      progressObservations: { status: "removed" },
       ...input,
     } as Omit<ClearLocalDataResult, "status" | "authorities" | "previewCleared">;
-    const result: ClearLocalDataResult = { ...legacyFields,
+    const result: ClearLocalDataResult = {
+      ...legacyFields,
       status: legacyFields.durability === "notCleared" ? "failed" : legacyFields.durability,
-      authorities: { active: legacyFields.activeState, profiles: legacyFields.profiles,
-        planDecisions: legacyFields.planDecisions, executionHistory: legacyFields.executionHistory,
-        historicalPlan: legacyFields.historicalPlan }, previewCleared: true };
+      authorities: {
+        active: legacyFields.activeState,
+        profiles: legacyFields.profiles,
+        planDecisions: legacyFields.planDecisions,
+        executionHistory: legacyFields.executionHistory,
+        historicalPlan: legacyFields.historicalPlan,
+        goals: legacyFields.goals,
+        measurementDefinitions: legacyFields.measurementDefinitions,
+        progressObservations: legacyFields.progressObservations,
+      },
+      previewCleared: true,
+    };
 
     expect(classifyClearLocalDataResult(result)).toEqual({
       ...expected,
       planDecisions: "durableSuccess",
       executionHistory: "durableSuccess",
       historicalPlan: "durableSuccess",
+      goals: "durableSuccess",
+      measurementDefinitions: "durableSuccess",
     });
   });
 

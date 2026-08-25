@@ -5,11 +5,11 @@ import type { GeneratedWorkBlock } from "../core/shifts/types.js";
 import { parseTimeString } from "../core/time/userDay.js";
 import { formatHumanTime, formatHumanTimeRange } from "./timeDisplay.js";
 
-const MINUTES_PER_DAY = 24 * 60;
-
 export type DayVisualizerProps = {
   selectedUserDayDate: string;
   dayBoundaryStartTime: `${number}:${number}`;
+  userDayStart?: Date;
+  userDayEnd?: Date;
   workBlocks: GeneratedWorkBlock[];
   scheduledBlocks: DraftScheduledBlock[];
 };
@@ -31,18 +31,37 @@ type VisualizerBlock = {
 export function DayVisualizer({
   selectedUserDayDate,
   dayBoundaryStartTime,
+  userDayStart,
+  userDayEnd,
   workBlocks,
   scheduledBlocks,
 }: DayVisualizerProps): ReactElement {
-  const dayStart = getUserDayStartFromDateString(selectedUserDayDate, dayBoundaryStartTime);
-  const blocks = buildVisualizerBlocks(dayStart, workBlocks, scheduledBlocks);
+  const dayStart =
+    userDayStart ?? getUserDayStartFromDateString(selectedUserDayDate, dayBoundaryStartTime);
+  const dayEnd =
+    userDayEnd ??
+    new Date(
+      dayStart.getFullYear(),
+      dayStart.getMonth(),
+      dayStart.getDate() + 1,
+      dayStart.getHours(),
+      dayStart.getMinutes(),
+      0,
+      0,
+    );
+  const durationMinutes = differenceInMinutes(dayStart, dayEnd);
+  if (durationMinutes <= 0)
+    throw new RangeError("DayVisualizer requires an increasing user-day window");
+  const blocks = buildVisualizerBlocks(dayStart, dayEnd, workBlocks, scheduledBlocks);
 
   return (
     <section aria-label={`Day visualizer for ${selectedUserDayDate}`} className="df-day-visualizer">
       <header className="df-day-visualizer-header">
         <div>
           <h3 className="df-group-title">Day Visualizer</h3>
-          <p className="df-meta">A read-only view of work and scheduled blocks across 24 hours.</p>
+          <p className="df-meta">
+            A read-only view across this {formatDuration(durationMinutes)} user-day.
+          </p>
         </div>
       </header>
 
@@ -52,21 +71,30 @@ export function DayVisualizer({
         </div>
       ) : (
         <div className="df-day-visualizer-grid">
-          <div aria-hidden="true" className="df-day-visualizer-hours">
-            {buildHourLabels(dayStart).map((hourLabel) => (
-              <div className="df-day-visualizer-hour" key={hourLabel}>
-                {hourLabel}
+          <div
+            aria-hidden="true"
+            className="df-day-visualizer-hours"
+            style={{
+              gridTemplateRows: `repeat(${Math.ceil(durationMinutes / 60)}, minmax(28px, 1fr))`,
+            }}
+          >
+            {buildHourLabels(dayStart, dayEnd).map((hourLabel) => (
+              <div className="df-day-visualizer-hour" key={hourLabel.key}>
+                {hourLabel.label}
               </div>
             ))}
           </div>
 
-          <div className="df-day-visualizer-track">
-            {buildHourLines().map((hour) => (
+          <div
+            className="df-day-visualizer-track"
+            style={{ minHeight: `${durationMinutes / 2}px` }}
+          >
+            {buildHourLines(durationMinutes).map((minuteOffset) => (
               <div
                 aria-hidden="true"
                 className="df-day-visualizer-hour-line"
-                key={hour}
-                style={{ top: `${(hour / 24) * 100}%` }}
+                key={minuteOffset}
+                style={{ top: `${(minuteOffset / durationMinutes) * 100}%` }}
               />
             ))}
 
@@ -90,7 +118,7 @@ export function DayVisualizer({
                   .filter(Boolean)
                   .join(" ")}
                 key={block.id}
-                style={buildBlockStyle(block)}
+                style={buildBlockStyle(block, durationMinutes)}
                 title={`${block.title}: ${formatHumanTimeRange(block.startsAt, block.endsAt)}`}
               >
                 <strong>{block.title}</strong>
@@ -106,12 +134,10 @@ export function DayVisualizer({
 
 function buildVisualizerBlocks(
   dayStart: Date,
+  dayEnd: Date,
   workBlocks: GeneratedWorkBlock[],
   scheduledBlocks: DraftScheduledBlock[],
 ): VisualizerBlock[] {
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
-
   const baseWorkBlocks = workBlocks
     .map((block) =>
       createBaseBlock(
@@ -278,15 +304,15 @@ function assignOverlapLanes(
   return visualizerBlocks;
 }
 
-function buildBlockStyle(block: VisualizerBlock): CSSProperties {
+function buildBlockStyle(block: VisualizerBlock, durationMinutes: number): CSSProperties {
   const inset = 6;
   const availableWidth = block.kind === "work" ? 100 : block.overlapsWork ? 76 : 100;
   const baseLeft = block.kind === "work" ? 0 : block.overlapsWork ? 24 : 0;
   const laneWidth = availableWidth / block.laneCount;
 
   return {
-    top: `${(block.startMinutes / MINUTES_PER_DAY) * 100}%`,
-    height: `${((block.endMinutes - block.startMinutes) / MINUTES_PER_DAY) * 100}%`,
+    top: `${(block.startMinutes / durationMinutes) * 100}%`,
+    height: `${((block.endMinutes - block.startMinutes) / durationMinutes) * 100}%`,
     left: `calc(${baseLeft + laneWidth * block.lane}% + ${inset}px)`,
     width: `calc(${laneWidth}% - ${inset * 2}px)`,
   };
@@ -299,18 +325,26 @@ function blocksOverlap(
   return left.startMinutes < right.endMinutes && left.endMinutes > right.startMinutes;
 }
 
-function buildHourLabels(dayStart: Date): string[] {
-  return Array.from({ length: 24 }, (_, hourOffset) => {
-    const hour = new Date(dayStart);
-
-    hour.setHours(hour.getHours() + hourOffset);
-
-    return formatHumanTime(hour);
+function buildHourLabels(dayStart: Date, dayEnd: Date): Array<{ key: number; label: string }> {
+  const count = Math.ceil((dayEnd.getTime() - dayStart.getTime()) / 3_600_000);
+  return Array.from({ length: count }, (_, hourOffset) => {
+    const hour = new Date(dayStart.getTime() + hourOffset * 3_600_000);
+    return { key: hour.getTime(), label: formatHumanTime(hour) };
   });
 }
 
-function buildHourLines(): number[] {
-  return Array.from({ length: 25 }, (_, hour) => hour);
+function buildHourLines(durationMinutes: number): number[] {
+  const lines = Array.from(
+    { length: Math.floor(durationMinutes / 60) + 1 },
+    (_, hour) => hour * 60,
+  );
+  if (lines.at(-1) !== durationMinutes) lines.push(durationMinutes);
+  return lines;
+}
+
+function formatDuration(durationMinutes: number): string {
+  const hours = durationMinutes / 60;
+  return Number.isInteger(hours) ? `${hours}-hour` : `${durationMinutes}-minute`;
 }
 
 function differenceInMinutes(start: Date, end: Date): number {

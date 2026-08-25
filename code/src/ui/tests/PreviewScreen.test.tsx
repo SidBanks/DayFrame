@@ -23,11 +23,11 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "DayFrame Preview" })).toBeInTheDocument();
-    expect(screen.getByText("No preview generated yet.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule details" })).toBeInTheDocument();
+    expect(screen.getByText("No schedule generated yet.")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Generate a preview to see work blocks, placed life blocks, and any friction that still needs review.",
+        "Generate a schedule to review work, placed commitments, and anything that still needs attention.",
       ),
     ).toBeInTheDocument();
   });
@@ -49,14 +49,14 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("Today at 1:00 PM")).toBeInTheDocument();
     expect(screen.getByText("Revised")).toBeInTheDocument();
     expect(screen.getByText("Today at 2:00 PM")).toBeInTheDocument();
-    expect(screen.getByText("Friction Counts")).toBeInTheDocument();
+    expect(screen.getAllByText("Needs attention")[0]!).toBeInTheDocument();
     expect(screen.getByText("1 total, 0 critical, 1 warning, 0 info")).toBeInTheDocument();
     expect(screen.getByText("Work-dependent activities skipped: 0")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Work" })).toHaveLength(2);
     expect(screen.getAllByRole("heading", { name: "Scheduled" })).toHaveLength(2);
-    expect(screen.getAllByRole("heading", { name: "Unplaced" })).toHaveLength(2);
-    expect(screen.getAllByRole("heading", { name: "Friction" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Plan attention — Unplaced" })).toHaveLength(2);
+    expect(screen.getAllByRole("heading", { name: "Needs attention" })).toHaveLength(2);
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(2);
     expect(screen.getByLabelText("Day visualizer for 2026-05-05")).toBeInTheDocument();
     expect(screen.getByText("Day Shift 5:45 AM - 2:15 PM")).toBeInTheDocument();
@@ -163,26 +163,50 @@ describe("PreviewScreen", () => {
   it("exposes a native Accept control only for a pending supported Try", () => {
     const onAcceptPlanDecision = vi.fn();
     const { rerender } = render(
-      <PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
-        onAcceptPlanDecision={onAcceptPlanDecision} onApplySuggestedFix={vi.fn()}
-        pendingPlanDecisionAcceptance preview={buildPreview()} />,
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onAcceptPlanDecision={onAcceptPlanDecision}
+        onApplySuggestedFix={vi.fn()}
+        pendingPlanDecisionAcceptance
+        preview={buildPreview()}
+      />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Accept this choice" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply Planning Change" }));
     expect(onAcceptPlanDecision).toHaveBeenCalledTimes(1);
-    const stale = buildPreview(); stale.isStale = true;
-    rerender(<PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
-      onAcceptPlanDecision={onAcceptPlanDecision} onApplySuggestedFix={vi.fn()}
-      pendingPlanDecisionAcceptance preview={stale} />);
-    expect(screen.queryByRole("button", { name: "Accept this choice" })).not.toBeInTheDocument();
+    const stale = buildPreview();
+    stale.isStale = true;
+    rerender(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onAcceptPlanDecision={onAcceptPlanDecision}
+        onApplySuggestedFix={vi.fn()}
+        pendingPlanDecisionAcceptance
+        preview={stale}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Apply Planning Change" })).not.toBeInTheDocument();
   });
 
   it("keeps accepted choices visible without a Preview and exposes contextual removal", () => {
     const onRemoveAcceptedDecision = vi.fn();
-    render(<PreviewScreen acceptedDecisions={[{ decisionId: "00000000-0000-4000-8000-000000000001" as never,
-      summary: "Omit Workout", targetSummary: "Workout", occurrenceContext: "Occurrence on 2026-05-05",
-      status: "notEvaluated", statusLabel: "Generate a preview to evaluate this choice" }]}
-      getDayBoundaryStartTimeForUserDayDate={() => "03:00"} onApplySuggestedFix={vi.fn()}
-      onRemoveAcceptedDecision={onRemoveAcceptedDecision} preview={null} />);
+    render(
+      <PreviewScreen
+        acceptedDecisions={[
+          {
+            decisionId: "00000000-0000-4000-8000-000000000001" as never,
+            summary: "Omit Workout",
+            targetSummary: "Workout",
+            occurrenceContext: "Occurrence on 2026-05-05",
+            status: "notEvaluated",
+            statusLabel: "Generate a preview to evaluate this choice",
+          },
+        ]}
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onApplySuggestedFix={vi.fn()}
+        onRemoveAcceptedDecision={onRemoveAcceptedDecision}
+        preview={null}
+      />,
+    );
     expect(screen.getByRole("heading", { name: "Accepted choices (1)" })).toBeInTheDocument();
     expect(screen.getByText("Omit Workout")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Remove accepted choice for Workout" }));
@@ -190,12 +214,27 @@ describe("PreviewScreen", () => {
   });
 
   it("disables accepted-choice removal while decision ingress is protected", () => {
-    render(<PreviewScreen acceptedDecisions={[{ decisionId: "00000000-0000-4000-8000-000000000001" as never,
-      summary: "Omit Workout", targetSummary: "Workout", occurrenceContext: "Occurrence on 2026-05-05",
-      status: "notEvaluated", statusLabel: "Generate a preview to evaluate this choice" }]}
-      decisionRemovalProtected getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
-      onApplySuggestedFix={vi.fn()} preview={null} />);
-    expect(screen.getByRole("button", { name: "Remove accepted choice for Workout" })).toBeDisabled();
+    render(
+      <PreviewScreen
+        acceptedDecisions={[
+          {
+            decisionId: "00000000-0000-4000-8000-000000000001" as never,
+            summary: "Omit Workout",
+            targetSummary: "Workout",
+            occurrenceContext: "Occurrence on 2026-05-05",
+            status: "notEvaluated",
+            statusLabel: "Generate a preview to evaluate this choice",
+          },
+        ]}
+        decisionRemovalProtected
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onApplySuggestedFix={vi.fn()}
+        preview={null}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Remove accepted choice for Workout" }),
+    ).toBeDisabled();
     expect(screen.getByText(/protected by recovery-required stored data/)).toBeInTheDocument();
   });
 
@@ -207,9 +246,16 @@ describe("PreviewScreen", () => {
       replayStatus: "applied",
       explanationCode: "sameTarget",
     };
-    render(<PreviewScreen getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
-      onApplySuggestedFix={vi.fn()} preview={preview} />);
-    expect(screen.getByRole("button", { name: "Revise accepted choice: Move block" })).toBeInTheDocument();
+    render(
+      <PreviewScreen
+        getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+        onApplySuggestedFix={vi.fn()}
+        preview={preview}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Revise accepted choice: Move block" }),
+    ).toBeInTheDocument();
   });
 
   it("keeps stale preview guidance visible and disables its suggested fixes", () => {
@@ -228,7 +274,7 @@ describe("PreviewScreen", () => {
 
     expect(
       screen.getByText(
-        "Setup changed. Generate a new preview to see updates and apply current suggestions.",
+        "Your planning setup changed after this schedule was generated. Refresh the schedule to see those changes.",
       ),
     ).toBeInTheDocument();
 
@@ -298,7 +344,7 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    expect(screen.getByText("Preview range warnings:")).toBeInTheDocument();
+    expect(screen.getByText("Planning range warnings:")).toBeInTheDocument();
     expect(
       screen.getByText("No cycle segment is active during part of this preview range."),
     ).toBeInTheDocument();
@@ -452,7 +498,7 @@ describe("PreviewScreen", () => {
 
     expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
-    expect(screen.getAllByText("No friction detected.")).toHaveLength(2);
+    expect(screen.getAllByText("No schedule conflicts detected.")).toHaveLength(2);
   });
 
   it("shows cross-boundary conflict friction on a visible day without adding an out-of-range day card", () => {
@@ -576,7 +622,7 @@ describe("PreviewScreen", () => {
     expect(screen.getByText("0 total, 0 critical, 0 warning, 0 info")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Wednesday, 2026-05-06" })).toBeInTheDocument();
     expect(screen.queryByText("Workout conflicts with Work")).not.toBeInTheDocument();
-    expect(screen.getByText("No friction detected.")).toBeInTheDocument();
+    expect(screen.getByText("No schedule conflicts detected.")).toBeInTheDocument();
   });
 
   it("groups repeated equivalent friction patterns while keeping individual fixes available", () => {
@@ -621,11 +667,13 @@ describe("PreviewScreen", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Repeated Friction Patterns" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Repeated schedule conflicts" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Appears on 2 days")).toBeInTheDocument();
 
     const groupedSection = screen.getByRole("heading", {
-      name: "Repeated Friction Patterns",
+      name: "Repeated schedule conflicts",
     }).parentElement;
 
     expect(groupedSection).not.toBeNull();

@@ -93,16 +93,27 @@ describe("dayFrameProfiles", () => {
 
   it("rejects singular-cycle and incarnation-bearing Profile V2 records", () => {
     const base = createDayFrameProfilesStorageV2([
-      createDayFrameSavedProfile({ id: "profile_v2", name: "Reusable Week",
-        savedAt: "2026-05-05T09:00:00-05:00", data: buildAuthoredSetup() }),
+      createDayFrameSavedProfile({
+        id: "profile_v2",
+        name: "Reusable Week",
+        savedAt: "2026-05-05T09:00:00-05:00",
+        data: buildAuthoredSetup(),
+      }),
     ]);
-    const singular = structuredClone(base) as unknown as { profiles: Array<{ data: Record<string, unknown> }> };
+    const singular = structuredClone(base) as unknown as {
+      profiles: Array<{ data: Record<string, unknown> }>;
+    };
     delete singular.profiles[0]!.data.shiftCycles;
     singular.profiles[0]!.data.shiftCycle = {};
     expect(() => validateDayFrameProfilesStorageV2(singular)).toThrow(RangeError);
 
-    const incarnated = structuredClone(base) as unknown as { profiles: Array<{ data: {
-      shiftDefinitions: unknown[] } }> };
+    const incarnated = structuredClone(base) as unknown as {
+      profiles: Array<{
+        data: {
+          shiftDefinitions: unknown[];
+        };
+      }>;
+    };
     incarnated.profiles[0]!.data.shiftDefinitions = [{ incarnationId: "runtime-only" }];
     expect(() => validateDayFrameProfilesStorageV2(incarnated)).toThrow(RangeError);
   });
@@ -112,8 +123,10 @@ describe("dayFrameProfiles", () => {
     const converted = convertDayFrameProfilesStorageV1({
       app: "DayFrame",
       version: 1,
-      profiles: [{ id: "profile_1", name: "Week A", savedAt: "2026-05-05", data: buildAuthoredSetup() },
-        invalidEntry],
+      profiles: [
+        { id: "profile_1", name: "Week A", savedAt: "2026-05-05", data: buildAuthoredSetup() },
+        invalidEntry,
+      ],
     });
 
     expect(converted.profiles.map(({ id }) => id)).toEqual(["profile_1"]);

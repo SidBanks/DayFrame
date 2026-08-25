@@ -81,7 +81,10 @@ export function validateDayFrameAuthoredSetup(
     : { status: "invalid", issues, advisories };
 }
 
-function validateTopLevelIds(setup: DayFrameAuthoredPattern, issues: AuthoredSnapshotIssue[]): void {
+function validateTopLevelIds(
+  setup: DayFrameAuthoredPattern,
+  issues: AuthoredSnapshotIssue[],
+): void {
   validateUniqueIds(setup.shiftDefinitions, "shiftDefinitions", "shiftDefinition", issues);
   validateUniqueIds(setup.shiftCycles, "shiftCycles", "shiftCycle", issues);
   validateUniqueIds(setup.blockTemplates, "blockTemplates", "blockTemplate", issues);
@@ -136,7 +139,10 @@ function validateSchedulingPreferences(
   }
 }
 
-function validatePreviewRange(setup: DayFrameAuthoredPattern, issues: AuthoredSnapshotIssue[]): void {
+function validatePreviewRange(
+  setup: DayFrameAuthoredPattern,
+  issues: AuthoredSnapshotIssue[],
+): void {
   const range = setup.previewRange;
   const validPresets = ["threeDays", "oneWeek", "twoWeeks", "oneMonth", "custom"];
   const validSources = ["preset", "custom", "cycle"];
@@ -183,7 +189,10 @@ function validateShiftDefinitions(
   });
 }
 
-function validateShiftCycles(setup: DayFrameAuthoredPattern, issues: AuthoredSnapshotIssue[]): void {
+function validateShiftCycles(
+  setup: DayFrameAuthoredPattern,
+  issues: AuthoredSnapshotIssue[],
+): void {
   const definitionIds = new Set(setup.shiftDefinitions.map((definition) => definition.id));
 
   setup.shiftCycles.forEach((cycle, cycleIndex) => {
@@ -490,7 +499,10 @@ function hasValidRecurrenceParameters(recurrence: BlockRecurrence): boolean {
   return true;
 }
 
-function validateManualEvents(setup: DayFrameAuthoredPattern, issues: AuthoredSnapshotIssue[]): void {
+function validateManualEvents(
+  setup: DayFrameAuthoredPattern,
+  issues: AuthoredSnapshotIssue[],
+): void {
   setup.manualEvents.forEach((event, index) => {
     const timesValid = event.allDay
       ? event.startTime === undefined && event.endTime === undefined

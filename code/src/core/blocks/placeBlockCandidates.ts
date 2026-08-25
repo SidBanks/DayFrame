@@ -16,7 +16,8 @@ export function placeBlockCandidates(input: PlaceBlockCandidatesInput): PlaceBlo
   const deferredSleepCandidates: BlockCandidate[] = [];
   const unplacedCandidates: BlockCandidate[] = [];
   const sortedBlockCandidates = [...input.blockCandidates].sort((left, right) => {
-    const hardDifference = Number(input.hardPlacementCandidateIds?.has(right.id) ?? false) -
+    const hardDifference =
+      Number(input.hardPlacementCandidateIds?.has(right.id) ?? false) -
       Number(input.hardPlacementCandidateIds?.has(left.id) ?? false);
     return hardDifference || compareBlockCandidates(left, right);
   });
@@ -72,16 +73,25 @@ function placeBlockCandidate(
   scheduledBlocks: DraftScheduledBlock[],
   input: PlaceBlockCandidatesInput,
 ): DraftScheduledBlock | null {
+  const canonicalWindow = input.getUserDayWindowForUserDayDate?.(blockCandidate.userDayDate);
   const dayBoundaryStartTime =
+    canonicalWindow?.dayBoundaryStartTime ??
     input.getDayBoundaryStartTimeForUserDayDate?.(blockCandidate.userDayDate) ??
     input.dayBoundaryStartTime;
-  const userDayStart = getUserDayStartFromDateString(
-    blockCandidate.userDayDate,
-    dayBoundaryStartTime,
-  );
-  const userDayEnd = new Date(userDayStart.getTime());
-
-  userDayEnd.setDate(userDayEnd.getDate() + 1);
+  const userDayStart =
+    canonicalWindow?.start ??
+    getUserDayStartFromDateString(blockCandidate.userDayDate, dayBoundaryStartTime);
+  const userDayEnd =
+    canonicalWindow?.end ??
+    new Date(
+      userDayStart.getFullYear(),
+      userDayStart.getMonth(),
+      userDayStart.getDate() + 1,
+      userDayStart.getHours(),
+      userDayStart.getMinutes(),
+      0,
+      0,
+    );
   const placementBounds = getPlacementBoundsForUserDay(
     blockCandidate.userDayDate,
     input,
@@ -105,8 +115,14 @@ function placeBlockCandidate(
         ...getPlacementOccupiedBlocks(scheduledBlocks, input.generatedWorkBlocks, input),
         ...(input.additionalOccupiedBlocks ?? []),
       ];
-      if (occupied.some((block) => startsAt.getTime() < block.endsAt.getTime() &&
-          endsAt.getTime() > block.startsAt.getTime())) return null;
+      if (
+        occupied.some(
+          (block) =>
+            startsAt.getTime() < block.endsAt.getTime() &&
+            endsAt.getTime() > block.startsAt.getTime(),
+        )
+      )
+        return null;
     }
 
     return buildScheduledBlock(blockCandidate, startsAt, endsAt);
@@ -176,6 +192,9 @@ function buildScheduledBlock(
     ...(blockCandidate.occurrenceIdentity
       ? { occurrenceIdentity: cloneOccurrenceIdentity(blockCandidate.occurrenceIdentity) }
       : {}),
+    ...(blockCandidate.commitmentNavigationIdentity
+      ? { commitmentNavigationIdentity: { ...blockCandidate.commitmentNavigationIdentity } }
+      : {}),
     userId: blockCandidate.userId,
     templateId: blockCandidate.templateId,
     source: "template",
@@ -208,13 +227,14 @@ function placePropagatedSleepBlock(
   scheduledBlocks: DraftScheduledBlock[],
   input: PlaceBlockCandidatesInput,
 ): DraftScheduledBlock | null {
+  const targetWindow = input.getUserDayWindowForUserDayDate?.(blockCandidate.userDayDate);
   const targetDayBoundaryStartTime =
+    targetWindow?.dayBoundaryStartTime ??
     input.getDayBoundaryStartTimeForUserDayDate?.(blockCandidate.userDayDate) ??
     input.dayBoundaryStartTime;
-  const targetUserDayStart = getUserDayStartFromDateString(
-    blockCandidate.userDayDate,
-    targetDayBoundaryStartTime,
-  );
+  const targetUserDayStart =
+    targetWindow?.start ??
+    getUserDayStartFromDateString(blockCandidate.userDayDate, targetDayBoundaryStartTime);
   const anchorDayBoundaryStartTime =
     input.getDayBoundaryStartTimeForUserDayDate?.(anchor.userDayDate) ?? input.dayBoundaryStartTime;
   const anchorUserDayStart = getUserDayStartFromDateString(
@@ -466,7 +486,10 @@ function getPlacementSearchWindow(
           windowEnd: placementBounds.end,
           preferredStart: addMinutes(
             placementBounds.start,
-            Math.max(getBufferBeforeMinutes(blockCandidate), Math.floor((24 * 60 * 2) / 3)),
+            Math.max(
+              getBufferBeforeMinutes(blockCandidate),
+              Math.floor((differenceInMinutes(placementBounds.start, placementBounds.end) * 2) / 3),
+            ),
           ),
         };
       }
@@ -697,9 +720,17 @@ function getPlacementBoundsForUserDay(
   input: PlaceBlockCandidatesInput,
   userDayStart: Date,
 ): { start: Date; end: Date } {
-  void userDayDate;
-  void input;
-  const userDayEnd = addMinutes(userDayStart, 24 * 60);
+  const userDayEnd =
+    input.getUserDayWindowForUserDayDate?.(userDayDate).end ??
+    new Date(
+      userDayStart.getFullYear(),
+      userDayStart.getMonth(),
+      userDayStart.getDate() + 1,
+      userDayStart.getHours(),
+      userDayStart.getMinutes(),
+      0,
+      0,
+    );
 
   return {
     start: userDayStart,

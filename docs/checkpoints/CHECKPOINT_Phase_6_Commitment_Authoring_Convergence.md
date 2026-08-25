@@ -1,0 +1,3 @@
+# Phase 6 Commitment Authoring Convergence Checkpoint
+
+Task 6.7 is implemented. Planner derives Commitments from exact block-template/recurrence identity, uses bounded local Add/Edit/Remove buffers, and commits only to the one canonical Setup draft. Save Setup, schedule staleness, Goal-link ownership, profiles, restore, full clear, HistoricalPlan, Today, and Summary semantics are unchanged. Work remains source-specific advanced configuration; manual events retain their single calendar-day path; no Pattern authority exists. Plan authoring is production-lazy, restoring sustainable eager bundle headroom. Task 6.8 is next.

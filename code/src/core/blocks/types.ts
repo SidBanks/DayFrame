@@ -102,9 +102,17 @@ export type BlockRecurrence = {
   endsOnDate?: LocalDateString;
 };
 
+export type CommitmentNavigationIdentity = {
+  templateId: string;
+  templateIncarnationId: string;
+  recurrenceId: string;
+  recurrenceIncarnationId: string;
+};
+
 export type BlockCandidate = {
   id: string;
   occurrenceIdentity?: OccurrenceIdentity;
+  commitmentNavigationIdentity?: CommitmentNavigationIdentity;
   userId: string;
   templateId: string;
   recurrenceId: string;
@@ -152,6 +160,7 @@ export type ScheduledBlockStatus =
 export type DraftScheduledBlock = {
   id: string;
   occurrenceIdentity?: OccurrenceIdentity;
+  commitmentNavigationIdentity?: CommitmentNavigationIdentity;
   userId: string;
   templateId?: string;
   source: ScheduledBlockSource;
@@ -179,6 +188,11 @@ export type PlaceBlockCandidatesInput = {
   planningWindowEnd: Date;
   dayBoundaryStartTime: TimeString;
   getDayBoundaryStartTimeForUserDayDate?: (userDayDate: LocalDateString) => TimeString;
+  getUserDayWindowForUserDayDate?: (userDayDate: LocalDateString) => {
+    start: Date;
+    end: Date;
+    dayBoundaryStartTime: TimeString;
+  };
   visiblePlanningWindowStart?: Date;
   visiblePlanningWindowEnd?: Date;
   hardPlacementCandidateIds?: ReadonlySet<string>;

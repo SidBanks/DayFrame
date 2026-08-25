@@ -6,24 +6,46 @@ import type { LocalDateString, ShiftDefinition } from "../core/shifts/types.js";
 import type { TimeString, Weekday } from "../core/time/types.js";
 import type { BackupValidationFailureCategory, DayFrameBackup } from "./dayFrameBackup.js";
 import type { DayFrameBackupV3 } from "./dayFrameBackupV3.js";
+import type { DayFrameBackupV4 } from "./dayFrameBackupV4.js";
+import type { DayFrameBackupV5 } from "./dayFrameBackupV5.js";
+import type { DayFrameBackupV6 } from "./dayFrameBackupV6.js";
+import type { GoalSurface } from "./goalSurface.js";
+import type { MeasurementDefinitionSurface } from "./measurementDefinitionSurface.js";
+import type { ProgressObservationSurface } from "./progressObservationSurface.js";
+import type { GoalProgressQueryV1 } from "../core/progress/manualQuantityProgress.js";
+import type { GoalProgressQueryResultV1 } from "./goalProgressQuery.js";
 import type { SuggestedFixFeedback } from "../core/friction/types.js";
 import type { AuthoredSnapshotValidationResult } from "../core/authored/validateDayFrameAuthoredSetup.js";
 import type { IncarnatedSource, SourceIncarnationId } from "../core/authored/sourceIncarnation.js";
-import type { AcceptPlanDecisionInput, PlanDecisionId, PlanDecisionIdAllocator,
-  PlanDecisionV1 } from "../core/decisions/planDecision.js";
-import type { AcceptPlanDecisionResult, PlanDecisionIngressStatus, PlanDecisionRecoveryResult,
-  PlanDecisionRetryResult, QuarantinedPlanDecision, RemovePlanDecisionResult } from "./planDecisionSurface.js";
+import type {
+  AcceptPlanDecisionInput,
+  PlanDecisionId,
+  PlanDecisionIdAllocator,
+  PlanDecisionV1,
+} from "../core/decisions/planDecision.js";
+import type {
+  AcceptPlanDecisionResult,
+  PlanDecisionIngressStatus,
+  PlanDecisionRecoveryResult,
+  PlanDecisionRetryResult,
+  QuarantinedPlanDecision,
+  RemovePlanDecisionResult,
+} from "./planDecisionSurface.js";
 import type { ExecutionHistorySurface } from "./executionHistorySurface.js";
-import type { HistoricalPlanSurface, HistoricalPlanPublicationResult } from "./historicalPlanSurface.js";
+import type {
+  HistoricalPlanSurface,
+  HistoricalPlanPublicationResult,
+} from "./historicalPlanSurface.js";
 import type { MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
 import type { DayFrameReadinessApi } from "./dayFrameReadiness.js";
-import type { HistoricalCompletionDistributionQueryV1 } from
-  "../core/historicalIntelligence/completionDistribution.js";
-import type { HistoricalSchedulingRealizationQueryV1 } from
-  "../core/historicalIntelligence/schedulingRealization.js";
-import type { HistoricalCompletionDistributionQueryResultV1,
-  HistoricalSchedulingRealizationQueryResultV1 } from
-  "./historicalIntelligenceQuery.js";
+import type { HistoricalCompletionDistributionQueryV1 } from "../core/historicalIntelligence/completionDistribution.js";
+import type { HistoricalSchedulingRealizationQueryV1 } from "../core/historicalIntelligence/schedulingRealization.js";
+import type {
+  HistoricalCompletionDistributionQueryResultV1,
+  GoalActivityQueryResultV1,
+  HistoricalSchedulingRealizationQueryResultV1,
+} from "./historicalIntelligenceQuery.js";
+import type { GoalActivityQueryV1 } from "../core/historicalIntelligence/goalActivity.js";
 
 export type DayFrameSchedulingPreferences = {
   dayBoundaryStartTime: TimeString;
@@ -68,7 +90,8 @@ export type DayFrameSavedProfile = {
 type RuntimeIncarnation = IncarnatedSource;
 export type ActiveShiftDefinition = ShiftDefinition & RuntimeIncarnation;
 export type ActiveShiftSegment = ShiftCycle["segments"][number] & RuntimeIncarnation;
-export type ActiveShiftSequenceEntry = NonNullable<ShiftCycle["sequence"]>[number] & RuntimeIncarnation;
+export type ActiveShiftSequenceEntry = NonNullable<ShiftCycle["sequence"]>[number] &
+  RuntimeIncarnation;
 export type ActiveShiftCycle = Omit<ShiftCycle, "segments" | "sequence"> &
   RuntimeIncarnation & {
     segments: ActiveShiftSegment[];
@@ -237,21 +260,57 @@ export type BackupImportResult =
       status: "instantiatedFromLegacy" | "restored";
       advisories: AuthoredSnapshotValidationResult["advisories"];
     })
-  | { status: "rejected"; reason: BackupValidationFailureCategory | "allocationFailure" |
-      "activeLocalRecovery" };
+  | {
+      status: "rejected";
+      reason: BackupValidationFailureCategory | "allocationFailure" | "activeLocalRecovery";
+    };
 
 export type BackupV3ExportResult =
   | { status: "exported"; backup: DayFrameBackupV3; semanticFingerprint: string }
   | { status: "initializing" | "restoreBusy" }
-  | { status: "protectedSurface"; surface: "active" | "profiles" | "planDecisions" |
-      "executionHistory" | "historicalPlan" }
+  | {
+      status: "protectedSurface";
+      surface: "active" | "profiles" | "planDecisions" | "executionHistory" | "historicalPlan";
+    }
   | { status: "validationFailure" | "exportFailure"; reason: string };
 
 export type BackupV3ImportResult =
   | { status: "restoredV3"; semanticFingerprint: string }
-  | { status: "invalidBackup" | "unsupportedVersion" | "initializing" | "restoreBusy" |
-      "protectedCurrentState" | "stagingFailure" | "sourceChanged" | "persistenceFailure" |
-      "rollbackCompleted" | "recoveryRequired"; surface?: string };
+  | {
+      status:
+        | "invalidBackup"
+        | "unsupportedVersion"
+        | "initializing"
+        | "restoreBusy"
+        | "protectedCurrentState"
+        | "stagingFailure"
+        | "sourceChanged"
+        | "persistenceFailure"
+        | "rollbackCompleted"
+        | "recoveryRequired";
+      surface?: string;
+    };
+export type BackupV4ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV4; semanticFingerprint: string }
+  | Exclude<BackupV3ExportResult, { status: "exported" }>
+  | { status: "protectedSurface"; surface: "goals" };
+export type BackupV4ImportResult =
+  | { status: "restoredV4"; semanticFingerprint: string }
+  | Exclude<BackupV3ImportResult, { status: "restoredV3" }>;
+export type BackupV5ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV5; semanticFingerprint: string }
+  | Exclude<BackupV4ExportResult, { status: "exported" }>
+  | { status: "protectedSurface"; surface: "measurementDefinitions" };
+export type BackupV5ImportResult =
+  | { status: "restoredV5"; semanticFingerprint: string }
+  | Exclude<BackupV4ImportResult, { status: "restoredV4" }>;
+export type BackupV6ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV6; semanticFingerprint: string }
+  | Exclude<BackupV5ExportResult, { status: "exported" }>
+  | { status: "protectedSurface"; surface: "progressObservations" };
+export type BackupV6ImportResult =
+  | { status: "restoredV6"; semanticFingerprint: string }
+  | Exclude<BackupV5ImportResult, { status: "restoredV5" }>;
 
 export type FullClearAuthorityResults = {
   active: ActiveRemovalOutcome;
@@ -259,6 +318,9 @@ export type FullClearAuthorityResults = {
   planDecisions: PersistenceRemovalOutcome;
   executionHistory: PersistenceRemovalOutcome;
   historicalPlan: PersistenceRemovalOutcome;
+  goals: PersistenceRemovalOutcome;
+  measurementDefinitions: PersistenceRemovalOutcome;
+  progressObservations: PersistenceRemovalOutcome;
 };
 
 export type ClearLocalDataResult = {
@@ -266,12 +328,15 @@ export type ClearLocalDataResult = {
   authorities: FullClearAuthorityResults;
   previewCleared: true;
   state: DayFrameState;
-  /** Compatibility aliases; `authorities` is the canonical five-surface contract. */
+  /** Compatibility aliases; `authorities` is the canonical eight-authority contract. */
   activeState: ActiveRemovalOutcome;
   profiles: PersistenceRemovalOutcome;
   planDecisions: PersistenceRemovalOutcome;
   executionHistory: PersistenceRemovalOutcome;
   historicalPlan: PersistenceRemovalOutcome;
+  goals: PersistenceRemovalOutcome;
+  measurementDefinitions: PersistenceRemovalOutcome;
+  progressObservations: PersistenceRemovalOutcome;
   /** Compatibility aggregate; derived from `status`. */
   durability: "cleared" | "partiallyCleared" | "notCleared";
 };
@@ -353,10 +418,19 @@ export type ProfileIngressStatus =
   | { status: "accepted"; quarantinedEntryCount: number }
   | {
       status: "recoveryRequired";
-      reason: "readFailure" | "corruptJson" | "invalidCollection" | "unsupportedVersion" |
-        "migrationFailure" | "invalidV2";
-      failureDetail?: "serializationFailure" | "writeFailure" | "rereadFailure" |
-        "rereadValidationFailure" | "verificationFailure";
+      reason:
+        | "readFailure"
+        | "corruptJson"
+        | "invalidCollection"
+        | "unsupportedVersion"
+        | "migrationFailure"
+        | "invalidV2";
+      failureDetail?:
+        | "serializationFailure"
+        | "writeFailure"
+        | "rereadFailure"
+        | "rereadValidationFailure"
+        | "verificationFailure";
       sourcePreserved: boolean;
     };
 
@@ -370,19 +444,32 @@ export type QuarantinedProfileEntry = {
 
 export type ProfileMutationResult =
   | PersistenceMutationResult
-  | { status: "blocked"; reason: "profileRecovery"; state: DayFrameState;
-      persistence: { status: "notAttempted"; reason: "profileRecovery" } };
+  | {
+      status: "blocked";
+      reason: "profileRecovery";
+      state: DayFrameState;
+      persistence: { status: "notAttempted"; reason: "profileRecovery" };
+    };
 
 export type ProfileProtectedRecoveryResult =
   | { status: "resolved"; action: "replace" | "abandon"; persistence: { status: "persisted" } }
-  | { status: "notResolved"; action: "replace" | "abandon";
-      persistence: Exclude<PersistenceWriteOutcome, { status: "persisted" }> }
-  | { status: "notAttempted"; reason: "noProtectedSource" | "sourceUnreadable" |
-      "sourceChanged" | "invalidCurrentState" };
+  | {
+      status: "notResolved";
+      action: "replace" | "abandon";
+      persistence: Exclude<PersistenceWriteOutcome, { status: "persisted" }>;
+    }
+  | {
+      status: "notAttempted";
+      reason: "noProtectedSource" | "sourceUnreadable" | "sourceChanged" | "invalidCurrentState";
+    };
 
 export type QuarantineRemovalResult =
-  | { status: "removed"; quarantineId: string; persistence: PersistenceWriteOutcome;
-      remainingCount: number }
+  | {
+      status: "removed";
+      quarantineId: string;
+      persistence: PersistenceWriteOutcome;
+      remainingCount: number;
+    }
   | { status: "notAttempted"; reason: "missingEntry" | "profileRecovery" };
 
 type ActiveLocalRecoveryNotAttempted = {
@@ -433,11 +520,16 @@ export type DayFrameStore = DayFrameReadinessApi & {
   exportProtectedProfileSource: () =>
     | { status: "exported"; raw: string }
     | { status: "notAvailable"; reason: "noProtectedSource" | "sourceUnreadable" };
-  exportQuarantinedProfile: (quarantineId: string) =>
+  exportQuarantinedProfile: (
+    quarantineId: string,
+  ) =>
     | { status: "exported"; entry: QuarantinedProfileEntry }
     | { status: "notAvailable"; reason: "missingEntry" };
-  recheckProtectedProfileSource: () => "unchanged" | "sourceChanged" |
-    "sourceUnreadable" | "noProtectedSource";
+  recheckProtectedProfileSource: () =>
+    | "unchanged"
+    | "sourceChanged"
+    | "sourceUnreadable"
+    | "noProtectedSource";
   getDesiredDurableCondition: () => StoreDesiredDurableCondition;
   retryActivePersistence: () => DurabilityRetryResult;
   retryProfilePersistence: () => DurabilityRetryResult;
@@ -450,16 +542,23 @@ export type DayFrameStore = DayFrameReadinessApi & {
   getPlanDecisionDurabilityStatus: () => SurfaceDurabilityStatus;
   getPlanDecisionIngressStatus: () => PlanDecisionIngressStatus;
   subscribePlanDecisions: (listener: (decisions: PlanDecisionV1[]) => void) => () => void;
-  subscribePlanDecisionDurability: (listener: (status: SurfaceDurabilityStatus) => void) => () => void;
-  subscribePlanDecisionIngress: (listener: (status: PlanDecisionIngressStatus) => void) => () => void;
+  subscribePlanDecisionDurability: (
+    listener: (status: SurfaceDurabilityStatus) => void,
+  ) => () => void;
+  subscribePlanDecisionIngress: (
+    listener: (status: PlanDecisionIngressStatus) => void,
+  ) => () => void;
   acceptPlanDecision: (input: AcceptPlanDecisionInput) => AcceptPlanDecisionResult;
   removePlanDecision: (id: PlanDecisionId) => RemovePlanDecisionResult;
   retryPlanDecisionPersistence: () => PlanDecisionRetryResult;
   removeQuarantinedPlanDecision: (quarantineId: string) => unknown;
   exportQuarantinedPlanDecision: (quarantineId: string) => unknown;
   exportProtectedPlanDecisionSource: () => unknown;
-  recheckProtectedPlanDecisionSource: () => "unchanged" | "sourceChanged" |
-    "sourceUnreadable" | "noProtectedSource";
+  recheckProtectedPlanDecisionSource: () =>
+    | "unchanged"
+    | "sourceChanged"
+    | "sourceUnreadable"
+    | "noProtectedSource";
   replaceProtectedPlanDecisionCheckpoint: () => PlanDecisionRecoveryResult;
   abandonProtectedPlanDecisionCheckpoint: () => PlanDecisionRecoveryResult;
   replaceProtectedActiveCheckpointWithCurrentState: () => ActiveLocalReplacementRecoveryResult;
@@ -489,19 +588,66 @@ export type DayFrameStore = DayFrameReadinessApi & {
   importBackup: (backup: unknown) => BackupImportResult;
   exportBackupV3: (exportedAt: string) => Promise<BackupV3ExportResult>;
   importBackupV3: (backup: unknown) => Promise<BackupV3ImportResult>;
-  importBackupFile: (backup: unknown) => Promise<BackupImportResult | BackupV3ImportResult>;
+  importBackupFile: (
+    backup: unknown,
+  ) => Promise<
+    | BackupImportResult
+    | BackupV3ImportResult
+    | BackupV4ImportResult
+    | BackupV5ImportResult
+    | BackupV6ImportResult
+  >;
+  exportBackupV4: (exportedAt: string) => Promise<BackupV4ExportResult>;
+  importBackupV4: (backup: unknown) => Promise<BackupV4ImportResult>;
+  exportBackupV5: (exportedAt: string) => Promise<BackupV5ExportResult>;
+  importBackupV5: (backup: unknown) => Promise<BackupV5ImportResult>;
+  exportBackupV6: (exportedAt: string) => Promise<BackupV6ExportResult>;
+  importBackupV6: (backup: unknown) => Promise<BackupV6ImportResult>;
   generatePreview: (input: GeneratePreviewActionInput) => DayFrameState;
   applySuggestedFixToPreview: (input: ApplyPreviewFixActionInput) => DayFrameState;
-  getLastHistoricalPlanPublicationResult: () => HistoricalPlanPublicationResult |
-    Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
-  getHistoricalCompletionDistribution: (query: HistoricalCompletionDistributionQueryV1) =>
-    Promise<HistoricalCompletionDistributionQueryResultV1>;
-  getHistoricalSchedulingRealization: (query: HistoricalSchedulingRealizationQueryV1) =>
-    Promise<HistoricalSchedulingRealizationQueryResultV1>;
-} & Omit<ExecutionHistorySurface, "clearExecutionHistory" | "getRuntimeAuthorityAdapter"> & Pick<HistoricalPlanSurface,
-  "initialize" | "retryPendingPublications" | "getHistoricalPlanDay" | "getHistoricalPlanRange" |
-  "exportHistoricalPlan" | "abandonProtectedHistoricalPlan" | "getStatus" | "getPendingPublications" |
-  "exportProtectedSource" | "recheckProtectedSource" | "subscribeStatus" | "subscribeHistory">;
+  getLastHistoricalPlanPublicationResult: () =>
+    | HistoricalPlanPublicationResult
+    | Exclude<MaterializePlanPublicationResult, { status: "materialized" }>
+    | undefined;
+  getHistoricalCompletionDistribution: (
+    query: HistoricalCompletionDistributionQueryV1,
+  ) => Promise<HistoricalCompletionDistributionQueryResultV1>;
+  getHistoricalSchedulingRealization: (
+    query: HistoricalSchedulingRealizationQueryV1,
+  ) => Promise<HistoricalSchedulingRealizationQueryResultV1>;
+  getGoalActivity: (query: GoalActivityQueryV1) => Promise<GoalActivityQueryResultV1>;
+  queryGoalProgress: (query: GoalProgressQueryV1) => GoalProgressQueryResultV1;
+  queryGoalProgressObservationHistory: (
+    goalId: import("../core/goals/goal.js").GoalId,
+  ) => import("./goalProgressObservationHistoryQuery.js").GoalProgressObservationHistoryResult;
+  queryToday: (
+    query: import("./todayQuery.js").TodayQuery,
+  ) => Promise<import("./todayQuery.js").TodayQueryResult>;
+} & Omit<ExecutionHistorySurface, "clearExecutionHistory" | "getRuntimeAuthorityAdapter"> &
+  Pick<
+    HistoricalPlanSurface,
+    | "initialize"
+    | "retryPendingPublications"
+    | "getHistoricalPlanDay"
+    | "getHistoricalPlanRange"
+    | "exportHistoricalPlan"
+    | "abandonProtectedHistoricalPlan"
+    | "getStatus"
+    | "getPendingPublications"
+    | "exportProtectedSource"
+    | "recheckProtectedSource"
+    | "subscribeStatus"
+    | "subscribeHistory"
+  > &
+  Omit<GoalSurface, "clearGoals" | "getRuntimeAuthorityAdapter" | "replaceDurable"> &
+  Omit<
+    MeasurementDefinitionSurface,
+    "clearMeasurementDefinitions" | "getRuntimeAuthorityAdapter" | "replaceDurable"
+  > &
+  Omit<
+    ProgressObservationSurface,
+    "clearProgressObservations" | "getRuntimeAuthorityAdapter" | "replaceDurable"
+  >;
 
 export type { SourceIncarnationId };
 export type { PlanDecisionId, PlanDecisionIdAllocator, PlanDecisionV1 };

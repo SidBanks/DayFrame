@@ -33,7 +33,10 @@ type LegacyPersistedDayFrameState = Partial<
 export function createInitialDayFrameState(
   persistedState?: LegacyPersistedDayFrameState,
 ): DayFrameState {
-  const activeSetup = instantiateActiveSetup(normalizePersistedDayFramePattern(persistedState), createSourceIncarnationId);
+  const activeSetup = instantiateActiveSetup(
+    normalizePersistedDayFramePattern(persistedState),
+    createSourceIncarnationId,
+  );
 
   return { ...activeSetup, savedProfiles: [], preview: null };
 }
@@ -50,13 +53,13 @@ export function normalizePersistedDayFramePattern(
   });
 
   return {
-      schedulingPreferences: {
-        dayBoundaryStartTime: "03:00",
-        weekStartsOn: "saturday",
-        ...persistedState?.schedulingPreferences,
-      },
-      previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
-      ...normalizedAuthoredSetup,
+    schedulingPreferences: {
+      dayBoundaryStartTime: "03:00",
+      weekStartsOn: "saturday",
+      ...persistedState?.schedulingPreferences,
+    },
+    previewRange: normalizePersistedPreviewRange(persistedState?.previewRange),
+    ...normalizedAuthoredSetup,
   };
 }
 

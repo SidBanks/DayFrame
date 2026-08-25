@@ -53,4 +53,3 @@ export function isBootstrapPlaceholderState(value: unknown): boolean {
 export function isDayFrameReady(readiness: DayFrameReadiness): readiness is { status: "ready" } {
   return readiness.status === "ready";
 }
-

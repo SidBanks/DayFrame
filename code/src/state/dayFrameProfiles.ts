@@ -60,14 +60,24 @@ export function createDayFrameProfilesStorageV2(
 }
 
 export function validateDayFrameProfilesStorageV2(value: unknown): DayFrameProfilesStorageV2 {
-  if (!isRecord(value) || value.app !== "DayFrame" || value.surface !== "profiles" ||
-      value.version !== DAYFRAME_PROFILES_V2_VERSION || !Array.isArray(value.profiles) ||
-      !Array.isArray(value.quarantinedProfiles)) {
+  if (
+    !isRecord(value) ||
+    value.app !== "DayFrame" ||
+    value.surface !== "profiles" ||
+    value.version !== DAYFRAME_PROFILES_V2_VERSION ||
+    !Array.isArray(value.profiles) ||
+    !Array.isArray(value.quarantinedProfiles)
+  ) {
     throw new RangeError("Profile V2 envelope is invalid.");
   }
   for (const entry of value.profiles) {
-    if (!isRecord(entry) || !isRecord(entry.data) || "shiftCycle" in entry.data ||
-        !Array.isArray(entry.data.shiftCycles) || hasSourceIncarnation(entry.data)) {
+    if (
+      !isRecord(entry) ||
+      !isRecord(entry.data) ||
+      "shiftCycle" in entry.data ||
+      !Array.isArray(entry.data.shiftCycles) ||
+      hasSourceIncarnation(entry.data)
+    ) {
       throw new RangeError("Profile V2 patterns must be plural and incarnation-free.");
     }
   }
@@ -79,8 +89,13 @@ export function validateDayFrameProfilesStorageV2(value: unknown): DayFrameProfi
 }
 
 function hasSourceIncarnation(data: Record<string, unknown>): boolean {
-  const collections = ["shiftDefinitions", "shiftCycles", "blockTemplates", "blockRecurrences",
-    "manualEvents"];
+  const collections = [
+    "shiftDefinitions",
+    "shiftCycles",
+    "blockTemplates",
+    "blockRecurrences",
+    "manualEvents",
+  ];
   for (const collection of collections) {
     const sources = data[collection];
     if (!Array.isArray(sources)) continue;
@@ -89,8 +104,11 @@ function hasSourceIncarnation(data: Record<string, unknown>): boolean {
       if ("incarnationId" in source) return true;
       if (collection === "shiftCycles") {
         for (const nested of [source.segments, source.sequence]) {
-          if (Array.isArray(nested) && nested.some((entry) => isRecord(entry) &&
-              "incarnationId" in entry)) return true;
+          if (
+            Array.isArray(nested) &&
+            nested.some((entry) => isRecord(entry) && "incarnationId" in entry)
+          )
+            return true;
         }
       }
     }
@@ -99,8 +117,12 @@ function hasSourceIncarnation(data: Record<string, unknown>): boolean {
 }
 
 export function convertDayFrameProfilesStorageV1(value: unknown): ProfileV1Conversion {
-  if (!isRecord(value) || value.app !== "DayFrame" || value.version !== 1 ||
-      !Array.isArray(value.profiles)) {
+  if (
+    !isRecord(value) ||
+    value.app !== "DayFrame" ||
+    value.version !== 1 ||
+    !Array.isArray(value.profiles)
+  ) {
     throw new RangeError("Profile V1 collection is invalid.");
   }
   return convertProfileEntries(value.profiles);
@@ -146,9 +168,16 @@ function convertProfileEntries(entries: unknown[]): ProfileV1Conversion {
   const profiles: DayFrameSavedProfile[] = [];
   const quarantinedProfiles: unknown[] = [];
   for (const entry of entries) {
-    if (!isRecord(entry) || typeof entry.id !== "string" || !entry.id.trim() ||
-        typeof entry.name !== "string" || !entry.name.trim() ||
-        typeof entry.savedAt !== "string" || !entry.savedAt || !isRecord(entry.data)) {
+    if (
+      !isRecord(entry) ||
+      typeof entry.id !== "string" ||
+      !entry.id.trim() ||
+      typeof entry.name !== "string" ||
+      !entry.name.trim() ||
+      typeof entry.savedAt !== "string" ||
+      !entry.savedAt ||
+      !isRecord(entry.data)
+    ) {
       quarantinedProfiles.push(structuredClone(entry));
       continue;
     }
@@ -158,8 +187,14 @@ function convertProfileEntries(entries: unknown[]): ProfileV1Conversion {
         quarantinedProfiles.push(structuredClone(entry));
         continue;
       }
-      profiles.push(createDayFrameSavedProfile({ id: entry.id, name: entry.name,
-        savedAt: entry.savedAt, data }));
+      profiles.push(
+        createDayFrameSavedProfile({
+          id: entry.id,
+          name: entry.name,
+          savedAt: entry.savedAt,
+          data,
+        }),
+      );
     } catch {
       quarantinedProfiles.push(structuredClone(entry));
     }

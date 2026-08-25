@@ -16,6 +16,7 @@ import {
   validateShiftCycles,
 } from "./shiftCycleUtils.js";
 import { getUserDayDate, parseTimeString } from "../time/userDay.js";
+import { resolveUserDayContainingInstant } from "../time/canonicalUserDay.js";
 import { createWorkOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
 export function generateCycleWorkBlocks(
@@ -107,6 +108,11 @@ function generateManualSegmentWorkBlocks(input: {
     }).dayBoundaryStartTime,
   }).map((workBlock) => ({
     ...workBlock,
+    userDayDate: resolveUserDayContainingInstant({
+      shiftCycles: input.shiftCycles,
+      defaultSchedulingPreferences: input.defaultSchedulingPreferences,
+      instant: workBlock.startsAt,
+    }).userDayDate,
     shiftCycleId: input.shiftCycle.id,
     shiftSegmentId: input.segment.id,
     occurrenceIdentity: createWorkOccurrenceIdentity({
@@ -154,6 +160,11 @@ function generateRepeatingSequenceWorkBlocks(input: {
         shiftDefinition,
         dayBoundaryStartTime,
       );
+      workBlock.userDayDate = resolveUserDayContainingInstant({
+        shiftCycles: input.shiftCycles,
+        defaultSchedulingPreferences: input.defaultSchedulingPreferences,
+        instant: workBlock.startsAt,
+      }).userDayDate;
 
       if (
         overlapsPlanningWindow(

@@ -2,6 +2,247 @@
 
 # Current State
 
+Phase 6 is complete and publication-ready. Task 6.11 exercised the production build
+in Chromium across desktop and 320/375/390/430px widths, keyboard/focus, the browser
+accessibility tree, throttled lazy loading, Commitment/Event/Review journeys, and
+22/24/26-hour user-days. One P2 focus loss after Generate Schedule was fixed by
+focusing the Review heading. All 90 files/934 tests and unchanged bundle guards pass.
+Planner owns intent/review, Today owns current execution, and Summary owns historical
+interpretation. Phase 7 planning is next; no specific Phase 7 feature is authorized.
+
+Task 6.8 connects Review Schedule occurrences to current Event, Commitment, and
+truthful composite Work editors while keeping Event writes, SetupDraft edits, Try
+revisions, and PlanDecision acceptance semantically distinct. Task 6.9 production
+audit corrected one overclaim: Event recreation is guarded exactly, but stale
+Commitment occurrences currently resolve a new incarnation by logical IDs.
+
+Task 6.7 converges authored flexible scheduling inputs into a derived Commitment
+inventory with bounded Add/Edit/Remove over the single Setup draft. Work Hours,
+Work Schedule, preferences, and advanced fields retain their canonical source
+semantics; manual events keep their calendar path and no Pattern or Commitment
+authority exists. Plan authoring is production-lazy with authority/recovery eager.
+Task 6.8 is authorized.
+
+Task 6.6 converges Planner's generated result into an explicit Review Schedule
+workflow. Plan remains the authored-intent mode; Review Schedule preserves the
+existing Preview scheduler/publication and Try/PlanDecision paths while presenting
+schedule status, range/date review, planned geometry, unplaced attention, and
+conflict resolution in product language. Planner no longer composes execution
+reporting. Task 6.7 is authorized.
+
+Task 6.3A has now resolved both architectural questions. Canonical user-days will
+be half-open intervals between consecutive label-indexed effective boundary starts,
+so boundary changes produce exact short or long days without gaps or overlaps.
+HistoricalPlan occurrence snapshot V2 now carries required tagged all-day/timed
+provenance; V1 absence remains unavailable legacy and is never backfilled. The
+separate Tasks 6.3B (resolver and variable-duration consumers) and 6.3C
+(HistoricalPlan timing provenance and compatibility) are implemented and green.
+
+## Phase 6 — Platform Maturity
+
+**Status:** Phase 6 complete; publication checkpoint created
+**Current through:** Task 6.11
+**Last reviewed:** 2026-08-25
+
+Task 6.1 audited the proposed Monthly Planner / Daily Workspace / Summary operating
+model against production behavior. Determination A accepts the three user questions
+but recommends the truthful primary navigation **Planner / Today / Summary**:
+planning ranges are arbitrary and cycle/user-week aware, so month is a Planner view
+rather than an authority boundary; Today is the canonical current user-day rather
+than calendar midnight; Summary remains settled and read-only. Existing Active,
+PlanDecision, HistoricalPlan, ExecutionHistory, Goal, Measurement Definition, and
+Progress Observation authorities suffice for V1. No generic Commitment, Daily
+Workspace, current-plan, or acceptance authority is required. Task 6.2 should create
+bounded application/surface composition without changing semantics or duplicating
+write paths; a later pure read-model task should compose current-user-day,
+HistoricalPlan, now/next/later, and Execution outcomes.
+
+Task 6.2 now implements the structural boundary without changing product truth.
+Planner remains eager/default and contains the unchanged Plan/Schedule workflows;
+Today is an eager bounded placeholder with no semantic authority reads or writes;
+Summary remains lazy with intent preload and unchanged projections. One canonical
+surface state governs navigation while Planner mode remains orthogonal. Store,
+draft, command, bootstrap, recovery, restore/full-clear, persistence, and Backup V6
+ownership remain unchanged. Task 6.3 is next: the pure canonical Today
+current-user-day/current-plan read model, without Today UI.
+
+Task 6.3 source audit triggered mandatory stop conditions before production work.
+Valid adjacent shift segments may change `dayBoundaryStartTime`, but current
+architecture defines no ownership precedence for the resulting gap/overlap instants;
+instant-to-user-day resolution can be ambiguous or circular. HistoricalPlan V1 also
+drops the manual-event all-day marker during publication. A bounded architecture
+audit must define boundary-transition ownership and all-day publication semantics,
+including compatibility/versioning, before Task 6.3 resumes. Task 6.4 remains
+blocked on the canonical read model at that checkpoint.
+
+Task 6.3C implements the accepted occurrence-only HistoricalPlan evolution. New
+publications emit strict occurrence V2 with required tagged timing provenance;
+legacy V1 remains valid and explicitly unavailable rather than inferred. Semantic
+fingerprints, clone/JSON, IndexedDB mixed ledgers, Backup V6, restore, protection,
+full clear, and republication cutoffs preserve version and timing exactly. No
+Backup V7, store, migration, temporal change, or Today behavior was introduced.
+Together with Task 6.3B, both Task 6.3 stop conditions are now resolved.
+
+Resumed Task 6.3 composes those prerequisites into `queryToday`. HistoricalPlan is
+the sole plan source, ExecutionHistory the sole outcome source, and Active is used
+only by canonical temporal resolution. Known-empty, missing, plan-protected, and
+independently execution-protected states remain explicit. Multiple current items,
+tied next groups, republication, correction/retraction cutoffs, and exact-reference
+identity are deterministic. No Preview, UI, write, Goal/Progress context, Today
+authority, persistence, or Backup change was introduced.
+
+Task 6.4 replaces the Today placeholder with the first user-visible operational
+read surface. It consumes only `queryToday`, displays frozen evidence and neutral
+outcome copy, retains multiple current/tied next items, and exposes attention
+without cause. Refresh advances time; authority changes preserve the cutoff; no
+polling exists. Navigation/refresh/restore/clear races are generation-guarded.
+Today joins Summary as a justified lazy primary surface and fixed budgets stay green.
+
+Task 6.5 adds bounded outcome actions without changing Today chronology or plan
+authority. First reports, corrections, and confirmed removals use canonical
+append-only ExecutionHistory commands and exact durable occurrence identity.
+Protected/missing/empty and plan-attention states remain non-writing. Accepted user
+writes explicitly advance Today's cutoff and canonical re-query; passive updates
+retain the cutoff. Fixed bundle budgets remain green.
+
+Task 6.6 introduces Plan / Review Schedule product navigation without moving state
+ownership. Generate/Refresh Schedule still invokes canonical Preview generation and
+HistoricalPlan publication; stale schedules remain visible. Existing calendar/day
+filtering, variable-duration DayVisualizer, unplaced items, friction, Try, and
+PlanDecision Apply paths are recomposed. Execution outcomes are excluded from
+Planner. Fixed eager/lazy bundle budgets remain green.
+
+---
+
+## Phase 5 — Prescriptive Intelligence / Adaptive Planning Foundation
+
+Task 5.1 defines the boundary from descriptive evidence to user-governed action.
+Goals are recommended as a future independent durable authored authority, distinct
+from Commitments and priority. Progress remains deterministic, policy-versioned,
+provenance-bearing derived interpretation rather than a universal percentage.
+Recommendations remain ephemeral explainable proposals; only a future durable
+RecommendationDecision records user acceptance/rejection. Adaptation is a separate,
+explicitly accepted Planner transaction into future authored state, followed by
+normal stale-Schedule and explicit-generation behavior. Automatic adaptation and
+machine learning are not authorized for V1.
+
+Summary remains read-only explanation and handoff; Planner remains the operational
+decision surface. HistoricalPlan and ExecutionHistory remain immutable authorities,
+and neither behavior nor correlation may redefine user intent, importance, or
+preference. No Phase 5 production type, store, schema, Backup format, or UI exists
+yet. Task 5.1 therefore selected Goal V1 Authority, Identity, Lifecycle, and
+Commitment-Link Semantics Definition as Task 5.2.
+
+Task 5.2 finalized that contract: one versioned independent Goal collection,
+opaque never-reused IDs, revision-based staleness, active/completed/archived
+authored lifecycle, optional target/policy reference, and Goal-owned exact source-
+incarnation links. V1 is archive-only and scheduling-independent. Goal must join
+historical publication provenance and a new complete Backup/restore/full-clear
+boundary before Planner UI ships. Task 5.3 now implements that substrate: Goal V1
+has independent IndexedDB authority, strict lifecycle and link commands, protected
+bootstrap, six-participant runtime/restore/full-clear integration, Backup V4, and
+frozen HistoricalPlan Goal provenance. Backup V3 imports explicitly produce empty
+Goal authority and non-empty Goals cannot be exported as V3. Goal mutation remains
+scheduling-independent and does not stale Preview. Task 5.4 adds bounded Goal
+authoring to Planner / Plan: explicit independent create/edit drafts and saves,
+lifecycle controls, exact current commitment linking, preserved unavailable
+relationships, protection/durability feedback, and responsive accessible
+presentation. Summary and Schedule have no Goal authoring. Progress and
+Recommendations remain unimplemented. Task 5.5 found frozen linked Goal provenance
+and existing execution categories sufficient for a future categorical Goal Activity
+projection, but not yet sufficient to distinguish Goal-aware known-unlinked history
+from legacy provenance-unavailable history: both previously omitted `goals`. Task
+5.6 now makes Goal-aware known-empty history explicit as `goals: []` while absent
+`goals` remains legacy/unavailable. New publication, strict validation, canonical
+fingerprinting, Backup V4, restore, and republication preserve this distinction
+without migration or version bump. Task 5.7 may define a pure categorical Goal
+Activity projection. Task 5.7 now implements that deterministic non-persisted query:
+linked intended occurrences conserve across scheduled/unplaced/omitted/blocked,
+linked scheduled occurrences conserve across completed/partial/skipped/unknown/not
+reported, and plan/Goal-link/reporting coverage remain separate with drill-down
+provenance. Current Goal links and scheduling state are not inputs. Summary UI,
+Progress, scores, measurement policies, and Recommendations remain unimplemented;
+Task 5.8 confirms direct bounded Summary integration is ready: a selected-Goal
+composite section under the shared History range/cutoff, three compact independent
+coverage rows, categorical Planning/Execution counts, and evidence drill-down that
+shows frozen labels only when they differ from current context. Summary remains
+read-only and generic metrics remain unchanged. Task 5.9 implements this audited
+shape with explicit ephemeral selection, current context, shared range/cutoff,
+independent coverage, categorical evidence drill-down, protected-state degradation,
+and Planner navigation. Progress and Recommendations remain deferred; Task 5.10
+audits Progress V1 and measurement-policy architecture before implementation.
+It finds Progress not implementation-ready: the current policy reference lacks
+authored unit/target/baseline/direction/epoch configuration, and neither Goal
+Activity nor ExecutionHistory is a universal Progress numerator. Progress remains
+pure and non-persisted; the smallest truthful future slice is manual quantity
+Progress over separate revisioned measurement definitions and durable user-reported
+observations. Task 5.11 defines the Measurement Definition V1 architecture and
+durable authority boundary before any Progress implementation.
+Task 5.11 now finalizes that boundary: an independent durable authority owns one
+immutable revision lineage per Goal, with `(definitionId, revision)` epochs,
+save-time non-overlapping effective intervals, explicit inactive boundaries, exact
+future observation binding, and no normal deletion. The first built-in policy is
+bounded absolute manual quantity toward a positive canonical-decimal target in an
+exact built-in unit, with no baseline or conversion. Goal's policy ref becomes
+non-operative compatibility metadata; HistoricalPlan/ExecutionHistory stay
+unchanged. Task 5.12 now implements the complete substrate and Backup V5 boundary:
+strict identity/revision/effective-time validation, closed built-in unit and policy
+registries, revision-guarded lifecycle commands, protected bootstrap,
+seven-authority runtime/full-clear participation, and transactional restore and
+rollback. Older backups translate to empty Measurement Definition authority, and
+Backup V4 export rejects non-empty definitions. No observation ledger or Progress
+projection is added. Task 5.13 defines Progress Observation V1 architecture and
+its durable authority boundary.
+Task 5.13 implements that boundary as an eighth independent authority with opaque
+observation identity, immutable monotonic correction/retraction revisions, exact
+Goal/definition-revision/unit binding, absolute canonical quantity values, and
+separate `observedAt` measurement time from `recordedAt` knowledge time. Backdated
+evidence is epoch-checked, future evidence and same-time active conflicts are
+rejected, and as-of queries reconstruct the known effective head. IndexedDB,
+runtime transactions, full clear, Backup V6, legacy-empty translation, restore,
+rollback, and recovery now include observations. Progress interpretation and UI
+remain absent; Task 5.14 defines the pure Manual Quantity Progress V1 projection.
+Task 5.14 implements that projection as deterministic derived intelligence. One
+Goal ID and explicit cutoff resolve the exact effective definition epoch and latest
+effective compatible observation. The result preserves raw quantity/target/unit,
+exact provenance, arithmetic comparison, and an unclamped canonical percentage
+computed with BigInt scaled decimals and four-place half-up rounding. Definition,
+evidence, unsupported-policy, known-zero, and authority-protection states remain
+explicit. Goal lifecycle/target date are context only; Goal Activity and all
+scheduling/history authorities are excluded. Progress is not persisted or backed
+up, and no UI exists. Task 5.15 now selects a separated product sequence. Planner
+Goal detail owns bounded Measurement configuration; Summary remains read-oriented
+and later presents quantity-first Progress and provenance distinctly from Goal
+Activity. Observation reporting uses one canonical Planner-owned workflow reachable
+contextually from both surfaces. Measurement APIs are implementation-ready.
+Observation commands are ready, but correction/retraction UI needs one Goal-scoped
+history read model that includes retracted lineages; that gap belongs to the
+Observation slice and does not block Task 5.16. Historical Progress selection,
+progress bars, and all prescriptive interpretation remain deferred. The 676.65 kB
+bundle baseline and mandatory Phase 5 exit bundle-architecture pass remain reserved.
+Task 5.16 adds selected-Goal Manual Quantity setup, change, stop, and restart through
+canonical Measurement Definition authority. Qualitative, active, stopped,
+unsupported, loading, protected, durability-failure, and conflict states remain
+distinct; adjacent Goal, scheduling, Preview, Observation, Progress, and Summary
+boundaries remain unchanged.
+Task 5.17 now adds selected-Goal absolute quantity reporting, correction, retraction,
+and one derived Goal-scoped logical-record history across exact Measurement periods.
+Observation is the only write authority. Summary and derived Progress remain absent;
+Task 5.19 remains the mandatory bundle exit gate.
+Task 5.18 now adds quantity-first read-only Summary Progress and bounded provenance
+for the same selected Goal as Goal Activity. Percentage and comparison remain
+derived arithmetic; Activity, lifecycle, and target date remain separate. Planner
+handoffs navigate only. Task 5.19 is now the mandatory next task.
+Task 5.19 measures the production dependency graph and closes Phase 5. Summary is
+one accessible lazy product surface; React has a stable vendor cache boundary;
+authority/bootstrap/restore and default Planner remain eager. Automated manifest
+budgets guard initial raw/gzip, largest lazy, and total JavaScript. The exit gate
+passes at 676.31 kB initial / 168.20 kB gzip with the complete canonical suite
+green. Phase 6 — Platform Maturity is next at Roadmap level; no entry task is yet
+defined.
+
+---
+
 ## Phase 4 — Historical Intelligence Foundation and Planner/Summary Product Architecture
 
 **Status:** Phase 4 complete with non-blocking deferred scope and residual debt
@@ -261,11 +502,11 @@ DayFrame treats durable authored data it writes or exports as user data.
 
 Historical representations must be handled through explicit:
 
-* compatibility;
-* migration;
-* conversion;
-* recovery;
-* or explicit unsupported-format behavior;
+- compatibility;
+- migration;
+- conversion;
+- recovery;
+- or explicit unsupported-format behavior;
 
 rather than silent degradation.
 
@@ -322,8 +563,8 @@ Runtime/domain success and durable success are no longer treated as the same fac
 
 # Architecture Status
 
-| Area                                    | Status        |
-| --------------------------------------- | ------------- |
+| Area                                    | Status         |
+| --------------------------------------- | -------------- |
 | Architecture Specification              | ✅ Published   |
 | Architecture Charter                    | ✅ Published   |
 | Architectural Decisions                 | ✅ Published   |
@@ -337,8 +578,8 @@ Runtime/domain success and durable success are no longer treated as the same fac
 
 # Audit and Alignment Status
 
-| Area                          | Status     |
-| ----------------------------- | ---------- |
+| Area                          | Status      |
+| ----------------------------- | ----------- |
 | Architecture Alignment Audit  | ✅ Complete |
 | Architecture Audit Synthesis  | ✅ Complete |
 | UX Audit                      | ✅ Complete |
@@ -351,8 +592,8 @@ Runtime/domain success and durable success are no longer treated as the same fac
 
 # Implementation Status
 
-| Area                                                        | Status     |
-| ----------------------------------------------------------- | ---------- |
+| Area                                                        | Status      |
+| ----------------------------------------------------------- | ----------- |
 | Implementation Planning                                     | ✅ Complete |
 | Tasks 1.1–1.4 — Initial ownership/obsolete-path alignment   | ✅ Complete |
 | Tasks 1.5–1.20 — `shiftCycle` compatibility alignment       | ✅ Complete |
@@ -370,13 +611,13 @@ Runtime/domain success and durable success are no longer treated as the same fac
 
 The first Phase 1 cluster:
 
-* established the foundational ownership map;
-* identified authored Setup transaction ownership as distributed;
-* introduced one atomic store-owned authored Setup commit;
-* investigated `PreviewScreenContainer`;
-* classified it as obsolete;
-* removed the obsolete Preview path;
-* preserved supported `DayFrameApp → PreviewScreen` behavior.
+- established the foundational ownership map;
+- identified authored Setup transaction ownership as distributed;
+- introduced one atomic store-owned authored Setup commit;
+- investigated `PreviewScreenContainer`;
+- classified it as obsolete;
+- removed the obsolete Preview path;
+- preserved supported `DayFrameApp → PreviewScreen` behavior.
 
 The resulting authored Setup path is:
 
@@ -439,10 +680,10 @@ where repository-produced historical data requires it.
 
 Removed:
 
-* `DayFrameState.shiftCycle`;
-* singular runtime mirror synthesis;
-* singular store-initialization fallback;
-* `setShiftCycle`.
+- `DayFrameState.shiftCycle`;
+- singular runtime mirror synthesis;
+- singular store-initialization fallback;
+- `setShiftCycle`.
 
 Current runtime uses:
 
@@ -456,10 +697,10 @@ only.
 
 Removed obsolete singular collection aliases from:
 
-* `generateBlockCandidates`;
-* `getActiveShiftSegment`;
-* `generateCycleWorkBlocks`;
-* `generateSchedulePreview`.
+- `generateBlockCandidates`;
+- `getActiveShiftSegment`;
+- `generateCycleWorkBlocks`;
+- `generateSchedulePreview`.
 
 The supported scheduling path is now:
 
@@ -537,13 +778,13 @@ The adopted surface commitments are:
 
 The ADR also establishes that:
 
-* formats are independently versioned;
-* incompatible semantic or representation changes require a new version or
+- formats are independently versioned;
+- incompatible semantic or representation changes require a new version or
   migration epoch;
-* unsupported historical data must not silently degrade;
-* pre-public-release repository-produced data receives the normal compatibility
+- unsupported historical data must not silently degrade;
+- pre-public-release repository-produced data receives the normal compatibility
   presumption unless explicitly excluded;
-* compatibility retirement requires explicit architectural authorization.
+- compatibility retirement requires explicit architectural authorization.
 
 ---
 
@@ -645,10 +886,10 @@ Task 1.28 established the governing retry rule:
 
 Rejected models included:
 
-* replaying the original failed mutation;
-* replaying a last-failed snapshot;
-* workflow command replay;
-* persistence-operation queues.
+- replaying the original failed mutation;
+- replaying a last-failed snapshot;
+- workflow command replay;
+- persistence-operation queues.
 
 The authoritative retry source is:
 
@@ -750,10 +991,10 @@ Absence retry repeats removal.
 
 Retry:
 
-* changes no `DayFrameState`;
-* sends no ordinary state notification;
-* updates only retained durability;
-* returns an exact discriminated result.
+- changes no `DayFrameState`;
+- sends no ordinary state notification;
+- updates only retained durability;
+- returns an exact discriminated result.
 
 ---
 
@@ -843,11 +1084,11 @@ alreadyDurable retry
 
 The classifier:
 
-* contains no React;
-* contains no product copy;
-* performs no persistence;
-* executes no retry;
-* performs no store mutation.
+- contains no React;
+- contains no product copy;
+- performs no persistence;
+- executes no retry;
+- performs no store mutation.
 
 Clear classification preserves aggregate and independent active/profile semantics.
 
@@ -859,13 +1100,13 @@ Every user-facing persisting workflow now consumes the shared semantic classifie
 
 Covered workflows include:
 
-* Setup save;
-* manual-event create/edit/delete;
-* profile save;
-* profile delete;
-* profile load;
-* backup import;
-* clear local data.
+- Setup save;
+- manual-event create/edit/delete;
+- profile save;
+- profile delete;
+- profile load;
+- backup import;
+- clear local data.
 
 Current workflow behavior can represent:
 
@@ -1014,11 +1255,11 @@ Automatic rollback, reset, reload, or schema-specific repair is not adopted.
 
 Current-model-specific work intentionally deferred includes:
 
-* field-level repair;
-* entity-specific serialization diagnostics;
-* shift/template/recurrence-specific repair UI;
-* invalid-profile surgery;
-* schema-specific recovery tooling.
+- field-level repair;
+- entity-specific serialization diagnostics;
+- shift/template/recurrence-specific repair UI;
+- invalid-profile surgery;
+- schema-specific recovery tooling.
 
 Those areas are expected to couple strongly to the later authored-data and engine
 redesign.
@@ -1029,22 +1270,22 @@ redesign.
 
 Persistent recovery-required awareness now explicitly communicates:
 
-* current session changes remain available;
-* those changes are not durably saved;
-* ordinary Retry is unavailable;
-* reloading DayFrame may discard those changes;
-* closing DayFrame may discard those changes;
-* older saved data may return.
+- current session changes remain available;
+- those changes are not durably saved;
+- ordinary Retry is unavailable;
+- reloading DayFrame may discard those changes;
+- closing DayFrame may discard those changes;
+- older saved data may return.
 
 No:
 
-* recovery control;
-* rollback;
-* reset;
-* backup-export promise;
-* unload interception;
-* navigation blocking;
-* model-specific repair
+- recovery control;
+- rollback;
+- reset;
+- backup-export promise;
+- unload interception;
+- navigation blocking;
+- model-specific repair
 
 was introduced.
 
@@ -1119,11 +1360,11 @@ The current durability model follows:
 
 Persistence failure therefore does not:
 
-* roll back runtime state;
-* suppress a valid mutation;
-* reload older data;
-* regenerate domain state;
-* pretend the mutation itself failed.
+- roll back runtime state;
+- suppress a valid mutation;
+- reload older data;
+- regenerate domain state;
+- pretend the mutation itself failed.
 
 Instead, DayFrame records and communicates the durability discrepancy.
 
@@ -1225,11 +1466,11 @@ No Task 1.23–1.39 durability work authorized reader retirement.
 
 Current validated baseline after Task 1.39:
 
-* `npm run lint` — passed
-* `npm run typecheck` — passed
-* `npm test` — passed
-* `npm run build` — passed
-* affected-scope `git diff --check` — passed
+- `npm run lint` — passed
+- `npm run typecheck` — passed
+- `npm test` — passed
+- `npm run build` — passed
+- affected-scope `git diff --check` — passed
 
 Current automated baseline:
 
@@ -1237,22 +1478,22 @@ Current automated baseline:
 
 The current suite protects:
 
-* historical singular local/profile/backup compatibility;
-* plural current runtime/core authority;
-* persistence outcomes;
-* mutation-result semantics;
-* retained durability;
-* desired durable condition;
-* storage-accessor normalization;
-* store-owned retry;
-* durability subscriptions;
-* semantic classification;
-* immediate workflow feedback;
-* persistent cross-navigation awareness;
-* explicit user-triggered Retry;
-* partial-clear retry;
-* recovery-required suppression of Retry;
-* session-end risk communication.
+- historical singular local/profile/backup compatibility;
+- plural current runtime/core authority;
+- persistence outcomes;
+- mutation-result semantics;
+- retained durability;
+- desired durable condition;
+- storage-accessor normalization;
+- store-owned retry;
+- durability subscriptions;
+- semantic classification;
+- immediate workflow feedback;
+- persistent cross-navigation awareness;
+- explicit user-triggered Retry;
+- partial-clear retry;
+- recovery-required suppression of Retry;
+- session-end risk communication.
 
 Repository-wide `git diff --check` continues to identify pre-existing whitespace in
 architecture documentation outside the executable task scopes. That cleanup should
@@ -1331,11 +1572,11 @@ No additional Phase 1 durability implementation is required before proceeding.
 
 Earlier Phase 1 audits identified additional concerns including:
 
-* manual-event command ownership;
-* feedback aggregation;
-* focus and continuity ownership;
-* duplicated date-conversion helpers;
-* seeded-store purpose.
+- manual-event command ownership;
+- feedback aggregation;
+- focus and continuity ownership;
+- duplicated date-conversion helpers;
+- seeded-store purpose.
 
 Some of these findings may now be superseded or reframed by the completed Phase 1
 architecture.
@@ -1376,10 +1617,10 @@ Which layer decides that derived information is stale?
 
 What exactly happens when authored state is replaced through:
 
-* profile load;
-* backup import;
-* future recovery;
-* other replacement operations?
+- profile load;
+- backup import;
+- future recovery;
+- other replacement operations?
 
 ### Ownership
 
@@ -1502,19 +1743,19 @@ Architecture governs implementation.
 
 Implementation should preserve:
 
-* Determinism
-* Explainability
-* Information Provenance
-* Epistemic Integrity
-* Explicit Authority
-* Historical Immutability
-* Architectural Traceability
-* Continuous Validation
-* Documentation Integrity
-* Forward Migration Safety
-* User Data Preservation
-* Session-First Runtime Authority
-* Separation of Authoritative and Derived State
+- Determinism
+- Explainability
+- Information Provenance
+- Epistemic Integrity
+- Explicit Authority
+- Historical Immutability
+- Architectural Traceability
+- Continuous Validation
+- Documentation Integrity
+- Forward Migration Safety
+- User Data Preservation
+- Session-First Runtime Authority
+- Separation of Authoritative and Derived State
 
 When evidence is insufficient, DayFrame should preserve uncertainty rather than
 invent certainty.
@@ -1540,36 +1781,36 @@ invent certainty.
 
 ## Architecture
 
-* `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md`
-* `ARCHITECTURE_CHARTER.md`
-* `DECISIONS.md`
-* `ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
+- `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md`
+- `ARCHITECTURE_CHARTER.md`
+- `DECISIONS.md`
+- `ADR_DURABLE_DATA_COMPATIBILITY_AND_FORMAT_VERSIONING.md`
 
 ## Audit
 
-* `Implementation_Architecture_Audit.md`
-* `Implementation_Architecture_Audit_Synthesis.md`
-* `Implementation_UX_Audit.md`
-* `Implementation_UX_Audit_Synthesis.md`
+- `Implementation_Architecture_Audit.md`
+- `Implementation_Architecture_Audit_Synthesis.md`
+- `Implementation_UX_Audit.md`
+- `Implementation_UX_Audit_Synthesis.md`
 
 ## Planning
 
-* `Alignment_Strategy.md`
-* `Implementation_Roadmap.md`
-* `Implementation_Execution_Plan.md`
+- `Alignment_Strategy.md`
+- `Implementation_Roadmap.md`
+- `Implementation_Execution_Plan.md`
 
 ## Implementation
 
-* Phase 1 Task Specifications
-* Phase 1 Task Result Artifacts
+- Phase 1 Task Specifications
+- Phase 1 Task Result Artifacts
 
 ## Governance
 
-* `CURRENT_STATE.md`
-* `CHANGELOG.md`
-* Session Checkpoints
-* Phase Checkpoints
-* Architectural Decision Records
+- `CURRENT_STATE.md`
+- `CHANGELOG.md`
+- Session Checkpoints
+- Phase Checkpoints
+- Architectural Decision Records
 
 ---
 
@@ -1597,10 +1838,10 @@ How should Preview and later scheduling-engine output relate to authored state?
 
 Future authored-model changes may require:
 
-* new local persistence versions;
-* profile migration epochs;
-* new backup versions;
-* conversion tooling.
+- new local persistence versions;
+- profile migration epochs;
+- new backup versions;
+- conversion tooling.
 
 Those decisions remain governed by the accepted durable-data ADR and should be made
 when the future authored model is sufficiently defined.
@@ -1614,10 +1855,10 @@ Current model-specific serialization repair remains intentionally deferred.
 If future authored data makes representation failure realistically reachable,
 DayFrame should revisit:
 
-* diagnostics;
-* defensive export;
-* repair tooling;
-* recovery surfaces;
+- diagnostics;
+- defensive export;
+- repair tooling;
+- recovery surfaces;
 
 against the then-current authored architecture.
 

@@ -27,6 +27,8 @@ import { useEffect, useRef, useState } from "react";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 import { cloneShiftCycles as cloneNormalizedShiftCycles } from "../core/cycles/shiftCycleUtils.js";
 import { allocateReadableSourceId } from "../core/authored/allocateReadableSourceId.js";
+import { CommitmentSection } from "./CommitmentSection.js";
+import type { CommitmentEditorTarget } from "./CommitmentSection.js";
 
 const blockCategories: BlockCategory[] = [
   "work",
@@ -116,6 +118,10 @@ export type SetupScreenProps = {
     templateId: string;
     field: "fixedStartTime";
   } | null;
+  requestedCommitmentEditorTarget?: CommitmentEditorTarget | null;
+  onRequestedCommitmentEditorTargetHandled?: (status: "opened" | "unavailable") => void;
+  requestedWorkEditor?: boolean;
+  onRequestedWorkEditorHandled?: () => void;
 };
 
 export function SetupScreen({
@@ -127,6 +133,10 @@ export function SetupScreen({
   saveMessageTone = "success",
   isDirty = false,
   focusedTemplateField = null,
+  requestedCommitmentEditorTarget = null,
+  onRequestedCommitmentEditorTargetHandled,
+  requestedWorkEditor = false,
+  onRequestedWorkEditorHandled,
 }: SetupScreenProps): ReactElement {
   const [confirmingDeleteShiftIndex, setConfirmingDeleteShiftIndex] = useState<number | null>(null);
   const [confirmingDeleteCycleIndex, setConfirmingDeleteCycleIndex] = useState<number | null>(null);
@@ -134,9 +144,6 @@ export function SetupScreen({
     cycleIndex: number;
     segmentIndex: number;
   } | null>(null);
-  const [confirmingDeleteTemplateIndex, setConfirmingDeleteTemplateIndex] = useState<number | null>(
-    null,
-  );
   const [isSchedulePreferencesOpen, setIsSchedulePreferencesOpen] = useState(true);
   const [isShiftsOpen, setIsShiftsOpen] = useState(true);
   const [isCyclesOpen, setIsCyclesOpen] = useState(false);
@@ -163,15 +170,23 @@ export function SetupScreen({
     });
   }, [focusedTemplateField]);
 
+  useEffect(() => {
+    if (!requestedWorkEditor) return;
+    setIsShiftsOpen(true);
+    setIsCyclesOpen(true);
+    onRequestedWorkEditorHandled?.();
+    requestAnimationFrame(() => document.getElementById("setup-shifts-heading")?.focus());
+  }, [onRequestedWorkEditorHandled, requestedWorkEditor]);
+
   return (
     <main className="df-screen">
       <header className="df-panel df-screen-header">
-        <h2 className="df-screen-title">Setup</h2>
+        <h2 className="df-screen-title">Plan</h2>
         <p className="df-screen-subtitle">
-          Edit your authored setup in one place. Generate Preview saves the current draft first.
+          Define your commitments and the preferences DayFrame uses to build your schedule.
         </p>
         <p className="df-support">
-          Setup includes schedule preferences, shifts, cycles, templates, and recurrences.
+          Goals save independently. Planning changes remain one setup draft until you save.
         </p>
       </header>
 
@@ -182,7 +197,7 @@ export function SetupScreen({
           </button>
           {onGeneratePreview ? (
             <button className="df-action-button" onClick={onGeneratePreview} type="button">
-              Generate Preview
+              Generate Schedule
             </button>
           ) : null}
           <button
@@ -226,6 +241,15 @@ export function SetupScreen({
           {setupStatusMessage}
         </p>
       </div>
+
+      <CommitmentSection
+        draft={draft}
+        requestedEditorTarget={requestedCommitmentEditorTarget}
+        setDraft={setDraft}
+        {...(onRequestedCommitmentEditorTargetHandled
+          ? { onRequestedEditorTargetHandled: onRequestedCommitmentEditorTargetHandled }
+          : {})}
+      />
 
       <CollapsibleSetupSection
         helperText="Controls how DayFrame interprets days, weeks, and schedule boundaries."
@@ -292,20 +316,20 @@ export function SetupScreen({
       </CollapsibleSetupSection>
 
       <CollapsibleSetupSection
-        helperText="Controls how far ahead DayFrame generates a preview."
+        helperText="Controls how far ahead DayFrame generates a schedule."
         isOpen={isPreviewRangeOpen}
         onToggle={() => {
           setIsPreviewRangeOpen((currentValue) => !currentValue);
         }}
         sectionId="setup-preview-range"
-        title="Preview Range"
+        title="Planning Range"
       >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-preview-range-heading">
-            Preview Range
+            Planning Range
           </h2>
           <p className="df-support">
-            Choose the saved date range DayFrame should use when generating preview.
+            Choose the saved date range DayFrame should use when generating a schedule.
           </p>
         </div>
         <div className="df-grid">
@@ -438,17 +462,17 @@ export function SetupScreen({
       </CollapsibleSetupSection>
 
       <CollapsibleSetupSection
-        helperText="Define your work shifts and workday patterns."
+        helperText="Advanced work configuration used by your work schedule."
         isOpen={isShiftsOpen}
         onToggle={() => {
           setIsShiftsOpen((currentValue) => !currentValue);
         }}
         sectionId="setup-shifts"
-        title="Shifts"
+        title="Work Hours"
       >
         <div className="df-screen-header">
-          <h2 className="df-panel-title" id="setup-shifts-heading">
-            Shift Definitions
+          <h2 className="df-panel-title" id="setup-shifts-heading" tabIndex={-1}>
+            Work Hours
           </h2>
           <p className="df-support">
             Create one definition for each kind of shift you work, including overnight shifts.
@@ -717,17 +741,17 @@ export function SetupScreen({
       </CollapsibleSetupSection>
 
       <CollapsibleSetupSection
-        helperText="Connect shifts to dated manual ranges or repeating day-by-day rotations."
+        helperText="Advanced work schedule rotation and dated-period configuration."
         isOpen={isCyclesOpen}
         onToggle={() => {
           setIsCyclesOpen((currentValue) => !currentValue);
         }}
         sectionId="setup-cycle"
-        title="Cycles"
+        title="Work Schedule"
       >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-cycle-heading">
-            Schedule Cycles
+            Work Schedule
           </h2>
           <p className="df-support">
             Each cycle can use manual date segments or a repeating sequence of shift and off days.
@@ -1544,53 +1568,28 @@ export function SetupScreen({
       </CollapsibleSetupSection>
 
       <CollapsibleSetupSection
-        helperText="Reusable activities DayFrame can place into your schedule."
+        helperText="Source-specific fields not yet available in the bounded Commitment editor."
         isOpen={isTemplatesOpen}
         onToggle={() => {
           setIsTemplatesOpen((currentValue) => !currentValue);
         }}
         sectionId="setup-templates"
-        title="Templates"
+        title="Advanced Commitment Fields"
       >
         <div className="df-screen-header">
           <h2 className="df-panel-title" id="setup-templates-heading">
-            Templates And Recurrences
+            Advanced Commitment Fields
           </h2>
           <p className="df-support">
-            Templates describe what should happen. Recurrence tells DayFrame how often to consider
-            each block.
+            Configure placement, buffers, resources, and detailed recurrence without changing the
+            underlying commitment identity.
           </p>
         </div>
-        <div className="df-screen-actions">
-          <button
-            className="df-secondary-button"
-            onClick={() => {
-              setDraft((currentDraft) => {
-                const created = createDraftTemplateEntry(
-                  currentDraft.templateEntries,
-                  currentDraft.shiftCycles,
-                );
-                return recordDraftCreations(
-                  {
-                    ...currentDraft,
-                    templateEntries: [...currentDraft.templateEntries, created],
-                  },
-                  [
-                    sourceReference("blockTemplate", created.template.id),
-                    sourceReference("blockRecurrence", created.recurrence.id),
-                  ],
-                );
-              });
-            }}
-            type="button"
-          >
-            Add Block Template
-          </button>
-        </div>
-
         {draft.templateEntries.length === 0 ? (
           <div>
-            <p className="df-empty">No templates yet. Add your first template to get started.</p>
+            <p className="df-empty">
+              No commitments yet. Use Add Commitment in the Commitments section to get started.
+            </p>
           </div>
         ) : (
           <ul className="df-list">
@@ -1599,12 +1598,12 @@ export function SetupScreen({
                 <div className="df-screen-actions">
                   <div className="df-form-stack">
                     <h3 className="df-item-title">
-                      {entry.template.title || `Template ${index + 1}`}
+                      {entry.template.title || `Commitment ${index + 1}`}
                     </h3>
                     <div className="df-screen-actions">
                       <label className="df-checkbox">
                         <input
-                          aria-label="Include in Preview"
+                          aria-label="Include in Schedule"
                           checked={entry.template.enabled}
                           onChange={(event) => {
                             const nextChecked = (event.target as { checked: boolean }).checked;
@@ -1627,65 +1626,14 @@ export function SetupScreen({
                           }}
                           type="checkbox"
                         />
-                        Include in Preview
+                        Include in Schedule
                       </label>
-                      <button
-                        className="df-secondary-button"
-                        onClick={() => {
-                          setConfirmingDeleteTemplateIndex(index);
-                        }}
-                        type="button"
-                      >
-                        Delete Block Template
-                      </button>
                     </div>
                   </div>
                 </div>
 
                 {!entry.template.enabled ? (
-                  <p className="df-muted">Not included in preview.</p>
-                ) : null}
-
-                {confirmingDeleteTemplateIndex === index ? (
-                  <div className="df-confirmation">
-                    <p className="df-danger-message">
-                      Delete this template and its matching recurrence from the current setup draft?
-                    </p>
-                    <div className="df-confirmation-actions">
-                      <button
-                        className="df-danger-button"
-                        onClick={() => {
-                          setDraft((currentDraft) =>
-                            recordDraftDeletions(
-                              {
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.filter(
-                                  (_, currentIndex) => currentIndex !== index,
-                                ),
-                              },
-                              [
-                                sourceReference("blockTemplate", entry.template.id),
-                                sourceReference("blockRecurrence", entry.recurrence.id),
-                              ],
-                            ),
-                          );
-                          setConfirmingDeleteTemplateIndex(null);
-                        }}
-                        type="button"
-                      >
-                        Confirm Delete Block Template
-                      </button>
-                      <button
-                        className="df-secondary-button"
-                        onClick={() => {
-                          setConfirmingDeleteTemplateIndex(null);
-                        }}
-                        type="button"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+                  <p className="df-muted">Not included when generating the schedule.</p>
                 ) : null}
 
                 <div className="df-grid">
@@ -2740,48 +2688,6 @@ function createDraftSequenceDay(
     }),
     dayOffset: nextDayOffset,
     shiftDefinitionId: shiftDefinitions[0]?.id ?? null,
-  };
-}
-
-function createDraftTemplateEntry(
-  currentEntries: SetupDraftEntry[],
-  shiftCycles: ShiftCycle[],
-): SetupDraftEntry {
-  const timestamp = createIsoTimestamp();
-  const nextIndex = currentEntries.length + 1;
-  const templateId = allocateReadableSourceId({
-    prefix: "template_",
-    occupiedIds: currentEntries.map((entry) => entry.template.id),
-  });
-  const userId = currentEntries[0]?.template.userId ?? shiftCycles[0]?.userId ?? "user_001";
-
-  return {
-    template: {
-      id: templateId,
-      userId,
-      title: `Template ${nextIndex}`,
-      category: "optional",
-      requiresWorkAnchor: false,
-      placementType: "flexible",
-      durationMinutes: 60,
-      priority: 3,
-      preferredWindow: "anyAvailable",
-      rescheduleBehavior: "askUser",
-      requiresResource: false,
-      externalResources: [],
-      enabled: true,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    },
-    recurrence: {
-      id: allocateReadableSourceId({
-        prefix: "rec_",
-        preferredId: `rec_${templateId}`,
-        occupiedIds: currentEntries.map((entry) => entry.recurrence.id),
-      }),
-      blockTemplateId: templateId,
-      frequency: "daily",
-    },
   };
 }
 

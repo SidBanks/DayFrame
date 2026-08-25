@@ -26,9 +26,14 @@ describe("DayFrame readiness", () => {
       const store = createDayFrameStore();
       expect(store.getReadiness()).toEqual({ status: "initializing" });
       expect(isBootstrapPlaceholderState(store.getState())).toBe(false);
-      expect(store.getState()).toMatchObject({ shiftDefinitions: [], savedProfiles: [], preview: null });
-      expect(() => store.setSchedulingPreferences({ weekStartsOn: "sunday" }))
-        .toThrow(DayFrameMutationAdmissionError);
+      expect(store.getState()).toMatchObject({
+        shiftDefinitions: [],
+        savedProfiles: [],
+        preview: null,
+      });
+      expect(() => store.setSchedulingPreferences({ weekStartsOn: "sunday" })).toThrow(
+        DayFrameMutationAdmissionError,
+      );
       expect(await store.whenReady()).toEqual({ status: "ready" });
       expect(store.getReadiness()).toEqual({ status: "ready" });
     } finally {
@@ -37,14 +42,19 @@ describe("DayFrame readiness", () => {
   });
 
   it("terminates readiness structurally when the pre-bootstrap hook protects authority", async () => {
-    const store = createDayFrameStore(undefined, { preBootstrapHook: async () => ({
-      status: "protected", reason: "authorityRecoveryRequired",
-    }) });
+    const store = createDayFrameStore(undefined, {
+      preBootstrapHook: async () => ({
+        status: "protected",
+        reason: "authorityRecoveryRequired",
+      }),
+    });
     expect(await store.whenReady()).toEqual({
-      status: "protected", reason: "authorityRecoveryRequired",
+      status: "protected",
+      reason: "authorityRecoveryRequired",
     });
     expect(store.getReadiness()).toEqual({
-      status: "protected", reason: "authorityRecoveryRequired",
+      status: "protected",
+      reason: "authorityRecoveryRequired",
     });
     expect(() => store.generatePreview({} as never)).toThrow(DayFrameMutationAdmissionError);
   });
@@ -52,8 +62,15 @@ describe("DayFrame readiness", () => {
   it("creates an identity-free non-authoritative bootstrap placeholder", () => {
     const placeholder = createBootstrapPlaceholderState();
     expect(isBootstrapPlaceholderState(placeholder)).toBe(true);
-    expect(placeholder).toMatchObject({ shiftDefinitions: [], shiftCycles: [], blockTemplates: [],
-      blockRecurrences: [], manualEvents: [], savedProfiles: [], preview: null });
+    expect(placeholder).toMatchObject({
+      shiftDefinitions: [],
+      shiftCycles: [],
+      blockTemplates: [],
+      blockRecurrences: [],
+      manualEvents: [],
+      savedProfiles: [],
+      preview: null,
+    });
     expect(JSON.stringify(placeholder)).not.toContain("incarnation");
   });
 });

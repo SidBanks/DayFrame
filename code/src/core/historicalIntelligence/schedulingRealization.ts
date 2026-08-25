@@ -1,13 +1,21 @@
-import type { HistoricalPlanContext, HistoricalPlanDayPublicationV1 } from
-  "../historicalPlan/historicalPlan.js";
+import type {
+  HistoricalPlanContext,
+  HistoricalPlanDayPublicationV1,
+} from "../historicalPlan/historicalPlan.js";
 import type { DurableOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
 import type { LocalDateString } from "../shifts/types.js";
-import { HISTORICAL_METRIC_POLICY_V1, validateHistoricalCompletionDistributionQuery,
+import {
+  HISTORICAL_METRIC_POLICY_V1,
+  validateHistoricalCompletionDistributionQuery,
   type HistoricalCompletionDistributionQueryIssue,
-  type HistoricalCompletionDistributionQueryV1, type HistoricalMetricPolicyV1 } from
-  "./completionDistribution.js";
-import { resolveHistoricalPlanCoverageV1, type HistoricalPlanCoverageV1,
-  type HistoricalPlanEvidenceV1 } from "./historicalPlanCoverage.js";
+  type HistoricalCompletionDistributionQueryV1,
+  type HistoricalMetricPolicyV1,
+} from "./completionDistribution.js";
+import {
+  resolveHistoricalPlanCoverageV1,
+  type HistoricalPlanCoverageV1,
+  type HistoricalPlanEvidenceV1,
+} from "./historicalPlanCoverage.js";
 
 export const SCHEDULING_REALIZATION_METRIC_V1 = {
   id: "schedulingRealization",
@@ -26,8 +34,10 @@ export type SchedulingRealizationCountsV1 = {
 export type SchedulingRealizationDistributionV1 = SchedulingRealizationCountsV1 & {
   status: "available" | "notApplicable" | "unavailable";
 };
-export type SchedulingRealizationLimitationV1 = "incompletePlanCoverage" |
-  "noPlanCoverage" | "zeroIntendedOccurrences";
+export type SchedulingRealizationLimitationV1 =
+  | "incompletePlanCoverage"
+  | "noPlanCoverage"
+  | "zeroIntendedOccurrences";
 export type SchedulingRealizationProvenanceV1 = {
   userDayDate: LocalDateString;
   reference: DurableOccurrenceReference;
@@ -71,19 +81,20 @@ export function projectHistoricalSchedulingRealizationV1(input: {
     missingUserDayDates: input.missingUserDayDates,
   });
   const occurrences: SchedulingRealizationProvenanceV1[] = [];
-  for (const evidence of resolved.days) for (const occurrence of evidence.day.occurrences) {
-    occurrences.push({
-      userDayDate: evidence.day.userDayDate,
-      reference: structuredClone(occurrence.reference),
-      sourceFamily: occurrence.sourceFamily,
-      title: occurrence.title,
-      category: occurrence.category,
-      planningDisposition: occurrence.plan.state,
-      plan: { ...occurrence.plan },
-      batchId: evidence.batchId,
-      publishedAt: evidence.publishedAt,
-    });
-  }
+  for (const evidence of resolved.days)
+    for (const occurrence of evidence.day.occurrences) {
+      occurrences.push({
+        userDayDate: evidence.day.userDayDate,
+        reference: structuredClone(occurrence.reference),
+        sourceFamily: occurrence.sourceFamily,
+        title: occurrence.title,
+        category: occurrence.category,
+        planningDisposition: occurrence.plan.state,
+        plan: { ...occurrence.plan },
+        batchId: evidence.batchId,
+        publishedAt: evidence.publishedAt,
+      });
+    }
   occurrences.sort(compareProvenance);
   const counts: SchedulingRealizationCountsV1 = {
     intendedOccurrenceCount: occurrences.length,
@@ -100,7 +111,8 @@ export function projectHistoricalSchedulingRealizationV1(input: {
   };
   const limitations: SchedulingRealizationLimitationV1[] = [
     ...(resolved.coverage.status === "incompleteCoverage"
-      ? ["incompletePlanCoverage" as const] : []),
+      ? ["incompletePlanCoverage" as const]
+      : []),
     ...(unavailable ? ["noPlanCoverage" as const] : []),
     ...(!unavailable && zero ? ["zeroIntendedOccurrences" as const] : []),
   ];
@@ -116,11 +128,15 @@ export function projectHistoricalSchedulingRealizationV1(input: {
   });
 }
 
-function compareProvenance(left: SchedulingRealizationProvenanceV1,
-  right: SchedulingRealizationProvenanceV1): number {
+function compareProvenance(
+  left: SchedulingRealizationProvenanceV1,
+  right: SchedulingRealizationProvenanceV1,
+): number {
   const start = (value: SchedulingRealizationProvenanceV1) =>
     value.plan.state === "scheduled" ? value.plan.startsAt : "";
-  return left.userDayDate.localeCompare(right.userDayDate) ||
+  return (
+    left.userDayDate.localeCompare(right.userDayDate) ||
     start(left).localeCompare(start(right)) ||
-    JSON.stringify(left.reference).localeCompare(JSON.stringify(right.reference));
+    JSON.stringify(left.reference).localeCompare(JSON.stringify(right.reference))
+  );
 }

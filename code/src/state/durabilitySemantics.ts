@@ -35,6 +35,8 @@ export type ClearDurabilitySemanticClassification = {
   planDecisions: DurabilitySemanticCategory;
   executionHistory: DurabilitySemanticCategory;
   historicalPlan: DurabilitySemanticCategory;
+  goals: DurabilitySemanticCategory;
+  measurementDefinitions: DurabilitySemanticCategory;
 };
 
 const writeOutcomeCategories = {
@@ -149,6 +151,8 @@ export function classifyClearLocalDataResult(
     planDecisions: classifyPersistenceRemovalOutcome(result.planDecisions),
     executionHistory: classifyPersistenceRemovalOutcome(result.executionHistory),
     historicalPlan: classifyPersistenceRemovalOutcome(result.historicalPlan),
+    goals: classifyPersistenceRemovalOutcome(result.goals),
+    measurementDefinitions: classifyPersistenceRemovalOutcome(result.measurementDefinitions),
   };
 }
 

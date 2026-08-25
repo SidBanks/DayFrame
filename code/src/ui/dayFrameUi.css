@@ -14,6 +14,18 @@
   --df-shadow: 0 10px 25px rgb(15 23 42 / 0.08);
 }
 
+.df-commitment-list {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.df-commitment-list .df-list-card {
+  min-width: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
@@ -149,7 +161,69 @@ textarea {
 .df-primary-nav {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.df-product-surface {
+  display: grid;
+  gap: 20px;
+}
+
+.df-today-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.df-today-sections,
+.df-today-section,
+.df-today-list,
+.df-today-item {
+  display: grid;
+  gap: 12px;
+}
+
+.df-today-sections {
+  grid-template-columns: 1fr;
+}
+
+.df-today-item {
+  padding: 14px;
+  border: 1px solid var(--df-border);
+  border-radius: 14px;
+  background: var(--df-panel-alt);
+}
+
+.df-today-time,
+.df-today-outcome {
+  font-size: 0.92rem;
+}
+
+.df-today-outcome {
+  font-weight: 600;
+}
+
+.df-today-notice {
+  border-left: 4px solid var(--df-danger);
+}
+
+.df-today-reporting,
+.df-today-outcome-choices,
+.df-today-remove-confirmation {
+  display: grid;
+  gap: 10px;
+}
+
+.df-today-report-actions,
+.df-today-outcome-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.df-today-report-actions {
+  align-items: center;
 }
 
 .df-planner-header {
@@ -161,6 +235,13 @@ textarea {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.df-schedule-review-navigation {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  align-items: end;
 }
 
 .df-planner-mode-nav .is-active {
@@ -218,6 +299,67 @@ textarea {
 .df-history-detail-list li {
   display: grid;
   gap: 3px;
+}
+
+.df-goal-activity {
+  border-left: 3px solid var(--df-accent);
+}
+.df-goal-progress {
+  display: grid;
+  gap: 0.6rem;
+  padding: 14px;
+  border: 1px solid var(--df-border);
+  border-radius: 14px;
+  background: var(--df-panel-alt);
+}
+.df-goal-progress > :is(h4, p),
+.df-progress-provenance > :is(h5, p) {
+  margin: 0;
+}
+.df-progress-quantity {
+  display: grid;
+  gap: 0.15rem;
+}
+.df-progress-quantity strong {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+}
+.df-progress-percentage {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.df-progress-provenance {
+  display: grid;
+  gap: 0.5rem;
+  padding: 12px;
+  border-left: 3px solid var(--df-accent);
+}
+.df-progress-provenance p {
+  display: grid;
+  gap: 0.15rem;
+}
+.df-goal-activity-selector {
+  max-width: 32rem;
+}
+.df-goal-activity-context {
+  display: grid;
+  gap: 0.4rem;
+}
+.df-goal-activity-context p {
+  margin: 0;
+}
+.df-goal-coverage {
+  display: grid;
+  gap: 0.45rem;
+}
+.df-goal-coverage p {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.35fr) 1fr;
+  gap: 1rem;
+  margin: 0;
+}
+.df-goal-activity-result {
+  display: grid;
+  gap: 1rem;
 }
 
 .df-primary-nav-button {
@@ -386,6 +528,160 @@ textarea {
       var(--df-panel)
     ),
     var(--df-panel);
+}
+
+.df-goals {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 20px;
+  border-color: color-mix(in srgb, var(--df-accent) 35%, var(--df-border));
+}
+
+.df-goal-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.df-goal-list,
+.df-goal-links {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.df-goal-list-button {
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  text-align: left;
+  background: var(--df-panel-alt);
+}
+
+.df-goal-list-button[aria-pressed="true"] {
+  border-color: var(--df-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--df-accent) 20%, transparent);
+}
+
+.df-goal-list-button span,
+.df-goal-links span {
+  color: var(--df-muted);
+  font-size: 0.9rem;
+}
+
+.df-goal-editor,
+.df-goal-detail,
+.df-goal-empty {
+  padding: 18px;
+  border: 1px solid var(--df-border);
+  border-radius: 16px;
+  background: var(--df-panel-alt);
+}
+
+.df-goal-editor label,
+.df-goal-detail label {
+  display: grid;
+  gap: 6px;
+}
+
+.df-goal-links li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--df-border);
+}
+
+.df-goal-measurement {
+  display: grid;
+  gap: 10px;
+  padding: 16px 0;
+  border-block: 1px solid var(--df-border);
+}
+.df-goal-measurement > :is(h4, p),
+.df-measurement-form > p,
+.df-measurement-confirm > :is(h5, p) {
+  margin: 0;
+}
+.df-measurement-form {
+  max-width: 34rem;
+}
+.df-measurement-target {
+  display: grid;
+  gap: 4px;
+}
+.df-measurement-target span {
+  font-size: 1.15rem;
+}
+.df-measurement-confirm {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+}
+
+.df-goal-reporting {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--df-border);
+}
+.df-goal-reporting > :is(h4, p),
+.df-observation-form > p,
+.df-observation-history > :is(h5, p),
+.df-observation-period > :is(h6, p) {
+  margin: 0;
+}
+.df-observation-form {
+  max-width: 34rem;
+}
+.df-observation-value {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.df-observation-history,
+.df-observation-period {
+  display: grid;
+  gap: 10px;
+}
+.df-observation-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.df-observation-record {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+}
+.df-observation-record--removed {
+  color: var(--df-muted);
+}
+
+@media (max-width: 640px) {
+  .df-observation-value {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .df-goal-columns {
+    grid-template-columns: 1fr;
+  }
+  .df-goal-links li {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .df-workflow-block--preview > .df-panel,
@@ -846,7 +1142,10 @@ textarea {
 }
 
 @media (max-width: 640px) {
-  .df-accepted-choice { align-items: stretch; flex-direction: column; }
+  .df-accepted-choice {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .df-confirmation {
@@ -1175,12 +1474,29 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .df-today-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .df-history-range,
   .df-history-distribution {
     grid-template-columns: 1fr;
   }
+  .df-goal-coverage p {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .df-goal-activity-selector {
+    max-width: none;
+    width: 100%;
+  }
 
   .df-compact-preview-header {
+    grid-template-columns: 1fr;
+  }
+
+  .df-schedule-review-navigation {
     grid-template-columns: 1fr;
   }
 

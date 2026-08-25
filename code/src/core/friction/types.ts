@@ -72,6 +72,7 @@ export type GenerateSuggestedFixesInput = {
   unplacedCandidates: BlockCandidate[];
   dayBoundaryStartTime?: `${number}:${number}`;
   getDayBoundaryStartTimeForUserDayDate?: (userDayDate: LocalDateString) => `${number}:${number}`;
+  getUserDayWindowForUserDayDate?: (userDayDate: LocalDateString) => { start: Date; end: Date };
 };
 
 export type GenerateSuggestedFixesResult = {
@@ -86,6 +87,7 @@ export type ApplySuggestedFixInput = {
   selectedFrictionPointId: string;
   selectedSuggestedFixId: string;
   dayBoundaryStartTime: `${number}:${number}`;
+  getUserDayWindowForUserDayDate?: (userDayDate: LocalDateString) => { start: Date; end: Date };
   revisedAt: string;
 };
 

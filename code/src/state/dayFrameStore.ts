@@ -1,6 +1,13 @@
 import { generateSchedulePreview } from "../core/engine/generateSchedulePreview.js";
-import { materializePlanPublication, type MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
+import {
+  materializePlanPublication,
+  type MaterializePlanPublicationResult,
+} from "../core/historicalPlan/materializePlanPublication.js";
 import { reviseSchedulePreview } from "../core/engine/reviseSchedulePreview.js";
+import {
+  resolveUserDayContainingInstant,
+  resolveUserDayWindowForLabel,
+} from "../core/time/canonicalUserDay.js";
 import {
   cloneDayFrameAuthoredSetup,
   createDayFrameBackupV2,
@@ -19,7 +26,10 @@ import {
   normalizePersistedDayFramePattern,
   type PersistedDayFrameState,
 } from "./createInitialDayFrameState.js";
-import { createSourceIncarnationId, type SourceIncarnationAllocator } from "../core/authored/sourceIncarnation.js";
+import {
+  createSourceIncarnationId,
+  type SourceIncarnationAllocator,
+} from "../core/authored/sourceIncarnation.js";
 import {
   createActiveV2,
   cloneActiveSetup,
@@ -40,6 +50,12 @@ import type {
   BackupImportResult,
   BackupV3ExportResult,
   BackupV3ImportResult,
+  BackupV4ExportResult,
+  BackupV4ImportResult,
+  BackupV5ImportResult,
+  BackupV5ExportResult,
+  BackupV6ImportResult,
+  BackupV6ExportResult,
   CommitAuthoredSetupInput,
   CommitAuthoredSetupTransactionInput,
   ClearLocalDataResult,
@@ -68,34 +84,89 @@ import type {
   StoreMutationResult,
   SurfaceDurabilityStatus,
 } from "./types.js";
-import { createHistoricalPlanSurface, type HistoricalPlanPublicationResult, type HistoricalPlanSurface } from "./historicalPlanSurface.js";
+import {
+  createHistoricalPlanSurface,
+  type HistoricalPlanPublicationResult,
+  type HistoricalPlanSurface,
+} from "./historicalPlanSurface.js";
 import { cloneOccurrenceIdentity } from "../core/occurrences/occurrenceIdentity.js";
 import { validateDayFrameAuthoredSetup } from "../core/authored/validateDayFrameAuthoredSetup.js";
 import type { DayFrameAuthoredSetup } from "./types.js";
 import { createPlanDecisionSurface } from "./planDecisionSurface.js";
 import type { PlanDecisionIdAllocator } from "../core/decisions/planDecision.js";
 import { createExecutionHistorySurface } from "./executionHistorySurface.js";
-import { createHistoricalIntelligenceQuery, createHistoricalSchedulingRealizationQuery } from
-  "./historicalIntelligenceQuery.js";
+import {
+  createGoalActivityQuery,
+  createHistoricalIntelligenceQuery,
+  createHistoricalSchedulingRealizationQuery,
+} from "./historicalIntelligenceQuery.js";
 import type { ExecutionHistoryIndexedDb } from "./executionHistoryIndexedDb.js";
-import { createBootstrapPlaceholderState, type DayFrameReadiness,
-  type DayFrameReadyResult } from "./dayFrameReadiness.js";
-import { DayFrameMutationAdmissionError, getDayFrameMutationAdmission } from
-  "./dayFrameMutationAdmission.js";
+import {
+  createBootstrapPlaceholderState,
+  type DayFrameReadiness,
+  type DayFrameReadyResult,
+} from "./dayFrameReadiness.js";
+import {
+  DayFrameMutationAdmissionError,
+  getDayFrameMutationAdmission,
+} from "./dayFrameMutationAdmission.js";
 import { createDayFrameNotificationScheduler } from "./dayFrameNotificationScheduler.js";
+import { buildExecutionHistoryItems } from "../core/execution/executionHistoryProjection.js";
+import { historicalOccurrenceTimingSemantics } from "../core/historicalPlan/historicalPlan.js";
 import { createDayFrameAuthorityTransaction } from "./dayFrameAuthorityTransaction.js";
-import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY, registerDayFrameRuntimeAuthorityController,
-  type DayFrameRuntimeAuthorityController, type RuntimeAuthorityAdapter } from "./dayFrameRuntimeAuthority.js";
-import type { ExecutionRecordIdAllocator, ExecutionSubjectIdAllocator } from
-  "../core/execution/executionRecord.js";
+import {
+  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
+  registerDayFrameRuntimeAuthorityController,
+  type DayFrameRuntimeAuthorityController,
+  type RuntimeAuthorityAdapter,
+} from "./dayFrameRuntimeAuthority.js";
+import type {
+  ExecutionRecordIdAllocator,
+  ExecutionSubjectIdAllocator,
+} from "../core/execution/executionRecord.js";
 import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
 import type { IndexedDbCollectionStorage } from "../infrastructure/storage/indexedDbCollectionStorage.js";
-import { createDayFrameRestoreComposition, createExecutionHistoryDurableRestorePayload,
-  createHistoricalPlanDurableRestorePayload, registerDayFrameRestoreComposition } from
-  "./dayFrameRestoreComposition.js";
-import { backupV3SemanticFingerprint, createDayFrameBackupV3,
-  DayFrameBackupV3ValidationError, profilesV2BackupData, validateDayFrameBackupV3 } from
-  "./dayFrameBackupV3.js";
+import {
+  createDayFrameRestoreComposition,
+  createExecutionHistoryDurableRestorePayload,
+  createHistoricalPlanDurableRestorePayload,
+  registerDayFrameRestoreComposition,
+} from "./dayFrameRestoreComposition.js";
+import {
+  backupV3SemanticFingerprint,
+  createDayFrameBackupV3,
+  DayFrameBackupV3ValidationError,
+  profilesV2BackupData,
+  validateDayFrameBackupV3,
+} from "./dayFrameBackupV3.js";
+import {
+  backupV4SemanticFingerprint,
+  createDayFrameBackupV4,
+  validateDayFrameBackupV4,
+} from "./dayFrameBackupV4.js";
+import {
+  backupV5SemanticFingerprint,
+  createDayFrameBackupV5,
+  validateDayFrameBackupV5,
+} from "./dayFrameBackupV5.js";
+import { validateMeasurementDefinitionAuthority } from "../core/measurement/measurementDefinition.js";
+import { createGoalSurface, type GoalSurface } from "./goalSurface.js";
+import {
+  createMeasurementDefinitionSurface,
+  type MeasurementDefinitionSurface,
+} from "./measurementDefinitionSurface.js";
+import {
+  createProgressObservationSurface,
+  type ProgressObservationSurface,
+} from "./progressObservationSurface.js";
+import {
+  backupV6SemanticFingerprint,
+  createDayFrameBackupV6,
+  validateDayFrameBackupV6,
+} from "./dayFrameBackupV6.js";
+import { validateProgressObservationAuthority } from "../core/progressObservation/progressObservation.js";
+import { createGoalProgressQuery } from "./goalProgressQuery.js";
+import { createGoalProgressObservationHistoryQuery } from "./goalProgressObservationHistoryQuery.js";
 
 export const DAYFRAME_STORAGE_KEY = "dayframe-store-v1";
 export const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
@@ -107,7 +178,8 @@ export const DAYFRAME_PROFILES_V2_ESTABLISHED_KEY = "dayframe-profiles-v2-establ
 export type { PersistenceRemovalOutcome, PersistenceWriteOutcome } from "./types.js";
 
 function describeQuarantinedProfile(raw: unknown, index: number): QuarantinedProfileEntry {
-  const record = typeof raw === "object" && raw !== null ? raw as Record<string, unknown> : undefined;
+  const record =
+    typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : undefined;
   let serialized: string;
   try {
     serialized = JSON.stringify(raw) ?? String(raw);
@@ -244,8 +316,18 @@ function preserveUpdatedIncarnations(
   operations: CommitAuthoredSetupTransactionInput["lifecycle"]["operations"],
 ): void {
   const sources = (setup: DayFrameAuthoredSetup) => {
-    const result = new Map<string, { incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"] }>();
-    const add = (kind: string, source: { id: string; incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"] }, parent = "") => result.set(`${kind}:${parent}:${source.id}`, source);
+    const result = new Map<
+      string,
+      { incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"] }
+    >();
+    const add = (
+      kind: string,
+      source: {
+        id: string;
+        incarnationId: DayFrameAuthoredSetup["shiftDefinitions"][number]["incarnationId"];
+      },
+      parent = "",
+    ) => result.set(`${kind}:${parent}:${source.id}`, source);
     setup.shiftDefinitions.forEach((source) => add("shiftDefinition", source));
     setup.shiftCycles.forEach((cycle) => {
       add("shiftCycle", cycle);
@@ -294,23 +376,35 @@ export function createDayFrameStore(
     executionHistoryClock?: () => string;
     executionHistoryIndexedDb?: ExecutionHistoryIndexedDb;
     historicalPlanSurface?: HistoricalPlanSurface;
+    goalSurface?: GoalSurface;
+    measurementDefinitionSurface?: MeasurementDefinitionSurface;
+    progressObservationSurface?: ProgressObservationSurface;
     bootstrapMode?: "resolved-test";
-    preBootstrapHook?: (context: { runtimeAuthority: DayFrameRuntimeAuthorityController }) => Promise<{ status: "continue" } | {
-      status: "protected"; reason: "authorityRecoveryRequired";
-    }>;
+    preBootstrapHook?: (context: {
+      runtimeAuthority: DayFrameRuntimeAuthorityController;
+    }) => Promise<
+      | { status: "continue" }
+      | {
+          status: "protected";
+          reason: "authorityRecoveryRequired";
+        }
+    >;
     restoreStorage?: Storage;
     restoreIndexedDb?: IndexedDbCollectionStorage;
     restoreTransactionId?: () => string;
     restoreClock?: () => string;
   } = {},
 ): DayFrameStore {
-  let readiness: DayFrameReadiness = options.bootstrapMode === "resolved-test"
-    ? { status: "ready" } : { status: "initializing" };
+  let readiness: DayFrameReadiness =
+    options.bootstrapMode === "resolved-test" ? { status: "ready" } : { status: "initializing" };
   const readinessListeners = new Set<(value: DayFrameReadiness) => void>();
   let settleReadiness: ((result: DayFrameReadyResult) => void) | undefined;
-  const readinessPromise: Promise<DayFrameReadyResult> = readiness.status === "ready"
-    ? Promise.resolve({ status: "ready" })
-    : new Promise((resolve) => { settleReadiness = resolve; });
+  const readinessPromise: Promise<DayFrameReadyResult> =
+    readiness.status === "ready"
+      ? Promise.resolve({ status: "ready" })
+      : new Promise((resolve) => {
+          settleReadiness = resolve;
+        });
   const bootstrapPlaceholder = createBootstrapPlaceholderState();
   const notificationScheduler = createDayFrameNotificationScheduler();
   const allocateIncarnation = options.allocateSourceIncarnationId ?? createSourceIncarnationId;
@@ -343,15 +437,87 @@ export function createDayFrameStore(
     notificationScheduler,
   });
   const executionHistorySurface = createExecutionHistorySurface({
-    ...(options.allocateExecutionRecordId ? { allocateRecordId: options.allocateExecutionRecordId } : {}),
-    ...(options.allocateExecutionSubjectId ? { allocateSubjectId: options.allocateExecutionSubjectId } : {}),
+    ...(options.allocateExecutionRecordId
+      ? { allocateRecordId: options.allocateExecutionRecordId }
+      : {}),
+    ...(options.allocateExecutionSubjectId
+      ? { allocateSubjectId: options.allocateExecutionSubjectId }
+      : {}),
     ...(options.executionHistoryClock ? { now: options.executionHistoryClock } : {}),
     ...(options.serializeExecutionHistory ? { serialize: options.serializeExecutionHistory } : {}),
     ...(options.executionHistoryIndexedDb ? { indexedDb: options.executionHistoryIndexedDb } : {}),
     notificationScheduler,
   });
-  const historicalPlanSurface = options.historicalPlanSurface ?? createHistoricalPlanSurface({
-    notificationScheduler,
+  const historicalPlanSurface =
+    options.historicalPlanSurface ??
+    createHistoricalPlanSurface({
+      notificationScheduler,
+    });
+  let goalMutationAdmission = () => true;
+  const goalSurface =
+    options.goalSurface ??
+    createGoalSurface({
+      storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+      notificationScheduler,
+      canMutate: () => goalMutationAdmission(),
+      isLinkAvailable: (link) => {
+        const setup = getActiveSetup(state);
+        const sources =
+          link.sourceKind === "blockTemplate"
+            ? setup.blockTemplates
+            : link.sourceKind === "blockRecurrence"
+              ? setup.blockRecurrences
+              : link.sourceKind === "manualEvent"
+                ? setup.manualEvents
+                : link.sourceKind === "shiftDefinition"
+                  ? setup.shiftDefinitions
+                  : link.sourceKind === "shiftCycle"
+                    ? setup.shiftCycles
+                    : link.sourceKind === "shiftSegment"
+                      ? setup.shiftCycles.flatMap((cycle) => cycle.segments)
+                      : setup.shiftCycles.flatMap((cycle) => cycle.sequence ?? []);
+        return sources.some(
+          (source) => source.id === link.id && source.incarnationId === link.incarnationId,
+        );
+      },
+    });
+  let measurementMutationAdmission = () => true;
+  const measurementDefinitionSurface =
+    options.measurementDefinitionSurface ??
+    createMeasurementDefinitionSurface({
+      storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+      getGoal: goalSurface.getGoal,
+      notificationScheduler,
+      canMutate: () => measurementMutationAdmission(),
+    });
+  let observationMutationAdmission = () => true;
+  const progressObservationSurface =
+    options.progressObservationSurface ??
+    createProgressObservationSurface({
+      storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+      getGoal: goalSurface.getGoal,
+      getDefinition: measurementDefinitionSurface.getMeasurementDefinitionRevision,
+      resolveDefinition: measurementDefinitionSurface.getCurrentMeasurementDefinition,
+      dependenciesReady: () =>
+        goalSurface.getGoalIngressStatus().status === "accepted" &&
+        measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status === "accepted"
+          ? "ready"
+          : goalSurface.getGoalIngressStatus().status === "protected" ||
+              measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
+                "protected"
+            ? "protected"
+            : "initializing",
+      notificationScheduler,
+      canMutate: () => observationMutationAdmission(),
+    });
+  const queryGoalProgress = createGoalProgressQuery({
+    goals: goalSurface,
+    definitions: measurementDefinitionSurface,
+    observations: progressObservationSurface,
+  });
+  const queryGoalProgressObservationHistory = createGoalProgressObservationHistoryQuery({
+    definitions: measurementDefinitionSurface,
+    observations: progressObservationSurface,
   });
   const getHistoricalCompletionDistribution = createHistoricalIntelligenceQuery({
     historicalPlan: historicalPlanSurface,
@@ -360,8 +526,26 @@ export function createDayFrameStore(
   const getHistoricalSchedulingRealization = createHistoricalSchedulingRealizationQuery({
     historicalPlan: historicalPlanSurface,
   });
-  let lastHistoricalPlanPublicationResult: HistoricalPlanPublicationResult |
-    Exclude<MaterializePlanPublicationResult, { status: "materialized" }> | undefined;
+  const getGoalActivity = createGoalActivityQuery({
+    historicalPlan: historicalPlanSurface,
+    executionHistory: executionHistorySurface,
+    goals: goalSurface,
+  });
+  async function queryToday(query: import("./todayQuery.js").TodayQuery) {
+    const { createTodayQuery } = await import("./todayQuery.js");
+    return createTodayQuery({
+      getAuthoredSetup: () => getActiveSetup(state),
+      historicalPlan: historicalPlanSurface,
+      executionHistory: executionHistorySurface,
+      resolveUserDayContainingInstant,
+      buildExecutionHistoryItems,
+      historicalOccurrenceTimingSemantics,
+    })(query);
+  }
+  let lastHistoricalPlanPublicationResult:
+    | HistoricalPlanPublicationResult
+    | Exclude<MaterializePlanPublicationResult, { status: "materialized" }>
+    | undefined;
   let lastHistoricalPlanPublicationMillis = 0;
   let activeLocalIngressStatus = activeLocalIngress.status;
   let protectedActiveSource = activeLocalIngress.protectedSource;
@@ -386,25 +570,40 @@ export function createDayFrameStore(
   function captureActiveRuntime() {
     const activeState = cloneState(state);
     activeState.savedProfiles = [];
-    return structuredClone({ activeState, activeLocalIngressStatus, protectedActiveSource,
-      protectedActiveSourceKey, durability: durabilityStatus.activeState,
-      desired: desiredDurableCondition.activeState });
+    return structuredClone({
+      activeState,
+      activeLocalIngressStatus,
+      protectedActiveSource,
+      protectedActiveSourceKey,
+      durability: durabilityStatus.activeState,
+      desired: desiredDurableCondition.activeState,
+    });
   }
   function installActiveRuntime(target: ReturnType<typeof captureActiveRuntime>) {
-    state = { ...structuredClone(target.activeState), savedProfiles: cloneSavedProfiles(state.savedProfiles) };
+    state = {
+      ...structuredClone(target.activeState),
+      savedProfiles: cloneSavedProfiles(state.savedProfiles),
+    };
     activeLocalIngressStatus = structuredClone(target.activeLocalIngressStatus);
     protectedActiveSource = target.protectedActiveSource;
     protectedActiveSourceKey = target.protectedActiveSourceKey;
     durabilityStatus = { ...durabilityStatus, activeState: target.durability };
     desiredDurableCondition = { ...desiredDurableCondition, activeState: target.desired };
     notificationScheduler.notify("main", () => {
-      const snapshot = getState(); for (const listener of listeners) listener(snapshot);
+      const snapshot = getState();
+      for (const listener of listeners) listener(snapshot);
     });
   }
   function captureProfilesRuntime() {
-    return structuredClone({ profiles: cloneSavedProfiles(state.savedProfiles), profileIngressStatus,
-      quarantinedProfiles, protectedProfileSource, protectedProfileSourceKey,
-      durability: durabilityStatus.profiles, desired: desiredDurableCondition.profiles });
+    return structuredClone({
+      profiles: cloneSavedProfiles(state.savedProfiles),
+      profileIngressStatus,
+      quarantinedProfiles,
+      protectedProfileSource,
+      protectedProfileSourceKey,
+      durability: durabilityStatus.profiles,
+      desired: desiredDurableCondition.profiles,
+    });
   }
   function installProfilesRuntime(target: ReturnType<typeof captureProfilesRuntime>) {
     state = { ...state, savedProfiles: cloneSavedProfiles(target.profiles) };
@@ -419,60 +618,131 @@ export function createDayFrameStore(
     });
   }
   const activeRuntimeAdapter: RuntimeAuthorityAdapter<ReturnType<typeof captureActiveRuntime>> = {
-    id: "active", captureRuntimeSnapshot: captureActiveRuntime, installRuntimeExact: installActiveRuntime,
+    id: "active",
+    captureRuntimeSnapshot: captureActiveRuntime,
+    installRuntimeExact: installActiveRuntime,
   };
-  const profilesRuntimeAdapter: RuntimeAuthorityAdapter<ReturnType<typeof captureProfilesRuntime>> = {
-    id: "profiles", captureRuntimeSnapshot: captureProfilesRuntime,
-    installRuntimeExact: installProfilesRuntime,
-  };
-  const runtimeParticipants = [activeRuntimeAdapter, profilesRuntimeAdapter,
+  const profilesRuntimeAdapter: RuntimeAuthorityAdapter<ReturnType<typeof captureProfilesRuntime>> =
+    {
+      id: "profiles",
+      captureRuntimeSnapshot: captureProfilesRuntime,
+      installRuntimeExact: installProfilesRuntime,
+    };
+  const runtimeParticipants = [
+    activeRuntimeAdapter,
+    profilesRuntimeAdapter,
     planDecisionSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
     executionHistorySurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
-    historicalPlanSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)];
-  const authorityTransaction = createDayFrameAuthorityTransaction({ scheduler: notificationScheduler,
-    participants: runtimeParticipants.map((participant) => ({ id: participant.id,
+    historicalPlanSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    goalSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    measurementDefinitionSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    progressObservationSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+  ];
+  const authorityTransaction = createDayFrameAuthorityTransaction({
+    scheduler: notificationScheduler,
+    participants: runtimeParticipants.map((participant) => ({
+      id: participant.id,
       capture: () => participant.captureRuntimeSnapshot(),
-      installExact: (value: unknown) => participant.installRuntimeExact(value as never) })) });
+      installExact: (value: unknown) => participant.installRuntimeExact(value as never),
+    })),
+  });
+  goalMutationAdmission = () => authorityTransaction.getState().status === "inactive";
+  measurementMutationAdmission = () => authorityTransaction.getState().status === "inactive";
+  observationMutationAdmission = () => authorityTransaction.getState().status === "inactive";
   const restoreStorage = options.restoreStorage ?? getOptionalStorage();
-  const restoreComposition = restoreStorage ? createDayFrameRestoreComposition({
-    storage: restoreStorage, indexedDb: options.restoreIndexedDb ?? createDayFrameDurableDb(),
-    runtime: authorityTransaction,
-    sources: {
-      active: () => createActiveV2(getActiveSetup(state)),
-      profiles: () => createDayFrameProfilesStorageV2(state.savedProfiles, quarantinedProfiles),
-      planDecisions: () => ({ app: "DayFrame", surface: "planDecisions", version: 1,
-        decisions: [...planDecisionSurface.getPlanDecisions(),
-          ...planDecisionSurface.getQuarantinedPlanDecisions().map((entry) => structuredClone(entry.raw))] }),
-      executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope,
-      historicalPlan: historicalPlanSurface.exportHistoricalPlan,
-      readiness: (id) => {
-        if (id === "active") return activeLocalIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
-        if (id === "profiles") return profileIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
-        if (id === "planDecisions") return planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired" ? "protected" : "ready";
-        if (id === "executionHistory") return executionHistorySurface.getExecutionHistoryIngressStatus().status === "recoveryRequired" ? "protected" : "ready";
-        return historicalPlanSurface.getStatus().status === "protected" ? "protected" : "ready";
-      },
-    },
-    ...(options.restoreTransactionId ? { allocateId: options.restoreTransactionId } : {}),
-    ...(options.restoreClock ? { now: options.restoreClock } : {}),
-  }) : undefined;
+  const restoreComposition = restoreStorage
+    ? createDayFrameRestoreComposition({
+        storage: restoreStorage,
+        indexedDb: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+        runtime: authorityTransaction,
+        sources: {
+          active: () => createActiveV2(getActiveSetup(state)),
+          profiles: () => createDayFrameProfilesStorageV2(state.savedProfiles, quarantinedProfiles),
+          planDecisions: () => ({
+            app: "DayFrame",
+            surface: "planDecisions",
+            version: 1,
+            decisions: [
+              ...planDecisionSurface.getPlanDecisions(),
+              ...planDecisionSurface
+                .getQuarantinedPlanDecisions()
+                .map((entry) => structuredClone(entry.raw)),
+            ],
+          }),
+          executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope,
+          historicalPlan: historicalPlanSurface.exportHistoricalPlan,
+          goals: goalSurface.exportAuthority,
+          measurementDefinitions: measurementDefinitionSurface.exportMeasurementDefinitionAuthority,
+          progressObservations: progressObservationSurface.exportProgressObservationAuthority,
+          readiness: (id) => {
+            if (id === "active")
+              return activeLocalIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+            if (id === "profiles")
+              return profileIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+            if (id === "planDecisions")
+              return planDecisionSurface.getPlanDecisionIngressStatus().status ===
+                "recoveryRequired"
+                ? "protected"
+                : "ready";
+            if (id === "executionHistory")
+              return executionHistorySurface.getExecutionHistoryIngressStatus().status ===
+                "recoveryRequired"
+                ? "protected"
+                : "ready";
+            if (id === "historicalPlan")
+              return historicalPlanSurface.getStatus().status === "protected"
+                ? "protected"
+                : "ready";
+            if (id === "goals")
+              return goalSurface.getGoalIngressStatus().status === "protected"
+                ? "protected"
+                : goalSurface.getGoalIngressStatus().status === "initializing" &&
+                    readiness.status !== "ready"
+                  ? "notReady"
+                  : "ready";
+            if (id === "measurementDefinitions")
+              return measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
+                "protected"
+                ? "protected"
+                : measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
+                      "initializing" && readiness.status !== "ready"
+                  ? "notReady"
+                  : "ready";
+            return progressObservationSurface.getProgressObservationIngressStatus().status ===
+              "protected"
+              ? "protected"
+              : progressObservationSurface.getProgressObservationIngressStatus().status ===
+                    "initializing" && readiness.status !== "ready"
+                ? "notReady"
+                : "ready";
+          },
+        },
+        ...(options.restoreTransactionId ? { allocateId: options.restoreTransactionId } : {}),
+        ...(options.restoreClock ? { now: options.restoreClock } : {}),
+      })
+    : undefined;
 
   function getState(): DayFrameState {
     return readiness.status === "ready" ? cloneState(state) : cloneState(bootstrapPlaceholder);
   }
 
-  function getReadiness(): DayFrameReadiness { return { ...readiness }; }
+  function getReadiness(): DayFrameReadiness {
+    return { ...readiness };
+  }
   function subscribeReadiness(listener: (value: DayFrameReadiness) => void) {
     readinessListeners.add(listener);
     return () => readinessListeners.delete(listener);
   }
-  function whenReady() { return readinessPromise; }
+  function whenReady() {
+    return readinessPromise;
+  }
   function transitionReadiness(next: Exclude<DayFrameReadiness, { status: "initializing" }>) {
     if (readiness.status !== "initializing") return;
     readiness = next;
-    const terminal: DayFrameReadyResult = next.status === "ready" ? { status: "ready" }
-      : { status: "protected", reason: next.reason };
-    settleReadiness?.(terminal); settleReadiness = undefined;
+    const terminal: DayFrameReadyResult =
+      next.status === "ready" ? { status: "ready" } : { status: "protected", reason: next.reason };
+    settleReadiness?.(terminal);
+    settleReadiness = undefined;
     if (next.status === "ready") notify();
     for (const listener of readinessListeners) listener({ ...next });
   }
@@ -498,16 +768,17 @@ export function createDayFrameStore(
       return { status: "notAvailable", reason: "noProtectedSource" } as const;
     }
     return protectedProfileSource === undefined
-      ? { status: "notAvailable", reason: "sourceUnreadable" } as const
-      : { status: "exported", raw: protectedProfileSource } as const;
+      ? ({ status: "notAvailable", reason: "sourceUnreadable" } as const)
+      : ({ status: "exported", raw: protectedProfileSource } as const);
   }
 
   function exportQuarantinedProfile(quarantineId: string) {
-    const entry = getQuarantinedProfiles().find((candidate) =>
-      candidate.quarantineId === quarantineId);
+    const entry = getQuarantinedProfiles().find(
+      (candidate) => candidate.quarantineId === quarantineId,
+    );
     return entry
-      ? { status: "exported", entry } as const
-      : { status: "notAvailable", reason: "missingEntry" } as const;
+      ? ({ status: "exported", entry } as const)
+      : ({ status: "notAvailable", reason: "missingEntry" } as const);
   }
 
   function getDesiredDurableCondition(): StoreDesiredDurableCondition {
@@ -818,8 +1089,11 @@ export function createDayFrameStore(
     return { status: "attempted", desiredCondition: "absent", persistence };
   }
 
-  function recheckProtectedProfileSource(): "unchanged" | "sourceChanged" | "sourceUnreadable" |
-    "noProtectedSource" {
+  function recheckProtectedProfileSource():
+    | "unchanged"
+    | "sourceChanged"
+    | "sourceUnreadable"
+    | "noProtectedSource" {
     if (profileIngressStatus.status !== "recoveryRequired") return "noProtectedSource";
     if (protectedProfileSource === undefined || protectedProfileSourceKey === undefined) {
       return "sourceUnreadable";
@@ -828,7 +1102,8 @@ export function createDayFrameStore(
       const storage = getStorage();
       if (!storage) return "sourceUnreadable";
       return storage.getItem(protectedProfileSourceKey) === protectedProfileSource
-        ? "unchanged" : "sourceChanged";
+        ? "unchanged"
+        : "sourceChanged";
     } catch {
       return "sourceUnreadable";
     }
@@ -901,19 +1176,29 @@ export function createDayFrameStore(
     if (profileIngressStatus.status === "recoveryRequired") {
       return { status: "notAttempted", reason: "profileRecovery" };
     }
-    const index = getQuarantinedProfiles().findIndex((entry) => entry.quarantineId === quarantineId);
+    const index = getQuarantinedProfiles().findIndex(
+      (entry) => entry.quarantineId === quarantineId,
+    );
     if (index === -1) return { status: "notAttempted", reason: "missingEntry" };
-    quarantinedProfiles = quarantinedProfiles.filter((_, candidateIndex) => candidateIndex !== index);
+    quarantinedProfiles = quarantinedProfiles.filter(
+      (_, candidateIndex) => candidateIndex !== index,
+    );
     retainProfileSnapshotIntent();
     const persistence = persistProfiles(state.savedProfiles, quarantinedProfiles);
     retainProfileWriteOutcome(persistence);
     if (persistence.status !== "persisted") {
-      transitionProfileIngress({ status: "accepted",
-        quarantinedEntryCount: quarantinedProfiles.length });
+      transitionProfileIngress({
+        status: "accepted",
+        quarantinedEntryCount: quarantinedProfiles.length,
+      });
     }
     notify();
-    return { status: "removed", quarantineId, persistence,
-      remainingCount: quarantinedProfiles.length };
+    return {
+      status: "removed",
+      quarantineId,
+      persistence,
+      remainingCount: quarantinedProfiles.length,
+    };
   }
 
   function subscribe(listener: (state: DayFrameState) => void): () => void {
@@ -1057,7 +1342,9 @@ export function createDayFrameStore(
     return { status: "applied", state: notify(), persistence };
   }
 
-  function setShiftCycles(shiftCycles: DayFrameAuthoredPattern["shiftCycles"]): StoreMutationResult {
+  function setShiftCycles(
+    shiftCycles: DayFrameAuthoredPattern["shiftCycles"],
+  ): StoreMutationResult {
     const candidate = buildAuthoredCandidate(state, { shiftCycles });
     const rejection = getValidationRejection(candidate);
 
@@ -1077,7 +1364,9 @@ export function createDayFrameStore(
     return { status: "applied", state: notify(), persistence };
   }
 
-  function setBlockTemplates(blockTemplates: DayFrameAuthoredPattern["blockTemplates"]): StoreMutationResult {
+  function setBlockTemplates(
+    blockTemplates: DayFrameAuthoredPattern["blockTemplates"],
+  ): StoreMutationResult {
     const candidate = buildAuthoredCandidate(state, { blockTemplates });
     const rejection = getValidationRejection(candidate);
 
@@ -1165,8 +1454,13 @@ export function createDayFrameStore(
       if (currentIndex === -1) {
         throw new RangeError("Cannot update a missing manual event.");
       }
-      return applyManualEvents(state.manualEvents.map((event, index) =>
-        index === currentIndex ? { ...mutation.event, incarnationId: event.incarnationId } : event));
+      return applyManualEvents(
+        state.manualEvents.map((event, index) =>
+          index === currentIndex
+            ? { ...mutation.event, incarnationId: event.incarnationId }
+            : event,
+        ),
+      );
     }
 
     if (mutation.operation === "replace") {
@@ -1174,7 +1468,9 @@ export function createDayFrameStore(
         currentIndex === -1
           ? [...state.manualEvents, { ...mutation.event, incarnationId: allocateIncarnation() }]
           : state.manualEvents.map((event, index) =>
-              index === currentIndex ? { ...mutation.event, incarnationId: allocateIncarnation() } : event,
+              index === currentIndex
+                ? { ...mutation.event, incarnationId: allocateIncarnation() }
+                : event,
             ),
       );
     }
@@ -1192,8 +1488,12 @@ export function createDayFrameStore(
       throw new RangeError("Profile name is required.");
     }
     if (profileIngressStatus.status === "recoveryRequired") {
-      return { status: "blocked", reason: "profileRecovery", state: getState(),
-        persistence: { status: "notAttempted", reason: "profileRecovery" } };
+      return {
+        status: "blocked",
+        reason: "profileRecovery",
+        state: getState(),
+        persistence: { status: "notAttempted", reason: "profileRecovery" },
+      };
     }
 
     const existingProfile = state.savedProfiles.find((profile) => profile.name === trimmedName);
@@ -1264,8 +1564,12 @@ export function createDayFrameStore(
 
   function deleteProfile(profileId: string): ProfileMutationResult {
     if (profileIngressStatus.status === "recoveryRequired") {
-      return { status: "blocked", reason: "profileRecovery", state: getState(),
-        persistence: { status: "notAttempted", reason: "profileRecovery" } };
+      return {
+        status: "blocked",
+        reason: "profileRecovery",
+        state: getState(),
+        persistence: { status: "notAttempted", reason: "profileRecovery" },
+      };
     }
     state = {
       ...state,
@@ -1281,7 +1585,8 @@ export function createDayFrameStore(
 
   async function clearLocalData(): Promise<ClearLocalDataResult> {
     const begun = authorityTransaction.begin("internalReplacement");
-    if (begun.status !== "begun") throw new DayFrameMutationAdmissionError("authorityTransactionActive");
+    if (begun.status !== "begun")
+      throw new DayFrameMutationAdmissionError("authorityTransactionActive");
     state = createInitialDayFrameState();
     desiredDurableCondition = {
       activeState: "absent",
@@ -1292,6 +1597,10 @@ export function createDayFrameStore(
     const planDecisions = planDecisionSurface.clearPlanDecisions();
     const executionHistoryPromise = executionHistorySurface.clearExecutionHistory();
     const historicalPlanPromise = historicalPlanSurface.clearHistoricalPlan();
+    const goalsPromise = goalSurface.clearGoals();
+    const measurementDefinitionsPromise =
+      measurementDefinitionSurface.clearMeasurementDefinitions();
+    const progressObservationsPromise = progressObservationSurface.clearProgressObservations();
     if (profiles.status === "removed") {
       transitionProfileIngress({ status: "noSource", reason: "missing" });
       quarantinedProfiles = [];
@@ -1305,30 +1614,85 @@ export function createDayFrameStore(
           : mapRemovalOutcomeToDurability(activeState),
       profiles: mapRemovalOutcomeToDurability(profiles),
     });
-    const [executionHistory, historicalRaw] = await Promise.all([executionHistoryPromise, historicalPlanPromise]);
-    const historicalPlan: PersistenceRemovalOutcome = historicalRaw.status === "success"
-      ? { status: "removed" } : { status: "storageFailure" };
-    const authorities = { active: activeState, profiles, planDecisions, executionHistory,
-      historicalPlan } satisfies FullClearAuthorityResults;
-    const successes = Object.values(authorities).filter((value) => value.status === "removed").length;
-    const status = successes === 5 ? "cleared" as const : successes === 0 ? "failed" as const
-      : "partiallyCleared" as const;
+    const [executionHistory, historicalRaw, goals, measurementDefinitions, progressObservations] =
+      await Promise.all([
+        executionHistoryPromise,
+        historicalPlanPromise,
+        goalsPromise,
+        measurementDefinitionsPromise,
+        progressObservationsPromise,
+      ]);
+    const historicalPlan: PersistenceRemovalOutcome =
+      historicalRaw.status === "success" ? { status: "removed" } : { status: "storageFailure" };
+    const authorities = {
+      active: activeState,
+      profiles,
+      planDecisions,
+      executionHistory,
+      historicalPlan,
+      goals,
+      measurementDefinitions,
+      progressObservations,
+    } satisfies FullClearAuthorityResults;
+    const successes = Object.values(authorities).filter(
+      (value) => value.status === "removed",
+    ).length;
+    const status =
+      successes === Object.keys(authorities).length
+        ? ("cleared" as const)
+        : successes === 0
+          ? ("failed" as const)
+          : ("partiallyCleared" as const);
     const committed = authorityTransaction.commit();
-    if (committed.status !== "committed") throw new Error("Full-clear authority notification commit failed.");
+    if (committed.status !== "committed")
+      throw new Error("Full-clear authority notification commit failed.");
     const snapshot = notify();
-    return { status, authorities: structuredClone(authorities), previewCleared: true, state: snapshot,
-      activeState, profiles, planDecisions, executionHistory, historicalPlan,
-      durability: status === "failed" ? "notCleared" : status };
+    return {
+      status,
+      authorities: structuredClone(authorities),
+      previewCleared: true,
+      state: snapshot,
+      activeState,
+      profiles,
+      planDecisions,
+      executionHistory,
+      historicalPlan,
+      goals,
+      measurementDefinitions,
+      progressObservations,
+      durability: status === "failed" ? "notCleared" : status,
+    };
   }
 
   function exportBackup(exportedAt: string) {
     return createDayFrameBackupV2(getActiveSetup(state), exportedAt);
   }
 
-  async function exportBackupV3(exportedAt: string): Promise<BackupV3ExportResult> {
+  async function exportBackupV3(
+    exportedAt: string,
+    allowGoals = false,
+    allowMeasurementDefinitions = false,
+  ): Promise<BackupV3ExportResult> {
+    if (!allowGoals && goalSurface.listGoals().length)
+      return {
+        status: "exportFailure",
+        reason: "Backup V3 cannot represent Goal authority; export Backup V4.",
+      };
+    if (
+      !allowMeasurementDefinitions &&
+      measurementDefinitionSurface.exportMeasurementDefinitionAuthority().definitions.length
+    )
+      return {
+        status: "exportFailure",
+        reason: "Backup V3 cannot represent Measurement Definition authority; export Backup V5.",
+      };
     if (readiness.status !== "ready") return { status: "initializing" };
-    if (!restoreComposition || authorityTransaction.getState().status !== "inactive" ||
-        restoreComposition.coordinator.getStatus() !== "idle") return { status: "restoreBusy" };
+    if (
+      !restoreComposition ||
+      authorityTransaction.getState().status !== "inactive" ||
+      restoreComposition.coordinator.getStatus() !== "idle"
+    )
+      return { status: "restoreBusy" };
     if (activeLocalIngressStatus.status === "recoveryRequired")
       return { status: "protectedSurface", surface: "active" };
     if (profileIngressStatus.status === "recoveryRequired")
@@ -1341,54 +1705,89 @@ export function createDayFrameStore(
       return { status: "protectedSurface", surface: "historicalPlan" };
     try {
       const historical = await historicalPlanSurface.exportHistoricalPlan();
-      if (historical.status !== "exported") return historical.status === "protected"
-        ? { status: "protectedSurface", surface: "historicalPlan" }
-        : { status: "exportFailure", reason: "historicalPlanUnavailable" };
-      const backup = createDayFrameBackupV3({
-        active: { surfaceVersion: 2, data: getActiveSetup(state) },
-        profiles: profilesV2BackupData(state.savedProfiles, quarantinedProfiles),
-        planDecisions: { surfaceVersion: 1,
-          decisions: planDecisionSurface.getPlanDecisions(),
-          quarantinedDecisions: planDecisionSurface.getQuarantinedPlanDecisions() },
-        executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope(),
-        historicalPlan: { surfaceVersion: 1, batches: historical.batches },
-      }, exportedAt);
-      return { status: "exported", backup: structuredClone(backup),
-        semanticFingerprint: backupV3SemanticFingerprint(backup) };
-    } catch (error) { return { status: error instanceof DayFrameBackupV3ValidationError
-      ? "validationFailure" : "exportFailure", reason: error instanceof Error
-        ? error.message : "Backup V3 export failed." }; }
+      if (historical.status !== "exported")
+        return historical.status === "protected"
+          ? { status: "protectedSurface", surface: "historicalPlan" }
+          : { status: "exportFailure", reason: "historicalPlanUnavailable" };
+      const backup = createDayFrameBackupV3(
+        {
+          active: { surfaceVersion: 2, data: getActiveSetup(state) },
+          profiles: profilesV2BackupData(state.savedProfiles, quarantinedProfiles),
+          planDecisions: {
+            surfaceVersion: 1,
+            decisions: planDecisionSurface.getPlanDecisions(),
+            quarantinedDecisions: planDecisionSurface.getQuarantinedPlanDecisions(),
+          },
+          executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope(),
+          historicalPlan: { surfaceVersion: 1, batches: historical.batches },
+        },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup: structuredClone(backup),
+        semanticFingerprint: backupV3SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status:
+          error instanceof DayFrameBackupV3ValidationError ? "validationFailure" : "exportFailure",
+        reason: error instanceof Error ? error.message : "Backup V3 export failed.",
+      };
+    }
   }
 
   async function importBackupV3(backupValue: unknown): Promise<BackupV3ImportResult> {
     if (!restoreComposition) return { status: "persistenceFailure" };
     if (readiness.status !== "ready") return { status: "initializing" };
     let backup;
-    try { backup = validateDayFrameBackupV3(structuredClone(backupValue)); }
-    catch { return { status: "invalidBackup" }; }
+    try {
+      backup = validateDayFrameBackupV3(structuredClone(backupValue));
+    } catch {
+      return { status: "invalidBackup" };
+    }
     const target = {
       active: createActiveV2(backup.data.active.data),
-      profiles: createDayFrameProfilesStorageV2(backup.data.profiles.profiles,
-        backup.data.profiles.quarantinedProfiles),
-      planDecisions: { app: "DayFrame" as const, surface: "planDecisions" as const,
-        version: 1 as const, decisions: [...backup.data.planDecisions.decisions,
+      profiles: createDayFrameProfilesStorageV2(
+        backup.data.profiles.profiles,
+        backup.data.profiles.quarantinedProfiles,
+      ),
+      planDecisions: {
+        app: "DayFrame" as const,
+        surface: "planDecisions" as const,
+        version: 1 as const,
+        decisions: [
+          ...backup.data.planDecisions.decisions,
           ...backup.data.planDecisions.quarantinedDecisions.map((entry) =>
-            structuredClone(entry.raw))] },
-      executionHistory: createExecutionHistoryDurableRestorePayload(
-        backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(
-        backup.data.historicalPlan.batches),
+            structuredClone(entry.raw),
+          ),
+        ],
+      },
+      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
+      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      goals: { version: 1 as const, goals: [] },
+      measurementDefinitions: { version: 1 as const, definitions: [] },
+      progressObservations: { version: 1 as const, observations: [] },
     };
     const result = await restoreComposition.coordinator.restore(target);
-    if (result.status === "completed") return { status: "restoredV3",
-      semanticFingerprint: backupV3SemanticFingerprint(backup) };
+    if (result.status === "completed")
+      return { status: "restoredV3", semanticFingerprint: backupV3SemanticFingerprint(backup) };
     if (result.status === "busy") return { status: "restoreBusy" };
-    if (result.status === "participantNotReady") return { status: "initializing",
-      ...(result.participantId ? { surface: result.participantId } : {}) };
-    if (result.status === "participantProtected") return { status: "protectedCurrentState",
-      ...(result.participantId ? { surface: result.participantId } : {}) };
-    if (result.status === "invalidTarget") return { status: "invalidBackup",
-      ...(result.participantId ? { surface: result.participantId } : {}) };
+    if (result.status === "participantNotReady")
+      return {
+        status: "initializing",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "participantProtected")
+      return {
+        status: "protectedCurrentState",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "invalidTarget")
+      return {
+        status: "invalidBackup",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
     if (result.status === "stagingFailed") return { status: "stagingFailure" };
     if (result.status === "sourceChanged") return { status: "sourceChanged" };
     if (result.status === "rolledBack") return { status: "rollbackCompleted" };
@@ -1397,13 +1796,322 @@ export function createDayFrameStore(
     return { status: "persistenceFailure" };
   }
 
+  async function exportBackupV4(
+    exportedAt: string,
+    allowMeasurementDefinitions = false,
+  ): Promise<BackupV4ExportResult> {
+    if (
+      !allowMeasurementDefinitions &&
+      measurementDefinitionSurface.exportMeasurementDefinitionAuthority().definitions.length
+    )
+      return {
+        status: "exportFailure",
+        reason: "Backup V4 cannot represent Measurement Definition authority; export Backup V5.",
+      };
+    const legacy = await exportBackupV3(exportedAt, true, true);
+    if (legacy.status !== "exported") return legacy as BackupV4ExportResult;
+    if (goalSurface.getGoalIngressStatus().status === "protected")
+      return { status: "protectedSurface", surface: "goals" } as BackupV4ExportResult;
+    try {
+      const backup = createDayFrameBackupV4(
+        { ...legacy.backup.data, goals: goalSurface.exportAuthority() },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV4SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "Backup V4 export failed.",
+      };
+    }
+  }
+  async function importBackupV4(value: unknown): Promise<BackupV4ImportResult> {
+    let backup;
+    try {
+      backup = validateDayFrameBackupV4(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    if (!restoreComposition) return { status: "persistenceFailure" };
+    const target = {
+      active: createActiveV2(backup.data.active.data),
+      profiles: createDayFrameProfilesStorageV2(
+        backup.data.profiles.profiles,
+        backup.data.profiles.quarantinedProfiles,
+      ),
+      planDecisions: {
+        app: "DayFrame" as const,
+        surface: "planDecisions" as const,
+        version: 1 as const,
+        decisions: [
+          ...backup.data.planDecisions.decisions,
+          ...backup.data.planDecisions.quarantinedDecisions.map((entry) =>
+            structuredClone(entry.raw),
+          ),
+        ],
+      },
+      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
+      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      goals: backup.data.goals,
+      measurementDefinitions: { version: 1 as const, definitions: [] },
+      progressObservations: { version: 1 as const, observations: [] },
+    };
+    const result = await restoreComposition.coordinator.restore(target);
+    if (result.status === "completed")
+      return { status: "restoredV4", semanticFingerprint: backupV4SemanticFingerprint(backup) };
+    if (result.status === "busy") return { status: "restoreBusy" };
+    if (result.status === "participantNotReady")
+      return {
+        status: "initializing",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "participantProtected")
+      return {
+        status: "protectedCurrentState",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "invalidTarget")
+      return {
+        status: "invalidBackup",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "rolledBack") return { status: "rollbackCompleted" };
+    if (result.status === "recoveryRequired" || result.status === "rollbackFailed")
+      return { status: "recoveryRequired" };
+    return { status: "persistenceFailure" };
+  }
+
   async function importBackupFile(backupValue: unknown) {
+    if (
+      typeof backupValue === "object" &&
+      backupValue !== null &&
+      "version" in backupValue &&
+      (backupValue as { version?: unknown }).version === 6
+    )
+      return importBackupV6(backupValue);
+    if (
+      typeof backupValue === "object" &&
+      backupValue !== null &&
+      "version" in backupValue &&
+      (backupValue as { version?: unknown }).version === 5
+    )
+      return importBackupV5(backupValue);
     let validated;
-    try { validated = validateDayFrameBackup(backupValue); }
-    catch (error) { return { status: "rejected" as const,
-      reason: error instanceof DayFrameBackupValidationError ? error.category
-        : "envelopeValidationFailure" as const }; }
-    return validated.version === 3 ? importBackupV3(validated) : importBackup(validated);
+    try {
+      validated = validateDayFrameBackup(backupValue);
+    } catch (error) {
+      return {
+        status: "rejected" as const,
+        reason:
+          error instanceof DayFrameBackupValidationError
+            ? error.category
+            : ("envelopeValidationFailure" as const),
+      };
+    }
+    return validated.version === 4
+      ? importBackupV4(validated)
+      : validated.version === 3
+        ? importBackupV3(validated)
+        : importBackup(validated);
+  }
+
+  async function exportBackupV5(
+    exportedAt: string,
+    allowProgressObservations = false,
+  ): Promise<BackupV5ExportResult> {
+    if (
+      !allowProgressObservations &&
+      progressObservationSurface.exportProgressObservationAuthority().observations.length
+    )
+      return {
+        status: "exportFailure",
+        reason: "Backup V5 cannot represent Progress Observation authority; export Backup V6.",
+      };
+    const legacy = await exportBackupV4(exportedAt, true);
+    if (legacy.status !== "exported") return legacy;
+    if (measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status === "protected")
+      return { status: "protectedSurface", surface: "measurementDefinitions" };
+    try {
+      const backup = createDayFrameBackupV5(
+        {
+          ...legacy.backup.data,
+          measurementDefinitions:
+            measurementDefinitionSurface.exportMeasurementDefinitionAuthority(),
+        },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV5SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "Backup V5 export failed.",
+      };
+    }
+  }
+  async function importBackupV5(value: unknown): Promise<BackupV5ImportResult> {
+    let backup;
+    try {
+      backup = validateDayFrameBackupV5(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    if (!restoreComposition) return { status: "persistenceFailure" };
+    const goals = new Set(backup.data.goals.goals.map((goal) => goal.id));
+    if (
+      validateMeasurementDefinitionAuthority(backup.data.measurementDefinitions, (id) =>
+        goals.has(id),
+      ).status === "invalid"
+    )
+      return { status: "invalidBackup" };
+    const target = {
+      active: createActiveV2(backup.data.active.data),
+      profiles: createDayFrameProfilesStorageV2(
+        backup.data.profiles.profiles,
+        backup.data.profiles.quarantinedProfiles,
+      ),
+      planDecisions: {
+        app: "DayFrame" as const,
+        surface: "planDecisions" as const,
+        version: 1 as const,
+        decisions: [
+          ...backup.data.planDecisions.decisions,
+          ...backup.data.planDecisions.quarantinedDecisions.map((entry) =>
+            structuredClone(entry.raw),
+          ),
+        ],
+      },
+      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
+      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      goals: backup.data.goals,
+      measurementDefinitions: backup.data.measurementDefinitions,
+      progressObservations: { version: 1 as const, observations: [] },
+    };
+    const result = await restoreComposition.coordinator.restore(target);
+    if (result.status === "completed")
+      return { status: "restoredV5", semanticFingerprint: backupV5SemanticFingerprint(backup) };
+    if (result.status === "busy") return { status: "restoreBusy" };
+    if (result.status === "participantNotReady")
+      return {
+        status: "initializing",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "participantProtected")
+      return {
+        status: "protectedCurrentState",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "invalidTarget")
+      return {
+        status: "invalidBackup",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "rolledBack") return { status: "rollbackCompleted" };
+    if (result.status === "recoveryRequired" || result.status === "rollbackFailed")
+      return { status: "recoveryRequired" };
+    return { status: "persistenceFailure" };
+  }
+
+  async function exportBackupV6(exportedAt: string): Promise<BackupV6ExportResult> {
+    const legacy = await exportBackupV5(exportedAt, true);
+    if (legacy.status !== "exported") return legacy;
+    if (progressObservationSurface.getProgressObservationIngressStatus().status === "protected")
+      return { status: "protectedSurface", surface: "progressObservations" };
+    try {
+      const backup = createDayFrameBackupV6(
+        {
+          ...legacy.backup.data,
+          progressObservations: progressObservationSurface.exportProgressObservationAuthority(),
+        },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV6SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "Backup V6 export failed.",
+      };
+    }
+  }
+  async function importBackupV6(value: unknown): Promise<BackupV6ImportResult> {
+    let backup;
+    try {
+      backup = validateDayFrameBackupV6(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    if (!restoreComposition) return { status: "persistenceFailure" };
+    const goals = new Set(backup.data.goals.goals.map((goal) => goal.id)),
+      definitions = new Map(
+        backup.data.measurementDefinitions.definitions.map((item) => [
+          `${item.id}|${item.revision}`,
+          item,
+        ]),
+      );
+    if (
+      validateProgressObservationAuthority(backup.data.progressObservations, {
+        goalExists: (id) => goals.has(id),
+        getDefinition: (id, revision) => definitions.get(`${id}|${revision}`),
+      }).status === "invalid"
+    )
+      return { status: "invalidBackup" };
+    const target = {
+      active: createActiveV2(backup.data.active.data),
+      profiles: createDayFrameProfilesStorageV2(
+        backup.data.profiles.profiles,
+        backup.data.profiles.quarantinedProfiles,
+      ),
+      planDecisions: {
+        app: "DayFrame" as const,
+        surface: "planDecisions" as const,
+        version: 1 as const,
+        decisions: [
+          ...backup.data.planDecisions.decisions,
+          ...backup.data.planDecisions.quarantinedDecisions.map((entry) =>
+            structuredClone(entry.raw),
+          ),
+        ],
+      },
+      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
+      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      goals: backup.data.goals,
+      measurementDefinitions: backup.data.measurementDefinitions,
+      progressObservations: backup.data.progressObservations,
+    };
+    const result = await restoreComposition.coordinator.restore(target);
+    if (result.status === "completed")
+      return { status: "restoredV6", semanticFingerprint: backupV6SemanticFingerprint(backup) };
+    if (result.status === "busy") return { status: "restoreBusy" };
+    if (result.status === "participantNotReady")
+      return {
+        status: "initializing",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "participantProtected")
+      return {
+        status: "protectedCurrentState",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "invalidTarget")
+      return {
+        status: "invalidBackup",
+        ...(result.participantId ? { surface: result.participantId } : {}),
+      };
+    if (result.status === "rolledBack") return { status: "rollbackCompleted" };
+    if (result.status === "recoveryRequired" || result.status === "rollbackFailed")
+      return { status: "recoveryRequired" };
+    return { status: "persistenceFailure" };
   }
 
   function importBackup(backup: Parameters<typeof validateDayFrameBackup>[0]): BackupImportResult {
@@ -1411,10 +2119,16 @@ export function createDayFrameStore(
     try {
       validatedBackup = validateDayFrameBackup(backup);
     } catch (error) {
-      return { status: "rejected", reason: error instanceof DayFrameBackupValidationError
-        ? error.category : "envelopeValidationFailure" };
+      return {
+        status: "rejected",
+        reason:
+          error instanceof DayFrameBackupValidationError
+            ? error.category
+            : "envelopeValidationFailure",
+      };
     }
-    if (validatedBackup.version === 3) return { status: "rejected", reason: "unsupportedVersion" };
+    if (validatedBackup.version === 3 || validatedBackup.version === 4)
+      return { status: "rejected", reason: "unsupportedVersion" };
     const validation = validateDayFrameAuthoredSetup(validatedBackup.data);
 
     if (validation.status === "invalid") {
@@ -1426,13 +2140,19 @@ export function createDayFrameStore(
 
     let restored: ActiveDayFrameAuthoredSetup;
     try {
-      restored = validatedBackup.version === 2
-        ? cloneActiveSetup(validatedBackup.data)
-        : instantiateActiveSetup(cloneDayFrameAuthoredSetup(validatedBackup.data),
-            allocateIncarnation);
+      restored =
+        validatedBackup.version === 2
+          ? cloneActiveSetup(validatedBackup.data)
+          : instantiateActiveSetup(
+              cloneDayFrameAuthoredSetup(validatedBackup.data),
+              allocateIncarnation,
+            );
     } catch {
-      return { status: "rejected", reason: validatedBackup.version === 1
-        ? "allocationFailure" : "incarnationValidationFailure" };
+      return {
+        status: "rejected",
+        reason:
+          validatedBackup.version === 1 ? "allocationFailure" : "incarnationValidationFailure",
+      };
     }
     state = { ...restored, savedProfiles: cloneSavedProfiles(state.savedProfiles), preview: null };
 
@@ -1480,14 +2200,22 @@ export function createDayFrameStore(
     };
 
     const snapshot = notify();
-    const materialized = materializePlanPublication({ authoredSetup: getActiveSetup(state), preview: state.preview,
-      providers: { now: () => {
-        const next = Math.max(Date.now(), lastHistoricalPlanPublicationMillis + 1);
-        lastHistoricalPlanPublicationMillis = next;
-        return new Date(next).toISOString();
-      } } });
+    const materialized = materializePlanPublication({
+      authoredSetup: getActiveSetup(state),
+      preview: state.preview,
+      goals: goalSurface.listGoals(),
+      providers: {
+        now: () => {
+          const next = Math.max(Date.now(), lastHistoricalPlanPublicationMillis + 1);
+          lastHistoricalPlanPublicationMillis = next;
+          return new Date(next).toISOString();
+        },
+      },
+    });
     if (materialized.status === "materialized") {
-      void historicalPlanSurface.publish(materialized.batch).then((result) => { lastHistoricalPlanPublicationResult = result; });
+      void historicalPlanSurface.publish(materialized.batch).then((result) => {
+        lastHistoricalPlanPublicationResult = result;
+      });
     } else lastHistoricalPlanPublicationResult = materialized;
     return snapshot;
   }
@@ -1507,6 +2235,12 @@ export function createDayFrameStore(
       selectedSuggestedFixId: input.selectedSuggestedFixId,
       dayBoundaryStartTime: state.schedulingPreferences.dayBoundaryStartTime,
       revisedAt: input.revisedAt,
+      getUserDayWindowForUserDayDate: (userDayDate) =>
+        resolveUserDayWindowForLabel({
+          shiftCycles: state.shiftCycles,
+          defaultSchedulingPreferences: state.schedulingPreferences,
+          userDayDate,
+        }),
     });
 
     state = {
@@ -1550,31 +2284,47 @@ export function createDayFrameStore(
         transitionReadiness({ status: "protected", reason: "authorityRecoveryRequired" });
         return;
       }
-      const hook = await (options.preBootstrapHook?.({ runtimeAuthority: authorityTransaction }) ?? Promise.resolve({ status: "continue" as const }));
+      const hook = await (options.preBootstrapHook?.({ runtimeAuthority: authorityTransaction }) ??
+        Promise.resolve({ status: "continue" as const }));
       if (hook.status === "protected") {
         transitionReadiness({ status: "protected", reason: hook.reason });
         return;
       }
+      await goalSurface.initializeGoals();
       await Promise.all([
         executionHistorySurface.initializeExecutionHistory(),
         historicalPlanSurface.initialize(),
+        measurementDefinitionSurface.initializeMeasurementDefinitions(),
       ]);
+      await progressObservationSurface.initializeProgressObservations();
       const executionStatus = executionHistorySurface.getExecutionHistoryMigrationStatus();
       const historicalStatus = historicalPlanSurface.getStatus();
-      const protectedParticipant = activeLocalIngressStatus.status === "recoveryRequired" ||
+      const protectedParticipant =
+        activeLocalIngressStatus.status === "recoveryRequired" ||
         profileIngressStatus.status === "recoveryRequired" ||
         planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired" ||
-        executionStatus === "protected" || executionStatus === "unavailable" ||
-        historicalStatus.status === "protected" || historicalStatus.status === "unavailable";
-      transitionReadiness(protectedParticipant
-        ? { status: "protected", reason: "authorityInitializationFailed" }
-        : { status: "ready" });
+        executionStatus === "protected" ||
+        executionStatus === "unavailable" ||
+        historicalStatus.status === "protected" ||
+        historicalStatus.status === "unavailable";
+      const goalProtected = goalSurface.getGoalIngressStatus().status === "protected";
+      const measurementProtected =
+        measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status === "protected";
+      const observationProtected =
+        progressObservationSurface.getProgressObservationIngressStatus().status === "protected";
+      transitionReadiness(
+        protectedParticipant || goalProtected || measurementProtected || observationProtected
+          ? { status: "protected", reason: "authorityInitializationFailed" }
+          : { status: "ready" },
+      );
     } catch {
       transitionReadiness({ status: "protected", reason: "authorityInitializationFailed" });
     }
   }
 
-  function getLastHistoricalPlanPublicationResult() { return lastHistoricalPlanPublicationResult; }
+  function getLastHistoricalPlanPublicationResult() {
+    return lastHistoricalPlanPublicationResult;
+  }
 
   const api: DayFrameStore = {
     getReadiness,
@@ -1619,6 +2369,12 @@ export function createDayFrameStore(
     exportBackupV3,
     importBackupV3,
     importBackupFile,
+    exportBackupV4,
+    importBackupV4,
+    exportBackupV5,
+    importBackupV5,
+    exportBackupV6,
+    importBackupV6,
     generatePreview,
     applySuggestedFixToPreview,
     getLastHistoricalPlanPublicationResult,
@@ -1628,6 +2384,10 @@ export function createDayFrameStore(
     getHistoricalPlanRange: historicalPlanSurface.getHistoricalPlanRange,
     getHistoricalCompletionDistribution,
     getHistoricalSchedulingRealization,
+    getGoalActivity,
+    queryGoalProgress,
+    queryGoalProgressObservationHistory,
+    queryToday,
     exportHistoricalPlan: historicalPlanSurface.exportHistoricalPlan,
     abandonProtectedHistoricalPlan: historicalPlanSurface.abandonProtectedHistoricalPlan,
     exportProtectedSource: historicalPlanSurface.exportProtectedSource,
@@ -1638,37 +2398,72 @@ export function createDayFrameStore(
     subscribeHistory: historicalPlanSurface.subscribeHistory,
     ...planDecisionSurface,
     ...executionHistorySurface,
+    ...goalSurface,
+    ...measurementDefinitionSurface,
+    ...progressObservationSurface,
   };
   const gatedMethods = new Set<PropertyKey>([
-    "retryActivePersistence", "retryProfilePersistence",
-    "replaceProtectedActiveCheckpointWithCurrentState", "abandonProtectedActiveCheckpointAndReset",
-    "replaceProtectedProfileCheckpointWithCurrentProfiles", "abandonProtectedProfileCheckpoint",
-    "removeQuarantinedProfile", "commitAuthoredSetup", "commitAuthoredSetupTransaction",
-    "setSchedulingPreferences", "setPreviewRange", "setShiftDefinitions", "setShiftCycles",
-    "setBlockTemplates", "setBlockRecurrences", "setManualEvents", "mutateManualEvent",
-    "saveProfile", "loadProfile", "deleteProfile", "clearLocalData", "exportBackup", "importBackup",
-    "generatePreview", "applySuggestedFixToPreview", "acceptPlanDecision", "removePlanDecision",
-    "retryPlanDecisionPersistence", "removeQuarantinedPlanDecision",
-    "replaceProtectedPlanDecisionCheckpoint", "abandonProtectedPlanDecisionCheckpoint",
-    "recordExecution", "correctExecutionRecord", "retractExecutionRecord",
-    "retryExecutionHistoryPersistence", "removeQuarantinedExecutionHistory",
-    "replaceProtectedExecutionHistoryCheckpoint", "abandonProtectedExecutionHistoryCheckpoint",
-    "retryExecutionHistoryMigration", "replaceProtectedExecutionHistoryIndexedDbCheckpoint",
-    "abandonProtectedExecutionHistoryIndexedDbCheckpoint", "retryPendingPublications",
+    "retryActivePersistence",
+    "retryProfilePersistence",
+    "replaceProtectedActiveCheckpointWithCurrentState",
+    "abandonProtectedActiveCheckpointAndReset",
+    "replaceProtectedProfileCheckpointWithCurrentProfiles",
+    "abandonProtectedProfileCheckpoint",
+    "removeQuarantinedProfile",
+    "commitAuthoredSetup",
+    "commitAuthoredSetupTransaction",
+    "setSchedulingPreferences",
+    "setPreviewRange",
+    "setShiftDefinitions",
+    "setShiftCycles",
+    "setBlockTemplates",
+    "setBlockRecurrences",
+    "setManualEvents",
+    "mutateManualEvent",
+    "saveProfile",
+    "loadProfile",
+    "deleteProfile",
+    "clearLocalData",
+    "exportBackup",
+    "importBackup",
+    "generatePreview",
+    "applySuggestedFixToPreview",
+    "acceptPlanDecision",
+    "removePlanDecision",
+    "retryPlanDecisionPersistence",
+    "removeQuarantinedPlanDecision",
+    "replaceProtectedPlanDecisionCheckpoint",
+    "abandonProtectedPlanDecisionCheckpoint",
+    "recordExecution",
+    "correctExecutionRecord",
+    "retractExecutionRecord",
+    "retryExecutionHistoryPersistence",
+    "removeQuarantinedExecutionHistory",
+    "replaceProtectedExecutionHistoryCheckpoint",
+    "abandonProtectedExecutionHistoryCheckpoint",
+    "retryExecutionHistoryMigration",
+    "replaceProtectedExecutionHistoryIndexedDbCheckpoint",
+    "abandonProtectedExecutionHistoryIndexedDbCheckpoint",
+    "retryPendingPublications",
     "abandonProtectedHistoricalPlan",
   ]);
   const wrappers = new Map<PropertyKey, unknown>();
-  const storeProxy = new Proxy(api, { get(target, property, receiver) {
-    const value = Reflect.get(target, property, receiver) as unknown;
-    if (!gatedMethods.has(property) || typeof value !== "function") return value;
-    if (!wrappers.has(property)) wrappers.set(property, (...args: unknown[]) => {
-      const admission = getDayFrameMutationAdmission(readiness,
-        authorityTransaction.getState().status !== "inactive");
-      if (!admission.allowed) throw new DayFrameMutationAdmissionError(admission.reason);
-      return (value as (...values: unknown[]) => unknown)(...args);
-    });
-    return wrappers.get(property);
-  } });
+  const storeProxy = new Proxy(api, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver) as unknown;
+      if (!gatedMethods.has(property) || typeof value !== "function") return value;
+      if (!wrappers.has(property))
+        wrappers.set(property, (...args: unknown[]) => {
+          const admission = getDayFrameMutationAdmission(
+            readiness,
+            authorityTransaction.getState().status !== "inactive",
+          );
+          if (!admission.allowed) throw new DayFrameMutationAdmissionError(admission.reason);
+          return (value as (...values: unknown[]) => unknown)(...args);
+        });
+      return wrappers.get(property);
+    },
+  });
   registerDayFrameRuntimeAuthorityController(storeProxy, authorityTransaction);
   if (restoreComposition) registerDayFrameRestoreComposition(storeProxy, restoreComposition);
   if (options.bootstrapMode !== "resolved-test") void bootstrapAuthority();
@@ -1676,7 +2471,11 @@ export function createDayFrameStore(
 }
 
 function getOptionalStorage(): Storage | undefined {
-  try { return globalThis.localStorage; } catch { return undefined; }
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return undefined;
+  }
 }
 
 function mergeInitialState(
@@ -1769,7 +2568,13 @@ function loadActiveLocalIngress(
       try {
         const parsedV2 = JSON.parse(rawV2) as unknown;
         if (isObjectRecord(parsedV2) && parsedV2.version !== 2) {
-          return createProtectedFallback("unsupportedVersion", true, true, rawV2, DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+          return createProtectedFallback(
+            "unsupportedVersion",
+            true,
+            true,
+            rawV2,
+            DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+          );
         }
         const active = validateActiveV2(parsedV2);
         return {
@@ -1778,7 +2583,13 @@ function loadActiveLocalIngress(
           activeDurability: "durable",
         };
       } catch {
-        return createProtectedFallback("structurallyInvalid", true, true, rawV2, DAYFRAME_ACTIVE_V2_STORAGE_KEY);
+        return createProtectedFallback(
+          "structurallyInvalid",
+          true,
+          true,
+          rawV2,
+          DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        );
       }
     }
     if (storage.getItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY) === "1") {
@@ -1806,7 +2617,14 @@ function loadActiveLocalIngress(
   try {
     parsedState = JSON.parse(rawState) as unknown;
   } catch {
-    return createProtectedFallback("corruptJson", true, true, rawState, DAYFRAME_STORAGE_KEY, "parseFailure");
+    return createProtectedFallback(
+      "corruptJson",
+      true,
+      true,
+      rawState,
+      DAYFRAME_STORAGE_KEY,
+      "parseFailure",
+    );
   }
 
   if (!isPersistedStateRecord(parsedState)) {
@@ -1839,50 +2657,113 @@ function loadActiveLocalIngress(
     try {
       active = instantiateActiveSetup(pattern, allocate);
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "allocationFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        rawState,
+        DAYFRAME_STORAGE_KEY,
+        "allocationFailure",
+      );
     }
 
     let envelope: ReturnType<typeof createActiveV2>;
     try {
       envelope = validateActiveV2(createActiveV2(active));
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "constructionFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        rawState,
+        DAYFRAME_STORAGE_KEY,
+        "constructionFailure",
+      );
     }
 
     let serialized: string;
     try {
       serialized = serializeActiveV2(envelope);
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "serializationFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        rawState,
+        DAYFRAME_STORAGE_KEY,
+        "serializationFailure",
+      );
     }
 
     try {
       storage.setItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY, serialized);
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, rawState, DAYFRAME_STORAGE_KEY, "writeFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        rawState,
+        DAYFRAME_STORAGE_KEY,
+        "writeFailure",
+      );
     }
 
     let reread: string | null;
     try {
       reread = storage.getItem(DAYFRAME_ACTIVE_V2_STORAGE_KEY);
     } catch {
-      return createProtectedFallback("migrationFailure", false, true, serialized, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        false,
+        true,
+        serialized,
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        "rereadFailure",
+      );
     }
     if (reread === null) {
-      return createProtectedFallback("migrationFailure", true, false, serialized, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        false,
+        serialized,
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        "rereadFailure",
+      );
     }
     try {
       validateActiveV2(JSON.parse(reread) as unknown);
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "rereadValidationFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        reread,
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        "rereadValidationFailure",
+      );
     }
     if (reread !== serialized) {
-      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "verificationFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        reread,
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        "verificationFailure",
+      );
     }
     try {
       storage.setItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY, "1");
     } catch {
-      return createProtectedFallback("migrationFailure", true, true, reread, DAYFRAME_ACTIVE_V2_STORAGE_KEY, "writeFailure");
+      return createProtectedFallback(
+        "migrationFailure",
+        true,
+        true,
+        reread,
+        DAYFRAME_ACTIVE_V2_STORAGE_KEY,
+        "writeFailure",
+      );
     }
     return {
       state: { ...active, savedProfiles: [], preview: null },
@@ -1904,7 +2785,10 @@ function createProtectedFallback(
   sourcePreserved: boolean,
   protectedSource?: string,
   protectedSourceKey = DAYFRAME_STORAGE_KEY,
-  migrationFailureDetail?: Extract<ActiveLocalIngressStatus, { status: "recoveryRequired" }>["migrationFailureDetail"],
+  migrationFailureDetail?: Extract<
+    ActiveLocalIngressStatus,
+    { status: "recoveryRequired" }
+  >["migrationFailureDetail"],
 ): ActiveLocalIngressRead {
   return {
     state: createInitialDayFrameState(),
@@ -1921,9 +2805,9 @@ function createProtectedFallback(
   };
 }
 
-function readActiveLocalSource(key: string):
-  | { status: "readable"; raw: string | null }
-  | { status: "unreadable" } {
+function readActiveLocalSource(
+  key: string,
+): { status: "readable"; raw: string | null } | { status: "unreadable" } {
   try {
     const storage = getStorage();
 
@@ -2034,9 +2918,15 @@ type ProfileIngressRead = {
 };
 
 function loadPersistedProfiles(serializeV2: (value: unknown) => string): ProfileIngressRead {
-  const empty = (status: ProfileIngressStatus, protectedSource?: string,
-    protectedSourceKey?: string): ProfileIngressRead => ({
-    profiles: [], quarantinedProfiles: [], status, durability: "unknown",
+  const empty = (
+    status: ProfileIngressStatus,
+    protectedSource?: string,
+    protectedSourceKey?: string,
+  ): ProfileIngressRead => ({
+    profiles: [],
+    quarantinedProfiles: [],
+    status,
+    durability: "unknown",
     ...(protectedSource !== undefined ? { protectedSource } : {}),
     ...(protectedSourceKey !== undefined ? { protectedSourceKey } : {}),
   });
@@ -2062,8 +2952,11 @@ function loadPersistedProfiles(serializeV2: (value: unknown) => string): Profile
     try {
       const parsed = JSON.parse(rawV2) as unknown;
       if (isObjectRecord(parsed) && parsed.version !== 2) {
-        return empty({ status: "recoveryRequired", reason: "unsupportedVersion", sourcePreserved: true },
-          rawV2, DAYFRAME_PROFILES_V2_STORAGE_KEY);
+        return empty(
+          { status: "recoveryRequired", reason: "unsupportedVersion", sourcePreserved: true },
+          rawV2,
+          DAYFRAME_PROFILES_V2_STORAGE_KEY,
+        );
       }
       const validated = validateDayFrameProfilesStorageV2(parsed);
       return {
@@ -2073,8 +2966,11 @@ function loadPersistedProfiles(serializeV2: (value: unknown) => string): Profile
         durability: "durable",
       };
     } catch {
-      return empty({ status: "recoveryRequired", reason: "invalidV2", sourcePreserved: true },
-        rawV2, DAYFRAME_PROFILES_V2_STORAGE_KEY);
+      return empty(
+        { status: "recoveryRequired", reason: "invalidV2", sourcePreserved: true },
+        rawV2,
+        DAYFRAME_PROFILES_V2_STORAGE_KEY,
+      );
     }
   }
 
@@ -2098,62 +2994,122 @@ function loadPersistedProfiles(serializeV2: (value: unknown) => string): Profile
   try {
     converted = convertDayFrameProfilesStorageV1(JSON.parse(rawV1) as unknown);
   } catch (error) {
-    return empty({ status: "recoveryRequired",
-      reason: error instanceof SyntaxError ? "corruptJson" : "invalidCollection",
-      sourcePreserved: true }, rawV1, DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: error instanceof SyntaxError ? "corruptJson" : "invalidCollection",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
-  const envelope = createDayFrameProfilesStorageV2(converted.profiles, converted.quarantinedProfiles);
+  const envelope = createDayFrameProfilesStorageV2(
+    converted.profiles,
+    converted.quarantinedProfiles,
+  );
   let serialized: string;
   try {
     serialized = serializeV2(envelope);
   } catch {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "serializationFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "serializationFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   try {
     storage.setItem(DAYFRAME_PROFILES_V2_STORAGE_KEY, serialized);
   } catch {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "writeFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "writeFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   let reread: string | null;
   try {
     reread = storage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY);
   } catch {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "rereadFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "rereadFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   if (reread === null) {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "rereadFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "rereadFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   try {
     validateDayFrameProfilesStorageV2(JSON.parse(reread) as unknown);
   } catch {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "rereadValidationFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "rereadValidationFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   if (reread !== serialized) {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "verificationFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "verificationFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
   try {
     storage.setItem(DAYFRAME_PROFILES_V2_ESTABLISHED_KEY, "1");
   } catch {
-    return empty({ status: "recoveryRequired", reason: "migrationFailure",
-      failureDetail: "writeFailure", sourcePreserved: true }, rawV1,
-      DAYFRAME_PROFILES_STORAGE_KEY);
+    return empty(
+      {
+        status: "recoveryRequired",
+        reason: "migrationFailure",
+        failureDetail: "writeFailure",
+        sourcePreserved: true,
+      },
+      rawV1,
+      DAYFRAME_PROFILES_STORAGE_KEY,
+    );
   }
-  return { profiles: cloneSavedProfiles(converted.profiles),
+  return {
+    profiles: cloneSavedProfiles(converted.profiles),
     quarantinedProfiles: structuredClone(converted.quarantinedProfiles),
     status: { status: "accepted", quarantinedEntryCount: converted.quarantinedProfiles.length },
-    durability: "durable" };
+    durability: "durable",
+  };
 }
 
 function getAuthoredSetup(state: DayFrameState) {
@@ -2187,7 +3143,9 @@ export function persistProfiles(
   let serializedProfiles: string;
 
   try {
-    serializedProfiles = JSON.stringify(createDayFrameProfilesStorageV2(profiles, quarantinedProfiles));
+    serializedProfiles = JSON.stringify(
+      createDayFrameProfilesStorageV2(profiles, quarantinedProfiles),
+    );
   } catch {
     return { status: "serializationFailure" };
   }
@@ -2362,7 +3320,8 @@ function clonePreviewResult(result: DayFramePreview["result"]): DayFramePreview[
       })),
     })),
     planDecisionResults: result.planDecisionResults.map((replayResult) =>
-      structuredClone(replayResult)),
+      structuredClone(replayResult),
+    ),
   };
 }
 

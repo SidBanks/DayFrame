@@ -14,6 +14,323 @@ record.
 
 ---
 
+# 2026-08-25 — Phase 6 Product-Surface Convergence Completed
+
+Task 6.11 validated the production Planner, Today, and Summary application in
+Chromium across desktop/mobile widths, keyboard/focus, accessibility-tree semantics,
+slow lazy loading, Commitment/Event/Review workflows, and 22/24/26-hour user-days.
+One P2 Generate Schedule focus-loss defect was fixed by focusing the Review heading.
+All 90 test files/934 tests and unchanged bundle guards pass. The Phase 6 publication
+checkpoint is created; Phase 7 planning is next with no feature pre-authorized.
+
+# 2026-08-25 — Planner Exact Identity and Commitment Authoring Completed
+
+Task 6.10 added non-durable Preview navigation provenance for exact template and
+recurrence incarnations, with current-draft revalidation after lazy Plan loading.
+Stale removed/recreated sources no longer retarget. Specific-weekday and times-per-
+user-week recurrence are now completely validated in the bounded editor; unsupported
+existing recurrence remains preserved. Duplicate advanced Add/Delete Block Template
+controls were removed and directly related schedule terminology was cleaned. No
+authority, schema, dependency, scheduler policy, or bundle threshold changed.
+
+# 2026-08-25 — Phase 6 Surface-Convergence Audit Requires Bounded Remediation
+
+Task 6.9 audited the implemented Planner, Today, and Summary surfaces and selected
+Outcome B. Surface ownership, canonical authorities, temporal semantics, loading,
+and baseline validation are coherent, but stale Review Commitment navigation can
+retarget a recreated source, bounded recurrence authoring can create incomplete
+intent, and advanced Setup duplicates a raw Commitment path. Task 6.10 will repair
+those Planner gaps; Task 6.11 will complete browser accessibility/mobile and
+publication validation. No production code, authority, ADR, or threshold changed.
+
+# 2026-08-25 — Planner Contextual Event and Friction Workflows Converged
+
+Task 6.8 added selected-day Add Event, exact Edit Event/Commitment, truthful Work
+configuration navigation, and explicit return paths from Review Schedule. It reuses
+the existing editors and preserves immediate Event writes, SetupDraft/Save Setup,
+derived Try, bounded PlanDecision Apply, variable user-days, history isolation, and
+lazy Plan authoring. No authority, dependency, scheduler, or friction semantics
+were added.
+
+# 2026-08-25 — Commitment Authoring Converged
+
+Task 6.7 added a product-facing Commitment inventory and bounded Add/Edit/Remove
+workflow derived from exact block-template/recurrence identity. The single Setup
+draft and Save Setup persistence boundary remain canonical; Work configuration,
+manual events, Goals, schedule staleness, Today, Summary, and history semantics are
+unchanged. No Commitment or Pattern authority was added. Plan authoring now loads
+as an intentional production chunk, recovering sustainable eager bundle headroom.
+
+# 2026-08-25 — Planner Schedule Review Converged
+
+Task 6.6 replaced the product-facing Schedule/Preview workflow with Plan / Review
+Schedule terminology and composition. Generate/Refresh Schedule, fresh/stale/empty
+states, arbitrary planning range, selected user-day filtering, variable-duration
+visualization, plan attention, and deterministic conflict resolutions now read as
+one Planner workflow. Existing Preview, HistoricalPlan publication, Try,
+PlanDecision, profile, restore, and clear semantics are preserved. Execution
+reporting is excluded from Planner. Fixed bundle budgets remain green and Task 6.7
+is authorized.
+
+# 2026-08-24 — Today Outcome Reporting Integrated
+
+Task 6.5 added exact-occurrence Completed, Partial, and Skipped reporting to Today
+through existing mutation-admitted ExecutionHistory commands. Correction and
+confirmed removal preserve append-only evidence; protected and plan-attention
+states remain non-writing. Accepted user actions advance the local Today evaluation
+cutoff and canonical re-query, while passive authority changes preserve cutoff.
+Today stays lazy and all unchanged bundle budgets remain green. Task 6.6 is
+authorized.
+
+# 2026-08-24 — Read-Only Today V1 Surface Implemented
+
+Task 6.4 replaced the Today placeholder with a canonical-query-only operational
+surface for exact user-day windows, all-day/timed/legacy groups, chronology,
+explicit outcomes, protection states, and plan attention. Refresh is explicit,
+authority invalidation preserves cutoff, stale requests cannot resurrect old state,
+and no writes exist. Today presentation/query are lazy and budgets remain green.
+
+# 2026-08-24 — Canonical Today Read Model Implemented
+
+Task 6.3 added one explicit-time `queryToday` application query over canonical
+piecewise user-day ownership, effective HistoricalPlan authority, and exact
+cutoff-governed ExecutionHistory outcomes. It preserves known-empty/missing/protected
+states, all-day/timed/legacy timing, current/next/later/elapsed groups, plan
+attention, exact identity, and epistemic separation. The derived query is lazy and
+non-persisted; no Today UI or write was added. Task 6.4 is authorized.
+
+# 2026-08-24 — HistoricalPlan V2 Timing Provenance Implemented
+
+Task 6.3C added strict occurrence snapshot V2 with required `allDay`/`timed`
+provenance while leaving V1 unchanged and explicitly timing-unavailable. New
+publications derive timing only from authoritative source semantics. Fingerprints,
+cloning, JSON, IndexedDB mixed history, cutoff reads, Backup V6, restore,
+protection, and full clear preserve the distinction without a wider version bump.
+Together with Task 6.3B, both Task 6.3 blockers are resolved and Task 6.3 may resume.
+
+# 2026-08-24 — Canonical Piecewise User-Day Windows Implemented
+
+Task 6.3B implemented label-specific consecutive user-day starts and remediated
+work ownership, recurrence/week lookup, placement and fix bounds, manual all-day
+expansion, Preview overlap/clipping, and actual-duration visualization. Stable
+regimes remain compatible; transition days may be short/long. No authority or
+HistoricalPlan schema changed. Task 6.3C remains the next prerequisite.
+
+# 2026-08-24 — User-Day Transition and Historical All-Day Architecture Accepted
+
+Task 6.3A adopted consecutive label-indexed user-day starts, making boundary
+transition days explicitly variable-duration and uniquely owned. It also adopted
+HistoricalPlan occurrence snapshot V2 with required tagged all-day/timed provenance
+while preserving V1 absence as unavailable legacy. Two separate implementation
+prerequisites, Tasks 6.3B and 6.3C, now gate resumption of Task 6.3. No production
+behavior or durable schema changed in this audit.
+
+# 2026-08-24 — Task 6.3 Stopped for Today Time/Publication Semantics
+
+The Today read-model audit found two mandatory architecture prerequisites. Variable
+segment day boundaries can create gaps or overlaps without a transition precedence,
+and HistoricalPlan V1 does not preserve the all-day marker. No read model or
+production behavior was added; a bounded architecture audit must resolve these
+semantics before Task 6.3 resumes.
+
+# 2026-08-24 — Planner / Today / Summary Application Boundaries Established
+
+Extracted an eager Planner product surface, added a truthful authority-free Today
+surface foundation, and introduced one canonical three-way navigation state while
+preserving Planner Plan/Schedule behavior and lazy Summary. Store, draft, recovery,
+restore, Backup, clear, authority, and write-path ownership remain unchanged.
+
+# 2026-08-24 — Phase 6 Product-Convergence Audit Completed
+
+Audited the current planning, publication, execution, user-day, Goal/Progress,
+friction, navigation, and loading architecture. Determination A accepts Planner /
+Today / Summary as the mature boundary, with month as a Planner presentation and
+Today as the canonical current user-day. Existing authorities suffice; Task 6.2
+should establish bounded surface/application composition before Today semantics.
+
+# 2026-08-24 — Phase 5 Production Bundle Exit Gate Passed
+
+Measured the production dependency graph, deferred Summary behind an accessible
+lazy boundary, isolated the React runtime for caching, and added automated initial,
+lazy, gzip, and total-JavaScript budgets. Authority/bootstrap/restore and default
+Planner remain eager. Phase 5 is complete through Task 5.19.
+
+# 2026-08-24 — Summary Progress V1 and Provenance Implemented
+
+Added quantity-first, read-only Manual Quantity Progress to Summary using the
+existing Goal selector and shared cutoff. Progress provenance and Planner-only
+handoffs are available while Goal Activity remains a separate sibling analysis.
+
+# 2026-08-24 — Progress Observation Reporting V1 UX Implemented
+
+Added Planner selected-Goal absolute quantity reporting, correction, canonical
+retraction, and a derived Goal-scoped logical-record history grouped by exact current
+and prior Measurement periods. Summary and derived Progress remain deferred.
+
+# 2026-08-24 — Goal Measurement Configuration V1 UX Implemented
+
+Added canonical Manual Quantity setup/change/stop/restart to selected Planner Goal
+detail with distinct authority states, ephemeral drafts, durability/conflict handling,
+and accessible focus while preserving all adjacent authority boundaries.
+
+# 2026-08-23 — Progress Product Workflow Split into Bounded Slices
+
+Audited the implemented Goal, Measurement Definition, Progress Observation,
+Progress projection, Planner, and Summary boundaries. Selected Planner Goal detail
+for measurement configuration and one canonical Planner-owned reporting flow for
+record/correct/remove-invalid-record actions, with Summary providing navigation
+rather than inline writes. Recommended quantity-first Progress and provenance under
+a shared Goal context, distinct from Goal Activity. Identified one bounded
+Observation-UX prerequisite: a Goal-scoped history read model including retracted
+lineages. Reserved separate Measurement, Observation, Summary, and bundle-exit tasks.
+
+# 2026-08-23 — Manual Quantity Progress V1 Projection Implemented
+
+Added a pure application query that resolves one Goal's exact effective Manual
+Quantity definition and compatible observation at an explicit cutoff. It preserves
+raw quantity/target/unit and complete provenance, derives an unclamped arithmetic
+comparison and canonical percentage using bounded BigInt scaled-decimal division,
+and keeps missing definition, unsupported policy, insufficient evidence, known zero,
+and authority protection distinct. Progress is not persisted and no UI was added.
+
+# 2026-08-23 — Progress Observation V1 Durable Evidence Added
+
+Added an eighth independent durable authority for absolute measured Goal-state
+evidence. Observations use opaque immutable revision lineages, preserve exact
+Goal/Measurement Definition revision/unit binding through correction and retraction,
+and distinguish measurement time from knowledge time for reproducible as-of queries.
+Backup V6, legacy-empty restore translation, runtime transactions, rollback/recovery,
+and full clear now include the authority. Progress calculation and UI remain deferred.
+
+# 2026-08-23 — Measurement Definition V1 Durable Authority Implemented
+
+Implemented the independent revisioned Measurement Definition authority, bounded
+manual-quantity policy and built-in unit registries, protected durable lifecycle,
+seven-authority runtime/full-clear participation, and transactional Backup V5
+export/import/rollback. Backup V4 remains readable as an explicitly empty
+Measurement Definition authority and cannot represent non-empty definitions.
+Progress observations and derived Progress remain deferred to Task 5.13 onward.
+
+# 2026-08-23 — Measurement Definition V1 Authority Architecture Finalized
+
+Defined measurement semantics as an independent durable authority with one stable
+lineage per Goal, immutable revision epochs, exact future observation binding,
+non-overlapping save-time intervals, and no normal deletion. Bounded the first
+policy to absolute manual quantity toward a positive canonical-decimal target in
+an exact built-in unit, without baseline or conversion. Selected a complete durable
+Task 5.12 implementation with Backup V5; no authority or Progress was implemented.
+
+---
+
+# 2026-08-23 — Progress Deferred Pending Measurement Substrate
+
+Audited Progress V1 and rejected Goal Activity, execution outcomes, target dates,
+and Goal lifecycle as universal measurement. A useful percentage requires explicit
+same-unit target, baseline, direction, policy, cutoff, and evidence semantics.
+Selected manual quantity as the first eventual policy, backed by future revisioned
+measurement definitions and durable user observations; derived Progress remains
+non-persisted. Task 5.11 defines the measurement-definition authority boundary.
+
+---
+
+# 2026-08-23 — Goal Activity V1 Added to Summary
+
+Added one bounded, read-only Goal Activity section to Summary with explicit
+lifecycle-grouped Goal selection, current authored context, the shared historical
+range/cutoff, separate plan/Goal-link/reporting coverage, categorical Planning and
+Execution evidence, accessible drill-down, protected-state degradation, and a
+navigation-only Planner handoff. Generic historical analyses remain unchanged;
+Progress, scoring, Recommendations, adaptation, persistence, and schema changes
+remain deferred.
+
+---
+
+# 2026-08-23 — Goal Activity Summary Integration Audited
+
+Accepted a bounded read-only Goal Activity section within Summary's existing
+History panel: explicit Goal selection, shared range/cutoff, three compact coverage
+rows, nested categorical planning/outcome counts, and existing-style evidence
+drill-down. Defined known-zero, legacy, missing, protected, current/frozen-label,
+accessibility, mobile, and Planner-handoff behavior. No UI or product behavior was
+implemented; Task 5.9 is next.
+
+---
+
+# 2026-08-23 — Goal Activity V1 Pure Projection Implemented
+
+Added a deterministic non-persisted Goal Activity query with explicit policy,
+current Goal context, frozen historical membership, categorical linked planning
+and scheduled-outcome distributions, three independent coverage dimensions,
+legacy/known-zero/protection states, and explanatory provenance. ExecutionHistory
+protection degrades only execution interpretation. No UI, persistence, score,
+percentage, Progress, Recommendation, or scheduling behavior was introduced.
+
+---
+
+# 2026-08-23 — Historical Goal-Link Coverage Ambiguity Remediated
+
+New HistoricalPlan publications now serialize `goals: []` when Goal relationships
+were observed but none matched; absent `goals` retains legacy/unavailable meaning.
+Validation, clone/JSON persistence, canonical fingerprints, Backup V4, restore, and
+republication preserve linked, known-empty, and legacy-unknown states without
+migration or version bump. Goal Activity, Progress, and UI remain deferred.
+
+---
+
+# 2026-08-23 — Goal Progress Readiness Audited
+
+Confirmed frozen linked Goal provenance, exact ExecutionHistory correlation,
+categorical planning/outcome evidence, and derived non-persistent query reuse.
+Progress is not ready: legacy provenance-unavailable and Goal-aware known-unlinked
+occurrences both omit the Goal field. Sequenced Task 5.6 to establish explicit
+historical Goal-link coverage before a categorical Goal Activity V1 projection.
+No production code, schema, UI, metric, or Progress behavior was added.
+
+---
+
+# 2026-08-23 — Planner Goal V1 Workflow Implemented
+
+Added a bounded Goals section to Planner / Plan with explicit independent create
+and edit drafts, lifecycle actions, exact current commitment link management,
+unavailable-link explanation, protected/durability states, keyboard semantics, and
+responsive layouts. Goal edits remain separate from Save Setup and have no
+Schedule or Summary authoring effect. Progress, scoring, Recommendations, and
+adaptation remain deferred pending Task 5.5's evidence-readiness audit.
+
+---
+
+# 2026-08-23 — Goal V1 Durable Authority Implemented
+
+Implemented Goal V1 domain and independent IndexedDB authority, revision-guarded
+lifecycle/link commands, protected bootstrap, six-authority runtime/restore/full-
+clear integration, Backup V4, explicit Backup V3 translation, and frozen
+HistoricalPlan Goal provenance. Settings now exports Backup V4. Scheduling,
+Progress, Recommendations, and Goal UI remain unchanged or deferred; Task 5.4 is
+the bounded Planner Goal UX.
+
+---
+
+# 2026-08-23 — Goal V1 Durable Contract Finalized
+
+Defined Goal V1 as independent archive-only authored authority with stable IDs,
+revision-based staleness, explicit lifecycle, and Goal-owned exact commitment-
+incarnation links. Required historical provenance and complete Backup/restore/
+clear integration before UI, and sequenced the bounded substrate implementation
+next. No production Goal model or behavior was added.
+
+---
+
+# 2026-08-23 — Phase 5 Prescriptive-Intelligence Architecture Defined
+
+Defined Goals as future independent authored authority, Progress as governed
+derived interpretation, Recommendations as ephemeral explainable proposals, and
+RecommendationDecision as the future durable record of user choice. Adaptation is
+separate and requires explicit Planner acceptance; Summary remains read-only and
+historical evidence cannot redefine user intent. Sequenced Goal semantics first;
+no production type, persistence, Backup, UI, or behavior was added.
+
+---
+
 # 2026-08-23 — Phase 4 Completed and Published
 
 Closed Phase 4 as Historical Intelligence Foundation and Planner/Summary Product
@@ -399,13 +716,13 @@ classification layer.
 
 Covered workflows include:
 
-* authored Setup save;
-* manual-event create/edit/delete;
-* profile save;
-* profile delete;
-* profile load;
-* backup import;
-* clear local data.
+- authored Setup save;
+- manual-event create/edit/delete;
+- profile save;
+- profile delete;
+- profile load;
+- backup import;
+- clear local data.
 
 A runtime/session transition can now be represented as successful while its durable
 persistence is accurately represented as unresolved.
@@ -431,11 +748,11 @@ subscribeDurability()
 
 The surface:
 
-* independently represents active-state and profile durability;
-* remains silent for `unknown`;
-* remains silent for `durable`;
-* persists known retryable/recovery-required failures across workflow navigation;
-* automatically clears when retained durability converges.
+- independently represents active-state and profile durability;
+- remains silent for `unknown`;
+- remains silent for `durable`;
+- persists known retryable/recovery-required failures across workflow navigation;
+- automatically clears when retained durability converges.
 
 Immediate workflow feedback remains separate and operation-specific.
 
@@ -515,11 +832,11 @@ deferred until the authored-data architecture is sufficiently stable.
 
 Persistent recovery-required awareness now explicitly communicates that:
 
-* current changes remain available for the active session;
-* those changes are not durably saved;
-* ordinary Retry is unavailable;
-* reloading or closing DayFrame may discard those session-only changes;
-* an older saved representation may return.
+- current changes remain available for the active session;
+- those changes are not durably saved;
+- ordinary Retry is unavailable;
+- reloading or closing DayFrame may discard those session-only changes;
+- an older saved representation may return.
 
 No recovery button, rollback, reset, export promise, unload interception, or
 model-specific repair behavior was introduced.
@@ -535,11 +852,11 @@ The durability sequence is complete for the current Phase 1 boundary.
 
 Task 1.39 completed with:
 
-* lint passed;
-* type checking passed;
-* 23 test files / 366 tests passed;
-* production build passed;
-* affected-scope diff validation passed.
+- lint passed;
+- type checking passed;
+- 23 test files / 366 tests passed;
+- production build passed;
+- affected-scope diff validation passed.
 
 ---
 
@@ -558,11 +875,11 @@ DayFrame now treats durable authored data it writes or exports as user data.
 
 Historical representations require explicit:
 
-* compatibility;
-* migration;
-* conversion;
-* recovery;
-* or intentional unsupported-format handling;
+- compatibility;
+- migration;
+- conversion;
+- recovery;
+- or intentional unsupported-format handling;
 
 rather than silent degradation.
 
@@ -606,10 +923,10 @@ surface.
 Compatibility readers protecting DayFrame-produced historical data may not be
 removed merely because:
 
-* current writers no longer emit that representation;
-* significant time has passed;
-* a newer version exists;
-* current tests use only the newer representation.
+- current writers no longer emit that representation;
+- significant time has passed;
+- a newer version exists;
+- current tests use only the newer representation.
 
 Reader retirement requires explicit architectural authorization and
 surface-appropriate migration/recovery evidence.
@@ -635,10 +952,10 @@ No historical reader was removed by the governance decision.
 
 Task 1.22 baseline:
 
-* lint passed;
-* type checking passed;
-* 22 test files / 244 tests passed;
-* production build passed.
+- lint passed;
+- type checking passed;
+- 22 test files / 244 tests passed;
+- production build passed.
 
 ---
 
@@ -684,9 +1001,9 @@ DayFrameState.shiftCycle
 
 along with:
 
-* store-initialization singular fallback;
-* initial-state singular mirror synthesis;
-* snapshot/clone singular mirror synthesis.
+- store-initialization singular fallback;
+- initial-state singular mirror synthesis;
+- snapshot/clone singular mirror synthesis.
 
 Current runtime authority is:
 
@@ -698,10 +1015,10 @@ DayFrameState.shiftCycles
 
 Removed singular cycle collection aliases from:
 
-* `generateBlockCandidates`;
-* `getActiveShiftSegment`;
-* `generateCycleWorkBlocks`;
-* `generateSchedulePreview`.
+- `generateBlockCandidates`;
+- `getActiveShiftSegment`;
+- `generateCycleWorkBlocks`;
+- `generateSchedulePreview`.
 
 Current scheduling collection vocabulary is plural-only:
 
@@ -730,9 +1047,9 @@ Normalized authored data is plural-only.
 
 Historical singular `shiftCycle` remains accepted only at raw ingress for:
 
-* legacy local persisted state;
-* legacy saved profiles;
-* legacy V1 backups.
+- legacy local persisted state;
+- legacy saved profiles;
+- legacy V1 backups.
 
 Those readers normalize historical data into plural current authority before it
 enters normalized authored state/runtime scheduling.
@@ -781,12 +1098,12 @@ Singular compatibility no longer competes with current architectural authority.
 
 ## Changed
 
-* Standard local backup export now produces complete-authority Backup V3 across Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan while retaining V1/V2 import compatibility.
+- Standard local backup export now produces complete-authority Backup V3 across Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan while retaining V1/V2 import compatibility.
 
-* Removed the obsolete `PreviewScreenContainer` application path after
+- Removed the obsolete `PreviewScreenContainer` application path after
   investigation established that it was not part of supported production Preview
   coordination.
-* Preserved the supported application-level Preview path through:
+- Preserved the supported application-level Preview path through:
 
 ```text
 DayFrameApp
@@ -796,12 +1113,12 @@ PreviewScreen
 
 ## Preserved
 
-* Preview generation semantics;
-* Preview revision behavior;
-* friction detection;
-* suggested fixes;
-* scheduling behavior;
-* application navigation.
+- Preview generation semantics;
+- Preview revision behavior;
+- friction detection;
+- suggested fixes;
+- scheduling behavior;
+- application navigation.
 
 ---
 
@@ -809,29 +1126,29 @@ PreviewScreen
 
 ## Added
 
-* Added one store-owned operation for committing the complete authored Setup
+- Added one store-owned operation for committing the complete authored Setup
   payload.
-* Added transaction-level coverage for cloning, state preservation, Preview
+- Added transaction-level coverage for cloning, state preservation, Preview
   staleness, persistence compatibility, and single-snapshot observation.
 
 ## Changed
 
-* Replaced the UI-coordinated six-mutation Setup save with one authoritative store
+- Replaced the UI-coordinated six-mutation Setup save with one authoritative store
   transition.
-* Reduced each Setup save from six persistence writes and notifications to one of
+- Reduced each Setup save from six persistence writes and notifications to one of
   each without changing final authored state or supported user behavior.
 
 ## Preserved
 
-* persistence keys and schema;
-* historical compatibility;
-* deterministic scheduling;
-* profiles;
-* backups;
-* manual events;
-* navigation;
-* validation;
-* generation behavior.
+- persistence keys and schema;
+- historical compatibility;
+- deterministic scheduling;
+- profiles;
+- backups;
+- manual events;
+- navigation;
+- validation;
+- generation behavior.
 
 ---
 
@@ -839,17 +1156,17 @@ PreviewScreen
 
 ## Added
 
-* Published the Phase 1 Foundational Ownership Map from executable production and
+- Published the Phase 1 Foundational Ownership Map from executable production and
   test evidence.
-* Recorded distributed, ambiguous, compatibility-only, and unresolved ownership
+- Recorded distributed, ambiguous, compatibility-only, and unresolved ownership
   relevant to the Setup → Preview workflow.
-* Established the initial Phase 1 implementation boundary.
+- Established the initial Phase 1 implementation boundary.
 
 ## Determined
 
-* Established atomic authored Setup commit at the existing store boundary as the
+- Established atomic authored Setup commit at the existing store boundary as the
   first dependency-correct production task.
-* Preserved Preview generation and revision engines as coherent deterministic
+- Preserved Preview generation and revision engines as coherent deterministic
   seams outside that first implementation change.
 
 ## Behavior
@@ -862,42 +1179,42 @@ No production behavior changed.
 
 ## Added
 
-* Completed the comprehensive Implementation Architecture Audit.
-* Completed the comprehensive UX Implementation Audit.
-* Published the **Implementation Architecture Audit Synthesis**.
-* Published the **Implementation UX Audit Synthesis**.
-* Published the **Alignment Strategy** as the normative implementation-alignment
+- Completed the comprehensive Implementation Architecture Audit.
+- Completed the comprehensive UX Implementation Audit.
+- Published the **Implementation Architecture Audit Synthesis**.
+- Published the **Implementation UX Audit Synthesis**.
+- Published the **Alignment Strategy** as the normative implementation-alignment
   document.
-* Published the first **Implementation Roadmap** defining the dependency-driven
+- Published the first **Implementation Roadmap** defining the dependency-driven
   phased execution strategy.
-* Published the **Implementation Execution Plan** defining operational discipline
+- Published the **Implementation Execution Plan** defining operational discipline
   for sustained implementation.
-* Established formal implementation governance, validation criteria,
+- Established formal implementation governance, validation criteria,
   documentation workflow, checkpoint requirements, and execution sequencing.
-* Established a repeatable engineering methodology spanning architecture, audit,
+- Established a repeatable engineering methodology spanning architecture, audit,
   synthesis, alignment, roadmap development, execution, validation,
   documentation, checkpoints, and publication.
 
 ## Changed
 
-* Transitioned DayFrame from architectural design and implementation planning into
+- Transitioned DayFrame from architectural design and implementation planning into
   sustained implementation.
-* Refined project governance to distinguish:
+- Refined project governance to distinguish:
+  - Architecture Specification;
+  - Architectural Decisions;
+  - Implementation Audits;
+  - Audit Syntheses;
+  - Alignment Strategy;
+  - Implementation Roadmap;
+  - Implementation Execution Plan;
+  - Project State Documentation;
+  - Historical Documentation.
 
-  * Architecture Specification;
-  * Architectural Decisions;
-  * Implementation Audits;
-  * Audit Syntheses;
-  * Alignment Strategy;
-  * Implementation Roadmap;
-  * Implementation Execution Plan;
-  * Project State Documentation;
-  * Historical Documentation.
-* Established **Phase 1 — Architectural Foundation Alignment** as the first active
+- Established **Phase 1 — Architectural Foundation Alignment** as the first active
   implementation phase.
-* Clarified that implementation proceeds through small, independently verifiable
+- Clarified that implementation proceeds through small, independently verifiable
   tasks rather than broad feature-driven development.
-* Established the standard implementation-session workflow:
+- Established the standard implementation-session workflow:
 
 ```text
 Review
@@ -913,7 +1230,7 @@ Checkpoint
 Commit
 ```
 
-* Established that implementation pauses rather than introducing unreviewed
+- Established that implementation pauses rather than introducing unreviewed
   architectural assumptions when governing documentation does not provide
   sufficient direction.
 
@@ -950,58 +1267,58 @@ remains the criterion for roadmap-phase completion.
 
 ## Added
 
-* Published the **DayFrame Complete Architecture Specification** as the normative
+- Published the **DayFrame Complete Architecture Specification** as the normative
   architectural reference.
-* Established the four Architectural Pillars:
+- Established the four Architectural Pillars:
+  - Teach;
+  - Plan;
+  - Live;
+  - Learn.
 
-  * Teach;
-  * Plan;
-  * Live;
-  * Learn.
-* Established the four Information Transformations:
+- Established the four Information Transformations:
+  - Author;
+  - Derive;
+  - Record;
+  - Analyze.
 
-  * Author;
-  * Derive;
-  * Record;
-  * Analyze.
-* Introduced the formal distinction between **Domain Object Categories** and
+- Introduced the formal distinction between **Domain Object Categories** and
   **Named Domain Objects**.
-* Defined the complete Core Domain Model.
-* Established Architectural Services as the exclusive producers of Named Domain
+- Defined the complete Core Domain Model.
+- Established Architectural Services as the exclusive producers of Named Domain
   Objects.
-* Established Architectural Engines as workflow coordinators.
-* Introduced Information Provenance as a first-class architectural concept.
-* Introduced Explainability as a foundational architectural principle.
-* Published the canonical architectural glossary.
-* Established architectural governance through the Architecture Charter and
+- Established Architectural Engines as workflow coordinators.
+- Introduced Information Provenance as a first-class architectural concept.
+- Introduced Explainability as a foundational architectural principle.
+- Published the canonical architectural glossary.
+- Established architectural governance through the Architecture Charter and
   Architectural Decision Records.
 
 ## Changed
 
-* Refined the planning lifecycle into a forward-only Information Flow.
-* Simplified the transformation model from five transformations to four canonical
+- Refined the planning lifecycle into a forward-only Information Flow.
+- Simplified the transformation model from five transformations to four canonical
   transformations.
-* Clarified the distinction among:
+- Clarified the distinction among:
+  - Responsibility;
+  - Capability;
+  - Workflow.
 
-  * Responsibility;
-  * Capability;
-  * Workflow.
-* Clarified the separation among:
+- Clarified the separation among:
+  - Architectural Pillars;
+  - Architectural Services;
+  - Architectural Engines.
 
-  * Architectural Pillars;
-  * Architectural Services;
-  * Architectural Engines.
-* Recognized **Derived Analytical Domain Objects** as a first-class architectural
+- Recognized **Derived Analytical Domain Objects** as a first-class architectural
   category.
-* Clarified Recommendation Proposals as advisory Derived Domain Objects.
-* Clarified Planning Insights as Derived Analytical Domain Objects.
+- Clarified Recommendation Proposals as advisory Derived Domain Objects.
+- Clarified Planning Insights as Derived Analytical Domain Objects.
 
 ## Documentation
 
-* Published the DayFrame Complete Architecture Specification Version 1.0.0.
-* Published the Architecture Charter.
-* Established canonical architectural terminology.
-* Established architecture governance for future revisions through ADRs.
+- Published the DayFrame Complete Architecture Specification Version 1.0.0.
+- Published the Architecture Charter.
+- Established canonical architectural terminology.
+- Established architecture governance for future revisions through ADRs.
 
 ---
 

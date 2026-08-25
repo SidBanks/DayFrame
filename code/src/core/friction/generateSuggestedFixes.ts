@@ -27,6 +27,10 @@ type SuggestedFixContext = {
   getDayBoundaryStartTimeForUserDayDate?: (
     userDayDate: DraftScheduledBlock["userDayDate"],
   ) => `${number}:${number}`;
+  getUserDayWindowForUserDayDate?: (userDayDate: DraftScheduledBlock["userDayDate"]) => {
+    start: Date;
+    end: Date;
+  };
 };
 
 const FITNESS_LIKE_CATEGORIES = new Set(["fitness", "recovery", "optional"]);
@@ -49,6 +53,9 @@ export function generateSuggestedFixes(
     dayBoundaryStartTime: input.dayBoundaryStartTime ?? "03:00",
     ...(input.getDayBoundaryStartTimeForUserDayDate
       ? { getDayBoundaryStartTimeForUserDayDate: input.getDayBoundaryStartTimeForUserDayDate }
+      : {}),
+    ...(input.getUserDayWindowForUserDayDate
+      ? { getUserDayWindowForUserDayDate: input.getUserDayWindowForUserDayDate }
       : {}),
   };
 
@@ -482,11 +489,11 @@ function findFirstAvailableGapStartForScheduledBlock(
   const dayBoundaryStartTime =
     context.getDayBoundaryStartTimeForUserDayDate?.(scheduledBlock.userDayDate) ??
     context.dayBoundaryStartTime;
-  const userDayStart = getUserDayStartFromLocalDateString(
-    scheduledBlock.userDayDate,
-    dayBoundaryStartTime,
-  );
-  const userDayEnd = addMinutes(userDayStart, 24 * 60);
+  const canonicalWindow = context.getUserDayWindowForUserDayDate?.(scheduledBlock.userDayDate);
+  const userDayStart =
+    canonicalWindow?.start ??
+    getUserDayStartFromLocalDateString(scheduledBlock.userDayDate, dayBoundaryStartTime);
+  const userDayEnd = canonicalWindow?.end ?? addMinutes(userDayStart, 24 * 60);
   const occupiedBlocks = [
     ...context.generatedWorkBlocks.filter(
       (workBlock) => workBlock.userDayDate === scheduledBlock.userDayDate,

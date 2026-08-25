@@ -1,6 +1,8 @@
-import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../cycles/resolveEffectiveSchedulePreferences.js";
-import { getUserDayDate, getUserDayStart } from "../time/userDay.js";
-import { getUserWeekStartDate } from "../time/userWeek.js";
+import { getUserDayDate } from "../time/userDay.js";
+import {
+  resolveUserDayWindowForLabel,
+  resolveUserWeekStartDateForLabel,
+} from "../time/canonicalUserDay.js";
 import type { UserTimePreferences, Weekday } from "../time/types.js";
 import type {
   BlockCandidate,
@@ -310,6 +312,16 @@ function buildBlockCandidate(
       userWeekStartDate,
       slot: occurrenceSlot,
     }),
+    ...(getIncarnationId(blockTemplate) && getIncarnationId(recurrence)
+      ? {
+          commitmentNavigationIdentity: {
+            templateId: blockTemplate.id,
+            templateIncarnationId: getIncarnationId(blockTemplate)!,
+            recurrenceId: recurrence.id,
+            recurrenceIncarnationId: getIncarnationId(recurrence)!,
+          },
+        }
+      : {}),
     userId: blockTemplate.userId,
     templateId: blockTemplate.id,
     recurrenceId: recurrence.id,
@@ -335,6 +347,12 @@ function buildBlockCandidate(
     ...fixedStartTimeFields,
     ...customWindowFields,
   };
+}
+
+function getIncarnationId(value: object): string | undefined {
+  return "incarnationId" in value && typeof value.incarnationId === "string"
+    ? value.incarnationId
+    : undefined;
 }
 
 function getOverlappingUserDays(
@@ -365,15 +383,12 @@ function getOverlappingUserDays(
 
   while (currentDate.getTime() <= lastDate.getTime()) {
     const localDate = getLocalDateString(currentDate);
-    const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
+    const window = resolveUserDayWindowForLabel({
       shiftCycles: shiftCycles ?? [],
       defaultSchedulingPreferences,
       userDayDate: localDate,
     });
-    const userDayStart = getUserDayStartFromLocalDate(localDate, preferences.dayBoundaryStartTime);
-    const userDayEnd = new Date(userDayStart);
-
-    userDayEnd.setDate(userDayEnd.getDate() + 1);
+    const { start: userDayStart, end: userDayEnd } = window;
 
     if (
       userDayStart.getTime() < planningWindowEnd.getTime() &&
@@ -415,24 +430,11 @@ function getUserWeekStartDateForUserDayDate(
   shiftCycles: GenerateBlockCandidatesInput["shiftCycles"],
   defaultSchedulingPreferences: UserTimePreferences,
 ): LocalDateString {
-  const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
+  return resolveUserWeekStartDateForLabel({
     shiftCycles: shiftCycles ?? [],
     defaultSchedulingPreferences,
     userDayDate,
   });
-  const anchorDate = getUserDayStartFromLocalDate(userDayDate, preferences.dayBoundaryStartTime);
-
-  return getUserWeekStartDate(anchorDate, preferences) as LocalDateString;
-}
-
-function getUserDayStartFromLocalDate(
-  userDayDate: LocalDateString,
-  dayBoundaryStartTime: UserTimePreferences["dayBoundaryStartTime"],
-): Date {
-  const [year, month, day] = userDayDate.split("-").map(Number);
-  const dayStart = new Date(year!, (month ?? 1) - 1, day!, 12, 0, 0, 0);
-
-  return getUserDayStart(dayStart, dayBoundaryStartTime);
 }
 
 function getLocalDateString(date: Date): LocalDateString {

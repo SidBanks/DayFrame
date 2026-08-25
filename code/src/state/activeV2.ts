@@ -3,10 +3,7 @@ import {
   type IncarnatedSource,
   type SourceIncarnationAllocator,
 } from "../core/authored/sourceIncarnation.js";
-import type {
-  ActiveDayFrameAuthoredSetup,
-  DayFrameAuthoredPattern,
-} from "./types.js";
+import type { ActiveDayFrameAuthoredSetup, DayFrameAuthoredPattern } from "./types.js";
 import { validateDayFrameAuthoredSetup } from "../core/authored/validateDayFrameAuthoredSetup.js";
 
 export const DAYFRAME_ACTIVE_V2_VERSION = 2 as const;
@@ -68,7 +65,10 @@ export function cloneActiveSetup(data: ActiveDayFrameAuthoredSetup): ActiveDayFr
   return {
     schedulingPreferences: { ...data.schedulingPreferences },
     previewRange: { ...data.previewRange },
-    shiftDefinitions: data.shiftDefinitions.map((source) => ({ ...source, workDays: [...source.workDays] })),
+    shiftDefinitions: data.shiftDefinitions.map((source) => ({
+      ...source,
+      workDays: [...source.workDays],
+    })),
     shiftCycles: data.shiftCycles.map((cycle) => ({
       ...cycle,
       segments: cycle.segments.map((source) => ({
@@ -131,17 +131,23 @@ export function validateIncarnationGraph(data: ActiveDayFrameAuthoredSetup): voi
   }
 }
 
-function incarnate<T extends object>(source: T, allocate: SourceIncarnationAllocator): T & IncarnatedSource {
+function incarnate<T extends object>(
+  source: T,
+  allocate: SourceIncarnationAllocator,
+): T & IncarnatedSource {
   return { ...source, incarnationId: allocated(allocate) };
 }
 
 function allocated(allocate: SourceIncarnationAllocator) {
   const id = allocate();
-  if (!isSourceIncarnationId(id)) throw new RangeError("Source incarnation allocator returned a non-canonical UUID v4.");
+  if (!isSourceIncarnationId(id))
+    throw new RangeError("Source incarnation allocator returned a non-canonical UUID v4.");
   return id;
 }
 
-function stripIncarnation<T extends object & { incarnationId?: unknown }>(source: T): Omit<T, "incarnationId"> {
+function stripIncarnation<T extends object & { incarnationId?: unknown }>(
+  source: T,
+): Omit<T, "incarnationId"> {
   const pattern = { ...source };
   delete pattern.incarnationId;
   return pattern;

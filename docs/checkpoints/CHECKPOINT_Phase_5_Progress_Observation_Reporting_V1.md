@@ -1,0 +1,3 @@
+# Phase 5 Checkpoint — Progress Observation Reporting V1
+
+Task 5.17 completes Planner Goal-scoped Manual Quantity reporting. Users record absolute measured state, correct immutable lineages, and remove invalid evidence through canonical retraction. One derived non-persisted query presents logical heads across current and prior Measurement periods, including retracted records. Goal, Measurement Definition, scheduling, Preview, history authorities, Summary, and derived Progress remain outside the write/presentation boundary. Task 5.18 Summary Progress is next; Task 5.19 remains the mandatory bundle exit gate.

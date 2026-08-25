@@ -1,8 +1,11 @@
 import type {
   HistoricalPlanDayPublicationV1,
-  HistoricalPlannedOccurrenceSnapshotV1,
+  HistoricalPlannedOccurrenceSnapshot,
 } from "../historicalPlan/historicalPlan.js";
-import { durableOccurrenceReferencesEqual, validateDurableOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
+import {
+  durableOccurrenceReferencesEqual,
+  validateDurableOccurrenceReference,
+} from "../occurrences/durableOccurrenceReference.js";
 import { validateExecutionHistoricalSnapshot } from "./executionRecord.js";
 import type { HistoricalExecutionTarget } from "./historicalExecutionTarget.js";
 
@@ -14,23 +17,39 @@ export type HistoricalPlanExecutionTargetResult =
 
 export function materializeHistoricalPlanExecutionTarget(input: {
   day: HistoricalPlanDayPublicationV1;
-  occurrence: HistoricalPlannedOccurrenceSnapshotV1;
+  occurrence: HistoricalPlannedOccurrenceSnapshot;
 }): HistoricalPlanExecutionTargetResult {
-  if (!input.day.occurrences.some((candidate) => candidate === input.occurrence ||
-      durableOccurrenceReferencesEqual(candidate.reference, input.occurrence.reference))) return { status: "notReportable" };
+  if (
+    !input.day.occurrences.some(
+      (candidate) =>
+        candidate === input.occurrence ||
+        durableOccurrenceReferencesEqual(candidate.reference, input.occurrence.reference),
+    )
+  )
+    return { status: "notReportable" };
   const reference = validateDurableOccurrenceReference(input.occurrence.reference);
-  if (reference.status !== "valid") return { status: "invalidReference",
-    issues: reference.status === "invalid" ? reference.issues : ["unsupported reference version"] };
+  if (reference.status !== "valid")
+    return {
+      status: "invalidReference",
+      issues: reference.status === "invalid" ? reference.issues : ["unsupported reference version"],
+    };
   const snapshot = validateExecutionHistoricalSnapshot({
     sourceFamily: input.occurrence.sourceFamily,
     title: input.occurrence.title,
     category: input.occurrence.category,
-    userDay: { date: input.day.userDayDate, dayBoundaryStartTime: input.day.dayBoundaryStartTime,
-      utcOffsetMinutes: input.day.utcOffsetMinutes },
+    userDay: {
+      date: input.day.userDayDate,
+      dayBoundaryStartTime: input.day.dayBoundaryStartTime,
+      utcOffsetMinutes: input.day.utcOffsetMinutes,
+    },
     plan: { ...input.occurrence.plan },
   });
   if (snapshot.status === "invalid") return { status: "invalidSnapshot", issues: snapshot.issues };
-  return { status: "materialized", target: {
-    reference: structuredClone(reference.reference), snapshot: snapshot.snapshot,
-  } };
+  return {
+    status: "materialized",
+    target: {
+      reference: structuredClone(reference.reference),
+      snapshot: snapshot.snapshot,
+    },
+  };
 }

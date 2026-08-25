@@ -8,7 +8,7 @@ The normative architectural definitions are contained in:
 
 > **DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md (Version 1.0.0)**
 
-This document records *why* the architecture is structured as it is.
+This document records _why_ the architecture is structured as it is.
 
 ---
 
@@ -18,8 +18,8 @@ This document records *why* the architecture is structured as it is.
 
 The DayFrame architecture is governed by two primary architectural documents:
 
-* `ARCHITECTURE_CHARTER.md`
-* `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md`
+- `ARCHITECTURE_CHARTER.md`
+- `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md`
 
 The Architecture Charter establishes architectural governance.
 
@@ -47,10 +47,10 @@ Published versions represent stable architectural milestones and may be archived
 
 The architecture is organized into four primary responsibility boundaries:
 
-* Teach
-* Plan
-* Live
-* Learn
+- Teach
+- Plan
+- Live
+- Learn
 
 Each Architectural Pillar owns exactly one architectural responsibility.
 
@@ -62,10 +62,10 @@ Each Architectural Pillar owns exactly one architectural responsibility.
 
 Information progresses through four legal architectural transformations:
 
-* Author
-* Derive
-* Record
-* Analyze
+- Author
+- Derive
+- Record
+- Analyze
 
 Every Named Domain Object is produced through one of these transformations.
 
@@ -79,8 +79,8 @@ No additional transformations exist without an approved architectural revision.
 
 The architecture distinguishes between:
 
-* Domain Object Categories
-* Named Domain Objects
+- Domain Object Categories
+- Named Domain Objects
 
 Every Named Domain Object belongs to exactly one Domain Object Category throughout its lifetime.
 
@@ -94,15 +94,15 @@ Named Domain Objects never change Domain Object Categories.
 
 The architecture explicitly separates:
 
-* Responsibility
-* Capability
-* Workflow
+- Responsibility
+- Capability
+- Workflow
 
 These concepts correspond to:
 
-* Architectural Pillars
-* Architectural Services
-* Architectural Engines
+- Architectural Pillars
+- Architectural Services
+- Architectural Engines
 
 No architectural component may assume the responsibilities of another layer.
 
@@ -116,10 +116,10 @@ Architectural Services are the exclusive producers of Named Domain Objects.
 
 Each Architectural Service:
 
-* performs one conceptual capability,
-* produces one or more Named Domain Objects,
-* belongs to one Architectural Pillar,
-* preserves information provenance.
+- performs one conceptual capability,
+- produces one or more Named Domain Objects,
+- belongs to one Architectural Pillar,
+- preserves information provenance.
 
 Services never coordinate workflows.
 
@@ -133,17 +133,17 @@ Architectural Engines coordinate workflows.
 
 Engines:
 
-* invoke Architectural Services,
-* preserve workflow ordering,
-* preserve information provenance,
-* aggregate workflow results.
+- invoke Architectural Services,
+- preserve workflow ordering,
+- preserve information provenance,
+- aggregate workflow results.
 
 Architectural Engines never:
 
-* implement business logic,
-* produce Named Domain Objects,
-* own persistence,
-* own presentation.
+- implement business logic,
+- produce Named Domain Objects,
+- own persistence,
+- own presentation.
 
 ---
 
@@ -153,10 +153,10 @@ Architectural Engines never:
 
 Every significant Domain Object preserves sufficient provenance to reconstruct:
 
-* originating information,
-* transformations performed,
-* producing Architectural Service,
-* coordinating Architectural Engine.
+- originating information,
+- transformations performed,
+- producing Architectural Service,
+- coordinating Architectural Engine.
 
 Explainability depends upon preserved provenance.
 
@@ -250,10 +250,10 @@ generic success/failure.
 
 The current persistence model distinguishes, as applicable:
 
-* successful persistence or removal;
-* storage unavailability;
-* storage failure;
-* serialization failure.
+- successful persistence or removal;
+- storage unavailability;
+- storage failure;
+- serialization failure.
 
 A persistence failure may coexist with a successful runtime/domain transition.
 
@@ -268,19 +268,19 @@ mutation as authority, or restore a stale failed snapshot.
 
 The current desired durable condition is store-owned and surface-specific:
 
-* `snapshot` means the latest complete current runtime representation is
+- `snapshot` means the latest complete current runtime representation is
   authoritative for persistence;
-* `absent` means durable key absence is authoritative following clear.
+- `absent` means durable key absence is authoritative following clear.
 
 A newer runtime intent supersedes earlier failed persistence attempts.
 
 The store exclusively owns:
 
-* retry-source selection;
-* desired-condition interpretation;
-* persistence/removal execution;
-* retained durability updates;
-* retry-result construction.
+- retry-source selection;
+- desired-condition interpretation;
+- persistence/removal execution;
+- retained durability updates;
+- retry-result construction.
 
 User-facing workflows may explicitly initiate retry but do not implement retry
 semantics.
@@ -318,11 +318,11 @@ boundary rather than independently reinterpreted by each workflow.
 
 The current semantic classes distinguish:
 
-* durable success;
-* retryable storage unavailability;
-* retryable storage failure;
-* recovery-required representation failure;
-* internal/non-actionable state.
+- durable success;
+- retryable storage unavailability;
+- retryable storage failure;
+- recovery-required representation failure;
+- internal/non-actionable state.
 
 Immediate workflow feedback describes the initiating operation.
 
@@ -335,8 +335,8 @@ These are complementary responsibilities rather than competing sources of truth.
 
 Serialization failure preserves both:
 
-* the latest accepted runtime/session intent; and
-* the last successfully established durable representation.
+- the latest accepted runtime/session intent; and
+- the last successfully established durable representation.
 
 DayFrame does not automatically roll back, reload, reset, discard, or replace
 current runtime state because serialization failed.
@@ -349,14 +349,14 @@ representation can be persisted successfully.
 Until a model-specific recovery mechanism is architecturally justified, the
 minimum recovery contract is:
 
-* preserve current session intent;
-* preserve the previous durable checkpoint;
-* communicate that current changes are not durably saved;
-* communicate that ordinary Retry is unavailable;
-* communicate that reload or close may discard session-only changes and allow
+- preserve current session intent;
+- preserve the previous durable checkpoint;
+- communicate that current changes are not durably saved;
+- communicate that ordinary Retry is unavailable;
+- communicate that reload or close may discard session-only changes and allow
   older saved data to return;
-* allow continued session use;
-* avoid destructive automatic recovery.
+- allow continued session use;
+- avoid destructive automatic recovery.
 
 Model-specific repair, rollback, diagnostic export, and recovery tooling require
 separate future architectural authorization.
@@ -523,6 +523,7 @@ Source deletion, source recreation, restart, and Backup V3 restore do not remove
 `clearLocalData()` is asynchronous and returns only after terminal outcomes exist for Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan. Its canonical `authorities` result enumerates all five; Preview is a separate derived-state guarantee. Five successes mean `cleared`, mixed successes/failures mean `partiallyCleared`, and zero successes mean `failed`. Compatibility flat fields and durability labels are derived from that canonical result.
 
 ExecutionHistory clear establishes empty IndexedDB authority before legacy evidence is removed and retains the anti-resurrection marker. HistoricalPlan clear settles an empty ledger and supersedes pending publications. Clear uses the shared runtime-authority notification transaction, does not erase restore evidence, and creates neither planning publication nor execution evidence.
+
 # Task 4.8 — Planner Convergence V1 Is the Next Product Boundary
 
 The post-Task-4.7 product supports two independently useful enduring concepts:
@@ -537,3 +538,173 @@ Phase 4 remains open because its broader Learn roadmap is not complete. Task 4.9
 is authorized only as bounded composition-first Planner Convergence V1. Engine,
 persistence, Settings/Pattern Library redesign, router, autosave, drag/drop, new
 analytics, Goals, Progress, Recommendations, and learning remain deferred.
+
+# Task 5.1 — Prescriptive Intelligence Preserves User Intent and Explicit Action
+
+**Status:** Accepted architecture direction
+
+**Date:** 2026-08-23
+
+Goals should become an independent durable authored authority with opaque identity,
+lifecycle, and explicit Commitment links. Progress is deterministic,
+policy-versioned derived interpretation and has no universal percentage.
+Recommendations are ephemeral explainable proposals, while a bounded future
+RecommendationDecision authority records user decisions and exact provenance.
+
+Recommendation and adaptation are separate. Only explicit Planner acceptance may
+mutate future authored state; normal stale Schedule and explicit generation rules
+then apply. Summary remains read-only. Historical evidence never redefines Goal
+importance or preference, recommendations never become authority, and automatic
+adaptation or machine learning is not authorized for V1. Task 5.2 must define the
+Goal V1 authority contract before implementation.
+
+# Task 5.2 — Goal V1 Uses Independent Archive-Only Authority and Exact Links
+
+**Status:** Accepted architecture; not implemented
+
+**Date:** 2026-08-23
+
+Goal V1 uses an independent versioned collection, opaque never-reused IDs, an
+explicit revision counter, active/completed/archived authored lifecycle, and
+Goal-owned exact commitment-incarnation links. There is no hard delete, link
+weight/role, Goal priority, Progress field, or scheduling effect. Replacement
+never retargets links; unavailable links remain explicit.
+
+Goal durability must launch with historical Goal provenance and the next complete
+Backup/restore/full-clear/runtime-transaction boundary before UI. Profiles do not
+own Goals. Task 5.3 implements this substrate without UI or prescriptive features.
+
+# Task 5.3 — Goal V1 Is a Sixth Independent Durable Authority
+
+**Status:** Implemented architectural decision
+
+**Date:** 2026-08-23
+
+Goal V1 is stored as its own versioned IndexedDB collection and participates in
+the shared runtime transaction, restore/recovery, full-clear, and Backup V4
+boundaries. Backup V3 imports translate explicitly to empty Goals and V3 exports
+are rejected when Goal authority is non-empty. HistoricalPlan occurrence
+snapshots use a backwards-compatible optional, independently versioned Goal
+provenance record rather than relabeling old history or making current Goals a
+historical dependency. Goal mutation remains absent from scheduling inputs and
+Preview staleness rules.
+
+# Task 5.5 — Progress Requires Explicit Historical Goal-Link Coverage
+
+**Status:** Accepted audit determination
+
+**Date:** 2026-08-23
+
+Frozen linked Goal provenance is historical relationship authority; current Goal
+links must never backfill it. A missing Goal-provenance field cannot safely mean
+both “publication predates Goal provenance” and “Goal-aware publication knew this
+occurrence was unlinked.” Task 5.5 therefore blocks Progress implementation until
+Task 5.6 introduces an explicit, backward-compatible provenance-coverage signal.
+The first later derived slice should be categorical **Goal Activity**, not a
+percentage: planning disposition and execution outcome distributions with separate
+plan, reporting, and Goal-link coverage, policy version, cutoff, and provenance.
+
+Task 5.6 realizes the coverage decision through the smallest compatible encoding:
+presence of the existing occurrence-level `goals` array means provenance was
+captured, including canonical empty `[]`; absence means legacy/unavailable. New
+eligible publications always include the array. HistoricalPlan and Goal-provenance
+versions remain 1 because both shapes were already valid additive states.
+Fingerprints distinguish absent from empty, and current Goal authority never
+enriches old publications.
+
+# Task 5.7 — Goal Activity Is Categorical Derived Intelligence
+
+**Status:** Implemented architectural decision
+
+**Date:** 2026-08-23
+
+Goal Activity V1 is a pure, policy-versioned, non-authoritative, non-persisted
+projection. Current Goal authority supplies existence and current context only;
+frozen HistoricalPlan Goal provenance exclusively determines historical membership
+and planning disposition; ExecutionHistory supplies governed outcomes only for
+linked scheduled occurrences. Plan, Goal-link, and reporting coverage remain
+separate. Counts conserve categorical evidence but are not a Goal denominator,
+percentage, score, pace, health, success, or Progress result.
+
+# Task 5.8 — Goal Activity Uses a Bounded Read-Only Summary Section
+
+**Status:** Accepted product integration decision
+
+**Date:** 2026-08-23
+
+Goal Activity belongs inside Summary's existing History panel as a selected-Goal
+composite section governed by its shared range and evaluation cutoff. It uses one
+explicit ephemeral Goal selector, three compact independent coverage rows, nested
+categorical Planning/Execution counts, and existing inserted evidence detail.
+Current Goal context heads the section; a frozen historical title appears only
+when different, labelled “Goal at the time.” Generic Summary metrics remain
+unchanged. Summary stays read-only; the first handoff only navigates to Planner /
+Plan and does not require routing or deep selection.
+
+# Task 5.10 — Progress Requires Explicit Measurement Definitions and Evidence
+
+**Status:** Accepted architecture direction; Progress deferred
+
+**Date:** 2026-08-23
+
+Progress is a pure, non-persisted, policy-versioned interpretation of evidence
+relative to explicit authored measurement semantics. Goal Activity and occurrence
+execution outcomes are supporting evidence, not universal numerators. Goal
+lifecycle, target date, and missing evidence have no implicit percentage meaning.
+Qualitative Goals remain valid without Progress.
+
+The current Goal `{id, version}` measurement-policy reference cannot hold the
+target, unit, baseline, direction, or epoch required for a useful reproducible
+measurement. The preferred first eventual policy is manual quantity Progress over
+a revisioned durable measurement definition and durable user-reported observation
+evidence. Derived results are recomputed, not persisted. Task 5.11 must define the
+measurement-definition authority boundary before any Progress implementation.
+
+# Task 5.11 — Measurement Semantics Use Immutable Definition Revision Epochs
+
+**Status:** Accepted architecture; not implemented
+
+**Date:** 2026-08-23
+
+Measurement Definition is a future independent durable authored authority with one
+stable lineage per Goal in V1. Immutable monotonic revisions form exact measurement
+epochs; each begins when saved, and active/inactive revisions produce one
+non-overlapping effective state. Semantic edits, stopping, and restarting append
+revisions. Future observations bind to the exact definition revision and unit.
+
+The first registry policy is `manualQuantityTarget@1`: an absolute non-negative
+quantity increases toward a positive canonical-decimal target in an exact built-in
+unit. It has no baseline, conversion, formula, custom unit, or direction config.
+Goal's existing policy ref becomes non-operative compatibility metadata, and first-
+policy Progress requires no HistoricalPlan or ExecutionHistory change. Task 5.12
+implements the full protected authority, transactions, clear, restore, and Backup V5.
+
+# Task 5.19 — Product-Surface Loading and Bundle Budgets
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-24
+
+The default Planner, canonical authority bootstrap/store, restore/full-clear, and
+runtime transactions remain eager. Summary and the read-only Today operational
+surface are justified lazy product surfaces and receive accessible loading/failure
+behavior plus intent preload. Today became lazy when its real V1 UI arrived because
+fixed initial gzip headroom was 117 bytes; the split reduced initial size without
+large shared-dependency duplication.
+React/ReactDOM/Scheduler form one vendor cache boundary. Settings/Backup remains
+eager, global CSS remains shared, and Vite's warning threshold is unchanged.
+Durable manifest-based budgets govern initial raw/gzip, largest lazy, and total JS;
+initial growth over 25 kB requires explicit review.
+
+# Task 6.5 — User-Initiated Today Evidence Writes Advance the Evaluation Cutoff
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-08-24
+
+Passive HistoricalPlan or ExecutionHistory notifications continue to re-query Today
+at its fixed evaluation cutoff. An accepted user-initiated Today report, correction,
+or retraction instead advances the mounted surface to a fresh app-clock cutoff and
+re-queries canonical truth. Failed/rejected writes do not advance it, and no local
+outcome shadow state is authoritative. See
+`ADR_USER_INITIATED_EVIDENCE_WRITES_AND_TODAY_EVALUATION_CUTOFF_ADVANCEMENT.md`.

@@ -3,6 +3,7 @@ import { detectScheduleFriction } from "../friction/detectScheduleFriction.js";
 import { generateSuggestedFixes } from "../friction/generateSuggestedFixes.js";
 import type { SuggestedFixFeedback } from "../friction/types.js";
 import type { TimeString } from "../time/types.js";
+import type { LocalDateString } from "../shifts/types.js";
 import type { GenerateSchedulePreviewResult } from "./generateSchedulePreview.js";
 import { cloneOccurrenceIdentity } from "../occurrences/occurrenceIdentity.js";
 
@@ -12,6 +13,7 @@ export type ReviseSchedulePreviewInput = {
   selectedSuggestedFixId: string;
   dayBoundaryStartTime: TimeString;
   revisedAt: string;
+  getUserDayWindowForUserDayDate?: (userDayDate: LocalDateString) => { start: Date; end: Date };
 };
 
 export type ReviseSchedulePreviewActionResult = {
@@ -33,6 +35,9 @@ export function reviseSchedulePreview(
     selectedSuggestedFixId: input.selectedSuggestedFixId,
     dayBoundaryStartTime: input.dayBoundaryStartTime,
     revisedAt: input.revisedAt,
+    ...(input.getUserDayWindowForUserDayDate
+      ? { getUserDayWindowForUserDayDate: input.getUserDayWindowForUserDayDate }
+      : {}),
   });
 
   if (!appliedFixResult.didRevise) {
@@ -58,6 +63,9 @@ export function reviseSchedulePreview(
     scheduledBlocks: appliedFixResult.scheduledBlocks,
     unplacedCandidates: appliedFixResult.unplacedCandidates,
     dayBoundaryStartTime: input.dayBoundaryStartTime,
+    ...(input.getUserDayWindowForUserDayDate
+      ? { getUserDayWindowForUserDayDate: input.getUserDayWindowForUserDayDate }
+      : {}),
   });
 
   return {
@@ -83,7 +91,9 @@ export function reviseSchedulePreview(
         suggestedFixesResult.frictionPoints,
         appliedFixResult.frictionPoints,
       ),
-      planDecisionResults: input.preview.planDecisionResults.map((result) => structuredClone(result)),
+      planDecisionResults: input.preview.planDecisionResults.map((result) =>
+        structuredClone(result),
+      ),
     },
     didRevise: true,
   };
