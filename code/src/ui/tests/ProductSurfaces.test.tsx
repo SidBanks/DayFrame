@@ -9,34 +9,46 @@ afterEach(cleanup);
 
 describe("product surface boundaries", () => {
   it("composes the existing Planner mode contract without owning its content state", () => {
-    const openPlan = vi.fn();
+    const openMonth = vi.fn();
     const openSchedule = vi.fn();
+    const openWorkPattern = vi.fn();
+    const openCommitmentLibrary = vi.fn();
     const { rerender } = render(
       <PlannerSurface
         isSetupDirty={false}
-        mode="plan"
-        onOpenPlan={openPlan}
+        commitmentLibraryContent={<p>Existing Commitment Library content</p>}
+        mode="month"
+        monthContent={<p>Month content</p>}
+        onOpenMonth={openMonth}
+        onOpenCommitmentLibrary={openCommitmentLibrary}
         onOpenSchedule={openSchedule}
-        planContent={<p>Existing Plan content</p>}
+        onOpenWorkPattern={openWorkPattern}
         previewState="none"
         scheduleContent={<p>Existing Schedule content</p>}
+        workPatternContent={<p>Existing Work Pattern content</p>}
       />,
     );
 
     expect(screen.getByRole("heading", { level: 1, name: "Planner" })).toBeInTheDocument();
-    expect(screen.getByText("Existing Plan content")).toBeInTheDocument();
+    expect(screen.getByText("Month content")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
     expect(openSchedule).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Commitment Library" }));
+    expect(openCommitmentLibrary).toHaveBeenCalledTimes(1);
 
     rerender(
       <PlannerSurface
         isSetupDirty
+        commitmentLibraryContent={<p>Existing Commitment Library content</p>}
         mode="schedule"
-        onOpenPlan={openPlan}
+        monthContent={<p>Month content</p>}
+        onOpenMonth={openMonth}
+        onOpenCommitmentLibrary={openCommitmentLibrary}
         onOpenSchedule={openSchedule}
-        planContent={<p>Existing Plan content</p>}
+        onOpenWorkPattern={openWorkPattern}
         previewState="stale"
         scheduleContent={<p>Existing Schedule content</p>}
+        workPatternContent={<p>Existing Work Pattern content</p>}
       />,
     );
     expect(screen.getByText("Existing Schedule content")).toBeInTheDocument();

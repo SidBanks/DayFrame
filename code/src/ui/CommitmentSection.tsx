@@ -28,7 +28,10 @@ type Props = {
   draft: SetupDraft;
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   requestedEditorTarget?: CommitmentEditorTarget | null;
+  requestedAddEditor?: boolean;
   onRequestedEditorTargetHandled?: (status: "opened" | "unavailable") => void;
+  onRequestedAddEditorHandled?: () => void;
+  onOpenEditorInvalidated?: () => void;
 };
 type Editor = { mode: "add" | "edit"; originalId?: string; entry: SetupDraftEntry };
 const categories: BlockCategory[] = [
@@ -71,7 +74,10 @@ export function CommitmentSection({
   draft,
   setDraft,
   requestedEditorTarget = null,
+  requestedAddEditor = false,
   onRequestedEditorTargetHandled,
+  onRequestedAddEditorHandled,
+  onOpenEditorInvalidated,
 }: Props): ReactElement {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [error, setError] = useState("");
@@ -91,8 +97,9 @@ export function CommitmentSection({
       setRemoveId(null);
       setError("");
       editorDraftFingerprint.current = null;
+      onOpenEditorInvalidated?.();
     }
-  }, [draft, editor]);
+  }, [draft, editor, onOpenEditorInvalidated]);
   useEffect(() => {
     if (!requestedEditorTarget) return;
     const source = draft.templateEntries.find(
@@ -116,6 +123,53 @@ export function CommitmentSection({
     });
     onRequestedEditorTargetHandled?.("opened");
   }, [draft, onRequestedEditorTargetHandled, requestedEditorTarget]);
+  useEffect(() => {
+    if (!requestedAddEditor) return;
+    openAddEditor();
+    onRequestedAddEditorHandled?.();
+  }, [onRequestedAddEditorHandled, requestedAddEditor]);
+
+  function openAddEditor(): void {
+    const timestamp = new Date().toISOString();
+    const templateId = allocateReadableSourceId({
+      prefix: "template_",
+      occupiedIds: draft.templateEntries.map((item) => item.template.id),
+    });
+    returnFocusId.current = null;
+    editorDraftFingerprint.current = draftFingerprint(draft);
+    setEditor({
+      mode: "add",
+      entry: {
+        template: {
+          id: templateId,
+          userId:
+            draft.templateEntries[0]?.template.userId ?? draft.shiftCycles[0]?.userId ?? "user_001",
+          title: "",
+          category: "optional",
+          requiresWorkAnchor: false,
+          placementType: "flexible",
+          durationMinutes: 60,
+          priority: 3,
+          preferredWindow: "anyAvailable",
+          rescheduleBehavior: "askUser",
+          requiresResource: false,
+          externalResources: [],
+          enabled: true,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+        recurrence: {
+          id: allocateReadableSourceId({
+            prefix: "rec_",
+            preferredId: `rec_${templateId}`,
+            occupiedIds: draft.templateEntries.map((item) => item.recurrence.id),
+          }),
+          blockTemplateId: templateId,
+          frequency: "daily",
+        },
+      },
+    });
+  }
 
   function closeEditor(focusId?: string) {
     setEditor(null);
@@ -191,53 +245,7 @@ export function CommitmentSection({
           </h2>
           <p className="df-support">The things you want DayFrame to make time for.</p>
         </div>
-        <button
-          className="df-action-button"
-          type="button"
-          onClick={() => {
-            const timestamp = new Date().toISOString();
-            const templateId = allocateReadableSourceId({
-              prefix: "template_",
-              occupiedIds: draft.templateEntries.map((item) => item.template.id),
-            });
-            returnFocusId.current = null;
-            editorDraftFingerprint.current = draftFingerprint(draft);
-            setEditor({
-              mode: "add",
-              entry: {
-                template: {
-                  id: templateId,
-                  userId:
-                    draft.templateEntries[0]?.template.userId ??
-                    draft.shiftCycles[0]?.userId ??
-                    "user_001",
-                  title: "",
-                  category: "optional",
-                  requiresWorkAnchor: false,
-                  placementType: "flexible",
-                  durationMinutes: 60,
-                  priority: 3,
-                  preferredWindow: "anyAvailable",
-                  rescheduleBehavior: "askUser",
-                  requiresResource: false,
-                  externalResources: [],
-                  enabled: true,
-                  createdAt: timestamp,
-                  updatedAt: timestamp,
-                },
-                recurrence: {
-                  id: allocateReadableSourceId({
-                    prefix: "rec_",
-                    preferredId: `rec_${templateId}`,
-                    occupiedIds: draft.templateEntries.map((item) => item.recurrence.id),
-                  }),
-                  blockTemplateId: templateId,
-                  frequency: "daily",
-                },
-              },
-            });
-          }}
-        >
+        <button className="df-action-button" type="button" onClick={openAddEditor}>
           Add Commitment
         </button>
       </div>

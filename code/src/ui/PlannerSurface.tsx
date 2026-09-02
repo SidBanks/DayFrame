@@ -1,13 +1,17 @@
 import type { ReactElement, ReactNode } from "react";
 
-export type PlannerMode = "plan" | "schedule";
+export type PlannerMode = "month" | "workPattern" | "commitmentLibrary" | "schedule";
 
 export type PlannerSurfaceProps = {
   isSetupDirty: boolean;
   mode: PlannerMode;
-  onOpenPlan: () => void;
+  onOpenMonth: () => void;
+  onOpenWorkPattern: () => void;
+  onOpenCommitmentLibrary: () => void;
   onOpenSchedule: () => void;
-  planContent: ReactNode;
+  monthContent: ReactNode;
+  workPatternContent: ReactNode;
+  commitmentLibraryContent: ReactNode;
   previewState: "current" | "none" | "stale";
   scheduleContent: ReactNode;
 };
@@ -15,9 +19,13 @@ export type PlannerSurfaceProps = {
 export function PlannerSurface({
   isSetupDirty,
   mode,
-  onOpenPlan,
+  onOpenMonth,
+  onOpenWorkPattern,
+  onOpenCommitmentLibrary,
   onOpenSchedule,
-  planContent,
+  monthContent,
+  workPatternContent,
+  commitmentLibraryContent,
   previewState,
   scheduleContent,
 }: PlannerSurfaceProps): ReactElement {
@@ -35,12 +43,32 @@ export function PlannerSurface({
         </div>
         <nav aria-label="Planner modes" className="df-planner-mode-nav">
           <button
-            aria-pressed={mode === "plan"}
-            className={mode === "plan" ? "df-secondary-button is-active" : "df-secondary-button"}
-            onClick={onOpenPlan}
+            aria-pressed={mode === "month"}
+            className={mode === "month" ? "df-action-button is-active" : "df-action-button"}
+            onClick={onOpenMonth}
             type="button"
           >
-            Plan
+            Month
+          </button>
+          <button
+            aria-pressed={mode === "commitmentLibrary"}
+            className={
+              mode === "commitmentLibrary" ? "df-secondary-button is-active" : "df-secondary-button"
+            }
+            onClick={onOpenCommitmentLibrary}
+            type="button"
+          >
+            Commitment Library
+          </button>
+          <button
+            aria-pressed={mode === "workPattern"}
+            className={
+              mode === "workPattern" ? "df-secondary-button is-active" : "df-secondary-button"
+            }
+            onClick={onOpenWorkPattern}
+            type="button"
+          >
+            Work Pattern
           </button>
           <button
             aria-pressed={mode === "schedule"}
@@ -63,7 +91,13 @@ export function PlannerSurface({
                 : "Generate a schedule to review how your commitments fit together."}
         </p>
       </section>
-      {mode === "plan" ? planContent : scheduleContent}
+      {mode === "month"
+        ? monthContent
+        : mode === "workPattern"
+          ? workPatternContent
+          : mode === "commitmentLibrary"
+            ? commitmentLibraryContent
+            : scheduleContent}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 # ADR — Production Surface Loading and Bundle Budget Architecture
 
-**Status:** Accepted
+**Status:** Partially superseded by `ADR_SUSTAINABLE_PRODUCTION_BUNDLE_BUDGET_GOVERNANCE.md`
 
 **Date:** 2026-08-24
 
@@ -33,3 +33,7 @@ Summary can be cached and fetched independently while all authority and restore
 semantics remain eager and singleton. The guard measures the static entry closure,
 lazy chunks separately, and total JavaScript so redistribution cannot masquerade as
 byte reduction. Further splitting requires evidence of a meaningful product boundary.
+
+The loading/chunk architecture remains accepted. The fixed total-JavaScript hard
+ceiling and bundle-governance semantics are superseded by the later ADR; the three
+startup/surface hard limits remain unchanged.

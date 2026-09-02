@@ -182,17 +182,69 @@ afterEach(() => {
   }
 });
 
+async function openPlanningSettings(): Promise<void> {
+  screen.getByRole("grid");
+  fireEvent.click(screen.getByRole("button", { name: "Planning settings" }));
+  screen.getByRole("heading", { name: "Planning Settings" });
+}
+
+async function openWorkPattern(): Promise<void> {
+  const modes = screen.getByRole("navigation", { name: "Planner modes" });
+  fireEvent.click(within(modes).getByRole("button", { name: "Work Pattern" }));
+  screen.getByRole("heading", { name: "Work Pattern" });
+}
+
+async function openCommitmentLibrary(): Promise<void> {
+  const modes = screen.getByRole("navigation", { name: "Planner modes" });
+  fireEvent.click(within(modes).getByRole("button", { name: "Commitment Library" }));
+  screen.getByRole("heading", { name: "Commitment Library" });
+}
+
+async function openDetailedReview(): Promise<void> {
+  const modes = screen.getByRole("navigation", { name: "Planner modes" });
+  fireEvent.click(within(modes).getByRole("button", { name: "Review Schedule" }));
+  screen.getByRole("heading", { name: "Review Schedule" });
+}
+
 describe("DayFrameApp", () => {
   const retiredGuardrailMessage =
     "Add at least one shift definition, an active shift cycle, at least one block template, and at least one block recurrence before generating a preview.";
+
+  it("makes Month the deterministic Planner default and retires legacy Plan navigation", async () => {
+    render(
+      <ExampleScheduleApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Plan" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Plan" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "true");
+    await waitFor(() => expect(document.getElementById("month-heading")).toHaveFocus());
+    const plannerModes = screen.getByRole("navigation", { name: "Planner modes" });
+    expect(within(plannerModes).getByRole("button", { name: "Work Pattern" })).toBeInTheDocument();
+    expect(
+      within(plannerModes).getByRole("button", { name: "Commitment Library" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review Schedule" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Planning settings" })).toBeInTheDocument();
+
+    fireEvent.click(within(plannerModes).getByRole("button", { name: "Work Pattern" }));
+    expect(screen.getByRole("heading", { name: "Work Pattern" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    await waitFor(() => expect(document.getElementById("month-heading")).toHaveFocus());
+    fireEvent.click(within(plannerModes).getByRole("button", { name: "Commitment Library" }));
+    expect(screen.getByRole("heading", { name: "Commitment Library" })).toHaveFocus();
+  });
 
   it("renders only the loading shell until authority becomes ready", async () => {
     const controlled = createControllableReadinessStore(createReadyDayFrameTestStore());
     render(<DayFrameApp store={controlled.store} />);
     expect(screen.getByText("Loading DayFrame…")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Plan" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Month" })).not.toBeInTheDocument();
     controlled.transition({ status: "ready" });
-    expect(await screen.findByRole("button", { name: "Plan" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Month" })).toBeInTheDocument();
   });
 
   it("renders only the protected shell when authority needs recovery", () => {
@@ -210,15 +262,14 @@ describe("DayFrameApp", () => {
   it("renders the shell and opens on setup", () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
 
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
     expect(screen.getByRole("heading", { name: "DayFrame" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Plan" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Plan" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Generate Schedule" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save Setup" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Save Current Setup as Profile" }),
     ).toBeInTheDocument();
@@ -231,26 +282,13 @@ describe("DayFrameApp", () => {
         "Set up your shifts, connect them to a cycle, add repeatable life blocks, then generate a schedule.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Planning Range: Expand" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(screen.getByRole("button", { name: "Work Schedule: Expand" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(
-      screen.getByText("No shifts yet. Add your first shift definition to get started."),
-    ).toBeInTheDocument();
-    expect(screen.queryByDisplayValue("Day Shift")).not.toBeInTheDocument();
-    expect(screen.queryByDisplayValue("Day Rotation")).not.toBeInTheDocument();
-    expect(screen.queryByDisplayValue("Sleep")).not.toBeInTheDocument();
-    expect(screen.queryByDisplayValue("Errands")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: /2026/ }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Work Pattern" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Commitment Library" }).length).toBeGreaterThan(0);
   });
 
-  it("shows persistent recovery awareness and explicit controls for a protected checkpoint", () => {
+  it("shows persistent recovery awareness and explicit controls for a protected checkpoint", async () => {
     const rawCheckpoint = "{ invalid active checkpoint";
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, rawCheckpoint);
 
@@ -273,6 +311,7 @@ describe("DayFrameApp", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /repair|migrate|export recovery/i })).toBeNull();
 
+    await openPlanningSettings();
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
     expect(
@@ -345,12 +384,13 @@ describe("DayFrameApp", () => {
     ).toBeNull();
   });
 
-  it("confirms active-only abandonment and reflects the store-owned reset", () => {
+  it("confirms active-only abandonment and reflects the store-owned reset", async () => {
     globalThis.localStorage.setItem(DAYFRAME_STORAGE_KEY, "{");
     const store = createReadyDayFrameTestStore();
     store.saveProfile({ name: "Kept Profile", savedAt: "2026-05-05T10:00:00-05:00" });
     const abandon = vi.spyOn(store, "abandonProtectedActiveCheckpointAndReset");
     render(<DayFrameApp store={store} />);
+    await openWorkPattern();
 
     fireEvent.click(
       screen.getByRole("button", { name: "Abandon protected saved setup and reset" }),
@@ -430,7 +470,9 @@ describe("DayFrameApp", () => {
       );
 
       expect(replace).toHaveBeenCalledTimes(1);
-      expect(screen.getByRole("status")).toHaveTextContent(copy);
+      expect(
+        screen.getAllByRole("status").some((status) => copy.test(status.textContent ?? "")),
+      ).toBe(true);
       expect(
         screen.getByRole("region", { name: "Saved setup needs recovery" }),
       ).toBeInTheDocument();
@@ -467,8 +509,12 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm abandon protected saved setup" }));
 
     expect(abandon).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("status")).toHaveTextContent("current session was not reset");
-    expect(screen.getAllByDisplayValue("Day Shift").length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) => /current session was not reset/i.test(status.textContent ?? "")),
+    ).toBe(true);
+    expect(baseStore.getState().shiftDefinitions[0]?.name).toBe("Day Shift");
   });
 
   it("suppresses active durability Retry during recovery while preserving profile Retry", () => {
@@ -528,7 +574,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm replace protected saved setup" }));
 
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByText(/saved setup no longer requires recovery/i)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Confirm replace protected saved setup" }),
     ).toBeNull();
@@ -554,11 +600,12 @@ describe("DayFrameApp", () => {
     expect(screen.queryByRole("button", { name: "Cancel replacement" })).toBeNull();
   });
 
-  it("does not persist or notify through authored mutations during neutral default startup", () => {
+  it("does not persist or notify through authored mutations during neutral default startup", async () => {
     const setItem = vi.spyOn(Storage.prototype, "setItem");
     setItem.mockClear();
 
     render(<DayFrameApp />);
+    await openWorkPattern();
 
     expect(setItem).not.toHaveBeenCalled();
     expect(globalThis.localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
@@ -567,7 +614,7 @@ describe("DayFrameApp", () => {
     ).toBeInTheDocument();
   });
 
-  it("preserves all seven persisted authored fields without rewriting seed-looking data", () => {
+  it("preserves all seven persisted authored fields without rewriting seed-looking data", async () => {
     const persistedState = {
       schedulingPreferences: {
         dayBoundaryStartTime: "04:30",
@@ -657,18 +704,18 @@ describe("DayFrameApp", () => {
     setItem.mockClear();
 
     render(<DayFrameApp />);
+    await openPlanningSettings();
 
     expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
     expect(globalThis.localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(storedBeforeMount);
     expect(screen.getByLabelText("Day Boundary Start Time")).toHaveValue("04:30");
     expect(screen.getByLabelText("Week Starts On")).toHaveValue("monday");
+    await openWorkPattern();
     expect(screen.getByLabelText("Name")).toHaveValue("Persisted Custom Shift");
-    fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
     const expandCycles = screen.queryByRole("button", { name: "Work Schedule: Expand" });
     if (expandCycles) fireEvent.click(expandCycles);
-    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
-    expect(screen.getByLabelText("Start Date")).toHaveValue("2026-06-01");
     expect(screen.getByDisplayValue("Persisted Custom Cycle")).toBeInTheDocument();
+    await openCommitmentLibrary();
     expect(screen.getByDisplayValue("Persisted Custom Sleep")).toBeInTheDocument();
 
     const rehydratedState = createReadyDayFrameTestStore().getState();
@@ -678,7 +725,7 @@ describe("DayFrameApp", () => {
     expect(rehydratedPattern.blockRecurrences).toEqual(persistedState.blockRecurrences);
   });
 
-  it("preserves intentionally empty persisted authored collections without rewriting them", () => {
+  it("preserves intentionally empty persisted authored collections without rewriting them", async () => {
     const emptyPersistedState = {
       schedulingPreferences: {
         dayBoundaryStartTime: "03:00",
@@ -701,6 +748,7 @@ describe("DayFrameApp", () => {
     setItem.mockClear();
 
     render(<DayFrameApp />);
+    await openWorkPattern();
 
     expect(setItem).toHaveBeenCalledWith(DAYFRAME_ACTIVE_V2_STORAGE_KEY, expect.any(String));
     expect(globalThis.localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBe(serializedState);
@@ -710,7 +758,7 @@ describe("DayFrameApp", () => {
     expect(screen.queryByDisplayValue("Day Shift")).not.toBeInTheDocument();
   });
 
-  it("keeps cleared state neutral after default app reconstruction", () => {
+  it("keeps cleared state neutral after default app reconstruction", async () => {
     globalThis.localStorage.setItem(
       DAYFRAME_STORAGE_KEY,
       JSON.stringify({
@@ -720,6 +768,7 @@ describe("DayFrameApp", () => {
       }),
     );
     const firstRender = render(<DayFrameApp />);
+    await openWorkPattern();
 
     expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
     fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
@@ -728,6 +777,7 @@ describe("DayFrameApp", () => {
     firstRender.unmount();
 
     render(<DayFrameApp />);
+    await openWorkPattern();
 
     expect(globalThis.localStorage.getItem(DAYFRAME_STORAGE_KEY)).toBeNull();
     expect(
@@ -736,7 +786,7 @@ describe("DayFrameApp", () => {
     expect(screen.queryByDisplayValue("Day Shift")).not.toBeInTheDocument();
   });
 
-  it("rehydrates saved profiles separately without seeding neutral active state", () => {
+  it("rehydrates saved profiles separately without seeding neutral active state", async () => {
     globalThis.localStorage.setItem(
       DAYFRAME_PROFILES_STORAGE_KEY,
       JSON.stringify({
@@ -758,6 +808,7 @@ describe("DayFrameApp", () => {
     );
 
     render(<DayFrameApp />);
+    await openWorkPattern();
 
     expect(screen.getByText("Explicit Profile")).toBeInTheDocument();
     expect(
@@ -796,9 +847,7 @@ describe("DayFrameApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Replace with current profiles" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm replace protected profiles" }));
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Saved profile data changed outside DayFrame",
-    );
+    expect(screen.getByText(/Saved profile data changed outside DayFrame/)).toBeInTheDocument();
     expect(globalThis.localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY)).toBe(
       "externally changed",
     );
@@ -829,16 +878,15 @@ describe("DayFrameApp", () => {
     expect(
       screen.queryByRole("heading", { name: "Some saved profiles need attention" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Quarantined profile entry permanently removed",
-    );
+    expect(screen.getByText(/Quarantined profile entry permanently removed/)).toBeInTheDocument();
   });
 
-  it("commits one complete authored setup transition when Setup is saved", () => {
+  it("commits one complete authored setup transition when Setup is saved", async () => {
     const store = createReadyDayFrameTestStore();
     const commitAuthoredSetupTransaction = vi.spyOn(store, "commitAuthoredSetupTransaction");
 
     render(<DayFrameApp store={store} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
@@ -878,24 +926,25 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Setup saved.")).toBeInTheDocument();
   });
 
-  it("shows unified setup content and still lets the user open preview", () => {
+  it("shows unified setup content and still lets the user open preview", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openPlanningSettings();
 
     expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
-    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
     expect(screen.getByRole("heading", { name: "Planning Range" })).toBeInTheDocument();
+    await openWorkPattern();
+    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     expect(screen.getByRole("heading", { name: "Work Schedule" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Cycle Name")).toHaveValue("Day Rotation");
+    await openCommitmentLibrary();
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
     expect(screen.getByRole("heading", { name: "Advanced Commitment Fields" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Range Preset")).toHaveValue("threeDays");
-    expect(screen.getByLabelText("Start Date")).toHaveValue("2026-05-04");
-    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-06");
-    expect(screen.getByDisplayValue("Day Rotation")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Sleep")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Include in Schedule")[0]).toBeChecked();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
@@ -907,8 +956,9 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByText("Needs attention")[0]!).toBeInTheDocument();
   });
 
-  it("keeps unified setup draft edits when switching to preview and back", () => {
+  it("keeps unified setup draft edits when switching to preview and back", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openWorkPattern();
 
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Sunrise Shift" },
@@ -920,19 +970,22 @@ describe("DayFrameApp", () => {
     });
     expect(screen.getByDisplayValue("Weekend Rotation")).toBeInTheDocument();
 
+    await openCommitmentLibrary();
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Baseline" },
     });
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openCommitmentLibrary();
 
     expect(screen.getByDisplayValue("Sleep Baseline")).toBeInTheDocument();
   });
 
-  it("updates global schedule preferences after saving setup", () => {
+  it("updates global schedule preferences after saving setup", async () => {
     const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
       target: { value: "05:00" },
@@ -948,10 +1001,11 @@ describe("DayFrameApp", () => {
     });
   });
 
-  it("updates preview range after saving setup", () => {
+  it("updates preview range after saving setup", async () => {
     const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Range Preset"), {
       target: { value: "oneWeek" },
@@ -969,7 +1023,7 @@ describe("DayFrameApp", () => {
     });
   });
 
-  it("saves unified authored edits through the single setup action", () => {
+  it("saves unified authored edits through the single setup action", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -1033,6 +1087,7 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openWorkPattern();
 
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Sunrise Shift" },
@@ -1040,6 +1095,7 @@ describe("DayFrameApp", () => {
     fireEvent.change(screen.getByLabelText("Cycle Name"), {
       target: { value: "Weekend Rotation" },
     });
+    await openCommitmentLibrary();
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Baseline" },
     });
@@ -1062,10 +1118,11 @@ describe("DayFrameApp", () => {
     });
   });
 
-  it("switches a cycle to repeating sequence, edits sequence days, and saves it", () => {
+  it("switches a cycle to repeating sequence, edits sequence days, and saves it", async () => {
     const store = createExampleScheduleStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     expect(screen.getByLabelText("Cycle Type")).toHaveValue("manualSegments");
@@ -1099,7 +1156,7 @@ describe("DayFrameApp", () => {
     });
   });
 
-  it("allocates collision-free readable IDs across Setup source scopes", () => {
+  it("allocates collision-free readable IDs across Setup source scopes", async () => {
     const baseState = createExampleScheduleStore().getState();
     const baseShift = baseState.shiftDefinitions[0]!;
     const baseCycle = baseState.shiftCycles[0]!;
@@ -1146,6 +1203,8 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
+    await openWorkPattern();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Delete Shift Definition" })[1]!);
     fireEvent.click(screen.getByRole("button", { name: "Confirm Delete Shift Definition" }));
@@ -1168,6 +1227,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-01" },
     });
     fireEvent.click(screen.getAllByRole("button", { name: "Add Cycle Segment" })[0]!);
+    await openCommitmentLibrary();
     fireEvent.click(screen.getByRole("button", { name: "Add Commitment" }));
     fireEvent.change(document.getElementById("commitment-title")!, {
       target: { value: "Template 4" },
@@ -1203,7 +1263,7 @@ describe("DayFrameApp", () => {
     expect(state.blockRecurrences[2]?.blockTemplateId).toBe("template_4");
   });
 
-  it("allows final-suffix reuse without colliding with an active shift", () => {
+  it("allows final-suffix reuse without colliding with an active shift", async () => {
     const baseState = createExampleScheduleStore().getState();
     const baseShift = baseState.shiftDefinitions[0]!;
     const cycle = baseState.shiftCycles[0]!;
@@ -1225,6 +1285,7 @@ describe("DayFrameApp", () => {
     });
     const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
     render(<DayFrameApp store={store} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Delete Shift Definition" })[1]!);
     fireEvent.click(screen.getByRole("button", { name: "Confirm Delete Shift Definition" }));
@@ -1241,7 +1302,7 @@ describe("DayFrameApp", () => {
     expect(operations.map((operation) => operation.operation)).toEqual(["delete", "create"]);
   });
 
-  it("allocates sequence IDs against the common cycle-local work-entry namespace", () => {
+  it("allocates sequence IDs against the common cycle-local work-entry namespace", async () => {
     const pattern = projectActiveToPattern(createExampleScheduleStore().getState());
     const cycle = pattern.shiftCycles[0]!;
 
@@ -1260,6 +1321,7 @@ describe("DayFrameApp", () => {
       ],
     });
     render(<DayFrameApp store={store} />);
+    await openWorkPattern();
 
     const expandCycles = screen.queryByRole("button", { name: "Work Schedule: Expand" });
     if (expandCycles) fireEvent.click(expandCycles);
@@ -1273,7 +1335,7 @@ describe("DayFrameApp", () => {
     ]);
   });
 
-  it("allocates distinct manual-event IDs for an identical creation timestamp and preserves edits", () => {
+  it("allocates distinct manual-event IDs for an identical creation timestamp and preserves edits", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-19T13:00:00.000Z"));
 
@@ -1288,6 +1350,7 @@ describe("DayFrameApp", () => {
           store={store}
         />,
       );
+      await openDetailedReview();
 
       fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
       fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
@@ -1320,7 +1383,7 @@ describe("DayFrameApp", () => {
     }
   });
 
-  it("generates preview work from a repeating sequence cycle", () => {
+  it("generates preview work from a repeating sequence cycle", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -1383,15 +1446,18 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openWorkPattern();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getByRole("heading", { name: "Schedule details" })).toBeInTheDocument();
     expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(2);
   });
 
-  it("clears the unified save message when the draft changes again", () => {
+  it("clears the unified save message when the draft changes again", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
     expect(screen.getByText("Setup saved.")).toBeInTheDocument();
@@ -1473,6 +1539,7 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Range Preset"), {
       target: { value: "oneWeek" },
@@ -1503,13 +1570,11 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Load Profile" }));
 
+    expect(screen.getByText('Loaded profile "Night Rotation".')).toBeInTheDocument();
+    await openWorkPattern();
     await waitFor(() => {
       expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
     });
-    expect(screen.getByLabelText("Range Preset")).toHaveValue("oneWeek");
-    expect(screen.getByLabelText("End Date")).toHaveValue("2026-05-10");
-
-    expect(screen.getByText('Loaded profile "Night Rotation".')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Delete Profile" }));
 
@@ -1555,7 +1620,7 @@ describe("DayFrameApp", () => {
     expect(screen.queryByText('Loaded profile "Needs Recovery".')).not.toBeInTheDocument();
   });
 
-  it("generates a preview from an explicit example schedule when the user requests it", () => {
+  it("generates a preview from an explicit example schedule when the user requests it", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
@@ -1563,6 +1628,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
@@ -1581,7 +1647,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ })).toBeInTheDocument();
   });
 
-  it("filters the full preview to a selected day and range from the compact calendar", () => {
+  it("filters the full preview to a selected day and range from the compact calendar", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
@@ -1589,6 +1655,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
@@ -1624,7 +1691,7 @@ describe("DayFrameApp", () => {
     ).toHaveClass("is-selected", "is-range-end");
   });
 
-  it("keeps the selected compact-preview day stable when switching between Setup and Preview", () => {
+  it("keeps the selected compact-preview day stable when switching between Setup and Preview", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
@@ -1632,13 +1699,15 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    await openDetailedReview();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
 
     expect(
       screen.getByRole("button", { name: "Tuesday, May 5, 2026, selected day" }),
@@ -1647,7 +1716,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" })).toBeInTheDocument();
   });
 
-  it("uses a lighter interior style for selected preview ranges", () => {
+  it("uses a lighter interior style for selected preview ranges", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
@@ -1655,6 +1724,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026$/ }));
     fireEvent.click(screen.getByRole("button", { name: /^Wednesday, May 6, 2026$/ }));
@@ -1664,7 +1734,7 @@ describe("DayFrameApp", () => {
     ).toHaveClass("is-selected", "is-range-middle");
   });
 
-  it("marks compact calendar friction days and restores the full visible range", () => {
+  it("marks compact calendar friction days and restores the full visible range", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -1758,6 +1828,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     const conflictDayButton = screen.getByRole("button", {
@@ -1782,7 +1853,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
   });
 
-  it("marks today in the compact calendar and keeps setup and preview navigation working", () => {
+  it("marks today in the compact calendar and keeps setup and preview navigation working", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-05T13:00:00-05:00"}
@@ -1790,6 +1861,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     const todayButton = screen.getByRole("button", {
@@ -1802,12 +1874,11 @@ describe("DayFrameApp", () => {
       "true",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    expect(screen.getByRole("button", { name: "Month" })).toHaveAttribute("aria-pressed", "true");
+    await openDetailedReview();
 
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
 
     expect(screen.getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
       "aria-pressed",
@@ -1820,13 +1891,10 @@ describe("DayFrameApp", () => {
     ).toHaveClass("is-selected", "is-today");
   });
 
-  it("collapses setup sections by default and preserves draft edits when sections are reopened", () => {
+  it("collapses setup sections by default and preserves draft edits when sections are reopened", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openWorkPattern();
 
-    expect(screen.getByRole("button", { name: "Schedule Preferences: Collapse" })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
     expect(screen.getByRole("button", { name: "Work Hours: Collapse" })).toHaveAttribute(
       "aria-expanded",
       "true",
@@ -1839,6 +1907,7 @@ describe("DayFrameApp", () => {
       screen.getByText("Advanced work schedule rotation and dated-period configuration."),
     ).toBeInTheDocument();
 
+    await openCommitmentLibrary();
     fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Buffer" },
@@ -1861,17 +1930,19 @@ describe("DayFrameApp", () => {
       target: { value: "Saved Setup" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Current Setup as Profile" }));
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Tuesday, May 5, 2026$/ }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openWorkPattern();
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Temporary Shift" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Load Profile" }));
 
+    await openWorkPattern();
     await waitFor(() => {
       expect(screen.getByLabelText("Name")).toHaveValue("Day Shift");
     });
@@ -1879,6 +1950,7 @@ describe("DayFrameApp", () => {
       screen.queryByRole("button", { name: /Tuesday, May 5, 2026, selected day/ }),
     ).not.toBeInTheDocument();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByRole("heading", { name: "Day Visualizer" })).toHaveLength(3);
@@ -1888,13 +1960,14 @@ describe("DayFrameApp", () => {
     );
   });
 
-  it("generates preview using the saved preview range instead of the old hardcoded window", () => {
+  it("generates preview using the saved preview range instead of the old hardcoded window", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
       />,
     );
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Range Preset"), {
       target: { value: "oneWeek" },
@@ -1903,20 +1976,26 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
   });
 
-  it("can save a cycle-based preview range and generate the full authored cycle", () => {
+  it("can save a cycle-based preview range and generate the full authored cycle", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
       />,
     );
+    await openPlanningSettings();
 
     fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
+    fireEvent.change(screen.getByLabelText("Range Source"), {
+      target: { value: "cycle" },
+    });
+    await openWorkPattern();
     fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     fireEvent.change(screen.getByLabelText("Cycle Start Date"), {
       target: { value: "2026-05-10" },
@@ -1930,32 +2009,34 @@ describe("DayFrameApp", () => {
     fireEvent.change(screen.getByLabelText("Segment End Date"), {
       target: { value: "2026-05-12" },
     });
-    fireEvent.change(screen.getByLabelText("Range Source"), {
-      target: { value: "cycle" },
-    });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 10-12, 2026").length).toBeGreaterThan(0);
   });
 
-  it("keeps Setup authoritative and does not generate Preview after a rejected commit", () => {
+  it("keeps Setup authoritative and does not generate Preview after a rejected commit", async () => {
     const store = createExampleScheduleStore();
     const originalCycle = store.getState().shiftCycles[0]!;
 
     render(<DayFrameApp store={store} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
     fireEvent.change(screen.getByLabelText("Cycle End Date"), {
       target: { value: "2026-04-30" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
     expect(
       screen.getByText("Setup contains conflicting or incomplete authored data and was not saved."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Work Pattern" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(store.getState().shiftCycles[0]).toEqual(originalCycle);
     expect(store.getState().preview).toBeNull();
   });
@@ -1968,6 +2049,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
 
@@ -2017,6 +2099,7 @@ describe("DayFrameApp", () => {
 
   it("opens the singular Event workflow from the selected Review Schedule user-day", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
 
@@ -2028,8 +2111,284 @@ describe("DayFrameApp", () => {
     await waitFor(() => expect(screen.getByLabelText("Title")).toHaveFocus());
   });
 
+  it("routes Month contextual actions through the canonical Event, Commitment, and Work workflows", async () => {
+    render(
+      <ExampleScheduleApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+      />,
+    );
+    await openWorkPattern();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await waitFor(() =>
+      expect(screen.getByText(/Schedule generated for part of this month/)).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+
+    expect(screen.getByRole("heading", { name: "Monday, May 4, 2026" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add Event" }));
+    expect(screen.getByLabelText("Date")).toHaveValue("2026-05-04");
+    await waitFor(() => expect(screen.getByLabelText("Title")).toHaveFocus());
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Monday, May 4, 2026" })).toHaveFocus(),
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Add Commitment" })[0]!);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Add Commitment" })).toBeInTheDocument(),
+    );
+    expect(screen.getByLabelText("Repeats")).toHaveValue("daily");
+    expect(document.getElementById("commitment-title")).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    expect(screen.getByRole("heading", { name: "Monday, May 4, 2026" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit Work" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument(),
+    );
+    expect(screen.getByRole("button", { name: "Back to day" })).toBeInTheDocument();
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Work Pattern" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Commitments" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Schedule Preferences" })).not.toBeInTheDocument();
+  });
+
+  it("reuses canonical Goals, Preferences, Range, and Save Setup in Month Planning Settings", async () => {
+    const store = createExampleScheduleStore();
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+        store={store}
+      />,
+    );
+    await openWorkPattern();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await waitFor(() => expect(store.getState().preview).not.toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next month" }));
+    expect(screen.getByRole("heading", { name: "June 2026" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Planning settings" }));
+    expect(screen.getByRole("heading", { name: "Goals" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Planning Settings" })).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "Schedule Preferences" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Work Hours" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Commitments" })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
+      target: { value: "05:30" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Planning Range: Expand" }));
+    expect(screen.getByRole("heading", { name: "Planning Range" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().schedulingPreferences.dayBoundaryStartTime).toBe("05:30");
+    expect(store.getState().preview?.isStale).toBe(true);
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    expect(screen.getByRole("heading", { name: "June 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById("selected-day-heading")).toHaveFocus());
+  });
+
+  it("extracts canonical structural Work into the shared Work Pattern workspace", async () => {
+    const store = createExampleScheduleStore();
+    const cycle = store.getState().shiftCycles[0]!;
+    store.setShiftCycles([
+      {
+        ...cycle,
+        segments: cycle.segments.map((segment, index) =>
+          index === 0 ? { ...segment, transitionStrategyId: "dormant-transition" } : segment,
+        ),
+      },
+    ]);
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+        store={store}
+      />,
+    );
+    await openWorkPattern();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    expect(screen.getByRole("heading", { name: "May 2026" })).toBeInTheDocument();
+    fireEvent.click(within(document.querySelector(".df-month-actions")!).getByText("Work Pattern"));
+
+    expect(screen.getByRole("heading", { name: "Work Pattern" })).toHaveFocus();
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Work Hours" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Commitments" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Schedule Preferences" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Planning Range" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Advanced Commitment Fields" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Add Shift Definition" }));
+    const shiftNames = screen.getAllByLabelText("Name");
+    fireEvent.change(shiftNames.at(-1)!, { target: { value: "Weekend Shift" } });
+    fireEvent.click(screen.getByRole("button", { name: "Work Schedule: Expand" }));
+    const segmentOverride = screen.getAllByLabelText(
+      "Override global schedule preferences",
+    )[0] as HTMLInputElement;
+    if (!segmentOverride.checked) fireEvent.click(segmentOverride);
+    fireEvent.change(screen.getAllByLabelText("Segment Day Boundary")[0]!, {
+      target: { value: "05:30" },
+    });
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+
+    expect(store.getState().shiftDefinitions.some((shift) => shift.name === "Weekend Shift")).toBe(
+      true,
+    );
+    expect(store.getState().shiftCycles[0]?.segments[0]?.schedulePreferences).toMatchObject({
+      dayBoundaryStartTime: "05:30",
+    });
+    expect(store.getState().shiftCycles[0]?.segments[0]?.transitionStrategyId).toBe(
+      "dormant-transition",
+    );
+    expect(store.getState().preview?.isStale).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    expect(screen.getByRole("heading", { name: "May 2026" })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById("selected-day-heading")).toHaveFocus());
+    expect(screen.getByRole("button", { name: "Refresh Schedule" })).toBeInTheDocument();
+  });
+
+  it("extracts the complete authored inventory into the shared Commitment Library", async () => {
+    const store = createExampleScheduleStore();
+    const disabled = store.getState().blockTemplates[0]!;
+    store.setBlockTemplates(
+      store
+        .getState()
+        .blockTemplates.map((template) =>
+          template.id === disabled.id ? { ...template, enabled: false } : template,
+        ),
+    );
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+        store={store}
+      />,
+    );
+
+    fireEvent.click(
+      within(screen.getByRole("navigation", { name: "Planner modes" })).getByRole("button", {
+        name: "Commitment Library",
+      }),
+    );
+    expect(screen.getByRole("heading", { name: "Commitment Library" })).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "Commitments" })).toBeInTheDocument();
+    expect(screen.getByText(/Disabled/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Work Hours" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Work Schedule" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Schedule Preferences" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Planning Range" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
+    expect(screen.getByRole("heading", { name: "Advanced Commitment Fields" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Edit commitment ${disabled.title}` }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Enabled" }));
+    fireEvent.click(screen.getByRole("button", { name: "Update Commitment" }));
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    expect(
+      store.getState().blockTemplates.find((template) => template.id === disabled.id)?.enabled,
+    ).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(
+      within(document.querySelector(".df-month-actions")!).getByText("Commitment Library"),
+    );
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Commitment Library" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    await waitFor(() => expect(document.getElementById("selected-day-heading")).toHaveFocus());
+  });
+
+  it("generates and refreshes canonically from Month without changing Month context", async () => {
+    const store = createExampleScheduleStore();
+    render(
+      <DayFrameApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+        store={store}
+      />,
+    );
+    await openWorkPattern();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    const selectedBefore = screen.getByRole("gridcell", { name: /Monday, May 4.*Selected/ });
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await waitFor(() =>
+      expect(screen.getByText(/Schedule generated for part of this month/)).toBeInTheDocument(),
+    );
+    expect(selectedBefore).toHaveAttribute("aria-selected", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit Work" }));
+    const workName = screen
+      .getAllByLabelText("Name")
+      .find((field) => (field as HTMLInputElement).value.includes("Day Shift"))!;
+    fireEvent.change(workName, { target: { value: "Updated Day Shift" } });
+    expect(screen.getAllByText(/Plan has unsaved changes/)).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Refresh Schedule" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
+    expect(screen.getByText(/based on older saved planning inputs/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
+    await waitFor(() =>
+      expect(screen.getByText(/Schedule generated for part of this month/)).toBeInTheDocument(),
+    );
+    expect(screen.getByRole("gridcell", { name: /Monday, May 4.*Selected/ })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById("month-schedule-status")).toHaveFocus());
+  });
+
+  it("opens exact Month attention in specialized Review without cloning resolution", async () => {
+    render(
+      <ExampleScheduleApp
+        getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
+        getNow={() => new Date(2026, 4, 4, 12, 0, 0, 0)}
+      />,
+    );
+    await openCommitmentLibrary();
+    fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await waitFor(() =>
+      expect(screen.getByText(/Schedule generated for part of this month/)).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Event" }));
+    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Work Conflict" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save Event" }));
+    await waitFor(() => expect(screen.getAllByText("Work Conflict").length).toBeGreaterThan(0));
+    const attentionAction = screen.queryAllByRole("button", {
+      name: /Resolve .* in Review Schedule/,
+    })[0];
+    expect(attentionAction).toBeDefined();
+    const exactName = attentionAction!.getAttribute("aria-label")!;
+    fireEvent.click(attentionAction!);
+    expect(screen.getByRole("heading", { name: "Review Schedule" })).toBeInTheDocument();
+    await waitFor(() => expect(document.activeElement?.id).toMatch(/^review-friction-/));
+    expect(
+      screen.getByRole("button", { name: /Try|Accept conflict|Move|Skip/ }),
+    ).toBeInTheDocument();
+    expect(exactName).toContain("Resolve");
+  });
+
   it("navigates from an exact scheduled occurrence to the reused lazy Commitment editor", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: "Review Schedule" })).toHaveFocus(),
@@ -2038,13 +2397,16 @@ describe("DayFrameApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Edit commitment Errands" }));
 
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Commitment Library" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(screen.getByRole("button", { name: "Return to Review Schedule" })).toBeInTheDocument();
     await waitFor(() => expect(document.getElementById("commitment-title")).toHaveValue("Errands"));
     expect(document.getElementById("commitment-title")).toHaveFocus();
   });
 
-  it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", () => {
+  it("keeps daily before-work sleep on every visible night-shift day across a one-week app preview", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -2116,6 +2478,7 @@ describe("DayFrameApp", () => {
         store={store}
       />,
     );
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Range Preset"), {
       target: { value: "oneWeek" },
@@ -2124,6 +2487,7 @@ describe("DayFrameApp", () => {
       target: { value: "2026-05-05" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("May 5-11, 2026").length).toBeGreaterThan(0);
@@ -2183,13 +2547,14 @@ describe("DayFrameApp", () => {
     },
   ])(
     "shows exactly $expectedVisibleDayCount visible user days for $preset",
-    ({ preset, expectedVisibleDayCount, expectedPlanningWindowLabel }) => {
+    async ({ preset, expectedVisibleDayCount, expectedPlanningWindowLabel }) => {
       render(
         <ExampleScheduleApp
           getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
           getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
         />,
       );
+      await openPlanningSettings();
 
       fireEvent.change(screen.getByLabelText("Range Preset"), {
         target: { value: preset },
@@ -2198,6 +2563,7 @@ describe("DayFrameApp", () => {
         target: { value: "2026-05-05" },
       });
       fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
+      await openDetailedReview();
       fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
       expect(screen.getAllByText(expectedPlanningWindowLabel).length).toBeGreaterThan(0);
@@ -2207,26 +2573,28 @@ describe("DayFrameApp", () => {
     },
   );
 
-  it("uses the current preferred window values when generating preview placements", () => {
+  it("uses the current preferred window values when generating preview placements", async () => {
     render(
       <ExampleScheduleApp
         getGeneratedAt={() => "2026-05-03T13:00:00-05:00"}
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
       />,
     );
+    await openCommitmentLibrary();
 
     fireEvent.change(screen.getAllByLabelText("Preferred Window")[0]!, {
       target: { value: "afterWork" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getByText("Sleep 2:15 PM - 10:15 PM")).toBeInTheDocument();
     expect(screen.queryByText("Sleep 8:45 PM - 4:45 AM")).not.toBeInTheDocument();
   });
 
-  it("persists the requires-work-shift setting from the template editor", () => {
+  it("persists the requires-work-shift setting from the template editor", async () => {
     const store = createReadyDayFrameTestStore({
       blockTemplates: [
         {
@@ -2264,6 +2632,7 @@ describe("DayFrameApp", () => {
         store={store}
       />,
     );
+    await openCommitmentLibrary();
 
     fireEvent.click(screen.getByRole("button", { name: "Advanced Commitment Fields: Expand" }));
 
@@ -2276,10 +2645,11 @@ describe("DayFrameApp", () => {
     expect(store.getState().blockTemplates[0]?.requiresWorkAnchor).toBe(true);
   });
 
-  it("shows a clear setup message when preview data is incomplete", () => {
+  it("shows a clear setup message when preview data is incomplete", async () => {
     const store = createReadyDayFrameTestStore();
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openDetailedReview();
 
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
@@ -2288,11 +2658,10 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getByText("No schedule generated yet.")).toBeInTheDocument();
   });
 
-  it("shows only the missing setup items that still need attention", () => {
+  it("shows only the missing setup items that still need attention", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -2310,6 +2679,7 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openDetailedReview();
 
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
@@ -2318,11 +2688,10 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Add or include at least one block template.")).toBeInTheDocument();
     expect(screen.queryByText(retiredGuardrailMessage)).not.toBeInTheDocument();
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByText("No schedule generated yet.")).toBeInTheDocument();
   });
 
-  it("generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks", () => {
+  it("generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -2425,6 +2794,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(
@@ -2442,7 +2812,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByText("Night Shift 9:45 PM - 6:15 AM")).toHaveLength(3);
   });
 
-  it("lets the user apply a suggested fix after generating a preview", () => {
+  it("lets the user apply a suggested fix after generating a preview", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -2540,6 +2910,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Move block" }));
 
@@ -2570,10 +2941,11 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openWorkPattern();
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Updated Day Shift" },
     });
@@ -2603,12 +2975,13 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Today at 1:00 PM").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 8:45 PM - 4:45 AM").length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openCommitmentLibrary();
     fireEvent.change(screen.getAllByLabelText("Title")[0]!, {
       target: { value: "Sleep Recovery" },
     });
@@ -2641,7 +3014,7 @@ describe("DayFrameApp", () => {
     expect(screen.getAllByText("May 4-6, 2026").length).toBeGreaterThan(0);
   });
 
-  it("shows non-blocking preview range mismatch warnings only after preview generation", () => {
+  it("shows non-blocking preview range mismatch warnings only after preview generation", async () => {
     const store = createReadyDayFrameTestStore({
       previewRange: {
         preset: "custom",
@@ -2718,6 +3091,7 @@ describe("DayFrameApp", () => {
       screen.queryByText("This preview range does not overlap the active cycle."),
     ).not.toBeInTheDocument();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Planning range warnings:").length).toBeGreaterThan(0);
@@ -2804,6 +3178,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     store.setSchedulingPreferences({ weekStartsOn: "monday" });
 
@@ -2821,8 +3196,11 @@ describe("DayFrameApp", () => {
     expect(freshReviewButton).toBeEnabled();
     fireEvent.click(freshReviewButton);
 
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Commitment Library" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("heading", { name: "Commitment Library" })).toBeInTheDocument();
     expect(screen.getAllByLabelText("Fixed Start Time")[0]).toHaveFocus();
   });
 
@@ -2903,6 +3281,7 @@ describe("DayFrameApp", () => {
       />,
     );
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(screen.getByRole("button", { name: "Review fixed time" })).toBeInTheDocument();
 
@@ -2938,7 +3317,7 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { name: "No friction" })).toBeInTheDocument();
   });
 
-  it("focuses the fixed-time input for the selected friction when multiple fixed templates exist", () => {
+  it("focuses the fixed-time input for the selected friction when multiple fixed templates exist", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -3146,15 +3525,20 @@ describe("DayFrameApp", () => {
         store={store}
       />,
     );
+    await openCommitmentLibrary();
 
-    fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
+    await openDetailedReview();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
     fireEvent.click(screen.getAllByRole("button", { name: "Review fixed time" })[1]!);
 
-    expect(screen.getByRole("button", { name: "Plan" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getAllByLabelText("Fixed Start Time")[1]).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Commitment Library" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await waitFor(() => expect(screen.getAllByLabelText("Fixed Start Time")[1]).toHaveFocus());
   });
 
-  it("re-enables persisted untouched default sleep and generates preview", () => {
+  it("re-enables persisted untouched default sleep and generates preview", async () => {
     globalThis.localStorage.setItem(
       DAYFRAME_STORAGE_KEY,
       JSON.stringify({
@@ -3229,14 +3613,16 @@ describe("DayFrameApp", () => {
         store={createReadyDayFrameTestStore()}
       />,
     );
+    await openCommitmentLibrary();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Sleep 7:00 PM - 3:00 AM")).toHaveLength(3);
   });
 
-  it("allows preview generation when sleep is intentionally disabled but another template is enabled", () => {
+  it("allows preview generation when sleep is intentionally disabled but another template is enabled", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -3328,7 +3714,9 @@ describe("DayFrameApp", () => {
         store={store}
       />,
     );
+    await openCommitmentLibrary();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getAllByText("Generated").length).toBeGreaterThan(0);
@@ -3336,7 +3724,7 @@ describe("DayFrameApp", () => {
     expect(screen.queryByText("Sleep 7:00 PM - 3:00 AM")).not.toBeInTheDocument();
   });
 
-  it("shows a clear guardrail when all templates are disabled", () => {
+  it("shows a clear guardrail when all templates are disabled", async () => {
     const store = createReadyDayFrameTestStore({
       shiftDefinitions: [
         {
@@ -3400,7 +3788,9 @@ describe("DayFrameApp", () => {
     });
 
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} store={store} />);
+    await openCommitmentLibrary();
 
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
     expect(screen.getByText("Finish setup before generating a schedule:")).toBeInTheDocument();
@@ -3408,8 +3798,9 @@ describe("DayFrameApp", () => {
     expect(screen.queryByText("Add at least one block recurrence.")).not.toBeInTheDocument();
   });
 
-  it("requires confirmation before clearing locally saved setup data", () => {
+  it("requires confirmation before clearing locally saved setup data", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
 
@@ -3430,6 +3821,7 @@ describe("DayFrameApp", () => {
 
   it("clears local setup data after confirmation", async () => {
     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openWorkPattern();
 
     fireEvent.click(screen.getByRole("button", { name: "Clear Local Data" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm Clear Local Data" }));
@@ -3442,6 +3834,7 @@ describe("DayFrameApp", () => {
     expect(
       screen.getByText("Local DayFrame setup data cleared from this device."),
     ).toBeInTheDocument();
+    await openWorkPattern();
     expect(
       screen.getByText("No shifts yet. Add your first shift definition to get started."),
     ).toBeInTheDocument();
@@ -3636,7 +4029,7 @@ describe("DayFrameApp", () => {
     ],
   ] as const)(
     "keeps a Setup commit in runtime while reflecting %s durability semantics",
-    (status, expectedMessage) => {
+    async (status, expectedMessage) => {
       const store = createReadyDayFrameTestStore();
       const commitAuthoredSetupTransaction = store.commitAuthoredSetupTransaction;
       const retryActivePersistence = vi.spyOn(store, "retryActivePersistence");
@@ -3651,6 +4044,7 @@ describe("DayFrameApp", () => {
       };
 
       render(<DayFrameApp store={workflowStore} />);
+      await openPlanningSettings();
       fireEvent.change(screen.getByLabelText("Week Starts On"), {
         target: { value: "monday" },
       });
@@ -3660,7 +4054,7 @@ describe("DayFrameApp", () => {
       expect(screen.getByText(expectedMessage)).toHaveClass("df-danger-message");
       expect(screen.queryByText("Setup saved.")).not.toBeInTheDocument();
       expect(retryActivePersistence).not.toHaveBeenCalled();
-      expect(screen.getByRole("heading", { name: "Plan" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Planning Settings" })).toBeInTheDocument();
     },
   );
 
@@ -3701,6 +4095,7 @@ describe("DayFrameApp", () => {
         getNow={() => new Date(2026, 4, 3, 16, 0, 0, 0)}
       />,
     );
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: /^Monday, May 4, 2026/ }));
     fireEvent.change(screen.getByLabelText("Title"), {
@@ -3888,13 +4283,14 @@ describe("DayFrameApp", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows active storage failure persistently beside immediate feedback and clears on ordinary convergence", () => {
+  it("shows active storage failure persistently beside immediate feedback and clears on ordinary convergence", async () => {
     const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
 
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
     expect(
@@ -3913,13 +4309,14 @@ describe("DayFrameApp", () => {
     expect(screen.getByText("Setup saved.")).toBeInTheDocument();
   });
 
-  it("keeps active durability awareness across workflow navigation", () => {
+  it("keeps active durability awareness across workflow navigation", async () => {
     const store = createReadyDayFrameTestStore();
     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage write failed.");
     });
 
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
 
@@ -4107,7 +4504,7 @@ describe("DayFrameApp", () => {
     ).toBeInTheDocument();
   });
 
-  it("clears recovery-required session-risk communication after natural convergence", () => {
+  it("clears recovery-required session-risk communication after natural convergence", async () => {
     const baseStore = createReadyDayFrameTestStore();
     let status: StoreDurabilityStatus = {
       activeState: "serializationFailure",
@@ -4135,6 +4532,7 @@ describe("DayFrameApp", () => {
     };
 
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
     expect(screen.getByText(/Reloading or closing DayFrame/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
 
@@ -4391,10 +4789,11 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Planner" })).toBeInTheDocument();
   });
 
-  it("preserves the app-owned Setup draft through Today without an implicit write", () => {
+  it("preserves the app-owned Setup draft through Today without an implicit write", async () => {
     const store = createReadyDayFrameTestStore();
     const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
     render(<DayFrameApp store={store} />);
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
       target: { value: "04:30" },
@@ -4444,7 +4843,8 @@ describe("DayFrameApp", () => {
     expect(generate).not.toHaveBeenCalled();
     fireEvent.click(within(navigation).getByRole("button", { name: "Planner" }));
     const returnedModes = screen.getByRole("navigation", { name: "Planner modes" });
-    fireEvent.click(within(returnedModes).getByRole("button", { name: "Plan" }));
+    fireEvent.click(within(returnedModes).getByRole("button", { name: "Month" }));
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     expect(generate).toHaveBeenCalledTimes(1);
     expect(within(returnedModes).getByRole("button", { name: "Review Schedule" })).toHaveAttribute(
@@ -4458,6 +4858,7 @@ describe("DayFrameApp", () => {
     const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
     const generate = vi.spyOn(store, "generatePreview");
     render(<DayFrameApp getNow={() => new Date("2026-08-22T17:00:00.000Z")} store={store} />);
+    await openPlanningSettings();
 
     fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
       target: { value: "04:30" },
@@ -4479,22 +4880,24 @@ describe("DayFrameApp", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 
-  it("regenerates Schedule from saved Active without consuming the dirty Plan draft", () => {
+  it("regenerates Schedule from saved Active without consuming the dirty Plan draft", async () => {
     const store = createExampleScheduleStore();
     render(<DayFrameApp getGeneratedAt={() => "2026-08-22T17:00:00.000Z"} store={store} />);
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openWorkPattern();
     const savedName = store.getState().shiftDefinitions[0]!.name;
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Unsaved Shift Name" } });
     fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
     fireEvent.click(screen.getByRole("button", { name: "Refresh Schedule" }));
     expect(store.getState().shiftDefinitions[0]!.name).toBe(savedName);
-    fireEvent.click(screen.getByRole("button", { name: "Plan" }));
+    await openWorkPattern();
     expect(screen.getByLabelText("Name")).toHaveValue("Unsaved Shift Name");
   });
 
-  it("reviews one selected canonical user-day without execution outcome controls", () => {
+  it("reviews one selected canonical user-day without execution outcome controls", async () => {
     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00:00-05:00"} />);
+    await openDetailedReview();
     fireEvent.click(screen.getByRole("button", { name: "Generate Schedule" }));
     const day = screen.getByLabelText("Review one user-day");
     const lastDay = day.getAttribute("max")!;

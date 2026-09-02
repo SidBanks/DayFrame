@@ -67,16 +67,22 @@ function Harness({
   initialDraft = createDraft(),
   target = null,
   handled,
+  requestAdd = false,
+  addHandled,
 }: {
   initialDraft?: SetupDraft;
   target?: CommitmentEditorTarget | null;
   handled?: (status: "opened" | "unavailable") => void;
+  requestAdd?: boolean;
+  addHandled?: () => void;
 }) {
   const [draft, setDraft] = useState(initialDraft);
   return (
     <CommitmentSection
       draft={draft}
+      {...(addHandled ? { onRequestedAddEditorHandled: addHandled } : {})}
       {...(handled ? { onRequestedEditorTargetHandled: handled } : {})}
+      requestedAddEditor={requestAdd}
       requestedEditorTarget={target}
       setDraft={setDraft}
     />
@@ -84,6 +90,17 @@ function Harness({
 }
 
 describe("CommitmentSection exact identity and recurrence authoring", () => {
+  it("opens the canonical add editor on a contextual request without date inference", () => {
+    const addHandled = vi.fn();
+    render(<Harness addHandled={addHandled} requestAdd />);
+
+    expect(screen.getByRole("heading", { name: "Add Commitment" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Repeats")).toHaveValue("daily");
+    expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument();
+    expect(addHandled).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("commitment-title")).toHaveFocus();
+  });
+
   it("opens only an exact template and recurrence incarnation", () => {
     const handled = vi.fn();
     render(<Harness handled={handled} target={exactTarget} />);

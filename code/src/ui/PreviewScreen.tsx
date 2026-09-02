@@ -8,9 +8,6 @@ import type { DayFramePreview } from "../state/types.js";
 import type { DayFrameAuthoredSetup } from "../state/types.js";
 import type { PreviewRangeWarning } from "./previewRangeWarnings.js";
 import { DayVisualizer } from "./DayVisualizer.js";
-import { ExecutionReportControl, type ExecutionReportingStore } from "./ExecutionReportControl.js";
-import { ExecutionHistoryPanel } from "./ExecutionHistoryPanel.js";
-import { HistoricalPlanReportingSection } from "./HistoricalPlanReportingSection.js";
 import type { AcceptedDecisionViewModel } from "./acceptedDecisionPresentation.js";
 import {
   formatHumanTimeRange,
@@ -39,7 +36,6 @@ export type PreviewScreenProps = {
   visibleRangeEndDate?: LocalDateString | null;
   now?: Date;
   authoredSetup?: DayFrameAuthoredSetup;
-  executionReportingStore?: ExecutionReportingStore;
   onAddEvent?: (userDayDate: LocalDateString) => void;
   onEditEvent?: (target: {
     logicalId: string;
@@ -93,7 +89,6 @@ export function PreviewScreen({
   visibleRangeEndDate = null,
   now = new Date(),
   authoredSetup,
-  executionReportingStore,
   onAddEvent,
   onEditEvent,
   onEditCommitment,
@@ -133,15 +128,6 @@ export function PreviewScreen({
             onRemove={onRemoveAcceptedDecision}
             removalProtected={decisionRemovalProtected}
           />
-          {executionReportingStore ? (
-            <HistoricalPlanReportingSection
-              initialDate={today(now)}
-              store={executionReportingStore}
-            />
-          ) : null}
-          {executionReportingStore ? (
-            <ExecutionHistoryPanel store={executionReportingStore} />
-          ) : null}
         </section>
       </main>
     );
@@ -210,11 +196,8 @@ export function PreviewScreen({
           </div>
         ) : null}
         <AcceptedChoicesSection
-          authoredSetup={authoredSetup}
           decisions={acceptedDecisions}
-          executionReportingStore={executionReportingStore}
           onRemove={onRemoveAcceptedDecision}
-          preview={preview}
           removalProtected={decisionRemovalProtected}
         />
         {rangeWarnings.length > 0 ? (
@@ -389,14 +372,6 @@ export function PreviewScreen({
                           {onEditEvent
                             ? renderEventEditAction(scheduledBlock, authoredSetup, onEditEvent)
                             : null}
-                          {authoredSetup && executionReportingStore ? (
-                            <ExecutionReportControl
-                              authoredSetup={authoredSetup}
-                              preview={preview}
-                              selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }}
-                              store={executionReportingStore}
-                            />
-                          ) : null}
                         </li>
                       ))}
                   </ul>
@@ -427,14 +402,6 @@ export function PreviewScreen({
                           >
                             Edit Work
                           </button>
-                        ) : null}
-                        {authoredSetup && executionReportingStore ? (
-                          <ExecutionReportControl
-                            authoredSetup={authoredSetup}
-                            preview={preview}
-                            selection={{ kind: "workBlock", blockId: workBlock.id }}
-                            store={executionReportingStore}
-                          />
                         ) : null}
                       </li>
                     ))}
@@ -468,14 +435,6 @@ export function PreviewScreen({
                           {onEditCommitment
                             ? renderCommitmentEditAction(scheduledBlock, onEditCommitment)
                             : null}
-                          {authoredSetup && executionReportingStore ? (
-                            <ExecutionReportControl
-                              authoredSetup={authoredSetup}
-                              preview={preview}
-                              selection={{ kind: "scheduledBlock", blockId: scheduledBlock.id }}
-                              store={executionReportingStore}
-                            />
-                          ) : null}
                         </li>
                       ))}
                   </ul>
@@ -500,14 +459,6 @@ export function PreviewScreen({
                         {onEditCommitment
                           ? renderCommitmentEditAction(candidate, onEditCommitment)
                           : null}
-                        {authoredSetup && executionReportingStore ? (
-                          <ExecutionReportControl
-                            authoredSetup={authoredSetup}
-                            preview={preview}
-                            selection={{ kind: "unplacedCandidate", candidateId: candidate.id }}
-                            store={executionReportingStore}
-                          />
-                        ) : null}
                       </li>
                     ))}
                   </ul>
@@ -526,7 +477,11 @@ export function PreviewScreen({
                 ) : (
                   <ul className="df-plain-list">
                     {dayGroup.frictionPoints.map((frictionPoint) => (
-                      <li key={frictionPoint.id}>
+                      <li
+                        id={`review-friction-${frictionPoint.id}`}
+                        key={frictionPoint.id}
+                        tabIndex={-1}
+                      >
                         <div>{frictionPoint.title}</div>
                         <div className="df-muted">{frictionPoint.message}</div>
                         <div className="df-fix-list">
@@ -562,35 +517,18 @@ export function PreviewScreen({
           </section>
         ))}
       </div>
-      {executionReportingStore ? (
-        <HistoricalPlanReportingSection
-          initialDate={preview.rangeEndDate}
-          store={executionReportingStore}
-        />
-      ) : null}
-      {executionReportingStore ? <ExecutionHistoryPanel store={executionReportingStore} /> : null}
     </main>
   );
-}
-
-function today(value: Date): string {
-  return value.toISOString().slice(0, 10);
 }
 
 function AcceptedChoicesSection({
   decisions,
   onRemove,
   removalProtected,
-  authoredSetup,
-  preview,
-  executionReportingStore,
 }: {
   decisions: AcceptedDecisionViewModel[];
   onRemove: ((decisionId: AcceptedDecisionViewModel["decisionId"]) => void) | undefined;
   removalProtected: boolean;
-  authoredSetup?: DayFrameAuthoredSetup | undefined;
-  preview?: DayFramePreview | undefined;
-  executionReportingStore?: ExecutionReportingStore | undefined;
 }): ReactElement | null {
   if (decisions.length === 0) return null;
   return (
@@ -620,14 +558,6 @@ function AcceptedChoicesSection({
             >
               Remove
             </button>
-            {authoredSetup && preview && executionReportingStore ? (
-              <ExecutionReportControl
-                authoredSetup={authoredSetup}
-                preview={preview}
-                selection={{ kind: "planDecision", decisionId: decision.decisionId }}
-                store={executionReportingStore}
-              />
-            ) : null}
           </li>
         ))}
       </ul>

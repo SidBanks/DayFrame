@@ -19,6 +19,11 @@ import { createPlanDecisionAcceptanceCandidate } from "../core/decisions/createP
 import type { AcceptPlanDecisionInput, PlanDecisionV1 } from "../core/decisions/planDecision.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString } from "../core/shifts/types.js";
+import type {
+  CommitmentTarget,
+  DisplayedMonth,
+  EventTarget,
+} from "../core/monthlyPlanner/queryMonthlyPlanner.js";
 import { parseDayFrameBackupJson, type DayFrameBackup } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
 import {
@@ -68,6 +73,13 @@ const SetupScreen =
   import.meta.env.MODE === "test"
     ? (await loadPlanAuthoring()).SetupScreen
     : lazy(() => loadPlanAuthoring().then((module) => ({ default: module.SetupScreen })));
+const loadMonthlyPlanner = () => import("./MonthlyPlannerSurface.js");
+const MonthlyPlannerSurface =
+  import.meta.env.MODE === "test"
+    ? (await loadMonthlyPlanner()).MonthlyPlannerSurface
+    : lazy(() =>
+        loadMonthlyPlanner().then((module) => ({ default: module.MonthlyPlannerSurface })),
+      );
 
 export class LazySurfaceBoundary extends Component<
   { children: ReactNode; name: string },
@@ -347,7 +359,7 @@ function ReadyDayFrameApp({
     useState<DurabilitySemanticCategory | null>(null);
   const [setupValidationMessage, setSetupValidationMessage] = useState("");
   const [currentScreen, setCurrentScreen] = useState<PrimarySurface>("planner");
-  const [plannerMode, setPlannerMode] = useState<PlannerMode>("plan");
+  const [plannerMode, setPlannerMode] = useState<PlannerMode>("month");
   const [previewGuardrailMissingItems, setPreviewGuardrailMissingItems] = useState<string[]>([]);
   const [isConfirmingClearLocalData, setIsConfirmingClearLocalData] = useState(false);
   const [clearDurabilityFeedback, setClearDurabilityFeedback] =
@@ -373,6 +385,9 @@ function ReadyDayFrameApp({
   } | null>(null);
   const [activeManualEventDate, setActiveManualEventDate] = useState<LocalDateString | null>(null);
   const [editingManualEventId, setEditingManualEventId] = useState<string | null>(null);
+  const [editingManualEventIncarnationId, setEditingManualEventIncarnationId] = useState<
+    string | null
+  >(null);
   const [manualEventDraft, setManualEventDraft] = useState<{
     title: string;
     userDayDate: LocalDateString;
@@ -387,10 +402,21 @@ function ReadyDayFrameApp({
   const [manualEventDurabilityFeedback, setManualEventDurabilityFeedback] =
     useState<DurabilitySemanticCategory | null>(null);
   const [manualEventValidationMessage, setManualEventValidationMessage] = useState("");
+  const [manualEventReturnToMonth, setManualEventReturnToMonth] = useState(false);
   const [requestedCommitmentEditorTarget, setRequestedCommitmentEditorTarget] =
     useState<CommitmentEditorTarget | null>(null);
+  const [requestedAddCommitmentEditor, setRequestedAddCommitmentEditor] = useState(false);
   const [requestedWorkEditor, setRequestedWorkEditor] = useState(false);
+  const [workPatternReturnToMonth, setWorkPatternReturnToMonth] = useState(false);
+  const [monthPlanWorkspace, setMonthPlanWorkspace] = useState<
+    "commitment" | "commitmentLibrary" | "work" | "planningSettings" | null
+  >(null);
+  const [preservedMonthView, setPreservedMonthView] = useState<{
+    displayedMonth: DisplayedMonth;
+    selectedLabel: LocalDateString;
+  } | null>(null);
   const [contextualNavigationMessage, setContextualNavigationMessage] = useState("");
+  const [pendingReviewFrictionId, setPendingReviewFrictionId] = useState<string | null>(null);
   const [returnToReviewAvailable, setReturnToReviewAvailable] = useState(false);
   const [pendingPlanDecisionAcceptance, setPendingPlanDecisionAcceptance] =
     useState<PendingPlanDecisionAcceptance | null>(null);
@@ -518,8 +544,40 @@ function ReadyDayFrameApp({
   }, [activeLocalIngressStatus.status]);
 
   useEffect(() => {
+    if (plannerMode !== "schedule" || !pendingReviewFrictionId) return;
+    const target = document.getElementById(`review-friction-${pendingReviewFrictionId}`);
+    if (!target) return;
+    target.focus();
+    target.scrollIntoView?.({ block: "center" });
+    setPendingReviewFrictionId(null);
+  }, [pendingReviewFrictionId, plannerMode, stateSnapshot.preview]);
+
+  useEffect(() => {
     setSetupDraft(buildSetupDraft(stateSnapshot, createIsoTimestamp()));
   }, [authoredStateFingerprint]);
+
+  useEffect(() => {
+    if (!editingManualEventId || !editingManualEventIncarnationId) return;
+    const exactSource = stateSnapshot.manualEvents.some(
+      (event) =>
+        event.id === editingManualEventId &&
+        event.incarnationId === editingManualEventIncarnationId,
+    );
+    if (exactSource) return;
+    if (!manualEventReturnToMonth) return;
+    setEditingManualEventId(null);
+    setEditingManualEventIncarnationId(null);
+    setManualEventDraft(null);
+    setActiveManualEventDate(null);
+    setContextualNavigationMessage(
+      "This event has changed or is no longer available to edit from this schedule.",
+    );
+  }, [
+    editingManualEventId,
+    editingManualEventIncarnationId,
+    manualEventReturnToMonth,
+    stateSnapshot.manualEvents,
+  ]);
 
   function resetShellMessages(): void {
     setSetupDurabilityFeedback(null);
@@ -535,10 +593,28 @@ function ReadyDayFrameApp({
     setProfileErrorMessage("");
   }
 
-  function openPlanMode(): void {
+  function openMonthMode(): void {
     setCurrentScreen("planner");
-    setPlannerMode("plan");
+    setPlannerMode("month");
     setFocusedTemplateField(null);
+    resetShellMessages();
+  }
+
+  function openWorkPatternMode(): void {
+    setCurrentScreen("planner");
+    setPlannerMode("workPattern");
+    setWorkPatternReturnToMonth(false);
+    setFocusedTemplateField(null);
+    resetShellMessages();
+  }
+
+  function openCommitmentLibraryMode(): void {
+    setCurrentScreen("planner");
+    setPlannerMode("commitmentLibrary");
+    setReturnToReviewAvailable(false);
+    setFocusedTemplateField(null);
+    setRequestedCommitmentEditorTarget(null);
+    setRequestedAddCommitmentEditor(false);
     resetShellMessages();
   }
 
@@ -547,6 +623,7 @@ function ReadyDayFrameApp({
     setPlannerMode("schedule");
     setFocusedTemplateField(null);
     resetShellMessages();
+    requestAnimationFrame(() => document.getElementById("review-schedule-heading")?.focus());
   }
 
   function openSummaryScreen(): void {
@@ -655,30 +732,9 @@ function ReadyDayFrameApp({
     return generatePreviewFromState(storeRef.current.getState());
   }
 
-  function generatePreviewFromCurrentDraft(): void {
-    const savedState = saveCurrentSetup(false);
-
-    if (!savedState) {
-      return;
-    }
-
-    setCurrentScreen("planner");
-    setPlannerMode("schedule");
-    setFocusedTemplateField(null);
-    setBackupMessage("");
-    setBackupErrorMessage("");
-    setProfileMessage("");
-    setProfileErrorMessage("");
-    setIsConfirmingClearLocalData(false);
-    setClearDurabilityFeedback(null);
-    if (generatePreviewFromState(savedState)) {
-      requestAnimationFrame(() => document.getElementById("review-schedule-heading")?.focus());
-    }
-  }
-
   function openSetupForFixedTime(templateId: string): void {
     setCurrentScreen("planner");
-    setPlannerMode("plan");
+    setPlannerMode("commitmentLibrary");
     setFocusedTemplateField({
       templateId,
       field: "fixedStartTime",
@@ -694,16 +750,10 @@ function ReadyDayFrameApp({
       currentSelection.startDate !== currentSelection.endDate ||
       pendingPreviewRangeStartDate === null
     ) {
-      setSelectedPreviewDayRange({
-        startDate: userDayDate,
-        endDate: userDayDate,
-      });
+      setSelectedPreviewDayRange({ startDate: userDayDate, endDate: userDayDate });
       setPendingPreviewRangeStartDate(userDayDate);
     } else if (pendingPreviewRangeStartDate === userDayDate) {
-      setSelectedPreviewDayRange({
-        startDate: userDayDate,
-        endDate: userDayDate,
-      });
+      setSelectedPreviewDayRange({ startDate: userDayDate, endDate: userDayDate });
     } else {
       setSelectedPreviewDayRange(orderPreviewDayRange(pendingPreviewRangeStartDate, userDayDate));
       setPendingPreviewRangeStartDate(null);
@@ -724,6 +774,7 @@ function ReadyDayFrameApp({
 
     if (existingManualEvent) {
       setEditingManualEventId(existingManualEvent.id);
+      setEditingManualEventIncarnationId(existingManualEvent.incarnationId);
       setManualEventDraft({
         title: existingManualEvent.title,
         userDayDate: existingManualEvent.userDayDate,
@@ -736,6 +787,8 @@ function ReadyDayFrameApp({
     }
 
     setEditingManualEventId(null);
+    setEditingManualEventIncarnationId(null);
+    setEditingManualEventIncarnationId(null);
     setManualEventDraft({
       title: "",
       userDayDate,
@@ -747,6 +800,7 @@ function ReadyDayFrameApp({
   }
 
   function openNewEventFromReview(userDayDate: LocalDateString): void {
+    setManualEventReturnToMonth(false);
     setSelectedPreviewDayRange({ startDate: userDayDate, endDate: userDayDate });
     setPendingPreviewRangeStartDate(null);
     setActiveManualEventDate(userDayDate);
@@ -766,8 +820,9 @@ function ReadyDayFrameApp({
   function openExistingEventFromReview(target: {
     logicalId: string;
     incarnationId?: string;
-    userDayDate: LocalDateString;
+    userDayDate?: LocalDateString;
   }): void {
+    setManualEventReturnToMonth(false);
     const event = storeRef.current
       .getState()
       .manualEvents.find(
@@ -776,12 +831,15 @@ function ReadyDayFrameApp({
           (!target.incarnationId || candidate.incarnationId === target.incarnationId),
       );
     if (!event) {
-      setContextualNavigationMessage("This Event is no longer available to edit.");
+      setContextualNavigationMessage(
+        "This event has changed or is no longer available to edit from this schedule.",
+      );
       return;
     }
     setSelectedPreviewDayRange({ startDate: event.userDayDate, endDate: event.userDayDate });
     setActiveManualEventDate(event.userDayDate);
     setEditingManualEventId(event.id);
+    setEditingManualEventIncarnationId(event.incarnationId);
     setManualEventDraft({
       title: event.title,
       userDayDate: event.userDayDate,
@@ -798,14 +856,113 @@ function ReadyDayFrameApp({
     setRequestedCommitmentEditorTarget(target);
     setReturnToReviewAvailable(true);
     setContextualNavigationMessage("");
-    openPlanMode();
+    setCurrentScreen("planner");
+    setPlannerMode("commitmentLibrary");
+    setFocusedTemplateField(null);
+    resetShellMessages();
+  }
+
+  function openCommitmentFromMonth(target: CommitmentTarget): void {
+    setRequestedCommitmentEditorTarget({
+      logicalId: target.templateId,
+      incarnationId: target.templateIncarnationId,
+      recurrenceLogicalId: target.recurrenceId,
+      recurrenceIncarnationId: target.recurrenceIncarnationId,
+    });
+    setRequestedAddCommitmentEditor(false);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setMonthPlanWorkspace("commitment");
+  }
+
+  function openNewCommitmentFromMonth(): void {
+    setRequestedCommitmentEditorTarget(null);
+    setRequestedAddCommitmentEditor(true);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setMonthPlanWorkspace("commitment");
+  }
+
+  function openCommitmentLibraryFromMonth(): void {
+    setRequestedCommitmentEditorTarget(null);
+    setRequestedAddCommitmentEditor(false);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setMonthPlanWorkspace("commitmentLibrary");
+  }
+
+  function openWorkFromMonth(): void {
+    setRequestedWorkEditor(true);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setMonthPlanWorkspace("work");
+  }
+
+  function openWorkPatternFromMonth(): void {
+    setRequestedWorkEditor(false);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setFocusedTemplateField(null);
+    setMonthPlanWorkspace("work");
+  }
+
+  function openPlanningSettingsFromMonth(): void {
+    setRequestedCommitmentEditorTarget(null);
+    setRequestedAddCommitmentEditor(false);
+    setRequestedWorkEditor(false);
+    setReturnToReviewAvailable(false);
+    setContextualNavigationMessage("");
+    setMonthPlanWorkspace("planningSettings");
+  }
+
+  function openAttentionFromMonth(input: {
+    frictionPointId: string;
+    userDayDate: LocalDateString;
+  }): void {
+    const current = storeRef.current
+      .getState()
+      .preview?.result.frictionPoints.find(
+        (point) => point.id === input.frictionPointId && !point.ignored && !point.resolved,
+      );
+    if (!current) {
+      setContextualNavigationMessage(
+        "This schedule issue has changed or is no longer available to review.",
+      );
+      requestAnimationFrame(() => document.getElementById("selected-day-heading")?.focus());
+      return;
+    }
+    setSelectedPreviewDayRange({ startDate: input.userDayDate, endDate: input.userDayDate });
+    setPendingReviewFrictionId(current.id);
+    setContextualNavigationMessage("");
+    openScheduleMode();
+  }
+
+  function generateScheduleFromMonth(): void {
+    generatePreviewFromSavedState();
+    requestAnimationFrame(() => document.getElementById("month-schedule-status")?.focus());
+  }
+
+  function openNewEventFromMonth(userDayDate: LocalDateString): void {
+    openNewEventFromReview(userDayDate);
+    setManualEventReturnToMonth(true);
+  }
+
+  function openExistingEventFromMonth(target: EventTarget): void {
+    openExistingEventFromReview({
+      logicalId: target.eventId,
+      incarnationId: target.eventIncarnationId,
+    });
+    setManualEventReturnToMonth(true);
   }
 
   function openWorkFromReview(): void {
     setRequestedWorkEditor(true);
     setReturnToReviewAvailable(true);
     setContextualNavigationMessage("");
-    openPlanMode();
+    setCurrentScreen("planner");
+    setPlannerMode("workPattern");
+    setFocusedTemplateField(null);
+    resetShellMessages();
   }
 
   function saveManualEvent(): void {
@@ -853,6 +1010,10 @@ function ReadyDayFrameApp({
     setManualEventValidationMessage("");
     setManualEventDurabilityFeedback(classifyActiveStoreMutationResult(result));
     setEditingManualEventId(nextManualEvent.id);
+    setEditingManualEventIncarnationId(
+      storeRef.current.getState().manualEvents.find((event) => event.id === nextManualEvent.id)
+        ?.incarnationId ?? null,
+    );
     setManualEventDraft({
       title: nextManualEvent.title,
       userDayDate: nextManualEvent.userDayDate,
@@ -862,6 +1023,13 @@ function ReadyDayFrameApp({
       notes: nextManualEvent.notes ?? "",
     });
     regeneratePreviewIfPresent();
+    if (manualEventReturnToMonth) {
+      setActiveManualEventDate(null);
+      setManualEventDraft(null);
+      setEditingManualEventId(null);
+      setManualEventReturnToMonth(false);
+      requestAnimationFrame(() => document.getElementById("selected-day-heading")?.focus());
+    }
   }
 
   function deleteManualEvent(eventId: string): void {
@@ -878,10 +1046,17 @@ function ReadyDayFrameApp({
     setManualEventDurabilityFeedback(classifyActiveStoreMutationResult(result));
     setConfirmingDeleteManualEventId(null);
     setEditingManualEventId(null);
+    setEditingManualEventIncarnationId(null);
     if (activeManualEventDate) {
       openManualEventPanel(activeManualEventDate);
     }
     regeneratePreviewIfPresent();
+    if (manualEventReturnToMonth) {
+      setActiveManualEventDate(null);
+      setManualEventDraft(null);
+      setManualEventReturnToMonth(false);
+      requestAnimationFrame(() => document.getElementById("selected-day-heading")?.focus());
+    }
   }
 
   function regeneratePreviewIfPresent(): void {
@@ -1486,7 +1661,7 @@ function ReadyDayFrameApp({
                               }
 
                               setCurrentScreen("planner");
-                              setPlannerMode("plan");
+                              setPlannerMode("month");
                               clearPreviewSelection();
                               setSetupDurabilityFeedback(null);
                               setProfileDurabilityFeedback({
@@ -1637,7 +1812,7 @@ function ReadyDayFrameApp({
                         setIsClearBusy(true);
                         const result = await storeRef.current.clearLocalData();
                         setCurrentScreen("planner");
-                        setPlannerMode("plan");
+                        setPlannerMode("month");
                         clearPreviewSelection();
                         setSetupDurabilityFeedback(null);
                         setPreviewGuardrailMissingItems([]);
@@ -1711,18 +1886,26 @@ function ReadyDayFrameApp({
                 <p className="df-workflow-eyebrow">Workspace</p>
                 <h2 className="df-panel-title">
                   {currentScreen === "planner"
-                    ? plannerMode === "plan"
-                      ? "Build your plan"
-                      : "Review your schedule"
+                    ? plannerMode === "month"
+                      ? "Navigate your month"
+                      : plannerMode === "workPattern"
+                        ? "Configure your work pattern"
+                        : plannerMode === "commitmentLibrary"
+                          ? "Manage your commitments"
+                          : "Review your schedule"
                     : currentScreen === "today"
                       ? "Today"
                       : "Review your history"}
                 </h2>
                 <p className="df-support">
                   {currentScreen === "planner"
-                    ? plannerMode === "plan"
-                      ? "Edit and save planning inputs, then explicitly generate a derived schedule."
-                      : "Review the generated schedule and resolve what still needs attention."
+                    ? plannerMode === "month"
+                      ? "Select a canonical DayFrame day and review the schedule DayFrame generated."
+                      : plannerMode === "workPattern"
+                        ? "Manage the structural Work inputs shared by your monthly plan."
+                        : plannerMode === "commitmentLibrary"
+                          ? "Manage the complete scheduling intent you have taught DayFrame."
+                          : "Review the generated schedule and resolve what still needs attention."
                     : currentScreen === "today"
                       ? "Review the published plan and reported outcomes known for the current user-day."
                       : "Inspect plan coverage, scheduled outcomes, and the evidence behind the counts."}
@@ -1738,7 +1921,7 @@ function ReadyDayFrameApp({
                       ? "df-primary-nav-button is-active"
                       : "df-primary-nav-button"
                   }
-                  onClick={openPlanMode}
+                  onClick={openMonthMode}
                   type="button"
                 >
                   <span className="df-primary-nav-title">Planner</span>
@@ -2020,6 +2203,7 @@ function ReadyDayFrameApp({
                       className="df-secondary-button"
                       onClick={() => {
                         setEditingManualEventId(null);
+                        setEditingManualEventIncarnationId(null);
                         setManualEventDraft({
                           title: "",
                           userDayDate: activeManualEventDate,
@@ -2036,14 +2220,22 @@ function ReadyDayFrameApp({
                     <button
                       className="df-secondary-button"
                       onClick={() => {
+                        const shouldReturnFocusToMonth = manualEventReturnToMonth;
                         setActiveManualEventDate(null);
                         setManualEventDraft(null);
                         setEditingManualEventId(null);
+                        setEditingManualEventIncarnationId(null);
                         setConfirmingDeleteManualEventId(null);
+                        setManualEventReturnToMonth(false);
+                        if (shouldReturnFocusToMonth) {
+                          requestAnimationFrame(() =>
+                            document.getElementById("selected-day-heading")?.focus(),
+                          );
+                        }
                       }}
                       type="button"
                     >
-                      Close
+                      {manualEventReturnToMonth ? "Back to day" : "Close"}
                     </button>
                   </div>
 
@@ -2074,6 +2266,7 @@ function ReadyDayFrameApp({
                               className="df-secondary-button"
                               onClick={() => {
                                 setEditingManualEventId(manualEvent.id);
+                                setEditingManualEventIncarnationId(manualEvent.incarnationId);
                                 setManualEventDraft({
                                   title: manualEvent.title,
                                   userDayDate: manualEvent.userDayDate,
@@ -2134,11 +2327,148 @@ function ReadyDayFrameApp({
           <PlannerSurface
             isSetupDirty={isSetupDirty}
             mode={plannerMode}
-            onOpenPlan={openPlanMode}
+            monthContent={
+              <LazySurfaceBoundary name="Monthly Planner">
+                <Suspense fallback={<LazySurfaceLoading name="Planner" />}>
+                  <MonthlyPlannerSurface
+                    contextualPlanContent={
+                      monthPlanWorkspace ? (
+                        <>
+                          {monthPlanWorkspace === "planningSettings" ? (
+                            <GoalSection store={storeRef.current} state={stateSnapshot} />
+                          ) : null}
+                          <LazySurfaceBoundary
+                            name={
+                              monthPlanWorkspace === "planningSettings"
+                                ? "Planning Settings"
+                                : "Planning workspace"
+                            }
+                          >
+                            <Suspense
+                              fallback={
+                                <LazySurfaceLoading
+                                  name={
+                                    monthPlanWorkspace === "planningSettings"
+                                      ? "Planning Settings"
+                                      : "Planning workspace"
+                                  }
+                                />
+                              }
+                            >
+                              <SetupScreen
+                                draft={setupDraft}
+                                embedded
+                                focusedTemplateField={focusedTemplateField}
+                                isDirty={isSetupDirty}
+                                onOpenCommitmentEditorInvalidated={() => {
+                                  setContextualNavigationMessage(
+                                    "This commitment has changed or is no longer available to edit from this schedule.",
+                                  );
+                                }}
+                                onRequestedAddCommitmentEditorHandled={() =>
+                                  setRequestedAddCommitmentEditor(false)
+                                }
+                                onRequestedCommitmentEditorTargetHandled={(status) => {
+                                  setRequestedCommitmentEditorTarget(null);
+                                  if (status === "unavailable") {
+                                    setContextualNavigationMessage(
+                                      "This commitment has changed or is no longer available to edit from this schedule.",
+                                    );
+                                  }
+                                }}
+                                onRequestedWorkEditorHandled={() => setRequestedWorkEditor(false)}
+                                onSave={saveCurrentSetup}
+                                requestedAddCommitmentEditor={requestedAddCommitmentEditor}
+                                requestedCommitmentEditorTarget={requestedCommitmentEditorTarget}
+                                requestedWorkEditor={requestedWorkEditor}
+                                scope={
+                                  monthPlanWorkspace === "planningSettings"
+                                    ? "planningSettings"
+                                    : monthPlanWorkspace === "work"
+                                      ? "workPattern"
+                                      : "commitmentLibrary"
+                                }
+                                saveMessage={
+                                  setupValidationMessage ||
+                                  (setupDurabilityFeedback
+                                    ? getMutationFeedbackMessage("setup", setupDurabilityFeedback)
+                                    : "")
+                                }
+                                saveMessageTone={
+                                  !setupValidationMessage &&
+                                  (setupDurabilityFeedback === null ||
+                                    setupDurabilityFeedback === "durableSuccess")
+                                    ? "success"
+                                    : "failure"
+                                }
+                                setDraft={(nextDraft) => {
+                                  setFocusedTemplateField(null);
+                                  setSetupDurabilityFeedback(null);
+                                  setSetupValidationMessage("");
+                                  setSetupDraft(nextDraft);
+                                }}
+                              />
+                            </Suspense>
+                          </LazySurfaceBoundary>
+                        </>
+                      ) : null
+                    }
+                    contextualPlanWide={
+                      monthPlanWorkspace === "planningSettings" ||
+                      monthPlanWorkspace === "work" ||
+                      monthPlanWorkspace === "commitment" ||
+                      monthPlanWorkspace === "commitmentLibrary"
+                    }
+                    getNow={getNow}
+                    {...(preservedMonthView ? { initialView: preservedMonthView } : {})}
+                    onAddCommitment={openNewCommitmentFromMonth}
+                    onAddEvent={openNewEventFromMonth}
+                    onBackToDay={() => {
+                      setMonthPlanWorkspace(null);
+                      setRequestedCommitmentEditorTarget(null);
+                      setRequestedAddCommitmentEditor(false);
+                      setRequestedWorkEditor(false);
+                      setContextualNavigationMessage("");
+                      requestAnimationFrame(() =>
+                        document.getElementById("selected-day-heading")?.focus(),
+                      );
+                    }}
+                    onEditCommitment={openCommitmentFromMonth}
+                    onEditEvent={openExistingEventFromMonth}
+                    onEditWork={openWorkFromMonth}
+                    contextualMessage={contextualNavigationMessage}
+                    generationMessage={
+                      previewGuardrailMissingItems.length > 0
+                        ? `Finish setup before generating: ${previewGuardrailMissingItems.join(", ")}.`
+                        : ""
+                    }
+                    isSetupDirty={isSetupDirty}
+                    onGenerateSchedule={generateScheduleFromMonth}
+                    onOpenAttention={openAttentionFromMonth}
+                    onOpenPlanningSettings={openPlanningSettingsFromMonth}
+                    onOpenCommitmentLibrary={openCommitmentLibraryFromMonth}
+                    onOpenReview={openScheduleMode}
+                    onOpenWorkPattern={openWorkPatternFromMonth}
+                    onViewChange={setPreservedMonthView}
+                    previewState={
+                      stateSnapshot.preview?.isStale
+                        ? "stale"
+                        : stateSnapshot.preview
+                          ? "current"
+                          : "none"
+                    }
+                    readiness={activeStore.getReadiness()}
+                    state={stateSnapshot}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
+            }
+            onOpenMonth={openMonthMode}
             onOpenSchedule={openScheduleMode}
-            planContent={
+            onOpenWorkPattern={openWorkPatternMode}
+            onOpenCommitmentLibrary={openCommitmentLibraryMode}
+            commitmentLibraryContent={
               <div className="df-workflow-block df-workflow-block--setup">
-                <GoalSection store={storeRef.current} state={stateSnapshot} />
                 {returnToReviewAvailable ? (
                   <section className="df-panel">
                     <button
@@ -2158,25 +2488,31 @@ function ReadyDayFrameApp({
                     ) : null}
                   </section>
                 ) : null}
-                <LazySurfaceBoundary name="Plan authoring">
-                  <Suspense fallback={<LazySurfaceLoading name="Plan authoring" />}>
+                <LazySurfaceBoundary name="Commitment Library">
+                  <Suspense fallback={<LazySurfaceLoading name="Commitment Library" />}>
                     <SetupScreen
                       draft={setupDraft}
                       focusedTemplateField={focusedTemplateField}
                       isDirty={isSetupDirty}
-                      onSave={saveCurrentSetup}
-                      onGeneratePreview={generatePreviewFromCurrentDraft}
+                      onOpenCommitmentEditorInvalidated={() => {
+                        setContextualNavigationMessage(
+                          "This commitment has changed or is no longer available to edit.",
+                        );
+                      }}
+                      onRequestedAddCommitmentEditorHandled={() =>
+                        setRequestedAddCommitmentEditor(false)
+                      }
                       onRequestedCommitmentEditorTargetHandled={(status) => {
                         setRequestedCommitmentEditorTarget(null);
                         if (status === "unavailable") {
                           setContextualNavigationMessage(
-                            "This commitment has changed or is no longer available to edit from this schedule.",
+                            "This commitment has changed or is no longer available to edit.",
                           );
                         }
                       }}
-                      onRequestedWorkEditorHandled={() => setRequestedWorkEditor(false)}
+                      onSave={saveCurrentSetup}
+                      requestedAddCommitmentEditor={requestedAddCommitmentEditor}
                       requestedCommitmentEditorTarget={requestedCommitmentEditorTarget}
-                      requestedWorkEditor={requestedWorkEditor}
                       saveMessage={
                         setupValidationMessage ||
                         (setupDurabilityFeedback
@@ -2190,6 +2526,7 @@ function ReadyDayFrameApp({
                           ? "success"
                           : "failure"
                       }
+                      scope="commitmentLibrary"
                       setDraft={(nextDraft) => {
                         setFocusedTemplateField(null);
                         setSetupDurabilityFeedback(null);
@@ -2203,6 +2540,69 @@ function ReadyDayFrameApp({
             }
             previewState={
               stateSnapshot.preview?.isStale ? "stale" : stateSnapshot.preview ? "current" : "none"
+            }
+            workPatternContent={
+              <div className="df-workflow-block df-workflow-block--setup">
+                {returnToReviewAvailable ? (
+                  <section className="df-panel">
+                    <button
+                      className="df-secondary-button"
+                      onClick={() => {
+                        setReturnToReviewAvailable(false);
+                        openScheduleMode();
+                      }}
+                      type="button"
+                    >
+                      Return to Review Schedule
+                    </button>
+                  </section>
+                ) : null}
+                {workPatternReturnToMonth ? (
+                  <section className="df-panel">
+                    <button
+                      className="df-secondary-button"
+                      onClick={() => {
+                        setWorkPatternReturnToMonth(false);
+                        openMonthMode();
+                        requestAnimationFrame(() =>
+                          document.getElementById("selected-day-heading")?.focus(),
+                        );
+                      }}
+                      type="button"
+                    >
+                      Back to Month
+                    </button>
+                  </section>
+                ) : null}
+                <LazySurfaceBoundary name="Work Pattern">
+                  <Suspense fallback={<LazySurfaceLoading name="Work Pattern" />}>
+                    <SetupScreen
+                      draft={setupDraft}
+                      isDirty={isSetupDirty}
+                      onSave={saveCurrentSetup}
+                      saveMessage={
+                        setupValidationMessage ||
+                        (setupDurabilityFeedback
+                          ? getMutationFeedbackMessage("setup", setupDurabilityFeedback)
+                          : "")
+                      }
+                      saveMessageTone={
+                        !setupValidationMessage &&
+                        (setupDurabilityFeedback === null ||
+                          setupDurabilityFeedback === "durableSuccess")
+                          ? "success"
+                          : "failure"
+                      }
+                      scope="workPattern"
+                      setDraft={(nextDraft) => {
+                        setSetupDurabilityFeedback(null);
+                        setSetupValidationMessage("");
+                        setSetupDraft(nextDraft);
+                      }}
+                    />
+                  </Suspense>
+                </LazySurfaceBoundary>
+              </div>
             }
             scheduleContent={
               <div className="df-screen df-workflow-block df-workflow-block--preview">
@@ -2308,7 +2708,7 @@ function ReadyDayFrameApp({
             <Suspense fallback={<LazySurfaceLoading name="Today" />}>
               <TodaySurface
                 now={getNow}
-                onOpenPlanner={openPlanMode}
+                onOpenPlanner={openMonthMode}
                 queryToday={activeStore.queryToday}
                 reportingStore={activeStore}
                 subscribeExecutionHistory={activeStore.subscribeExecutionHistory}
@@ -2323,7 +2723,7 @@ function ReadyDayFrameApp({
               <Suspense fallback={<LazySurfaceLoading name="Summary" />}>
                 <HistoricalIntelligenceSummary
                   now={getNow}
-                  onOpenPlanner={openPlanMode}
+                  onOpenPlanner={openMonthMode}
                   store={activeStore}
                 />
               </Suspense>
@@ -2780,7 +3180,7 @@ async function handleBackupFileSelection(
       setProfileDurabilityFeedback(null);
       setProfileErrorMessage("");
       setCurrentScreen("planner");
-      setPlannerMode("plan");
+      setPlannerMode("month");
       clearPreviewSelection();
       setPreviewGuardrailMissingItems([]);
       setIsConfirmingClearLocalData(false);
@@ -2835,7 +3235,7 @@ async function handleBackupFileSelection(
     setProfileDurabilityFeedback(null);
     setProfileErrorMessage("");
     setCurrentScreen("planner");
-    setPlannerMode("plan");
+    setPlannerMode("month");
     clearPreviewSelection();
     setPreviewGuardrailMissingItems([]);
     setIsConfirmingClearLocalData(false);

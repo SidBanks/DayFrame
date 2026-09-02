@@ -2,6 +2,150 @@
 
 # Current State
 
+Task 7.10 closes Phase 7 with Classification A and declares Phase 8 Ready. Evidence
+confirms that Month is a real routine planning workspace, supported by Planning
+Settings, Work Pattern, Commitment Library, and specialized Detailed Review; no
+required product, authority, accessibility, mobile, loading, lifecycle, or bundle gap
+remains. Plan stays retired. Work Pattern presets are the highest-value credible next
+opportunity, but structural readiness is ahead of application policy: replace/add/
+merge, identity remapping, dates/anchors/bounds, and preview-before-apply require a
+design decision. Recommended next is Task 8.1 — Work Pattern Preset Application Policy
+and Product Semantics Audit, classified as Phase 8 foundation. No production or test
+file changed for this audit. Lint/typecheck, 94 files/976 tests, build, bundle, and diff
+validation pass at the unchanged 636,234/162,015/53,188/761,854-byte baseline.
+
+
+Tasks 7.9 and 7.9A complete Phase 7 Planner convergence. Month is now the
+deterministic production and integration-test default; legacy Plan navigation and
+composition are absent. Planning Settings, Work Pattern, Commitment Library, Month,
+and Detailed Review own their bounded responsibilities while preserving one
+SetupDraft, one Save transaction, explicit Refresh, exact identity, and existing
+authority/lifecycle semantics. The migrated DayFrameApp suite is 123/123 and the full
+repository is 976/976 with zero skips. Lint, typecheck, build, and bundle guards pass;
+final bundle is 636,234 raw, 162,015 gzip, 53,188 largest lazy, and 761,854 total, with
+only the established gzip warning. Test convergence and Plan retirement are both A;
+the Phase 7 Planner strangler is complete and Task 7.10 is authorized as a closeout/
+product-value audit.
+
+
+Task 7.8 extracts complete authored scheduling intent into Commitment Library with
+direct Planner and Month-contextual entry. Active, disabled, non-occurring, Sleep, and
+advanced Commitment sources remain discoverable independent of Preview/Month and use
+the shared exact template/recurrence editor, SetupDraft, lifecycle, validation, and
+Save Setup. Work and Events remain excluded. The residual audit classifies Plan
+retirement A (zero unique responsibility) and Month-default readiness Ready; Task 7.9
+is authorized for navigation convergence, Month default, and legacy Plan retirement.
+All 975 tests, lint, typecheck, build, bundle checks, diff checks, and 320–1024px browser
+QA pass. Bundle is 637,805 raw, 162,143 gzip, 53,130 largest lazy, and 763,279 total;
+only the established initial-gzip warning remains.
+
+Task 7.7 extracts structural Work into a bounded Work Pattern workspace with direct
+Planner and Month-contextual entry. Both reuse the lazy SetupScreen, singular
+SetupDraft, canonical validation/identity lifecycle, and Save Setup; Month remains
+mounted and context-preserving. Commitments, global Planning Settings, Events, Goals,
+Review actions, and generated truth remain outside. Preset readiness is Classification
+C: the model is expressive, but replace/add/merge and date/anchor application policy
+remain unresolved, so no preset foundation was invented. All 974 tests, lint,
+typecheck, production build, bundle policy, and 320–1024px browser QA pass. Final
+bundle is 636,070 raw, 161,963 gzip, 52,651 largest lazy, and 760,931 total; only the
+existing gzip warning remains. Task 7.8 should extract Commitment Library.
+
+Task 7.6 is a read-only audit of Plan's remaining advanced responsibility. It selects
+multiple coherent workflows: Work Pattern for Shift Definitions, rotations/manual
+regimes/off days and regime overrides; Commitment Library for complete inactive/non-
+occurring inventory, recurrence, removal and advanced intent fields. Schedule
+Structure is too broad because no non-Work structural rule exists. Plan remains a
+temporary supporting shell until both workflows are extracted; Month should become
+the default only in final navigation convergence. Review remains specialized.
+`transitionStrategyId` is dormant metadata, not behavior. All 973 tests pass and the
+bundle is unchanged at 634,896 raw, 161,779 gzip, 52,326 largest lazy and 759,310 total.
+Task 7.7 Work Pattern extraction is precisely authorized.
+
+Task 7.5 makes bounded global Planning Settings available inside Month without
+embedding Plan or duplicating authority. Month and Plan now share GoalSection, the
+same lazy SetupScreen Preferences/Planning Range composition, one SetupDraft, and one
+Save Setup transaction. Month/range independence, pending-versus-durable truth,
+stale-without-auto-refresh, focus, keyboard, 320–430px behavior, and all 973 tests pass. Plan retains
+unique coupled shift/cycle/segment and advanced Commitment setup, so it remains
+supporting and is not retirement-ready; Review remains specialized. Bundle hard and
+review limits remain green at 634,896 raw, 161,779 gzip, 52,326 largest lazy, and
+759,310 total; initial gzip remains the sole warning. One bounded advanced-
+configuration extraction audit is recommended next.
+
+Task 7.4 makes Month attention actionable and brings canonical Generate/Refresh to the
+primary planning surface. Selected-day friction now retains exact ID, message, and
+canonical suggested-fix summaries, then opens the exact focused issue in specialized
+Review; Try/Apply remains there because it coordinates transient Preview revision and
+PlanDecision acceptance. Missing/stale generation uses the existing store action,
+preserves Month context, and stays separate from Save Setup. Goals, preferences, range,
+detailed visualization, and resolution remain supporting Plan/Review responsibilities;
+neither legacy mode is retirement-ready. All 972 tests and production-browser checks
+pass. Bundle hard limits remain green; initial gzip warns at 161,703 and total is
+758,317. The next boundary is bounded Planner configuration convergence.
+
+Task 7.3 turns Month's selected-day review into contextual source navigation. Add/Edit
+Event uses the singular Event writer; Add/Edit Commitment and Work use the existing
+lazy Plan authoring component inside the Month workspace. Exact Event incarnation and
+exact template/recurrence incarnations are revalidated after lazy loading and authority
+replacement; recreated sources never retarget. Month context remains mounted through
+loading and returns, while SetupDraft/Save Setup, stale Preview, generation, and Review
+semantics remain unchanged. All 970 tests and production-browser mobile/keyboard/slow-
+load checks pass. Bundle policy is green at 633,562 raw, 161,467 gzip, 51,852 largest
+lazy, and 755,909 total. Task 7.4 is ready.
+
+Task 7.2C selected a sustainable hybrid production-bundle policy after reconstructing
+Task 5.19 intent and the Phase 5–7 trend. Initial raw (685,000), initial gzip (170,000),
+and largest lazy (100,000) remain unchanged hard limits with early warnings. All
+749,882 emitted bytes remain counted, but total JS is now advisory with 800,000 growth-
+review and 825,000 architecture-review milestones. The prior fixed-total ADR policy is
+explicitly superseded; no production output or behavior changed. Task 7.3 is ready.
+
+Task 7.2B traced the production entry and store composition with source-map ownership
+evidence. Each production module has one owner; Month, Plan, Today, Today query, and
+Summary are clean lazy entries. The eager graph contains singular authority, readiness,
+recovery, persistence, supported compatibility, Review, and current user workflows.
+Demand-loading optional implementations would still be counted by the all-chunks total
+guard and would add async/atomicity risk. No production change was retained. The exact
+749,882-byte baseline therefore triggers a Bundle Budget Governance/ADR prerequisite;
+Task 7.3 remains paused.
+
+Task 7.2A reproduced and audited the production graph but hit its explicit safety stop
+condition. Total JS remains 749,882 bytes with only 118 bytes free. Dead Preview-era
+composition is already absent; remaining large paths are reachable behavior or governed
+compatibility/recovery code. Measured chunk-policy experiments were negative or below
+the 5 KB meaningful floor and were reverted. No production behavior, authority, guard,
+dependency, or build policy changed. Task 7.3 is paused pending a dedicated bundle-
+architecture remediation.
+
+Task 7.2 delivers the first visible Monthly Planner as a lazy, read-only third Planner
+mode. Its accessible 35/42-cell grid and selected canonical user-day workspace consume
+the Task 7.1 projection without redefining time, coverage, identity, or authority.
+Keyboard, focus, mobile, recovery, and loading states are implemented; navigation is
+write-free; Plan and Review remain reachable. Production-browser QA, 960 tests, and
+all bundle guards pass (749,882 total JS). Task 7.3 contextual workflow migration is
+ready.
+
+Task 7.1 implements the pure canonical Monthly Planner read model. It validates an
+explicit displayed month, selected visible label, evaluation instant, temporal state,
+planning-range context, Preview, current Events/exact sources, and availability; then
+returns a deterministic clone-isolated 35/42-cell civil grid. One effective M-01
+display-week anchor controls columns while each label retains canonical piecewise
+user-day/week truth. Covered fresh/stale, generated-empty, uncovered, and protected/
+unavailable remain distinct. Work, Commitment/Sleep, Event, friction, and unplaced
+evidence retain one owning label and exact non-retargeting context. HistoricalPlan,
+ExecutionHistory, Progress, Capacity, Recommendations, UI, writes, persistence, and
+new dependencies remain excluded. Task 7.2 is authorized.
+
+Phase 7 Audit 01 selected **Outcome A — Monthly Planner Architecture Ready**. Month
+will become Planner's dominant civil-date navigation/projection, with the selected
+canonical user-day driving a contextual workspace. Month is not authority, a fixed
+elapsed interval, a user-week boundary, or a generation range. Preview remains the
+current derived schedule; generation/publication stays explicit; Today and Summary
+retain their Phase 6 roles. A month-anchored display-week policy keeps grid columns
+stable across within-month preference transitions while canonical user-week truth is
+resolved per label. Task 7.1, a pure read model with no writes and minimal/no UI, is
+authorized next. No Phase 7 production behavior has begun.
+
 Phase 6 is complete and publication-ready. Task 6.11 exercised the production build
 in Chromium across desktop and 320/375/390/430px widths, keyboard/focus, the browser
 accessibility tree, throttled lazy loading, Commitment/Event/Review journeys, and
@@ -40,8 +184,8 @@ separate Tasks 6.3B (resolver and variable-duration consumers) and 6.3C
 
 ## Phase 6 — Platform Maturity
 
-**Status:** Phase 6 complete; publication checkpoint created
-**Current through:** Task 6.11
+**Status:** Phase 6 complete; Phase 7 awaiting bundle-budget governance decision
+**Current through:** Task 7.2B architecture audit/governance stop
 **Last reviewed:** 2026-08-25
 
 Task 6.1 audited the proposed Monthly Planner / Daily Workspace / Summary operating

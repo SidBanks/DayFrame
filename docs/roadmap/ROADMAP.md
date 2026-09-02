@@ -8,6 +8,67 @@ The roadmap is organized into major development phases rather than implementatio
 
 Individual implementation work is tracked separately.
 
+## Phase 7 Monthly Planner Architecture (2026-08-25)
+
+**Status: Complete (Task 7.10 closeout Classification A).**
+
+Phase 7 Audit 01 selected a true Month calendar as Planner's dominant
+spatial/navigation surface with a selected canonical user-day contextual workspace.
+The Month is a pure projection over existing authorities: it does not place
+occurrences, publish, report execution, rank Goals, or redefine arbitrary planning
+ranges, user-days, or user-weeks. Display columns use the effective week start at
+the displayed month's first label; rows remain presentational when policy changes
+within the month.
+
+Recommended sequence:
+
+```text
+7.1 pure Month read model and display-week projection (complete)
+        ↓
+7.2 accessible read-only Month + selected-day Review (complete)
+        ↓
+7.2A bundle-headroom audit (blocked safely; 118 bytes remain)
+        ↓
+7.2B eager application/store bundle architecture audit (complete; graph healthy)
+        ↓
+7.2C sustainable bundle-budget governance ADR (complete; hybrid policy)
+        ↓
+7.3 contextual source authoring/navigation (complete)
+        ↓
+7.4 Month attention, exact Review entry, and Generate/Refresh (complete)
+        ↓
+7.5 bounded Planner configuration convergence (complete)
+        ↓
+7.6 advanced Plan responsibility convergence audit (complete; multiple workflows)
+        ↓
+7.7 Work Pattern workspace extraction (complete; preset readiness Classification C)
+        ↓
+7.8 Commitment Library extraction (complete; Plan has zero unique responsibility)
+        ↓
+7.9 Planner navigation convergence, Month default, and legacy Plan retirement (complete)
+        ↓
+7.9A DayFrameApp integration-test convergence (complete; 123/123)
+        ↓
+7.10 Phase 7 closeout and next-product-value audit (complete; Phase 7 closed A)
+```
+
+Task 7.10 is complete. No required Phase 7 gap remains. Phase 8 is ready.
+
+Recommended next task:
+
+```text
+8.1 Work Pattern Preset Application Policy and Product Semantics Audit
+    (Phase 8 foundation; design-only)
+```
+
+The audit must resolve replace/add/merge, fresh identity and internal-reference
+remapping, application/start/anchor/bounds policy, preview-before-apply, provenance,
+and rollback before preset implementation is authorized. Pattern Library remains a
+separate future authority problem.
+
+Startup/lazy hard guards remain governing. Total JavaScript is fully reported with
+growth and architecture-review milestones; no new runtime dependency is assumed.
+
 ## Phase 6 Current Execution Boundary (2026-08-24)
 
 Task 6.3A accepted canonical piecewise user-day starts and versioned HistoricalPlan

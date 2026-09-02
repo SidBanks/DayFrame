@@ -3,6 +3,7 @@ import { gzipSync } from "node:zlib";
 import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { bundlePolicy, evaluateBundlePolicy } from "./bundle-policy.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, "dist/.vite/manifest.json"), "utf8"));
@@ -29,15 +30,8 @@ const initialGzip = [...initialFiles].reduce((total, file) => total + gzip(file)
 const lazyFiles = jsFiles.filter((file) => !initialFiles.has(file));
 const largestLazy = Math.max(0, ...lazyFiles.map(bytes));
 const totalBytes = jsFiles.reduce((total, file) => total + bytes(file), 0);
-const budgets = {
-  initialBytes: 685_000,
-  initialGzip: 170_000,
-  largestLazy: 100_000,
-  totalBytes: 750_000,
-};
-const failures = Object.entries(budgets).filter(
-  ([name, limit]) => ({ initialBytes, initialGzip, largestLazy, totalBytes })[name] > limit,
-);
+const metrics = { initialBytes, initialGzip, largestLazy, totalBytes };
+const evaluation = evaluateBundlePolicy(metrics);
 console.log(
   JSON.stringify(
     {
@@ -47,14 +41,21 @@ console.log(
       initialGzip,
       largestLazy,
       totalBytes,
-      budgets,
+      policy: bundlePolicy,
+      warnings: evaluation.warnings,
     },
     null,
     2,
   ),
 );
-if (failures.length) {
-  for (const [name, limit] of failures)
-    console.error(`Bundle budget failed: ${name} exceeds ${limit} bytes.`);
+for (const warning of evaluation.warnings) {
+  console.warn(
+    `Bundle policy warning: ${warning.name} is ${warning.value} bytes ` +
+      `(threshold ${warning.threshold}; ${warning.kind}).`,
+  );
+}
+if (evaluation.failures.length) {
+  for (const { name, limit, value } of evaluation.failures)
+    console.error(`Bundle budget failed: ${name} is ${value} bytes; hard limit ${limit}.`);
   process.exitCode = 1;
 }
