@@ -29,6 +29,7 @@ import {
 } from "../decisions/replayPlanDecisions.js";
 import { classifySuggestedFixes } from "../decisions/classifySuggestedFixes.js";
 import type { DayFrameAuthoredSetup } from "../../state/types.js";
+import type { CompositeOccurrenceV1 } from "../planning/commitmentComposition.js";
 
 export type GenerateSchedulePreviewInput = {
   shiftDefinitions: ShiftDefinition[];
@@ -51,6 +52,7 @@ export type GenerateSchedulePreviewResult = {
   unplacedCandidates: BlockCandidate[];
   frictionPoints: FrictionPoint[];
   planDecisionResults: PlanDecisionReplayResult[];
+  compositionResults?: CompositeOccurrenceV1[];
 };
 
 export function generateSchedulePreview(

@@ -47,6 +47,13 @@ import {
   type GoalProgressObservationAuthorityV1,
 } from "../core/progressObservation/progressObservation.js";
 import type { ProgressObservationSnapshot } from "./progressObservationSurface.js";
+import {
+  validateGoalStructureAuthority,
+  type GoalStructureAuthorityV1,
+} from "../core/planning/goalStructure.js";
+import type { GoalStructureRuntimeSnapshot } from "./goalStructureSurface.js";
+import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import type { CompositionAuthorityV1 } from "../core/planning/commitmentComposition.js";
 
 export type ActiveRestoreRuntimeTarget = {
   activeState: DayFrameState;
@@ -84,6 +91,9 @@ export type RestoreDurablePayloadMap = {
   goals: GoalAuthorityV1;
   measurementDefinitions: GoalMeasurementDefinitionAuthorityV1;
   progressObservations: GoalProgressObservationAuthorityV1;
+  goalStructure: GoalStructureAuthorityV1;
+  goalPlanning: GoalPlanningAuthorityV1;
+  composition: CompositionAuthorityV1;
 };
 export type RestoreRuntimeTargetMap = {
   active: ActiveRestoreRuntimeTarget;
@@ -94,6 +104,19 @@ export type RestoreRuntimeTargetMap = {
   goals: GoalRuntimeSnapshot;
   measurementDefinitions: MeasurementDefinitionSnapshot;
   progressObservations: ProgressObservationSnapshot;
+  goalStructure: GoalStructureRuntimeSnapshot;
+  goalPlanning: {
+    authority: GoalPlanningAuthorityV1;
+    desired: GoalPlanningAuthorityV1;
+    ingress: { status: "accepted" };
+    durability: "durable";
+  };
+  composition: {
+    authority: CompositionAuthorityV1;
+    desired: CompositionAuthorityV1;
+    ingress: { status: "accepted" };
+    durability: "durable";
+  };
 };
 
 export function translateActiveRestorePayload(value: unknown) {
@@ -264,6 +287,60 @@ export function translateProgressObservationRestorePayload(value: unknown) {
       }
     : { status: "invalid" as const, reason: "invalidProgressObservations" };
 }
+export function translateGoalStructureRestorePayload(value: unknown) {
+  const checked = validateGoalStructureAuthority(value);
+  return checked.status === "valid"
+    ? {
+        status: "valid" as const,
+        durable: checked.authority,
+        target: {
+          authority: checked.authority,
+          desired: checked.authority,
+          ingress: { status: "accepted" as const },
+          durability: "durable" as const,
+        },
+      }
+    : { status: "invalid" as const, reason: "invalidGoalStructure" };
+}
+export function translateGoalPlanningRestorePayload(value: unknown) {
+  const valid =
+    record(value) &&
+    value.version === 1 &&
+    Array.isArray(value.demands) &&
+    Array.isArray(value.priorities);
+  return valid
+    ? {
+        status: "valid" as const,
+        durable: structuredClone(value) as GoalPlanningAuthorityV1,
+        target: {
+          authority: structuredClone(value) as GoalPlanningAuthorityV1,
+          desired: structuredClone(value) as GoalPlanningAuthorityV1,
+          ingress: { status: "accepted" as const },
+          durability: "durable" as const,
+        },
+      }
+    : { status: "invalid" as const, reason: "invalidGoalPlanning" };
+}
+
+export function translateCompositionRestorePayload(value: unknown) {
+  const valid =
+    record(value) &&
+    value.version === 1 &&
+    Array.isArray(value.relationships) &&
+    Array.isArray(value.decisions);
+  return valid
+    ? {
+        status: "valid" as const,
+        durable: structuredClone(value) as CompositionAuthorityV1,
+        target: {
+          authority: structuredClone(value) as CompositionAuthorityV1,
+          desired: structuredClone(value) as CompositionAuthorityV1,
+          ingress: { status: "accepted" as const },
+          durability: "durable" as const,
+        },
+      }
+    : { status: "invalid" as const, reason: "invalidComposition" };
+}
 
 export const restoreTranslators = {
   active: translateActiveRestorePayload,
@@ -274,6 +351,9 @@ export const restoreTranslators = {
   goals: translateGoalRestorePayload,
   measurementDefinitions: translateMeasurementDefinitionRestorePayload,
   progressObservations: translateProgressObservationRestorePayload,
+  goalStructure: translateGoalStructureRestorePayload,
+  goalPlanning: translateGoalPlanningRestorePayload,
+  composition: translateCompositionRestorePayload,
 };
 
 function validExecutionMetadata(

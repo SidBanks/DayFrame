@@ -107,6 +107,14 @@ export function materializePlanPublication(input: {
       category: result.target.snapshot.category,
       plan: { ...result.target.snapshot.plan } as HistoricalPlannedOccurrenceSnapshotV2["plan"],
       timing: timingForSelection(selection, preview),
+      ...(selection.kind === "scheduledBlock"
+        ? (() => {
+            const composition = preview.result.scheduledBlocks.find(
+              (block) => block.id === selection.blockId,
+            )?.composition;
+            return composition ? { composition: structuredClone(composition) } : {};
+          })()
+        : {}),
       ...goalProvenance(result.target.reference, input.goals ?? []),
     };
     const existing = containingDay.occurrences.find((value) =>

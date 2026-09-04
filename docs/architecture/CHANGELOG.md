@@ -14,6 +14,64 @@ record.
 
 ---
 
+# 2026-09-04 — Capacity and Goal-Specific Feasibility V1 Implemented
+
+Task 8.5 adds demand-neutral, canonical user-day-owned Capacity intervals with
+deterministic identity, occupied/protected union arithmetic, conservative ordinary and
+Composite Liability qualification, explanations, fingerprints, and topology-derived
+summaries. A separate one-Demand Feasibility evaluator consumes Task 8.3 Demand
+Projection and Capacity only, producing bounded opportunity sets without priority,
+competition, allocation, Proposal, Friction, or scheduling effects. Capacity and
+Feasibility remain lazy, disposable read models; schema 9 and Backup V9 remain current.
+
+# 2026-09-04 — Commitment Composition V1 Implemented
+
+Task 8.4 adds revisioned, incarnation-safe Attachment Relationship and accepted
+CompositeDecision authority; deterministic parent-occurrence pairing; derived composite
+occurrences, classified footprint, required liability, and corrective Friction; and
+composition-aware scheduling without creating a duplicate source or execution subject.
+IndexedDB schema 9, Backup V9, atomic restore, full-clear, historical pairing provenance,
+and older-backup empty migration preserve the authority boundary. Capacity, feasibility,
+Allocation, Proposal, and automatic Progress remain absent. All 107 test files and 1,013
+tests pass with formatting, typecheck, lint, build, and hard bundle policy green.
+
+# 2026-09-04 — Goal Demand, Goal Priority, and Demand Projection V1 Implemented
+
+Task 8.3 adds independently identified, revisioned Goal Demand Intent and Goal
+Priority authority plus deterministic, disposable Demand Projection over exact
+canonical user-day bounds. Backup V8, persistence, protected atomic restore,
+full-clear, runtime authority, exact history, explicit empty older-format migration,
+and lossy V7-export refusal preserve the new authority. Projection consumes existing
+structural eligibility and planning provenance/freshness evidence while remaining
+separate from Capacity, Feasibility, Allocation, Proposal, scheduling, Friction, and
+Progress. The full 104-file / 1,003-test suite and all required gates pass. Bundle
+hard policy passes at 677,971 initial raw, 169,985 initial gzip, 53,187 largest lazy,
+and 807,972 total bytes; warning-level headroom/growth findings are documented.
+
+# 2026-09-03 — Goal Structure V1 Domain and Persistence Implemented
+
+Task 8.2 adds live revisioned Goal Structure authority for typed containment,
+contribution, dependency, and Goal-owned Milestone semantics. Deterministic graph
+validation, four-state structural eligibility with exact dependency evidence,
+historical resolution, IndexedDB participation, atomic restore/full-clear composition,
+and Backup V7 preserve identity and history. Older state migrates to explicit empty
+structure without interpreting Goal service links or other evidence. No UI, Demand,
+Priority, Progress inference, or scheduling effect was introduced. The full 100-file /
+993-test suite and all quality gates pass; hard bundle policy remains green with
+659,582-byte raw and 166,746-byte gzip initial headroom warnings.
+
+# 2026-09-03 — Revisioned Planning Provenance and Freshness Foundation Implemented
+
+Task 8.1 adds a bounded `core/planning` substrate for opaque logical identity,
+monotonic semantic revisions, closed typed origins, declared dependency references,
+canonical set/ordered fingerprints, Current/Stale/Unknown freshness, canonical
+user-day coverage, qualification, structured reasons, exact historical resolution,
+and fail-closed V1 snapshot migration. A non-user-facing revisioned Goal-relationship
+evidence slice proves the contracts without implementing Goal Structure authority or
+changing Preview, scheduling, persistence participants, Backup V6, or UI behavior.
+All 987 tests, format, typecheck, lint, build, and hard bundle limits pass; the existing
+initial-gzip headroom warning remains.
+
 # 2026-08-27 — Phase 7 Monthly Planner Closed
 
 Task 7.10 completes a read-only product-value audit and classifies Phase 7 A —

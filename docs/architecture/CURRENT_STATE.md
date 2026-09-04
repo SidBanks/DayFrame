@@ -2,6 +2,43 @@
 
 # Current State
 
+Task 8.3 implements first-class Goal Demand Intent V1 and independent Goal Priority
+V1 authored authority plus disposable Demand Projection V1. Complete Demand/Priority
+revision histories persist in a sibling authority and round-trip through Backup V8;
+V7 and older imports explicitly acquire empty authority, while lossy V7 export is
+refused when live Goal planning facts exist. Projection resolves exact canonical
+user-day coverage and records exact Demand, Goal, and structural-eligibility
+dependencies without owning time or affecting scheduling. Capacity, Feasibility,
+Allocation, Proposal, Progress inference, and Commitment attribution remain absent.
+All 104 files / 1,003 tests pass with format, typecheck, lint, build, and hard bundle
+policy green. The production bundle is 677,971 initial raw, 169,985 initial gzip,
+53,187 largest lazy, and 807,972 total bytes; headroom and total-growth warnings are
+recorded below their hard/review limits. Architecture did not reopen. Recommended
+next is the bounded Phase 8 Commitment Composition increment.
+
+Task 8.2 implements first-class, non-UI Goal Structure V1 authority. Typed `contains`,
+`contributesTo`, and `dependsOn` relationships plus Goal-owned Milestones now have
+durable identity, semantic revisions, retained exact history, deterministic graph
+validation, structural eligibility evidence, persistence/protected restore, explicit
+store actions, and Backup V7 compatibility. V6 and older state migrate to empty
+structure without inference; Goal IDs, service links, Progress, and scheduling remain
+unchanged. The temporary Task 8.1 relationship proof is retired in favor of the live
+domain. All 100 files / 993 tests pass with format, typecheck, lint, build, and hard
+bundle policy green. Initial bundle warnings are 659,582 raw and 166,746 gzip.
+Architecture did not reopen. Recommended next is the bounded Phase 8 Goal Demand
+Intent and Goal Priority implementation task.
+
+Task 8.1 implements the first Phase 8 foundation: bounded shared planning identity,
+revision, typed provenance, declared dependency fingerprints, typed freshness,
+canonical user-day coverage, qualification, structured reasons, exact historical
+resolution, and fail-closed versioned snapshot migration. A non-user-facing
+revisioned Goal-relationship evidence slice proves semantic-only revision advancement,
+dependency staleness, exact history, and JSON/backup-compatible round trips without
+starting full Goal Structure. Existing scheduling, Preview, surfaces, and Backup V6
+remain unchanged. All 987 tests pass; format, typecheck, lint, build, and hard bundle
+policy pass with the established 162,015-byte initial-gzip warning. Architecture did
+not reopen. Recommended next is Task 8.2 — Goal Structure V1 Domain and Persistence.
+
 Task 7.10 closes Phase 7 with Classification A and declares Phase 8 Ready. Evidence
 confirms that Month is a real routine planning workspace, supported by Planning
 Settings, Work Pattern, Commitment Library, and specialized Detailed Review; no
@@ -14,7 +51,6 @@ and Product Semantics Audit, classified as Phase 8 foundation. No production or 
 file changed for this audit. Lint/typecheck, 94 files/976 tests, build, bundle, and diff
 validation pass at the unchanged 636,234/162,015/53,188/761,854-byte baseline.
 
-
 Tasks 7.9 and 7.9A complete Phase 7 Planner convergence. Month is now the
 deterministic production and integration-test default; legacy Plan navigation and
 composition are absent. Planning Settings, Work Pattern, Commitment Library, Month,
@@ -26,7 +62,6 @@ final bundle is 636,234 raw, 162,015 gzip, 53,188 largest lazy, and 761,854 tota
 only the established gzip warning. Test convergence and Plan retirement are both A;
 the Phase 7 Planner strangler is complete and Task 7.10 is authorized as a closeout/
 product-value audit.
-
 
 Task 7.8 extracts complete authored scheduling intent into Commitment Library with
 direct Planner and Month-contextual entry. Active, disabled, non-occurring, Sleep, and
@@ -2040,6 +2075,50 @@ lint passing
 typecheck passing
 build passing
 ```
+
+## Commitment Composition V1
+
+Task 8.4 establishes revisioned Attachment Relationship authority between ordinary,
+incarnation-safe Commitment sources. Parent occurrences deterministically derive real
+attached activity occurrences, effective protected Buffers, classified composite
+footprints, and required liabilities. Accepted CompositeDecision records are replayed
+atomically against an exact composite fingerprint; stale decisions apply no deltas.
+
+The schedule suppresses an actively attached child's independent recurrence and includes
+only relationship-derived occurrences. Required placement failure produces durable-derived
+liability and corrective Friction; optional failure is an explicit omission. Historical
+plan snapshots retain composite, parent, pairing, and relationship-revision provenance,
+while each attached activity remains one ordinary execution subject.
+
+Composition authority participates in IndexedDB schema 9, Backup V9, protected restore,
+runtime authority replacement, and full clear. Older backups migrate to explicit empty
+composition; lossy V8 export is refused. Capacity, Goal-specific feasibility, Allocation,
+Proposal, and inferred Progress are not implemented. Composition and the prior Goal
+Structure/Goal Planning surfaces load lazily to preserve the hard initial bundle budget.
+
+**Evidence:** `TASK_8.4_COMMITMENT_COMPOSITION_V1_DOMAIN_PAIRING_AND_FOOTPRINT_RESULT.md`.
+
+## Capacity and Goal-Specific Feasibility V1
+
+Task 8.5 establishes Capacity as a deterministic, demand-neutral read model over exact
+canonical user-day windows. Current Preview activity—including Work, Commitments, manual
+events, and Task 8.4 support activities—is occupied time; effective Buffers are protected
+time. Half-open exclusions are unioned once before complement. Unplaced ordinary
+Commitments and Composite Liability conservatively qualify their affected user-day rather
+than becoming clean allocatable time. Interval topology is canonical; totals are derived.
+
+Goal-Specific Feasibility evaluates exactly one current Task 8.3 Demand Projection against
+the public Capacity contract. It respects structural eligibility, exact horizon,
+contiguity, splittability, minimum/preferred/maximum session duration, session count, and
+authored partial satisfaction. Opportunities neither reserve Capacity nor create
+Allocation, Proposal, Friction, decisions, or scheduled Goal work.
+
+No general-availability authority currently exists, so V1 uses the governed neutral
+geometric-openings policy. Capacity and Feasibility are lazy, non-authoritative, and not
+persisted; IndexedDB schema 9 and Backup V9 remain current. Phase 8 foundation semantics
+are complete and ready for Phase 9 competing-demand and Allocation work.
+
+**Evidence:** `TASK_8.5_CAPACITY_AND_GOAL_SPECIFIC_FEASIBILITY_V1_RESULT.md`.
 
 The current execution boundary is:
 

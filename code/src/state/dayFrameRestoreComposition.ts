@@ -23,6 +23,9 @@ import {
   GOAL_AUTHORITY_STORE,
   MEASUREMENT_DEFINITION_STORE,
   PROGRESS_OBSERVATION_STORE,
+  GOAL_STRUCTURE_STORE,
+  GOAL_PLANNING_STORE,
+  COMPOSITION_AUTHORITY_STORE,
 } from "../infrastructure/storage/dayFrameDurableDb.js";
 import type { DayFrameActiveV2 } from "./activeV2.js";
 import type { DayFrameProfilesStorageV2 } from "./dayFrameProfiles.js";
@@ -49,6 +52,9 @@ import {
 import type { GoalAuthorityV1 } from "../core/goals/goal.js";
 import type { GoalMeasurementDefinitionAuthorityV1 } from "../core/measurement/measurementDefinition.js";
 import type { GoalProgressObservationAuthorityV1 } from "../core/progressObservation/progressObservation.js";
+import type { GoalStructureAuthorityV1 } from "../core/planning/goalStructure.js";
+import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import type { CompositionAuthorityV1 } from "../core/planning/commitmentComposition.js";
 
 const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
 const DAYFRAME_PROFILES_V2_STORAGE_KEY = "dayframe-profiles-v2";
@@ -64,6 +70,9 @@ export type DayFrameRestoreAuthoritySources = {
   goals(): GoalAuthorityV1;
   measurementDefinitions(): GoalMeasurementDefinitionAuthorityV1;
   progressObservations(): GoalProgressObservationAuthorityV1;
+  goalStructure(): GoalStructureAuthorityV1;
+  goalPlanning(): GoalPlanningAuthorityV1;
+  composition(): CompositionAuthorityV1;
   readiness(id: keyof RestoreDurablePayloadMap): RestoreParticipantReadiness;
 };
 
@@ -313,6 +322,110 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       return checked.status === "valid" ? { status: "valid", target: checked.target } : checked;
     },
   };
+  const goalStructure: RestoreParticipantAdapter<
+    RestoreDurablePayloadMap["goalStructure"],
+    RestoreRuntimeTargetMap["goalStructure"]
+  > = {
+    id: "goalStructure",
+    durableKind: "indexedDb",
+    getReadiness: () => options.sources.readiness("goalStructure"),
+    captureCurrentAuthority: async () => options.sources.goalStructure(),
+    validatePayload: (value) => {
+      const checked = restoreTranslators.goalStructure(value);
+      return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
+    },
+    clonePayload: structuredClone,
+    fingerprint: semanticFingerprint,
+    captureSourceFingerprint: () => indexedFingerprint(options.indexedDb, [GOAL_STRUCTURE_STORE]),
+    recheckSourceFingerprint: async (expected) =>
+      (await indexedFingerprint(options.indexedDb, [GOAL_STRUCTURE_STORE])) === expected
+        ? success()
+        : failure("sourceChanged"),
+    writeDurableTargetExact: async () => success(),
+    verifyDurableTarget: async () => success(),
+    buildRuntimeTargetFromDurable: async (payload) => {
+      const checked = restoreTranslators.goalStructure(payload);
+      return checked.status === "valid" ? { status: "valid", target: checked.target } : checked;
+    },
+  };
+  const goalPlanning: RestoreParticipantAdapter<
+    RestoreDurablePayloadMap["goalPlanning"],
+    RestoreRuntimeTargetMap["goalPlanning"]
+  > = {
+    id: "goalPlanning",
+    durableKind: "indexedDb",
+    getReadiness: () => options.sources.readiness("goalPlanning"),
+    captureCurrentAuthority: async () => options.sources.goalPlanning(),
+    validatePayload: (value) => {
+      const checked = restoreTranslators.goalPlanning(value);
+      return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
+    },
+    clonePayload: structuredClone,
+    fingerprint: semanticFingerprint,
+    captureSourceFingerprint: () => indexedFingerprint(options.indexedDb, [GOAL_PLANNING_STORE]),
+    recheckSourceFingerprint: async (expected) =>
+      (await indexedFingerprint(options.indexedDb, [GOAL_PLANNING_STORE])) === expected
+        ? success()
+        : failure("sourceChanged"),
+    writeDurableTargetExact: async () => success(),
+    verifyDurableTarget: async () => success(),
+    buildRuntimeTargetFromDurable: async (payload) => {
+      const checked = restoreTranslators.goalPlanning(payload);
+      if (checked.status !== "valid") return checked;
+      const { validateGoalPlanningAuthority } = await import("../core/planning/goalDemand.js");
+      const strict = validateGoalPlanningAuthority(checked.durable);
+      return strict.status === "valid"
+        ? {
+            status: "valid",
+            target: {
+              ...checked.target,
+              authority: strict.authority,
+              desired: structuredClone(strict.authority),
+            },
+          }
+        : { status: "invalid", reason: "invalidGoalPlanning" };
+    },
+  };
+  const composition: RestoreParticipantAdapter<
+    RestoreDurablePayloadMap["composition"],
+    RestoreRuntimeTargetMap["composition"]
+  > = {
+    id: "composition",
+    durableKind: "indexedDb",
+    getReadiness: () => options.sources.readiness("composition"),
+    captureCurrentAuthority: async () => options.sources.composition(),
+    validatePayload: (value) => {
+      const checked = restoreTranslators.composition(value);
+      return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
+    },
+    clonePayload: structuredClone,
+    fingerprint: semanticFingerprint,
+    captureSourceFingerprint: () =>
+      indexedFingerprint(options.indexedDb, [COMPOSITION_AUTHORITY_STORE]),
+    recheckSourceFingerprint: async (expected) =>
+      (await indexedFingerprint(options.indexedDb, [COMPOSITION_AUTHORITY_STORE])) === expected
+        ? success()
+        : failure("sourceChanged"),
+    writeDurableTargetExact: async () => success(),
+    verifyDurableTarget: async () => success(),
+    buildRuntimeTargetFromDurable: async (payload) => {
+      const checked = restoreTranslators.composition(payload);
+      if (checked.status !== "valid") return checked;
+      const { validateCompositionAuthority } =
+        await import("../core/planning/commitmentComposition.js");
+      const strict = validateCompositionAuthority(checked.durable);
+      return strict.status === "valid"
+        ? {
+            status: "valid",
+            target: {
+              ...checked.target,
+              authority: strict.authority,
+              desired: structuredClone(strict.authority),
+            },
+          }
+        : { status: "invalid", reason: "invalidComposition" };
+    },
+  };
   return {
     active,
     profiles,
@@ -322,6 +435,9 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
     goals,
     measurementDefinitions,
     progressObservations,
+    goalStructure,
+    goalPlanning,
+    composition,
   };
 }
 

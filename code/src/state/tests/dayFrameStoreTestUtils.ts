@@ -8,7 +8,7 @@ export function createReadyDayFrameTestStore(
   initialState?: DayFrameStoreInitialState,
   options?: Parameters<typeof createDayFrameStore>[1],
 ): DayFrameStore {
-  if (!options?.historicalPlanSurface)
+  if (!options?.historicalPlanSurface || !globalThis.indexedDB)
     Object.defineProperty(globalThis, "indexedDB", { configurable: true, value: new IDBFactory() });
   const store = createDayFrameStore(initialState, { ...options, bootstrapMode: "resolved-test" });
   if (store.getReadiness().status !== "ready") {

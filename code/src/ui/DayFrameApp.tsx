@@ -144,7 +144,7 @@ export type DayFrameAppStore = Pick<
   | "clearLocalData"
   | "exportBackup"
   | "importBackup"
-  | "exportBackupV6"
+  | "exportBackupV9"
   | "importBackupV3"
   | "importBackupFile"
   | "mutateManualEvent"
@@ -1717,7 +1717,7 @@ function ReadyDayFrameApp({
                   disabled={isBackupBusy || isClearBusy}
                   onClick={async () => {
                     setIsBackupBusy(true);
-                    const result = await storeRef.current.exportBackupV6(getExportedAt());
+                    const result = await storeRef.current.exportBackupV9(getExportedAt());
                     if (result.status === "exported") {
                       downloadDayFrameBackup(result.backup);
                       setBackupMessage("Complete DayFrame backup downloaded.");

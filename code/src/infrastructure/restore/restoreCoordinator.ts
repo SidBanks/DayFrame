@@ -533,6 +533,9 @@ function indexedPayload(payload: RestorePayloadSet) {
     goals: payload.goals,
     measurementDefinitions: payload.measurementDefinitions,
     progressObservations: payload.progressObservations,
+    goalStructure: payload.goalStructure,
+    goalPlanning: payload.goalPlanning,
+    composition: payload.composition,
   };
 }
 function successful(value: unknown): boolean {

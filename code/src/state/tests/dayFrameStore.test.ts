@@ -1372,6 +1372,9 @@ describe("dayFrameStore", () => {
       "goals",
       "measurementDefinitions",
       "progressObservations",
+      "goalStructure",
+      "goalPlanning",
+      "composition",
     ]);
     expect(store.getDurabilityStatus()).toEqual({
       activeState: "durable",

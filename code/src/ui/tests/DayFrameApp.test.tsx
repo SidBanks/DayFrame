@@ -3863,7 +3863,7 @@ describe("DayFrameApp", () => {
     expect(parsed).toMatchObject({
       app: "DayFrame",
       surface: "backup",
-      version: 6,
+      version: 9,
       exportedAt: "2026-05-05T15:00:00.000Z",
     });
     expect(parsed.data).toHaveProperty("active");
@@ -3873,6 +3873,9 @@ describe("DayFrameApp", () => {
     expect(parsed.data).toHaveProperty("planDecisions");
     expect(parsed.data).toHaveProperty("executionHistory");
     expect(parsed.data).toHaveProperty("historicalPlan");
+    expect(parsed.data).toHaveProperty("goalStructure");
+    expect(parsed.data).toHaveProperty("goalPlanning");
+    expect(parsed.data).toHaveProperty("composition");
     expect(JSON.stringify(parsed.data)).not.toContain('"preview"');
     expect(JSON.stringify(parsed.data)).toContain("incarnationId");
   });

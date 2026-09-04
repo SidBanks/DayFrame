@@ -240,6 +240,7 @@ function validateSnapshot(
       "category",
       "plan",
       ...(isV2 ? ["timing"] : []),
+      ...(isV2 && value.composition !== undefined ? ["composition"] : []),
       ...(value.goals === undefined ? [] : ["goals"]),
     ],
     path,
@@ -253,6 +254,17 @@ function validateSnapshot(
       if (value.timing.kind !== "allDay" && value.timing.kind !== "timed")
         push(issues, "invalidOccurrence", `${path}.timing.kind`);
     }
+  }
+  if (isV2 && value.composition !== undefined) {
+    const composition = value.composition;
+    if (
+      !Array.isArray(composition) ||
+      composition.length !== 5 ||
+      !composition.slice(0, 4).every((item) => typeof item === "string" && item.length > 0) ||
+      !Number.isSafeInteger(composition[4]) ||
+      Number(composition[4]) < 1
+    )
+      push(issues, "invalidOccurrence", `${path}.composition`);
   }
   const reference = validateDurableOccurrenceReference(value.reference);
   if (reference.status !== "valid") push(issues, "invalidOccurrence", `${path}.reference`);

@@ -35,6 +35,8 @@ export type HistoricalPlannedOccurrenceSnapshotV2 = Omit<
 > & {
   version: typeof HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION;
   timing: HistoricalOccurrenceTimingV2;
+  /** compositeId, parentOccurrenceId, pairingId, relationshipId, relationshipRevision */
+  composition?: [string, string, string, string, number];
 };
 export type HistoricalPlannedOccurrenceSnapshot =
   | HistoricalPlannedOccurrenceSnapshotV1
@@ -151,6 +153,9 @@ export function cloneHistoricalPlanSnapshot(
     reference: structuredClone(snapshot.reference),
     plan: { ...snapshot.plan },
     ...(snapshot.version === 2 ? { timing: { ...snapshot.timing } } : {}),
+    ...(snapshot.version === 2 && snapshot.composition
+      ? { composition: [...snapshot.composition] }
+      : {}),
     ...(snapshot.goals === undefined ? {} : { goals: structuredClone(snapshot.goals) }),
   };
 }

@@ -161,6 +161,8 @@ export type DraftScheduledBlock = {
   id: string;
   occurrenceIdentity?: OccurrenceIdentity;
   commitmentNavigationIdentity?: CommitmentNavigationIdentity;
+  /** compositeId, parentOccurrenceId, pairingId, relationshipId, relationshipRevision */
+  composition?: [string, string, string, string, number];
   userId: string;
   templateId?: string;
   source: ScheduledBlockSource;

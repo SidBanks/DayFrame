@@ -7,6 +7,9 @@ export const DAYFRAME_NOTIFICATION_CHANNELS = [
   "goals",
   "measurementDefinitions",
   "progressObservations",
+  "goalStructure",
+  "goalPlanning",
+  "composition",
   "durability",
   "readiness",
 ] as const;

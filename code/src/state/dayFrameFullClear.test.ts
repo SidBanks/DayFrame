@@ -32,7 +32,7 @@ afterEach(() => {
   delete (globalThis as { localStorage?: unknown }).localStorage;
 });
 
-describe("five-authority full-clear settlement", () => {
+describe("ten-authority full-clear settlement", () => {
   it("does not return a terminal result while HistoricalPlan clear is pending", async () => {
     Object.defineProperty(globalThis, "localStorage", {
       configurable: true,
@@ -104,7 +104,7 @@ describe("five-authority full-clear settlement", () => {
     expect(result.authorities.executionHistory).toEqual({ status: "removed" });
   });
 
-  it("classifies mixed and all-failed terminal outcomes from all five enumerable authorities", async () => {
+  it("classifies mixed and all-failed terminal outcomes from all ten enumerable authorities", async () => {
     const local = new MemoryStorage();
     Object.defineProperty(globalThis, "localStorage", { configurable: true, value: local });
     const failingStorage = createDayFrameDurableDb({
@@ -137,6 +137,9 @@ describe("five-authority full-clear settlement", () => {
       "goals",
       "measurementDefinitions",
       "progressObservations",
+      "goalStructure",
+      "goalPlanning",
+      "composition",
     ]);
 
     delete (globalThis as { localStorage?: unknown }).localStorage;

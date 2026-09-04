@@ -13,6 +13,9 @@ export const RESTORE_PARTICIPANT_IDS = [
   "goals",
   "measurementDefinitions",
   "progressObservations",
+  "goalStructure",
+  "goalPlanning",
+  "composition",
 ] as const;
 export type RestoreParticipantId = (typeof RESTORE_PARTICIPANT_IDS)[number];
 export type RestoreSide = "target" | "recovery";

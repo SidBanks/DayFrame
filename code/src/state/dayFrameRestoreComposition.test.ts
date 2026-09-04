@@ -166,6 +166,9 @@ describe("real five-participant restore composition", () => {
       goals: { version: 1 as const, goals: [] },
       measurementDefinitions: { version: 1 as const, definitions: [] },
       progressObservations: { version: 1 as const, observations: [] },
+      goalStructure: { version: 1 as const, relationships: [], milestones: [] },
+      goalPlanning: { version: 1 as const, demands: [], priorities: [] },
+      composition: { version: 1 as const, relationships: [], decisions: [] },
     };
     const composition = getDayFrameRestoreComposition(store, DAYFRAME_RESTORE_CAPABILITY);
     expect(await composition.coordinator.restore(target)).toEqual({ status: "completed" });
@@ -266,6 +269,9 @@ describe("real five-participant restore composition", () => {
           goals: target.goals,
           measurementDefinitions: target.measurementDefinitions,
           progressObservations: target.progressObservations,
+          goalStructure: target.goalStructure,
+          goalPlanning: target.goalPlanning,
+          composition: target.composition,
         })
       ).status,
     ).toBe("success");

@@ -45,6 +45,9 @@ export function historicalPlanSnapshotFingerprint(
     category: snapshot.category,
     plan: snapshot.plan,
     ...(snapshot.version === 2 ? { timing: snapshot.timing } : {}),
+    ...(snapshot.version === 2 && snapshot.composition
+      ? { composition: snapshot.composition }
+      : {}),
     ...(snapshot.goals === undefined
       ? {}
       : { goals: [...snapshot.goals].sort((a, b) => a.goalId.localeCompare(b.goalId)) }),

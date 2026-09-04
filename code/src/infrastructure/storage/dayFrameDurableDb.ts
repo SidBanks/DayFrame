@@ -22,6 +22,9 @@ export const RESTORE_PAYLOAD_STORE = "restorePayloads";
 export const GOAL_AUTHORITY_STORE = "goals";
 export const MEASUREMENT_DEFINITION_STORE = "measurementDefinitions";
 export const PROGRESS_OBSERVATION_STORE = "progressObservations";
+export const GOAL_STRUCTURE_STORE = "goalStructure";
+export const GOAL_PLANNING_STORE = "goalPlanning";
+export const COMPOSITION_AUTHORITY_STORE = "compositionAuthority";
 
 export function createDayFrameDurableDb(
   options: { indexedDB?: IDBFactory; name?: string } = {},
@@ -72,6 +75,21 @@ export function createDayFrameDurableDb(
             { name: "byDefinitionRevision", keyPath: ["definitionId", "definitionRevision"] },
             { name: "byObservedAt", keyPath: "observedAt" },
           ],
+        },
+        {
+          name: GOAL_STRUCTURE_STORE,
+          keyPath: ["recordType", "id", "revision"],
+          indexes: [{ name: "byGoalStructureId", keyPath: ["recordType", "id"] }],
+        },
+        {
+          name: GOAL_PLANNING_STORE,
+          keyPath: ["recordType", "id", "revision"],
+          indexes: [{ name: "byGoalPlanningId", keyPath: ["recordType", "id"] }],
+        },
+        {
+          name: COMPOSITION_AUTHORITY_STORE,
+          keyPath: ["recordType", "id", "revision"],
+          indexes: [{ name: "byCompositionId", keyPath: ["recordType", "id"] }],
         },
       ],
     },
