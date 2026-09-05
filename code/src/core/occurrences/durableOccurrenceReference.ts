@@ -10,6 +10,10 @@ import type {
   TemplateOccurrenceIdentity,
   WorkOccurrenceIdentity,
 } from "./occurrenceIdentity.js";
+import {
+  validateRealizedScheduleReference,
+  type RealizedScheduleReferenceV1,
+} from "../planning/realizedScheduleIdentity.js";
 
 export const DURABLE_OCCURRENCE_REFERENCE_VERSION = 1 as const;
 
@@ -53,7 +57,8 @@ export type DurableManualEventOccurrenceReference = {
 export type DurableOccurrenceReference =
   | DurableTemplateOccurrenceReference
   | DurableWorkOccurrenceReference
-  | DurableManualEventOccurrenceReference;
+  | DurableManualEventOccurrenceReference
+  | RealizedScheduleReferenceV1;
 
 export type DurableOccurrenceReferenceValidation =
   | { status: "valid"; reference: DurableOccurrenceReference }
@@ -197,7 +202,10 @@ export function validateDurableOccurrenceReference(
   if (value.sourceKind === "template") validateTemplate(value, issues);
   else if (value.sourceKind === "work") validateWork(value, issues);
   else if (value.sourceKind === "manualEvent") validateManual(value, issues);
-  else issues.push("sourceKind is unsupported");
+  else if (value.sourceKind === "acceptedAllocation") {
+    if (!validateRealizedScheduleReference(value))
+      issues.push("accepted allocation reference is invalid");
+  } else issues.push("sourceKind is unsupported");
   return issues.length > 0
     ? { status: "invalid", issues }
     : {
@@ -224,7 +232,9 @@ export function cloneDurableOccurrenceReference(
       shiftDefinition: { ...reference.shiftDefinition },
       coordinate: { ...reference.coordinate },
     };
-  return { ...reference, manualEvent: { ...reference.manualEvent } };
+  if (reference.sourceKind === "manualEvent")
+    return { ...reference, manualEvent: { ...reference.manualEvent } };
+  return { ...reference };
 }
 
 export function durableOccurrenceReferencesEqual(
@@ -260,6 +270,17 @@ export function durableOccurrenceReferencesEqual(
           right.coordinate.scopeKind === "userWeek" &&
           left.coordinate.userWeekStartDate === right.coordinate.userWeekStartDate;
   }
+  if (left.sourceKind === "acceptedAllocation" && right.sourceKind === "acceptedAllocation")
+    return (
+      left.scheduledSubjectId === right.scheduledSubjectId &&
+      left.realizationId === right.realizationId &&
+      left.acceptedAllocationId === right.acceptedAllocationId &&
+      left.acceptedClaimId === right.acceptedClaimId &&
+      left.scheduleRole === right.scheduleRole &&
+      left.startsAt === right.startsAt &&
+      left.endsAt === right.endsAt &&
+      left.userDayDate === right.userDayDate
+    );
   return false;
 }
 
@@ -283,6 +304,7 @@ export function resolveDurableOccurrenceReference(
       }
     );
   }
+  if (reference.sourceKind === "acceptedAllocation") return { status: "occurrenceMissing" };
   if (reference.sourceKind === "template") return resolveTemplate(reference, state);
   return resolveWork(reference, state);
 }

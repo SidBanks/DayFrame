@@ -2152,7 +2152,6 @@ describe("DayFrameApp", () => {
     expect(screen.getByRole("button", { name: "Back to day" })).toBeInTheDocument();
     expect(screen.getByRole("grid")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Work Pattern" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Commitments" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Schedule Preferences" })).not.toBeInTheDocument();
   });
 
@@ -2340,7 +2339,7 @@ describe("DayFrameApp", () => {
       .getAllByLabelText("Name")
       .find((field) => (field as HTMLInputElement).value.includes("Day Shift"))!;
     fireEvent.change(workName, { target: { value: "Updated Day Shift" } });
-    expect(screen.getAllByText(/Plan has unsaved changes/)).toHaveLength(2);
+    expect(screen.getByText(/Plan has unsaved changes/)).toBeVisible();
     expect(screen.queryByRole("button", { name: "Refresh Schedule" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Save Setup" }));
     fireEvent.click(screen.getByRole("button", { name: "Back to day" }));
@@ -3863,7 +3862,7 @@ describe("DayFrameApp", () => {
     expect(parsed).toMatchObject({
       app: "DayFrame",
       surface: "backup",
-      version: 9,
+      version: 12,
       exportedAt: "2026-05-05T15:00:00.000Z",
     });
     expect(parsed.data).toHaveProperty("active");
@@ -3873,9 +3872,11 @@ describe("DayFrameApp", () => {
     expect(parsed.data).toHaveProperty("planDecisions");
     expect(parsed.data).toHaveProperty("executionHistory");
     expect(parsed.data).toHaveProperty("historicalPlan");
+    expect(parsed.data).toHaveProperty("realizations");
     expect(parsed.data).toHaveProperty("goalStructure");
     expect(parsed.data).toHaveProperty("goalPlanning");
     expect(parsed.data).toHaveProperty("composition");
+    expect(parsed.data).toHaveProperty("proposals");
     expect(JSON.stringify(parsed.data)).not.toContain('"preview"');
     expect(JSON.stringify(parsed.data)).toContain("incarnationId");
   });
@@ -4866,11 +4867,6 @@ describe("DayFrameApp", () => {
     fireEvent.change(screen.getByLabelText("Day Boundary Start Time"), {
       target: { value: "04:30" },
     });
-    expect(
-      screen.getByText(
-        "Plan has unsaved changes. Schedule actions continue to use the saved plan.",
-      ),
-    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
     expect(generate).not.toHaveBeenCalled();
     expect(commit).not.toHaveBeenCalled();

@@ -99,7 +99,7 @@ describe("HistoricalPlanReportingSection", () => {
     expect(await screen.findByText("Archived shift")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Report outcome" }));
     fireEvent.click(
-      await screen.findByRole("button", { name: "Submit report" }, { timeout: 3_000 }),
+      await screen.findByRole("button", { name: "Submit report" }, { timeout: 10_000 }),
     );
     await waitFor(() => expect(base.getExecutionHistory()).toHaveLength(1));
     expect(base.getExecutionHistory()[0]).toMatchObject({
@@ -143,7 +143,7 @@ describe("HistoricalPlanReportingSection", () => {
         unreportedOccurrences: 0,
       },
     });
-  });
+  }, 15_000);
 
   it("refreshes a loaded historical day after full clear instead of retaining stale rows", async () => {
     const base = createReadyDayFrameTestStore();

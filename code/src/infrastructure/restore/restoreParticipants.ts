@@ -11,6 +11,8 @@ import {
   GOAL_STRUCTURE_STORE,
   GOAL_PLANNING_STORE,
   COMPOSITION_AUTHORITY_STORE,
+  PROPOSAL_AUTHORITY_STORE,
+  REALIZATION_AUTHORITY_STORE,
 } from "../storage/dayFrameDurableDb.js";
 import type { IndexedDbCollectionStorage } from "../storage/indexedDbCollectionStorage.js";
 import { semanticFingerprint } from "./restoreStaging.js";
@@ -49,6 +51,8 @@ export interface CombinedIndexedDbRestoreAdapter {
     goalStructure: unknown;
     goalPlanning: unknown;
     composition: unknown;
+    proposals: unknown;
+    realizations?: unknown;
   }): Promise<RestoreCheck>;
   verifyExact(payloads: {
     executionHistory: unknown;
@@ -59,6 +63,8 @@ export interface CombinedIndexedDbRestoreAdapter {
     goalStructure: unknown;
     goalPlanning: unknown;
     composition: unknown;
+    proposals: unknown;
+    realizations?: unknown;
   }): Promise<RestoreCheck>;
 }
 export interface ExecutionHistoryAntiResurrectionAdapter {
@@ -121,6 +127,8 @@ export function createCombinedIndexedDbRestoreAdapter(
     goalStructure: unknown;
     goalPlanning: unknown;
     composition: unknown;
+    proposals: unknown;
+    realizations?: unknown;
   }) {
     if (
       !physicalExecution(value.executionHistory) ||
@@ -137,9 +145,21 @@ export function createCombinedIndexedDbRestoreAdapter(
       !record(value.goalPlanning) ||
       !Array.isArray(value.goalPlanning.demands) ||
       !Array.isArray(value.goalPlanning.priorities) ||
+      (value.goalPlanning.version === 2 &&
+        (!Array.isArray(value.goalPlanning.footprintSpecifications) ||
+          !Array.isArray(value.goalPlanning.footprintAssociations))) ||
       !record(value.composition) ||
       !Array.isArray(value.composition.relationships) ||
-      !Array.isArray(value.composition.decisions)
+      !Array.isArray(value.composition.decisions) ||
+      !record(value.proposals) ||
+      !Array.isArray(value.proposals.proposals) ||
+      !Array.isArray(value.proposals.candidates) ||
+      !Array.isArray(value.proposals.decisions) ||
+      !Array.isArray(value.proposals.acceptedAllocations) ||
+      (value.realizations !== undefined &&
+        (!record(value.realizations) ||
+          !Array.isArray(value.realizations.realizations) ||
+          !Array.isArray(value.realizations.facts)))
     )
       return undefined;
     return {
@@ -153,8 +173,29 @@ export function createCombinedIndexedDbRestoreAdapter(
       measurementDefinitions: value.measurementDefinitions.definitions,
       progressObservations: value.progressObservations.observations,
       goalStructure: [...value.goalStructure.relationships, ...value.goalStructure.milestones],
-      goalPlanning: [...value.goalPlanning.demands, ...value.goalPlanning.priorities],
+      goalPlanning: [
+        ...value.goalPlanning.demands,
+        ...value.goalPlanning.priorities,
+        ...(Array.isArray(value.goalPlanning.footprintSpecifications)
+          ? value.goalPlanning.footprintSpecifications
+          : []),
+        ...(Array.isArray(value.goalPlanning.footprintAssociations)
+          ? value.goalPlanning.footprintAssociations
+          : []),
+      ],
       composition: [...value.composition.relationships, ...value.composition.decisions],
+      proposals: [
+        ...value.proposals.proposals,
+        ...value.proposals.candidates,
+        ...value.proposals.decisions,
+        ...value.proposals.acceptedAllocations,
+      ],
+      realizations: value.realizations
+        ? [
+            ...(value.realizations.realizations as unknown[]),
+            ...(value.realizations.facts as unknown[]),
+          ]
+        : [],
     };
   }
   async function replaceExact(value: {
@@ -166,6 +207,8 @@ export function createCombinedIndexedDbRestoreAdapter(
     goalStructure: unknown;
     goalPlanning: unknown;
     composition: unknown;
+    proposals: unknown;
+    realizations?: unknown;
   }): Promise<RestoreCheck> {
     const checked = payloads(value);
     if (!checked) return { status: "failure", reason: "invalidPhysicalPayload" };
@@ -181,6 +224,8 @@ export function createCombinedIndexedDbRestoreAdapter(
       { type: "clear", store: GOAL_STRUCTURE_STORE },
       { type: "clear", store: GOAL_PLANNING_STORE },
       { type: "clear", store: COMPOSITION_AUTHORITY_STORE },
+      { type: "clear", store: PROPOSAL_AUTHORITY_STORE },
+      { type: "clear", store: REALIZATION_AUTHORITY_STORE },
       ...checked.execution.records.map((entry) => ({
         type: "put" as const,
         store: EXECUTION_HISTORY_RECORD_STORE,
@@ -236,6 +281,16 @@ export function createCombinedIndexedDbRestoreAdapter(
         store: COMPOSITION_AUTHORITY_STORE,
         value: entry,
       })),
+      ...checked.proposals.map((entry: unknown) => ({
+        type: "put" as const,
+        store: PROPOSAL_AUTHORITY_STORE,
+        value: entry,
+      })),
+      ...checked.realizations.map((entry: unknown) => ({
+        type: "put" as const,
+        store: REALIZATION_AUTHORITY_STORE,
+        value: entry,
+      })),
     ]);
     return result.status === "success"
       ? { status: "success" }
@@ -250,6 +305,8 @@ export function createCombinedIndexedDbRestoreAdapter(
     goalStructure: unknown;
     goalPlanning: unknown;
     composition: unknown;
+    proposals: unknown;
+    realizations?: unknown;
   }): Promise<RestoreCheck> {
     const expected = payloads(value);
     if (!expected) return { status: "failure", reason: "invalidPhysicalPayload" };
@@ -265,6 +322,8 @@ export function createCombinedIndexedDbRestoreAdapter(
       goalStructure,
       goalPlanning,
       composition,
+      proposals,
+      realizations,
     ] = await Promise.all([
       storage.getAll<unknown>(EXECUTION_HISTORY_RECORD_STORE),
       storage.getAll<unknown>(EXECUTION_HISTORY_QUARANTINE_STORE),
@@ -277,6 +336,8 @@ export function createCombinedIndexedDbRestoreAdapter(
       storage.getAll<unknown>(GOAL_STRUCTURE_STORE),
       storage.getAll<unknown>(GOAL_PLANNING_STORE),
       storage.getAll<unknown>(COMPOSITION_AUTHORITY_STORE),
+      storage.getAll<unknown>(PROPOSAL_AUTHORITY_STORE),
+      storage.getAll<unknown>(REALIZATION_AUTHORITY_STORE),
     ]);
     if (
       [
@@ -291,6 +352,8 @@ export function createCombinedIndexedDbRestoreAdapter(
         goalStructure,
         goalPlanning,
         composition,
+        proposals,
+        realizations,
       ].some((result) => result.status === "failure")
     )
       return { status: "failure", reason: "readFailed" };
@@ -307,6 +370,8 @@ export function createCombinedIndexedDbRestoreAdapter(
       goalStructure: successValue(goalStructure),
       goalPlanning: successValue(goalPlanning),
       composition: successValue(composition),
+      proposals: successValue(proposals),
+      realizations: successValue(realizations),
     };
     return semanticFingerprint(sortedPhysical(actual)) ===
       semanticFingerprint(sortedPhysical(expected))
@@ -329,6 +394,8 @@ export function assertRestoreParticipants(participants: readonly RestoreParticip
     "goalStructure",
     "goalPlanning",
     "composition",
+    "proposals",
+    "realizations",
   ];
   const actual = participants.map((value) => value.id).sort();
   if (
@@ -352,6 +419,8 @@ export function assertRestoreParticipants(participants: readonly RestoreParticip
         "goalStructure",
         "goalPlanning",
         "composition",
+        "proposals",
+        "realizations",
       ].sort(),
     )
   )

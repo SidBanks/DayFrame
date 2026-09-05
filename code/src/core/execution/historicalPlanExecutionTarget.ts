@@ -19,6 +19,8 @@ export function materializeHistoricalPlanExecutionTarget(input: {
   day: HistoricalPlanDayPublicationV1;
   occurrence: HistoricalPlannedOccurrenceSnapshot;
 }): HistoricalPlanExecutionTargetResult {
+  if (input.occurrence.version === 3 && input.occurrence.scheduleRole === "bufferProtection")
+    return { status: "notReportable" };
   if (
     !input.day.occurrences.some(
       (candidate) =>

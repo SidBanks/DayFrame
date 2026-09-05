@@ -1,13 +1,16 @@
 import { generateSchedulePreview } from "../core/engine/generateSchedulePreview.js";
-import {
-  materializePlanPublication,
-  type MaterializePlanPublicationResult,
-} from "../core/historicalPlan/materializePlanPublication.js";
+import type { MaterializePlanPublicationResult } from "../core/historicalPlan/materializePlanPublication.js";
 import { reviseSchedulePreview } from "../core/engine/reviseSchedulePreview.js";
 import {
+  addUserDayLabels,
   resolveUserDayContainingInstant,
   resolveUserDayWindowForLabel,
 } from "../core/time/canonicalUserDay.js";
+import {
+  CANONICAL_USER_DAY_RANGE_POLICY_V1,
+  previewRangeFromLegacyInclusive,
+  resolvePlanningDataHorizon,
+} from "../core/planning/planningScope.js";
 import {
   cloneDayFrameAuthoredSetup,
   createDayFrameBackupV2,
@@ -62,6 +65,12 @@ import type {
   BackupV8ExportResult,
   BackupV9ImportResult,
   BackupV9ExportResult,
+  BackupV10ImportResult,
+  BackupV10ExportResult,
+  BackupV11ImportResult,
+  BackupV11ExportResult,
+  BackupV12ExportResult,
+  BackupV12ImportResult,
   CommitAuthoredSetupInput,
   CommitAuthoredSetupTransactionInput,
   ClearLocalDataResult,
@@ -85,6 +94,8 @@ import type {
   QuarantineRemovalResult,
   ProfileLoadResult,
   ProfileIngressStatus,
+  PublishScheduleRangeInputV1,
+  PublishScheduleRangeResultV1,
   StoreDesiredDurableCondition,
   StoreDurabilityStatus,
   StoreMutationResult,
@@ -132,12 +143,7 @@ import type {
 } from "../core/execution/executionRecord.js";
 import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
 import type { IndexedDbCollectionStorage } from "../infrastructure/storage/indexedDbCollectionStorage.js";
-import {
-  createDayFrameRestoreComposition,
-  createExecutionHistoryDurableRestorePayload,
-  createHistoricalPlanDurableRestorePayload,
-  registerDayFrameRestoreComposition,
-} from "./dayFrameRestoreComposition.js";
+import type { DayFrameRestoreComposition } from "./dayFrameRestoreComposition.js";
 import {
   backupV3SemanticFingerprint,
   createDayFrameBackupV3,
@@ -176,12 +182,20 @@ import { createGoalProgressObservationHistoryQuery } from "./goalProgressObserva
 import type { GoalStructureAuthorityV1 } from "../core/planning/goalStructure.js";
 import type { GoalStructureSurface } from "./goalStructureSurface.js";
 import { createLazyGoalStructureSurface } from "./lazyGoalStructureSurface.js";
-import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import type {
+  GoalPlanningAuthorityV1,
+  GoalPlanningAuthorityV2,
+} from "../core/planning/goalDemand.js";
 import type { GoalPlanningSurface } from "./goalPlanningSurface.js";
 import { createLazyGoalPlanningSurface } from "./lazyGoalPlanningSurface.js";
 import type { CompositionSurface } from "./compositionSurface.js";
 import { createLazyCompositionSurface } from "./lazyCompositionSurface.js";
 import { createLazyCapacitySurface } from "./lazyCapacitySurface.js";
+import { createLazyAllocationSurface } from "./lazyAllocationSurface.js";
+import type { ProposalSurface } from "./proposalSurface.js";
+import type { ProposalAuthorityV1 } from "../core/planning/proposal.js";
+import { createLazyProposalSurface } from "./lazyProposalSurface.js";
+import { createLazyRealizationSurface } from "./lazyRealizationSurface.js";
 import type {
   CompositionAuthorityV1,
   CompositionTemplateSourceV1,
@@ -194,6 +208,20 @@ import {
 
 const loadBackupV8 = () => import("./dayFrameBackupV8.js");
 const loadBackupV9 = () => import("./dayFrameBackupV9.js");
+const loadBackupV10 = () => import("./dayFrameBackupV10.js");
+const loadBackupV11 = () => import("./dayFrameBackupV11.js");
+const loadBackupV12 = () => import("./dayFrameBackupV12.js");
+const loadRestoreComposition = () => import("./dayFrameRestoreComposition.js");
+const executionRestorePayload = async (
+  value: Parameters<
+    typeof import("./dayFrameRestoreComposition.js").createExecutionHistoryDurableRestorePayload
+  >[0],
+) => (await loadRestoreComposition()).createExecutionHistoryDurableRestorePayload(value);
+const historicalRestorePayload = async (
+  value: Parameters<
+    typeof import("./dayFrameRestoreComposition.js").createHistoricalPlanDurableRestorePayload
+  >[0],
+) => (await loadRestoreComposition()).createHistoricalPlanDurableRestorePayload(value);
 const emptyCompositionAuthority = () => ({ version: 1 as const, relationships: [], decisions: [] });
 const emptyGoalStructureAuthority = (): GoalStructureAuthorityV1 => ({
   version: 1,
@@ -205,6 +233,27 @@ const emptyGoalPlanningAuthority = (): GoalPlanningAuthorityV1 => ({
   demands: [],
   priorities: [],
 });
+const migrateGoalPlanningAuthorityV1 = (
+  value: GoalPlanningAuthorityV1,
+): GoalPlanningAuthorityV2 => ({
+  version: 2,
+  demands: structuredClone(value.demands),
+  priorities: structuredClone(value.priorities),
+  footprintSpecifications: [],
+  footprintAssociations: [],
+});
+const emptyProposalAuthority = (): ProposalAuthorityV1 => ({
+  version: 1 as const,
+  proposals: [],
+  candidates: [],
+  decisions: [],
+  acceptedAllocations: [],
+});
+const recordCount = (value: ReturnType<typeof emptyProposalAuthority>) =>
+  value.proposals.length +
+  value.candidates.length +
+  value.decisions.length +
+  value.acceptedAllocations.length;
 
 export const DAYFRAME_STORAGE_KEY = "dayframe-store-v1";
 export const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
@@ -420,6 +469,7 @@ export function createDayFrameStore(
     goalStructureSurface?: GoalStructureSurface;
     goalPlanningSurface?: GoalPlanningSurface;
     compositionSurface?: CompositionSurface;
+    proposalSurface?: ProposalSurface;
     bootstrapMode?: "resolved-test";
     preBootstrapHook?: (context: {
       runtimeAuthority: DayFrameRuntimeAuthorityController;
@@ -628,11 +678,105 @@ export function createDayFrameStore(
     definitions: measurementDefinitionSurface,
     observations: progressObservationSurface,
   });
+  let listRealizedScheduleFactsForCapacity = () =>
+    [] as import("../core/planning/realizedScheduleIdentity.js").RealizedScheduleFactV1[];
+  let listAcceptedAllocationsForCapacity = () =>
+    [] as import("../core/planning/proposal.js").AcceptedAllocationV2[];
   const capacitySurface = createLazyCapacitySurface({
     getState: () => state,
     projectGoalDemand: goalPlanningSurface.projectGoalDemand,
+    resolveDemandResourceFootprintAssociation:
+      goalPlanningSurface.resolveDemandResourceFootprintAssociation,
     getIntegrity: () => (readiness.status === "protected" ? "protected" : "valid"),
+    listRealizedScheduleFacts: () => listRealizedScheduleFactsForCapacity(),
+    listAcceptedAllocations: () => listAcceptedAllocationsForCapacity(),
   });
+  const allocationSurface = createLazyAllocationSurface({
+    capacity: capacitySurface,
+    goals: goalSurface,
+    planning: goalPlanningSurface,
+  });
+  let proposalMutationAdmission = () => true;
+  let realizeAcceptedAllocationAfterAcceptance: (id: string) => Promise<unknown> = async () => ({
+    status: "notInitialized",
+  });
+  const proposalSurface =
+    options.proposalSurface ??
+    createLazyProposalSurface({
+      storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+      notificationScheduler,
+      canMutate: () => proposalMutationAdmission(),
+      onAcceptedAllocation: (id) => realizeAcceptedAllocationAfterAcceptance(id),
+      revalidate: async (proposal) => {
+        const evaluated = await allocationSurface.evaluateCompetingAllocation({
+          startUserDayDate: proposal.horizon
+            .startUserDayDate as import("../core/shifts/types.js").LocalDateString,
+          endUserDayDateExclusive: proposal.horizon
+            .endUserDayDateExclusive as import("../core/shifts/types.js").LocalDateString,
+          evaluationCutoff: proposal.evaluationCutoff,
+        });
+        if (evaluated.status !== "evaluated")
+          return { status: "invalid" as const, reasons: [{ code: "invalidAllocation" as const }] };
+        const allocation = evaluated.allocation.allocations.find(
+          (value) => value.competingSetId === proposal.sourceCompetingSetId,
+        );
+        if (allocation) {
+          const { deriveOrdinaryProposal } = await import("../core/planning/proposal.js");
+          return deriveOrdinaryProposal({
+            allocation,
+            horizon: proposal.horizon,
+            allocationHorizon: proposal.horizon,
+            generatedAt: proposal.generatedAt,
+            evaluationCutoff: proposal.evaluationCutoff,
+          });
+        }
+        return { status: "invalid" as const, reasons: [{ code: "invalidAllocation" as const }] };
+      },
+    });
+  const realizationSurface = createLazyRealizationSurface({
+    storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+    resolveAcceptedAllocation: proposalSurface.resolveAcceptedAllocation as never,
+    currentSchedule: () => [
+      ...(state.preview?.result.generatedWorkBlocks.map((item) => ({
+        id: item.id as never,
+        startsAt: item.startsAt.toISOString(),
+        endsAt: item.endsAt.toISOString(),
+        sourceKind: "work" as never,
+      })) ?? []),
+      ...(state.preview?.result.scheduledBlocks.map((item) => ({
+        id: item.id as never,
+        startsAt: item.startsAt.toISOString(),
+        endsAt: item.endsAt.toISOString(),
+        sourceKind: item.source as never,
+      })) ?? []),
+    ],
+    onAuthorityChanged: () => {
+      if (state.preview && !state.preview.isStale) {
+        state = { ...state, preview: markPreviewStale(state.preview) };
+        notify();
+      }
+    },
+  });
+  listRealizedScheduleFactsForCapacity = realizationSurface.listRealizedScheduleFacts;
+  realizeAcceptedAllocationAfterAcceptance = realizationSurface.realizeAcceptedAllocation;
+  listAcceptedAllocationsForCapacity = () =>
+    proposalSurface
+      .exportProposalAuthority()
+      .acceptedAllocations.filter(
+        (value) => value.version === 2,
+      ) as import("../core/planning/proposal.js").AcceptedAllocationV2[];
+  async function queryPlanningReview(input: {
+    reviewScope: import("../core/planning/planningScope.js").ReviewScopeV1;
+    historyAsOf: string;
+  }) {
+    const { createPlanningScopeQuery } = await import("./planningScopeQuery.js");
+    return createPlanningScopeQuery({
+      getState: () => state,
+      proposals: proposalSurface,
+      realizations: realizationSurface,
+      historicalPlan: historicalPlanSurface,
+    })(input);
+  }
   const queryGoalProgressObservationHistory = createGoalProgressObservationHistoryQuery({
     definitions: measurementDefinitionSurface,
     observations: progressObservationSurface,
@@ -664,7 +808,6 @@ export function createDayFrameStore(
     | HistoricalPlanPublicationResult
     | Exclude<MaterializePlanPublicationResult, { status: "materialized" }>
     | undefined;
-  let lastHistoricalPlanPublicationMillis = 0;
   let activeLocalIngressStatus = activeLocalIngress.status;
   let protectedActiveSource = activeLocalIngress.protectedSource;
   let protectedActiveSourceKey = activeLocalIngress.protectedSourceKey;
@@ -758,6 +901,8 @@ export function createDayFrameStore(
     goalStructureSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
     goalPlanningSurface.getRuntimeAuthorityAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
     compositionSurface.getCompositionRuntimeAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    proposalSurface.getProposalRuntimeAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+    realizationSurface.getRealizationRuntimeAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
   ];
   const authorityTransaction = createDayFrameAuthorityTransaction({
     scheduler: notificationScheduler,
@@ -773,102 +918,120 @@ export function createDayFrameStore(
   structureMutationAdmission = () => authorityTransaction.getState().status === "inactive";
   planningMutationAdmission = () => authorityTransaction.getState().status === "inactive";
   compositionMutationAdmission = () => authorityTransaction.getState().status === "inactive";
+  proposalMutationAdmission = () => authorityTransaction.getState().status === "inactive";
   const restoreStorage = options.restoreStorage ?? getOptionalStorage();
-  const restoreComposition = restoreStorage
-    ? createDayFrameRestoreComposition({
-        storage: restoreStorage,
-        indexedDb: options.restoreIndexedDb ?? createDayFrameDurableDb(),
-        runtime: authorityTransaction,
-        sources: {
-          active: () => createActiveV2(getActiveSetup(state)),
-          profiles: () => createDayFrameProfilesStorageV2(state.savedProfiles, quarantinedProfiles),
-          planDecisions: () => ({
-            app: "DayFrame",
-            surface: "planDecisions",
-            version: 1,
-            decisions: [
-              ...planDecisionSurface.getPlanDecisions(),
-              ...planDecisionSurface
-                .getQuarantinedPlanDecisions()
-                .map((entry) => structuredClone(entry.raw)),
-            ],
-          }),
-          executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope,
-          historicalPlan: historicalPlanSurface.exportHistoricalPlan,
-          goals: goalSurface.exportAuthority,
-          measurementDefinitions: measurementDefinitionSurface.exportMeasurementDefinitionAuthority,
-          progressObservations: progressObservationSurface.exportProgressObservationAuthority,
-          goalStructure: goalStructureSurface.exportGoalStructureAuthority,
-          goalPlanning: goalPlanningSurface.exportGoalPlanningAuthority,
-          composition: compositionSurface.exportCompositionAuthority,
-          readiness: (id) => {
-            if (id === "active")
-              return activeLocalIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
-            if (id === "profiles")
-              return profileIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
-            if (id === "planDecisions")
-              return planDecisionSurface.getPlanDecisionIngressStatus().status ===
-                "recoveryRequired"
-                ? "protected"
+  let restoreComposition: DayFrameRestoreComposition | undefined;
+  async function initializeRestoreComposition() {
+    if (!restoreStorage || restoreComposition) return;
+    const module = await loadRestoreComposition();
+    restoreComposition = module.createDayFrameRestoreComposition({
+      storage: restoreStorage,
+      indexedDb: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+      runtime: authorityTransaction,
+      sources: {
+        active: () => createActiveV2(getActiveSetup(state)),
+        profiles: () => createDayFrameProfilesStorageV2(state.savedProfiles, quarantinedProfiles),
+        planDecisions: () => ({
+          app: "DayFrame",
+          surface: "planDecisions",
+          version: 1,
+          decisions: [
+            ...planDecisionSurface.getPlanDecisions(),
+            ...planDecisionSurface
+              .getQuarantinedPlanDecisions()
+              .map((entry) => structuredClone(entry.raw)),
+          ],
+        }),
+        executionHistory: executionHistorySurface.exportExecutionHistoryEnvelope,
+        historicalPlan: historicalPlanSurface.exportHistoricalPlan,
+        goals: goalSurface.exportAuthority,
+        measurementDefinitions: measurementDefinitionSurface.exportMeasurementDefinitionAuthority,
+        progressObservations: progressObservationSurface.exportProgressObservationAuthority,
+        goalStructure: goalStructureSurface.exportGoalStructureAuthority,
+        goalPlanning: goalPlanningSurface.exportGoalPlanningAuthority,
+        composition: compositionSurface.exportCompositionAuthority,
+        proposals: proposalSurface.exportProposalAuthority,
+        realizations: realizationSurface.exportRealizationAuthority,
+        readiness: (id) => {
+          if (id === "active")
+            return activeLocalIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+          if (id === "profiles")
+            return profileIngressStatus.status === "recoveryRequired" ? "protected" : "ready";
+          if (id === "planDecisions")
+            return planDecisionSurface.getPlanDecisionIngressStatus().status === "recoveryRequired"
+              ? "protected"
+              : "ready";
+          if (id === "executionHistory")
+            return executionHistorySurface.getExecutionHistoryIngressStatus().status ===
+              "recoveryRequired"
+              ? "protected"
+              : "ready";
+          if (id === "historicalPlan")
+            return historicalPlanSurface.getStatus().status === "protected" ? "protected" : "ready";
+          if (id === "goals")
+            return goalSurface.getGoalIngressStatus().status === "protected"
+              ? "protected"
+              : goalSurface.getGoalIngressStatus().status === "initializing" &&
+                  readiness.status !== "ready"
+                ? "notReady"
                 : "ready";
-            if (id === "executionHistory")
-              return executionHistorySurface.getExecutionHistoryIngressStatus().status ===
-                "recoveryRequired"
-                ? "protected"
+          if (id === "measurementDefinitions")
+            return measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
+              "protected"
+              ? "protected"
+              : measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
+                    "initializing" && readiness.status !== "ready"
+                ? "notReady"
                 : "ready";
-            if (id === "historicalPlan")
-              return historicalPlanSurface.getStatus().status === "protected"
-                ? "protected"
+          if (id === "progressObservations")
+            return progressObservationSurface.getProgressObservationIngressStatus().status ===
+              "protected"
+              ? "protected"
+              : progressObservationSurface.getProgressObservationIngressStatus().status ===
+                    "initializing" && readiness.status !== "ready"
+                ? "notReady"
                 : "ready";
-            if (id === "goals")
-              return goalSurface.getGoalIngressStatus().status === "protected"
-                ? "protected"
-                : goalSurface.getGoalIngressStatus().status === "initializing" &&
-                    readiness.status !== "ready"
-                  ? "notReady"
-                  : "ready";
-            if (id === "measurementDefinitions")
-              return measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
-                "protected"
-                ? "protected"
-                : measurementDefinitionSurface.getMeasurementDefinitionIngressStatus().status ===
-                      "initializing" && readiness.status !== "ready"
-                  ? "notReady"
-                  : "ready";
-            if (id === "progressObservations")
-              return progressObservationSurface.getProgressObservationIngressStatus().status ===
-                "protected"
-                ? "protected"
-                : progressObservationSurface.getProgressObservationIngressStatus().status ===
-                      "initializing" && readiness.status !== "ready"
-                  ? "notReady"
-                  : "ready";
-            if (id === "goalStructure")
-              return goalStructureSurface.getGoalStructureIngressStatus().status === "protected"
-                ? "protected"
-                : goalStructureSurface.getGoalStructureIngressStatus().status === "initializing" &&
-                    readiness.status !== "ready"
-                  ? "notReady"
-                  : "ready";
-            if (id === "goalPlanning")
-              return goalPlanningSurface.getGoalPlanningIngressStatus().status === "protected"
-                ? "protected"
-                : goalPlanningSurface.getGoalPlanningIngressStatus().status === "initializing" &&
-                    readiness.status !== "ready"
-                  ? "notReady"
-                  : "ready";
+          if (id === "goalStructure")
+            return goalStructureSurface.getGoalStructureIngressStatus().status === "protected"
+              ? "protected"
+              : goalStructureSurface.getGoalStructureIngressStatus().status === "initializing" &&
+                  readiness.status !== "ready"
+                ? "notReady"
+                : "ready";
+          if (id === "goalPlanning")
+            return goalPlanningSurface.getGoalPlanningIngressStatus().status === "protected"
+              ? "protected"
+              : goalPlanningSurface.getGoalPlanningIngressStatus().status === "initializing" &&
+                  readiness.status !== "ready"
+                ? "notReady"
+                : "ready";
+          if (id === "composition")
             return compositionSurface.getCompositionIngressStatus().status === "protected"
               ? "protected"
               : compositionSurface.getCompositionIngressStatus().status === "initializing" &&
                   readiness.status !== "ready"
                 ? "notReady"
                 : "ready";
-          },
+          if (id === "realizations")
+            return realizationSurface.getRealizationIngressStatus() === "protected"
+              ? "protected"
+              : realizationSurface.getRealizationIngressStatus() === "initializing" &&
+                  readiness.status !== "ready"
+                ? "notReady"
+                : "ready";
+          return proposalSurface.getProposalIngressStatus().status === "protected"
+            ? "protected"
+            : proposalSurface.getProposalIngressStatus().status === "initializing" &&
+                readiness.status !== "ready"
+              ? "notReady"
+              : "ready";
         },
-        ...(options.restoreTransactionId ? { allocateId: options.restoreTransactionId } : {}),
-        ...(options.restoreClock ? { now: options.restoreClock } : {}),
-      })
-    : undefined;
+      },
+      ...(options.restoreTransactionId ? { allocateId: options.restoreTransactionId } : {}),
+      ...(options.restoreClock ? { now: options.restoreClock } : {}),
+    });
+    module.registerDayFrameRestoreComposition(storeProxy, restoreComposition);
+  }
 
   function getState(): DayFrameState {
     return readiness.status === "ready" ? cloneState(state) : cloneState(bootstrapPlaceholder);
@@ -1752,6 +1915,8 @@ export function createDayFrameStore(
     const goalStructurePromise = goalStructureSurface.clearGoalStructure();
     const goalPlanningPromise = goalPlanningSurface.clearGoalPlanning();
     const compositionPromise = compositionSurface.clearCompositionAuthority();
+    const proposalsPromise = proposalSurface.clearProposalAuthority();
+    const realizationsPromise = realizationSurface.clearRealizationAuthority();
     if (profiles.status === "removed") {
       transitionProfileIngress({ status: "noSource", reason: "missing" });
       quarantinedProfiles = [];
@@ -1774,6 +1939,8 @@ export function createDayFrameStore(
       goalStructure,
       goalPlanning,
       composition,
+      proposals,
+      realizations,
     ] = await Promise.all([
       executionHistoryPromise,
       historicalPlanPromise,
@@ -1783,6 +1950,8 @@ export function createDayFrameStore(
       goalStructurePromise,
       goalPlanningPromise,
       compositionPromise,
+      proposalsPromise,
+      realizationsPromise,
     ]);
     const historicalPlan: PersistenceRemovalOutcome =
       historicalRaw.status === "success" ? { status: "removed" } : { status: "storageFailure" };
@@ -1798,6 +1967,8 @@ export function createDayFrameStore(
       goalStructure,
       goalPlanning,
       composition,
+      proposals,
+      realizations,
     } satisfies FullClearAuthorityResults;
     const successes = Object.values(authorities).filter(
       (value) => value.status === "removed",
@@ -1828,6 +1999,8 @@ export function createDayFrameStore(
       goalStructure,
       goalPlanning,
       composition,
+      proposals,
+      realizations,
       durability: status === "failed" ? "notCleared" : status,
     };
   }
@@ -1931,14 +2104,15 @@ export function createDayFrameStore(
           ),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(backup.data.executionHistory),
+      historicalPlan: await historicalRestorePayload(backup.data.historicalPlan.batches),
       goals: { version: 1 as const, goals: [] },
       measurementDefinitions: { version: 1 as const, definitions: [] },
       progressObservations: { version: 1 as const, observations: [] },
       goalStructure: emptyGoalStructureAuthority(),
       goalPlanning: emptyGoalPlanningAuthority(),
       composition: emptyCompositionAuthority(),
+      proposals: emptyProposalAuthority(),
     };
     const result = await restoreComposition.coordinator.restore(target);
     if (result.status === "completed")
@@ -2025,14 +2199,15 @@ export function createDayFrameStore(
           ),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(backup.data.executionHistory),
+      historicalPlan: await historicalRestorePayload(backup.data.historicalPlan.batches),
       goals: backup.data.goals,
       measurementDefinitions: { version: 1 as const, definitions: [] },
       progressObservations: { version: 1 as const, observations: [] },
       goalStructure: emptyGoalStructureAuthority(),
       goalPlanning: emptyGoalPlanningAuthority(),
       composition: emptyCompositionAuthority(),
+      proposals: emptyProposalAuthority(),
     };
     const result = await restoreComposition.coordinator.restore(target);
     if (result.status === "completed")
@@ -2060,6 +2235,27 @@ export function createDayFrameStore(
   }
 
   async function importBackupFile(backupValue: unknown) {
+    if (
+      typeof backupValue === "object" &&
+      backupValue !== null &&
+      "version" in backupValue &&
+      (backupValue as { version?: unknown }).version === 12
+    )
+      return importBackupV12(backupValue);
+    if (
+      typeof backupValue === "object" &&
+      backupValue !== null &&
+      "version" in backupValue &&
+      (backupValue as { version?: unknown }).version === 11
+    )
+      return importBackupV11(backupValue);
+    if (
+      typeof backupValue === "object" &&
+      backupValue !== null &&
+      "version" in backupValue &&
+      (backupValue as { version?: unknown }).version === 10
+    )
+      return importBackupV10(backupValue);
     if (
       typeof backupValue === "object" &&
       backupValue !== null &&
@@ -2183,14 +2379,15 @@ export function createDayFrameStore(
           ),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(backup.data.executionHistory),
+      historicalPlan: await historicalRestorePayload(backup.data.historicalPlan.batches),
       goals: backup.data.goals,
       measurementDefinitions: backup.data.measurementDefinitions,
       progressObservations: { version: 1 as const, observations: [] },
       goalStructure: emptyGoalStructureAuthority(),
       goalPlanning: emptyGoalPlanningAuthority(),
       composition: emptyCompositionAuthority(),
+      proposals: emptyProposalAuthority(),
     };
     const result = await restoreComposition.coordinator.restore(target);
     if (result.status === "completed")
@@ -2290,14 +2487,15 @@ export function createDayFrameStore(
           ),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(backup.data.executionHistory),
+      historicalPlan: await historicalRestorePayload(backup.data.historicalPlan.batches),
       goals: backup.data.goals,
       measurementDefinitions: backup.data.measurementDefinitions,
       progressObservations: backup.data.progressObservations,
       goalStructure: emptyGoalStructureAuthority(),
       goalPlanning: emptyGoalPlanningAuthority(),
       composition: emptyCompositionAuthority(),
+      proposals: emptyProposalAuthority(),
     };
     const result = await restoreComposition.coordinator.restore(target);
     if (result.status === "completed")
@@ -2383,14 +2581,15 @@ export function createDayFrameStore(
           ),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(backup.data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(backup.data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(backup.data.executionHistory),
+      historicalPlan: await historicalRestorePayload(backup.data.historicalPlan.batches),
       goals: backup.data.goals,
       measurementDefinitions: backup.data.measurementDefinitions,
       progressObservations: backup.data.progressObservations,
       goalStructure: backup.data.goalStructure,
       goalPlanning: emptyGoalPlanningAuthority(),
       composition: emptyCompositionAuthority(),
+      proposals: emptyProposalAuthority(),
     };
     const result = await restoreComposition.coordinator.restore(target);
     if (result.status === "completed")
@@ -2420,12 +2619,19 @@ export function createDayFrameStore(
   async function exportBackupV8(
     exportedAt: string,
     allowComposition = false,
+    allowResourceFootprints = false,
   ): Promise<BackupV8ExportResult> {
     const { backupV8SemanticFingerprint, createDayFrameBackupV8 } = await loadBackupV8();
     const legacy = await exportBackupV7(exportedAt, true);
     if (legacy.status !== "exported") return legacy;
     if (goalPlanningSurface.getGoalPlanningIngressStatus().status === "protected")
       return { status: "protectedSurface", surface: "goalPlanning" };
+    const planning = goalPlanningSurface.exportGoalPlanningAuthority();
+    if (
+      !allowResourceFootprints &&
+      (planning.footprintSpecifications.length || planning.footprintAssociations.length)
+    )
+      return { status: "exportFailure", reason: "V11" };
     if (
       !allowComposition &&
       (compositionSurface.exportCompositionAuthority().relationships.length ||
@@ -2433,11 +2639,18 @@ export function createDayFrameStore(
     )
       return {
         status: "exportFailure",
-        reason: "Composition requires V9.",
+        reason: "V9",
       };
     try {
       const backup = createDayFrameBackupV8(
-        { ...legacy.backup.data, goalPlanning: goalPlanningSurface.exportGoalPlanningAuthority() },
+        {
+          ...legacy.backup.data,
+          goalPlanning: {
+            version: 1,
+            demands: planning.demands,
+            priorities: planning.priorities,
+          },
+        },
         exportedAt,
       );
       return {
@@ -2463,16 +2676,23 @@ export function createDayFrameStore(
     return restoreModernBackup(
       backup.data,
       emptyCompositionAuthority(),
+      emptyProposalAuthority(),
       "restoredV8",
       backupV8SemanticFingerprint(backup),
     ) as Promise<BackupV8ImportResult>;
   }
-  async function exportBackupV9(exportedAt: string): Promise<BackupV9ExportResult> {
+  async function exportBackupV9(
+    exportedAt: string,
+    allowProposals = false,
+    allowResourceFootprints = false,
+  ): Promise<BackupV9ExportResult> {
     const { createDayFrameBackupV9, backupV9SemanticFingerprint } = await loadBackupV9();
-    const legacy = await exportBackupV8(exportedAt, true);
+    const legacy = await exportBackupV8(exportedAt, true, allowResourceFootprints);
     if (legacy.status !== "exported") return legacy;
     if (compositionSurface.getCompositionIngressStatus().status === "protected")
       return { status: "protectedSurface", surface: "composition" };
+    if (!allowProposals && recordCount(proposalSurface.exportProposalAuthority()))
+      return { status: "exportFailure", reason: "V10" };
     try {
       const backup = createDayFrameBackupV9(
         { ...legacy.backup.data, composition: compositionSurface.exportCompositionAuthority() },
@@ -2501,15 +2721,169 @@ export function createDayFrameStore(
     return restoreModernBackup(
       backup.data,
       backup.data.composition,
+      emptyProposalAuthority(),
       "restoredV9",
       backupV9SemanticFingerprint(backup),
     ) as Promise<BackupV9ImportResult>;
   }
+  async function exportBackupV10(
+    exportedAt: string,
+    allowResourceFootprints = false,
+  ): Promise<BackupV10ExportResult> {
+    await initializeRestoreComposition();
+    const { createDayFrameBackupV10, backupV10SemanticFingerprint } = await loadBackupV10();
+    const legacy = await exportBackupV9(exportedAt, true, allowResourceFootprints);
+    if (legacy.status !== "exported") return legacy;
+    if (proposalSurface.getProposalIngressStatus().status === "protected")
+      return { status: "protectedSurface", surface: "proposals" };
+    if (
+      !allowResourceFootprints &&
+      proposalSurface
+        .exportProposalAuthority()
+        .acceptedAllocations.some((accepted) => accepted.version === 2)
+    )
+      return { status: "exportFailure", reason: "V11" };
+    try {
+      const backup = createDayFrameBackupV10(
+        { ...legacy.backup.data, proposals: proposalSurface.exportProposalAuthority() },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV10SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "V10 export failed.",
+      };
+    }
+  }
+  async function importBackupV10(value: unknown): Promise<BackupV10ImportResult> {
+    const { validateDayFrameBackupV10, backupV10SemanticFingerprint } = await loadBackupV10();
+    let backup;
+    try {
+      backup = validateDayFrameBackupV10(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    return restoreModernBackup(
+      backup.data,
+      backup.data.composition,
+      backup.data.proposals,
+      "restoredV10",
+      backupV10SemanticFingerprint(backup),
+    ) as Promise<BackupV10ImportResult>;
+  }
+  async function exportBackupV11(
+    exportedAt: string,
+    allowRealizations = false,
+  ): Promise<BackupV11ExportResult> {
+    await initializeRestoreComposition();
+    const { createDayFrameBackupV11, backupV11SemanticFingerprint } = await loadBackupV11();
+    const legacy = await exportBackupV10(exportedAt, true);
+    if (legacy.status !== "exported") return legacy;
+    try {
+      if (!allowRealizations) {
+        const { assertBackupV11DowngradeSafe } = await loadBackupV12();
+        assertBackupV11DowngradeSafe(realizationSurface.exportRealizationAuthority());
+      }
+      const backup = createDayFrameBackupV11(
+        {
+          ...legacy.backup.data,
+          goalPlanning: goalPlanningSurface.exportGoalPlanningAuthority(),
+          proposals: proposalSurface.exportProposalAuthority(),
+        },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV11SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "V11 export failed.",
+      };
+    }
+  }
+  async function exportBackupV12(exportedAt: string): Promise<BackupV12ExportResult> {
+    await initializeRestoreComposition();
+    const { createDayFrameBackupV12, backupV12SemanticFingerprint } = await loadBackupV12();
+    const legacy = await exportBackupV11(exportedAt, true);
+    if (legacy.status !== "exported") return legacy;
+    if (realizationSurface.getRealizationIngressStatus() === "protected")
+      return { status: "protectedSurface", surface: "realizations" };
+    try {
+      const backup = createDayFrameBackupV12(
+        { ...legacy.backup.data, realizations: realizationSurface.exportRealizationAuthority() },
+        exportedAt,
+      );
+      return {
+        status: "exported",
+        backup,
+        semanticFingerprint: backupV12SemanticFingerprint(backup),
+      };
+    } catch (error) {
+      return {
+        status: "validationFailure",
+        reason: error instanceof Error ? error.message : "V12 export failed.",
+      };
+    }
+  }
+  async function importBackupV11(value: unknown): Promise<BackupV11ImportResult> {
+    const { validateDayFrameBackupV11, backupV11SemanticFingerprint } = await loadBackupV11();
+    let backup;
+    try {
+      backup = validateDayFrameBackupV11(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    return restoreModernBackup(
+      backup.data,
+      backup.data.composition,
+      backup.data.proposals,
+      "restoredV11",
+      backupV11SemanticFingerprint(backup),
+      backup.data.goalPlanning,
+    ) as Promise<BackupV11ImportResult>;
+  }
+  async function importBackupV12(value: unknown): Promise<BackupV12ImportResult> {
+    const { validateDayFrameBackupV12, backupV12SemanticFingerprint } = await loadBackupV12();
+    let backup;
+    try {
+      backup = validateDayFrameBackupV12(value);
+    } catch {
+      return { status: "invalidBackup" };
+    }
+    return restoreModernBackup(
+      backup.data,
+      backup.data.composition,
+      backup.data.proposals,
+      "restoredV12",
+      backupV12SemanticFingerprint(backup),
+      backup.data.goalPlanning,
+      backup.data.realizations,
+    ) as Promise<BackupV12ImportResult>;
+  }
   async function restoreModernBackup(
-    data: import("./dayFrameBackupV8.js").DayFrameBackupV8Data,
+    data: Omit<import("./dayFrameBackupV8.js").DayFrameBackupV8Data, "goalPlanning"> & {
+      goalPlanning: GoalPlanningAuthorityV1 | GoalPlanningAuthorityV2;
+    },
     composition: CompositionAuthorityV1,
-    successStatus: "restoredV8" | "restoredV9",
+    proposals: ReturnType<typeof emptyProposalAuthority>,
+    successStatus: "restoredV8" | "restoredV9" | "restoredV10" | "restoredV11" | "restoredV12",
     fingerprint: string,
+    goalPlanning: GoalPlanningAuthorityV2 = data.goalPlanning.version === 1
+      ? migrateGoalPlanningAuthorityV1(data.goalPlanning)
+      : data.goalPlanning,
+    realizations: import("../core/planning/acceptedAllocationRealization.js").RealizationAuthorityV1 = {
+      version: 1,
+      realizations: [],
+      facts: [],
+    },
   ) {
     if (!restoreComposition) return { status: "persistenceFailure" as const };
     const result = await restoreComposition.coordinator.restore({
@@ -2527,14 +2901,16 @@ export function createDayFrameStore(
           ...data.planDecisions.quarantinedDecisions.map((entry) => structuredClone(entry.raw)),
         ],
       },
-      executionHistory: createExecutionHistoryDurableRestorePayload(data.executionHistory),
-      historicalPlan: createHistoricalPlanDurableRestorePayload(data.historicalPlan.batches),
+      executionHistory: await executionRestorePayload(data.executionHistory),
+      historicalPlan: await historicalRestorePayload(data.historicalPlan.batches),
       goals: data.goals,
       measurementDefinitions: data.measurementDefinitions,
       progressObservations: data.progressObservations,
       goalStructure: data.goalStructure,
-      goalPlanning: data.goalPlanning,
+      goalPlanning,
       composition,
+      proposals,
+      realizations,
     });
     if (result.status === "completed")
       return { status: successStatus, semanticFingerprint: fingerprint };
@@ -2632,6 +3008,7 @@ export function createDayFrameStore(
       weekStartsOn: state.schedulingPreferences.weekStartsOn,
       generatedAt: input.generatedAt,
       planDecisions: planDecisionSurface.getPlanDecisions(),
+      realizedScheduleFacts: realizationSurface.listRealizedScheduleFacts(),
     });
     const compositionResults = compositionSurface.applyCompositionToSchedule({
       previewResult,
@@ -2640,6 +3017,19 @@ export function createDayFrameStore(
       generatedAt: input.generatedAt,
     });
     if (compositionResults?.length) previewResult.compositionResults = compositionResults;
+    const requestedPreviewRange = previewRangeFromLegacyInclusive(input);
+    const effectivePlanningDataHorizon = resolvePlanningDataHorizon({
+      operation: "previewGeneration",
+      requestedRange: requestedPreviewRange,
+      boundaryContext: true,
+      requiredContext: realizationSurface.listRealizedScheduleFacts().map((fact) => ({
+        range: {
+          startUserDayDate: fact.userDayDate,
+          endUserDayDateExclusive: addUserDayLabels(fact.userDayDate, 1),
+        },
+        reason: "realizedScheduleContext" as const,
+      })),
+    });
     state = {
       ...state,
       preview: {
@@ -2650,28 +3040,33 @@ export function createDayFrameStore(
         planningWindowEnd: new Date(input.planningWindowEnd),
         generatedAt: input.generatedAt,
         isStale: false,
+        scopeMetadata: {
+          requestedPreviewRange,
+          effectivePlanningDataHorizon,
+          ...(input.reviewScope ? { sourceReviewScope: structuredClone(input.reviewScope) } : {}),
+          canonicalRangePolicy: CANONICAL_USER_DAY_RANGE_POLICY_V1,
+        },
       },
     };
 
-    const snapshot = notify();
-    const materialized = materializePlanPublication({
-      authoredSetup: getActiveSetup(state),
-      preview: state.preview,
-      goals: goalSurface.listGoals(),
-      providers: {
-        now: () => {
-          const next = Math.max(Date.now(), lastHistoricalPlanPublicationMillis + 1);
-          lastHistoricalPlanPublicationMillis = next;
-          return new Date(next).toISOString();
-        },
+    return notify();
+  }
+
+  async function publishScheduleRange(
+    input: PublishScheduleRangeInputV1,
+  ): Promise<PublishScheduleRangeResultV1> {
+    const { publishScheduleRangeV1 } = await import("./schedulePublication.js");
+    return publishScheduleRangeV1({
+      input,
+      getState: () => state,
+      getAuthoredSetup: () => getActiveSetup(state),
+      listGoals: goalSurface.listGoals,
+      queryPlanningReview,
+      historicalPlan: historicalPlanSurface,
+      recordResult: (result) => {
+        lastHistoricalPlanPublicationResult = result;
       },
     });
-    if (materialized.status === "materialized") {
-      void historicalPlanSurface.publish(materialized.batch).then((result) => {
-        lastHistoricalPlanPublicationResult = result;
-      });
-    } else lastHistoricalPlanPublicationResult = materialized;
-    return snapshot;
   }
 
   function applySuggestedFixToPreview(input: ApplyPreviewFixActionInput): DayFrameState {
@@ -2714,6 +3109,9 @@ export function createDayFrameStore(
         ...(revisedPreviewResult.actionFeedback
           ? { actionFeedback: revisedPreviewResult.actionFeedback }
           : {}),
+        ...(state.preview.scopeMetadata
+          ? { scopeMetadata: structuredClone(state.preview.scopeMetadata) }
+          : {}),
         isStale: state.preview.isStale,
       },
     };
@@ -2733,6 +3131,7 @@ export function createDayFrameStore(
 
   async function bootstrapAuthority(): Promise<void> {
     try {
+      await initializeRestoreComposition();
       const recovered = await restoreComposition?.coordinator.recoverAtStartup();
       if (recovered?.status === "recoveryRequired") {
         transitionReadiness({ status: "protected", reason: "authorityRecoveryRequired" });
@@ -2748,6 +3147,8 @@ export function createDayFrameStore(
       await goalStructureSurface.initializeGoalStructure();
       await goalPlanningSurface.initializeGoalPlanning();
       await compositionSurface.initializeComposition();
+      await proposalSurface.initializeProposals();
+      await realizationSurface.initializeRealizations();
       await Promise.all([
         executionHistorySurface.initializeExecutionHistory(),
         historicalPlanSurface.initialize(),
@@ -2775,6 +3176,8 @@ export function createDayFrameStore(
         goalPlanningSurface.getGoalPlanningIngressStatus().status === "protected";
       const compositionProtected =
         compositionSurface.getCompositionIngressStatus().status === "protected";
+      const proposalProtected = proposalSurface.getProposalIngressStatus().status === "protected";
+      const realizationProtected = realizationSurface.getRealizationIngressStatus() === "protected";
       transitionReadiness(
         protectedParticipant ||
           goalProtected ||
@@ -2782,7 +3185,9 @@ export function createDayFrameStore(
           observationProtected ||
           structureProtected ||
           planningProtected ||
-          compositionProtected
+          compositionProtected ||
+          proposalProtected ||
+          realizationProtected
           ? { status: "protected", reason: "authorityInitializationFailed" }
           : { status: "ready" },
       );
@@ -2796,6 +3201,7 @@ export function createDayFrameStore(
   }
 
   const api: DayFrameStore = {
+    initializeRestoreAuthority: initializeRestoreComposition,
     getReadiness,
     subscribeReadiness,
     whenReady,
@@ -2850,7 +3256,14 @@ export function createDayFrameStore(
     importBackupV8,
     exportBackupV9,
     importBackupV9,
+    exportBackupV10,
+    importBackupV10,
+    exportBackupV11,
+    importBackupV11,
+    exportBackupV12,
+    importBackupV12,
     generatePreview,
+    publishScheduleRange,
     applySuggestedFixToPreview,
     getLastHistoricalPlanPublicationResult,
     initialize: historicalPlanSurface.initialize,
@@ -2863,7 +3276,9 @@ export function createDayFrameStore(
     queryGoalProgress,
     queryGoalProgressObservationHistory,
     queryToday,
+    queryPlanningReview,
     ...capacitySurface,
+    ...allocationSurface,
     exportHistoricalPlan: historicalPlanSurface.exportHistoricalPlan,
     abandonProtectedHistoricalPlan: historicalPlanSurface.abandonProtectedHistoricalPlan,
     exportProtectedSource: historicalPlanSurface.exportProtectedSource,
@@ -2880,6 +3295,8 @@ export function createDayFrameStore(
     ...goalStructureSurface,
     ...goalPlanningSurface,
     ...compositionSurface,
+    ...proposalSurface,
+    ...realizationSurface,
   };
   const gatedMethods = new Set<PropertyKey>([
     "retryActivePersistence",
@@ -2906,6 +3323,7 @@ export function createDayFrameStore(
     "exportBackup",
     "importBackup",
     "generatePreview",
+    "publishScheduleRange",
     "applySuggestedFixToPreview",
     "acceptPlanDecision",
     "removePlanDecision",
@@ -2944,7 +3362,6 @@ export function createDayFrameStore(
     },
   });
   registerDayFrameRuntimeAuthorityController(storeProxy, authorityTransaction);
-  if (restoreComposition) registerDayFrameRestoreComposition(storeProxy, restoreComposition);
   if (options.bootstrapMode !== "resolved-test") void bootstrapAuthority();
   return storeProxy;
 }
@@ -3732,6 +4149,7 @@ function clonePreview(preview: DayFramePreview): DayFramePreview {
     isStale: preview.isStale,
     ...(preview.revisedAt ? { revisedAt: preview.revisedAt } : {}),
     ...(preview.actionFeedback ? { actionFeedback: { ...preview.actionFeedback } } : {}),
+    ...(preview.scopeMetadata ? { scopeMetadata: structuredClone(preview.scopeMetadata) } : {}),
   };
 }
 
@@ -3801,6 +4219,9 @@ function clonePreviewResult(result: DayFramePreview["result"]): DayFramePreview[
     planDecisionResults: result.planDecisionResults.map((replayResult) =>
       structuredClone(replayResult),
     ),
+    ...(result.realizedScheduleFacts
+      ? { realizedScheduleFacts: structuredClone(result.realizedScheduleFacts) }
+      : {}),
   };
 }
 

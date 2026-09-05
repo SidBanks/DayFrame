@@ -8,6 +8,8 @@ import {
 import type { LocalDateString } from "../shifts/types.js";
 import { capacityFingerprint as semanticFingerprint } from "./capacityFingerprint.js";
 import type { DependencyFingerprintV1, PlanningProvenanceV1 } from "./planningFoundation.js";
+import type { ProjectedResourceClaimV1 } from "./demandResourceFootprint.js";
+import type { RealizedScheduleFactV1 } from "./realizedScheduleIdentity.js";
 
 export const CAPACITY_POLICY_V1 = { id: "capacity", version: 1 } as const;
 export const GENERAL_AVAILABILITY_POLICY_V1 = {
@@ -18,6 +20,7 @@ export const GENERAL_AVAILABILITY_POLICY_V1 = {
 export type CapacityReasonV1 =
   | { code: "unresolvedOrdinaryCommitment"; liabilityId: string }
   | { code: "unresolvedCompositeLiability"; liabilityId: string }
+  | { code: "acceptedAllocationLiability"; liabilityId: string }
   | { code: "incompleteCoverage" }
   | { code: "staleDependency" }
   | { code: "invalidInput" }
@@ -39,7 +42,7 @@ export type CapacityExclusionContributorV1 = {
 };
 export type CapacityLiabilityV1 = {
   id: string;
-  kind: "ordinaryCommitment" | "compositeCommitment";
+  kind: "ordinaryCommitment" | "compositeCommitment" | "acceptedAllocation";
   demandedMinutes: number;
   scope: { kind: "userDay"; userDayDate: LocalDateString; startsAt: string; endsAt: string };
   reason: string;
@@ -117,6 +120,8 @@ export type CapacityScheduleSnapshotV1 = {
   }[];
   unplacedCandidates: readonly BlockCandidate[];
   composites?: readonly CompositeOccurrenceV1[];
+  realizedScheduleFacts?: readonly RealizedScheduleFactV1[];
+  acceptedUnrealizedClaims?: readonly ProjectedResourceClaimV1[];
   isStale?: boolean;
   planningWindow: { startsAt: Date; endsAt: Date };
 };
@@ -191,7 +196,9 @@ export function deriveCapacity(input: {
             code:
               item.kind === "ordinaryCommitment"
                 ? "unresolvedOrdinaryCommitment"
-                : "unresolvedCompositeLiability",
+                : item.kind === "compositeCommitment"
+                  ? "unresolvedCompositeLiability"
+                  : "acceptedAllocationLiability",
             liabilityId: item.id,
           }),
         );
@@ -297,6 +304,14 @@ function exclusionContributors(schedule: CapacityScheduleSnapshotV1, start: Date
         new Date(item.endsAt.getTime() + item.bufferAfterMinutes * 60_000),
       );
   }
+  for (const item of schedule.realizedScheduleFacts ?? [])
+    add(
+      item.scheduleRole === "bufferProtection" ? "buffer" : "occupied",
+      item.id,
+      `acceptedAllocation:${item.scheduleRole}`,
+      new Date(item.startsAt),
+      new Date(item.endsAt),
+    );
   return result.sort(
     (a, b) =>
       a.startsAt.localeCompare(b.startsAt) ||
@@ -365,6 +380,20 @@ function liabilityValues(
           sourceId: item.relationshipId,
         });
     }
+  for (const claim of schedule.acceptedUnrealizedClaims ?? [])
+    result.push({
+      id: `accepted:${claim.id}`,
+      kind: "acceptedAllocation",
+      demandedMinutes: claim.durationMinutes,
+      scope: {
+        kind: "userDay",
+        userDayDate: claim.userDayDate,
+        startsAt: claim.startsAt,
+        endsAt: claim.endsAt,
+      },
+      reason: "acceptedButUnrealized",
+      sourceId: claim.id,
+    });
   return result.sort((a, b) => a.id.localeCompare(b.id));
 }
 function unionExclusions(values: CapacityExclusionContributorV1[], start: Date, end: Date) {

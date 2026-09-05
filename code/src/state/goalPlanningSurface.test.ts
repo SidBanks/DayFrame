@@ -27,6 +27,8 @@ const ids = [
   "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
   "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 ] as PlanningFactId[];
 let sequence = 0;
 const create = (name: string) => {
@@ -50,7 +52,7 @@ const create = (name: string) => {
         defaultSchedulingPreferences: { dayBoundaryStartTime: "04:00", weekStartsOn: "monday" },
       }),
       allocateId: () => ids[index++]!,
-      now: () => `2026-09-0${4 + tick++}T12:00:00.000Z`,
+      now: () => `2026-09-${String(4 + tick++).padStart(2, "0")}T12:00:00.000Z`,
     }),
   };
 };
@@ -102,6 +104,41 @@ describe("Goal planning surface", () => {
     expect(await surface.revisePriority(priority.value.id, 1, { level: "critical" })).toMatchObject(
       { status: "accepted", value: { revision: 2 } },
     );
+    const specification = await surface.createDemandResourceFootprintSpec({
+      name: "Prepared session",
+      variants: [
+        {
+          id: "standard",
+          name: "Standard",
+          components: [
+            {
+              id: "setup",
+              role: "supportActivity",
+              scope: "perSession",
+              requiredness: "required",
+              durationMinutes: 15,
+              geometry: { kind: "endsAtProductiveStart" },
+              actor: "user",
+              source: { kind: "direct" },
+            },
+          ],
+        },
+      ],
+    });
+    expect(specification).toMatchObject({ status: "accepted", value: { revision: 1 } });
+    if (specification.status !== "accepted") return;
+    expect(
+      await surface.setDemandResourceFootprintAssociation({
+        demandId: demand.value.id,
+        selection: {
+          kind: "specification",
+          specificationId: specification.value.id,
+          specificationRevision: specification.value.revision,
+          variantId: "standard",
+          selectedOptionalComponentIds: [],
+        },
+      }),
+    ).toMatchObject({ status: "accepted", value: { revision: 1 } });
     const restarted = createGoalPlanningSurface({
       storage,
       getGoal: () => goal,
@@ -127,6 +164,10 @@ describe("Goal planning surface", () => {
       priority: { level: "critical" },
     });
     expect(restarted.getGoalDemandRevision(demand.value.id, 9)).toEqual({ status: "notFound" });
+    expect(restarted.resolveDemandResourceFootprintAssociation(demand.value.id)).toMatchObject({
+      status: "resolved",
+      components: [{ id: "setup", role: "supportActivity" }],
+    });
   });
   it("rejects invalid input atomically and protects malformed persisted state", async () => {
     const { storage, surface } = create(`goal-planning-${sequence++}`);
@@ -138,9 +179,11 @@ describe("Goal planning surface", () => {
       }),
     ).toMatchObject({ status: "rejected", reason: "missingGoal" });
     expect(surface.exportGoalPlanningAuthority()).toEqual({
-      version: 1,
+      version: 2,
       demands: [],
       priorities: [],
+      footprintSpecifications: [],
+      footprintAssociations: [],
     });
     const valid = await surface.createDemand(demandInput);
     if (valid.status !== "accepted") throw new Error("valid demand setup");

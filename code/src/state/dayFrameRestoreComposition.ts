@@ -26,6 +26,8 @@ import {
   GOAL_STRUCTURE_STORE,
   GOAL_PLANNING_STORE,
   COMPOSITION_AUTHORITY_STORE,
+  PROPOSAL_AUTHORITY_STORE,
+  REALIZATION_AUTHORITY_STORE,
 } from "../infrastructure/storage/dayFrameDurableDb.js";
 import type { DayFrameActiveV2 } from "./activeV2.js";
 import type { DayFrameProfilesStorageV2 } from "./dayFrameProfiles.js";
@@ -53,8 +55,10 @@ import type { GoalAuthorityV1 } from "../core/goals/goal.js";
 import type { GoalMeasurementDefinitionAuthorityV1 } from "../core/measurement/measurementDefinition.js";
 import type { GoalProgressObservationAuthorityV1 } from "../core/progressObservation/progressObservation.js";
 import type { GoalStructureAuthorityV1 } from "../core/planning/goalStructure.js";
-import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import type { GoalPlanningAuthorityV2 } from "../core/planning/goalDemand.js";
 import type { CompositionAuthorityV1 } from "../core/planning/commitmentComposition.js";
+import type { ProposalAuthorityV1 } from "../core/planning/proposal.js";
+import type { RealizationAuthorityV1 } from "../core/planning/acceptedAllocationRealization.js";
 
 const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
 const DAYFRAME_PROFILES_V2_STORAGE_KEY = "dayframe-profiles-v2";
@@ -71,13 +75,15 @@ export type DayFrameRestoreAuthoritySources = {
   measurementDefinitions(): GoalMeasurementDefinitionAuthorityV1;
   progressObservations(): GoalProgressObservationAuthorityV1;
   goalStructure(): GoalStructureAuthorityV1;
-  goalPlanning(): GoalPlanningAuthorityV1;
+  goalPlanning(): GoalPlanningAuthorityV2;
   composition(): CompositionAuthorityV1;
+  proposals(): ProposalAuthorityV1;
+  realizations(): RealizationAuthorityV1;
   readiness(id: keyof RestoreDurablePayloadMap): RestoreParticipantReadiness;
 };
 
 export const DAYFRAME_RESTORE_CAPABILITY: unique symbol = Symbol("DayFrameRestoreCapability");
-type DayFrameRestoreComposition = ReturnType<typeof createDayFrameRestoreComposition>;
+export type DayFrameRestoreComposition = ReturnType<typeof createDayFrameRestoreComposition>;
 const compositions = new WeakMap<object, DayFrameRestoreComposition>();
 export function registerDayFrameRestoreComposition(
   store: object,
@@ -426,6 +432,72 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
         : { status: "invalid", reason: "invalidComposition" };
     },
   };
+  const proposals: RestoreParticipantAdapter<
+    RestoreDurablePayloadMap["proposals"],
+    RestoreRuntimeTargetMap["proposals"]
+  > = {
+    id: "proposals",
+    durableKind: "indexedDb",
+    getReadiness: () => options.sources.readiness("proposals"),
+    captureCurrentAuthority: async () => options.sources.proposals(),
+    validatePayload: (value) => {
+      const checked = restoreTranslators.proposals(value);
+      return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
+    },
+    clonePayload: structuredClone,
+    fingerprint: semanticFingerprint,
+    captureSourceFingerprint: () =>
+      indexedFingerprint(options.indexedDb, [PROPOSAL_AUTHORITY_STORE]),
+    recheckSourceFingerprint: async (expected) =>
+      (await indexedFingerprint(options.indexedDb, [PROPOSAL_AUTHORITY_STORE])) === expected
+        ? success()
+        : failure("sourceChanged"),
+    writeDurableTargetExact: async () => success(),
+    verifyDurableTarget: async () => success(),
+    buildRuntimeTargetFromDurable: async (payload) => {
+      const checked = restoreTranslators.proposals(payload);
+      if (checked.status !== "valid") return checked;
+      const { validateProposalAuthority } = await import("../core/planning/proposal.js");
+      const strict = validateProposalAuthority(checked.durable);
+      return strict.status === "valid"
+        ? {
+            status: "valid",
+            target: {
+              ...checked.target,
+              authority: strict.authority,
+              desired: structuredClone(strict.authority),
+            },
+          }
+        : { status: "invalid", reason: "invalidProposals" };
+    },
+  };
+  const realizations: RestoreParticipantAdapter<
+    RestoreDurablePayloadMap["realizations"],
+    RestoreRuntimeTargetMap["realizations"]
+  > = {
+    id: "realizations",
+    durableKind: "indexedDb",
+    getReadiness: () => options.sources.readiness("realizations"),
+    captureCurrentAuthority: async () => options.sources.realizations(),
+    validatePayload: (value) => {
+      const checked = restoreTranslators.realizations(value);
+      return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
+    },
+    clonePayload: structuredClone,
+    fingerprint: semanticFingerprint,
+    captureSourceFingerprint: () =>
+      indexedFingerprint(options.indexedDb, [REALIZATION_AUTHORITY_STORE]),
+    recheckSourceFingerprint: async (expected) =>
+      (await indexedFingerprint(options.indexedDb, [REALIZATION_AUTHORITY_STORE])) === expected
+        ? success()
+        : failure("sourceChanged"),
+    writeDurableTargetExact: async () => success(),
+    verifyDurableTarget: async () => success(),
+    buildRuntimeTargetFromDurable: async (payload) => {
+      const checked = restoreTranslators.realizations(payload);
+      return checked.status === "valid" ? { status: "valid", target: checked.target } : checked;
+    },
+  };
   return {
     active,
     profiles,
@@ -438,6 +510,8 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
     goalStructure,
     goalPlanning,
     composition,
+    proposals,
+    realizations,
   };
 }
 

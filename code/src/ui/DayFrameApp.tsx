@@ -14,7 +14,7 @@ import {
 import type { ManualCalendarEvent } from "../core/calendar/types.js";
 import { allocateReadableSourceId } from "../core/authored/allocateReadableSourceId.js";
 import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../core/cycles/resolveEffectiveSchedulePreferences.js";
-import { resolveUserDayWindowForLabel } from "../core/time/canonicalUserDay.js";
+import { addUserDayLabels, resolveUserDayWindowForLabel } from "../core/time/canonicalUserDay.js";
 import { createPlanDecisionAcceptanceCandidate } from "../core/decisions/createPlanDecisionAcceptanceCandidate.js";
 import type { AcceptPlanDecisionInput, PlanDecisionV1 } from "../core/decisions/planDecision.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
@@ -80,6 +80,11 @@ const MonthlyPlannerSurface =
     : lazy(() =>
         loadMonthlyPlanner().then((module) => ({ default: module.MonthlyPlannerSurface })),
       );
+const loadScheduleReview = () => import("./ScheduleReviewPanel.js");
+const ScheduleReviewPanel =
+  import.meta.env.MODE === "test"
+    ? (await loadScheduleReview()).ScheduleReviewPanel
+    : lazy(() => loadScheduleReview().then((module) => ({ default: module.ScheduleReviewPanel })));
 
 export class LazySurfaceBoundary extends Component<
   { children: ReactNode; name: string },
@@ -144,7 +149,8 @@ export type DayFrameAppStore = Pick<
   | "clearLocalData"
   | "exportBackup"
   | "importBackup"
-  | "exportBackupV9"
+  | "exportBackupV11"
+  | "exportBackupV12"
   | "importBackupV3"
   | "importBackupFile"
   | "mutateManualEvent"
@@ -176,6 +182,10 @@ export type DayFrameAppStore = Pick<
   | "getHistoricalSchedulingRealization"
   | "getGoalActivity"
   | "queryToday"
+  | "queryPlanningReview"
+  | "acceptProposalOption"
+  | "rejectProposal"
+  | "publishScheduleRange"
   | "subscribeHistory"
   | "listGoals"
   | "getGoal"
@@ -1717,7 +1727,7 @@ function ReadyDayFrameApp({
                   disabled={isBackupBusy || isClearBusy}
                   onClick={async () => {
                     setIsBackupBusy(true);
-                    const result = await storeRef.current.exportBackupV9(getExportedAt());
+                    const result = await storeRef.current.exportBackupV12(getExportedAt());
                     if (result.status === "exported") {
                       downloadDayFrameBackup(result.backup);
                       setBackupMessage("Complete DayFrame backup downloaded.");
@@ -2325,7 +2335,6 @@ function ReadyDayFrameApp({
 
         {currentScreen === "planner" ? (
           <PlannerSurface
-            isSetupDirty={isSetupDirty}
             mode={plannerMode}
             monthContent={
               <LazySurfaceBoundary name="Monthly Planner">
@@ -2450,6 +2459,8 @@ function ReadyDayFrameApp({
                     onOpenReview={openScheduleMode}
                     onOpenWorkPattern={openWorkPatternFromMonth}
                     onViewChange={setPreservedMonthView}
+                    readiness={activeStore.getReadiness()}
+                    queryPlanningReview={activeStore.queryPlanningReview}
                     previewState={
                       stateSnapshot.preview?.isStale
                         ? "stale"
@@ -2457,7 +2468,6 @@ function ReadyDayFrameApp({
                           ? "current"
                           : "none"
                     }
-                    readiness={activeStore.getReadiness()}
                     state={stateSnapshot}
                   />
                 </Suspense>
@@ -2538,9 +2548,6 @@ function ReadyDayFrameApp({
                 </LazySurfaceBoundary>
               </div>
             }
-            previewState={
-              stateSnapshot.preview?.isStale ? "stale" : stateSnapshot.preview ? "current" : "none"
-            }
             workPatternContent={
               <div className="df-workflow-block df-workflow-block--setup">
                 {returnToReviewAvailable ? (
@@ -2607,15 +2614,9 @@ function ReadyDayFrameApp({
             scheduleContent={
               <div className="df-screen df-workflow-block df-workflow-block--preview">
                 <div className="df-panel">
-                  <div className="df-screen-header">
-                    <h2 className="df-screen-title" id="review-schedule-heading" tabIndex={-1}>
-                      Review Schedule
-                    </h2>
-                    <p className="df-screen-subtitle">
-                      Review the schedule DayFrame built, see what still needs attention, and
-                      resolve conflicts before relying on the plan.
-                    </p>
-                  </div>
+                  <h2 className="df-screen-title" id="review-schedule-heading" tabIndex={-1}>
+                    Review Schedule
+                  </h2>
                   <div className="df-screen-actions">
                     <button
                       className="df-action-button"
@@ -2625,10 +2626,6 @@ function ReadyDayFrameApp({
                       {stateSnapshot.preview ? "Refresh Schedule" : "Generate Schedule"}
                     </button>
                   </div>
-                  <p className="df-support">
-                    Schedule generation uses the saved plan, not unsaved Plan changes. It does not
-                    export or save anything to your calendar.
-                  </p>
                   {contextualNavigationMessage ? (
                     <p className="df-warning-message" role="status">
                       {contextualNavigationMessage}
@@ -2673,6 +2670,36 @@ function ReadyDayFrameApp({
                     </label>
                   ) : null}
                 </div>
+                <LazySurfaceBoundary name="Review">
+                  <Suspense fallback={<LazySurfaceLoading name="Review" />}>
+                    <ScheduleReviewPanel
+                      endUserDayDateExclusive={addUserDayLabels(
+                        stateSnapshot.preview?.rangeEndDate ?? stateSnapshot.previewRange.endDate,
+                        1,
+                      )}
+                      historyAsOf={now.toISOString()}
+                      getPublishedAt={getExportedAt}
+                      onAcceptProposal={activeStore.acceptProposalOption}
+                      onGeneratePreview={generatePreviewFromSavedState}
+                      onOpenFriction={() => {
+                        document.getElementById("preview-heading")?.focus();
+                      }}
+                      onPublish={activeStore.publishScheduleRange}
+                      onRejectProposal={activeStore.rejectProposal}
+                      query={activeStore.queryPlanningReview}
+                      startUserDayDate={
+                        stateSnapshot.preview?.rangeStartDate ??
+                        stateSnapshot.previewRange.startDate
+                      }
+                      unresolvedFrictionCount={
+                        stateSnapshot.preview?.result.frictionPoints.filter(
+                          (point) => !point.ignored,
+                        ).length ?? 0
+                      }
+                      weekStartsOn={stateSnapshot.schedulingPreferences.weekStartsOn}
+                    />
+                  </Suspense>
+                </LazySurfaceBoundary>
                 <PreviewScreen
                   authoredSetup={stateSnapshot}
                   acceptedDecisions={acceptedDecisionViewModels}

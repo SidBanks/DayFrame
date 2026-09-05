@@ -749,7 +749,7 @@ function getPlacementOccupiedBlocks(
   bufferAfterMinutes?: number;
 }> {
   if (!input.visiblePlanningWindowStart || !input.visiblePlanningWindowEnd) {
-    return scheduledBlocks;
+    return [...scheduledBlocks, ...(input.fixedAuthorityOccupiedBlocks ?? [])];
   }
 
   return [
@@ -758,6 +758,7 @@ function getPlacementOccupiedBlocks(
       startsAt: generatedWorkBlock.startsAt,
       endsAt: generatedWorkBlock.endsAt,
     })),
+    ...(input.fixedAuthorityOccupiedBlocks ?? []),
   ];
 }
 

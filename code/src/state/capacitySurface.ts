@@ -7,7 +7,10 @@ import type { GoalPlanningSurface } from "./goalPlanningSurface.js";
 export function createCapacitySurface(options: {
   getState: () => DayFrameState;
   projectGoalDemand: GoalPlanningSurface["projectGoalDemand"];
+  resolveDemandResourceFootprintAssociation?: GoalPlanningSurface["resolveDemandResourceFootprintAssociation"];
   getIntegrity?: () => "valid" | "protected";
+  listRealizedScheduleFacts?: () => import("../core/planning/realizedScheduleIdentity.js").RealizedScheduleFactV1[];
+  listAcceptedAllocations?: () => import("../core/planning/proposal.js").AcceptedAllocationV2[];
 }) {
   async function queryCapacity(query: {
     startUserDayDate: LocalDateString;
@@ -40,6 +43,15 @@ export function createCapacitySurface(options: {
           ...(preview.result.compositionResults
             ? { composites: preview.result.compositionResults }
             : {}),
+          realizedScheduleFacts: options.listRealizedScheduleFacts?.() ?? [],
+          acceptedUnrealizedClaims: (options.listAcceptedAllocations?.() ?? []).flatMap(
+            (accepted) =>
+              (options.listRealizedScheduleFacts?.() ?? []).some(
+                (fact) => fact.origin.acceptedAllocationId === accepted.id,
+              )
+                ? []
+                : accepted.claims,
+          ),
           isStale: preview.isStale,
           planningWindow: {
             startsAt: preview.planningWindowStart,
@@ -65,11 +77,23 @@ export function createCapacitySurface(options: {
       if (projected.status !== "projected")
         return { status: projected.status as "notFound" | "unknown" };
       const { evaluateGoalFeasibility } = await import("../core/planning/goalFeasibility.js");
+      const resolver = {
+        shiftCycles: options.getState().shiftCycles,
+        defaultSchedulingPreferences: options.getState().schedulingPreferences,
+      };
       return {
         status: "evaluated" as const,
         feasibility: evaluateGoalFeasibility({
           demand: projected.projection,
           capacity: input.capacity,
+          ...(options.resolveDemandResourceFootprintAssociation
+            ? {
+                footprintAssociation: options.resolveDemandResourceFootprintAssociation(
+                  projected.projection.demandId,
+                ),
+                resolver,
+              }
+            : {}),
         }),
       };
     },

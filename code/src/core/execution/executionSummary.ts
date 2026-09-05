@@ -157,6 +157,7 @@ function emptySummary(): OutcomeSummary {
       template: counts(),
       work: counts(),
       manualEvent: counts(),
+      acceptedAllocation: counts(),
       unplanned: counts(),
     },
   };

@@ -143,6 +143,9 @@ function clonePreviewResult(preview: GenerateSchedulePreviewResult): GenerateSch
       })),
     })),
     planDecisionResults: preview.planDecisionResults.map((result) => structuredClone(result)),
+    ...(preview.realizedScheduleFacts
+      ? { realizedScheduleFacts: structuredClone(preview.realizedScheduleFacts) }
+      : {}),
   };
 }
 

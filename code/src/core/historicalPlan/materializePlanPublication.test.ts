@@ -168,6 +168,37 @@ describe("HistoricalPlan publication materialization", () => {
       endsAt: "2026-08-21T00:30:00.000Z",
     });
   });
+  it("publishes an explicit covered subset and refuses to clip an uncovered range", () => {
+    const subset = materializePlanPublication({
+      authoredSetup: authored,
+      preview: preview(),
+      providers,
+      publicationRange: {
+        version: 1,
+        scopeType: "publicationRange",
+        startUserDayDate: "2026-08-20",
+        endUserDayDateExclusive: "2026-08-21",
+        provenance: { source: "explicitPublication" },
+      },
+    });
+    expect(subset).toMatchObject({
+      status: "materialized",
+      batch: { range: { startUserDayDate: "2026-08-20", endUserDayDate: "2026-08-20" } },
+    });
+    expect(
+      materializePlanPublication({
+        authoredSetup: authored,
+        preview: preview(),
+        publicationRange: {
+          version: 1,
+          scopeType: "publicationRange",
+          startUserDayDate: "2026-08-20",
+          endUserDayDateExclusive: "2026-08-23",
+          provenance: { source: "explicitPublication" },
+        },
+      }),
+    ).toMatchObject({ status: "inconsistentPlanContext" });
+  });
   it("assigns manual and user-week reference forms to fresh Preview containing day", () => {
     const current = preview();
     current.result.blockCandidates.push(candidate(weekly) as never);

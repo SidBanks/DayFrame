@@ -1,12 +1,12 @@
 import type { GoalId, GoalV1 } from "../core/goals/goal.js";
 import { projectDemandForUserDayResolver } from "../core/planning/goalDemandProjection.js";
-import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import type { GoalPlanningAuthorityV2 } from "../core/planning/goalDemand.js";
 import type { StructuralEligibilityV1 } from "../core/planning/goalStructure.js";
 import type { PlanningFactId } from "../core/planning/planningFoundation.js";
 import type { CanonicalUserDayResolverInput } from "../core/time/canonicalUserDay.js";
 
 export function queryGoalDemandProjection(input: {
-  authority: GoalPlanningAuthorityV1;
+  authority: GoalPlanningAuthorityV2;
   id: PlanningFactId;
   revision?: number;
   getGoal: (id: GoalId) => GoalV1 | undefined;

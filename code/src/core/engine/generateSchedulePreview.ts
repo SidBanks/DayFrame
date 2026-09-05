@@ -30,6 +30,8 @@ import {
 import { classifySuggestedFixes } from "../decisions/classifySuggestedFixes.js";
 import type { DayFrameAuthoredSetup } from "../../state/types.js";
 import type { CompositeOccurrenceV1 } from "../planning/commitmentComposition.js";
+import type { RealizedScheduleFactV1 } from "../planning/realizedScheduleIdentity.js";
+import { expandInstantPlanningWindowForBoundaryContext } from "../planning/planningScope.js";
 
 export type GenerateSchedulePreviewInput = {
   shiftDefinitions: ShiftDefinition[];
@@ -43,6 +45,7 @@ export type GenerateSchedulePreviewInput = {
   weekStartsOn: Weekday;
   generatedAt: string;
   planDecisions?: readonly PlanDecisionV1[];
+  realizedScheduleFacts?: readonly RealizedScheduleFactV1[];
 };
 
 export type GenerateSchedulePreviewResult = {
@@ -53,6 +56,7 @@ export type GenerateSchedulePreviewResult = {
   frictionPoints: FrictionPoint[];
   planDecisionResults: PlanDecisionReplayResult[];
   compositionResults?: CompositeOccurrenceV1[];
+  realizedScheduleFacts?: RealizedScheduleFactV1[];
 };
 
 export function generateSchedulePreview(
@@ -67,7 +71,7 @@ export function generateSchedulePreview(
     resolveUserDayWindowForLabel({ shiftCycles, defaultSchedulingPreferences, userDayDate });
   validatePlanningWindow(input.planningWindowStart, input.planningWindowEnd);
   validateBlockTemplates(input.blockTemplates);
-  const expandedPlanningWindow = expandPlanningWindow(
+  const expandedPlanningWindow = expandInstantPlanningWindowForBoundaryContext(
     input.planningWindowStart,
     input.planningWindowEnd,
   );
@@ -150,6 +154,10 @@ export function generateSchedulePreview(
     getUserDayWindowForUserDayDate: getCanonicalUserDayWindow,
     hardPlacementCandidateIds: replay.hardPlacementCandidateIds,
     additionalOccupiedBlocks: manualScheduledBlocks,
+    fixedAuthorityOccupiedBlocks: (input.realizedScheduleFacts ?? []).map((fact) => ({
+      startsAt: new Date(fact.startsAt),
+      endsAt: new Date(fact.endsAt),
+    })),
   });
   const planDecisionResults = finalizePlanDecisionResults(
     replay.pendingResults,
@@ -250,6 +258,9 @@ export function generateSchedulePreview(
     unplacedCandidates: filteredUnplacedCandidates,
     frictionPoints: filteredFrictionPoints,
     planDecisionResults,
+    ...(input.realizedScheduleFacts?.length
+      ? { realizedScheduleFacts: structuredClone([...input.realizedScheduleFacts]) }
+      : {}),
   };
 }
 
@@ -382,16 +393,6 @@ function cloneBlockRecurrence(blockRecurrence: BlockRecurrence): BlockRecurrence
   };
 }
 
-function expandPlanningWindow(
-  planningWindowStart: Date,
-  planningWindowEnd: Date,
-): { start: Date; end: Date } {
-  return {
-    start: addDays(planningWindowStart, -1),
-    end: addDays(planningWindowEnd, 1),
-  };
-}
-
 function getOverlappingUserDayDates(input: {
   planningWindowStart: Date;
   planningWindowEnd: Date;
@@ -442,12 +443,6 @@ function getOverlappingUserDayDates(input: {
   }
 
   return userDayDates;
-}
-
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
 }
 
 function overlapsVisiblePlanningWindow(

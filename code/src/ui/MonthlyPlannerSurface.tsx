@@ -8,6 +8,8 @@ import {
 } from "react";
 
 import { addUserDayLabels } from "../core/time/canonicalUserDay.js";
+import { createReviewScope } from "../core/planning/reviewScope.js";
+import type { ReviewScopeV1 } from "../core/planning/planningScope.js";
 import {
   projectLabelToDisplayedMonth,
   shiftDisplayedMonth,
@@ -25,7 +27,9 @@ import {
   queryMonthlyPlannerFromState,
 } from "../state/monthlyPlannerQuery.js";
 import type { DayFrameState } from "../state/types.js";
+import type { PlanningReviewReadModelV1 } from "../state/planningScopeQuery.js";
 import { formatHumanTimeRange } from "./timeDisplay.js";
+import { PlanningReviewPanel } from "./PlanningReviewPanel.js";
 
 export type MonthlyPlannerSurfaceProps = {
   state: DayFrameState;
@@ -51,6 +55,10 @@ export type MonthlyPlannerSurfaceProps = {
   contextualPlanContent?: ReactNode;
   contextualPlanWide?: boolean;
   onBackToDay?: () => void;
+  queryPlanningReview?: (input: {
+    reviewScope: ReviewScopeV1;
+    historyAsOf: string;
+  }) => Promise<PlanningReviewReadModelV1>;
 };
 
 export function MonthlyPlannerSurface({
@@ -77,6 +85,7 @@ export function MonthlyPlannerSurface({
   contextualPlanContent = null,
   contextualPlanWide = false,
   onBackToDay,
+  queryPlanningReview,
 }: MonthlyPlannerSurfaceProps): ReactElement {
   const [evaluationInstant, setEvaluationInstant] = useState(() => getNow());
   const [initial] = useState(() => getInitialMonthlyPlannerView(state, evaluationInstant));
@@ -97,6 +106,12 @@ export function MonthlyPlannerSurface({
     evaluationInstant,
     displayedMonth,
     selectedLabel,
+  });
+  const monthReviewScope = createReviewScope({
+    kind: "month",
+    anchorUserDayDate: `${displayedMonth}-01` as LocalDateString,
+    weekStartsOn: state.schedulingPreferences.weekStartsOn,
+    source: "navigation",
   });
 
   useEffect(() => {
@@ -308,6 +323,15 @@ export function MonthlyPlannerSurface({
           selectedDay={model.selectedDay}
         />
       </div>
+      {queryPlanningReview ? (
+        <PlanningReviewPanel
+          historyAsOf={evaluationInstant.toISOString()}
+          query={queryPlanningReview}
+          refreshKey={state}
+          reviewScope={monthReviewScope}
+          selectedDay={selectedLabel}
+        />
+      ) : null}
     </section>
   );
 }

@@ -1,5 +1,5 @@
 export const DAYFRAME_DURABLE_DB_NAME = "dayframe-durable-v1";
-export const DAYFRAME_DURABLE_DB_VERSION = 9;
+export const DAYFRAME_DURABLE_DB_VERSION = 11;
 
 export type DurableStorageErrorCode =
   | "unavailable"

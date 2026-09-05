@@ -5,6 +5,7 @@ import {
   HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION,
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION,
+  HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION,
   HISTORICAL_PLAN_SURFACE_VERSION,
   HISTORICAL_PLAN_TITLE_MAX_LENGTH,
   PLAN_PUBLICATION_BATCH_VERSION,
@@ -12,6 +13,11 @@ import {
   isPlanPublicationBatchId,
   type PlanPublicationBatchV1,
 } from "./historicalPlan.js";
+import {
+  realizedScheduleReference,
+  validateRealizedScheduleFact,
+} from "../planning/realizedScheduleIdentity.js";
+import { durableOccurrenceReferencesEqual } from "../occurrences/durableOccurrenceReference.js";
 import {
   areHistoricalPlanDaysSemanticallyEqual,
   durableReferenceKey,
@@ -230,6 +236,7 @@ function validateSnapshot(
   }
   const isV1 = value.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION;
   const isV2 = value.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION;
+  const isV3 = value.version === HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION;
   exact(
     value,
     [
@@ -241,19 +248,37 @@ function validateSnapshot(
       "plan",
       ...(isV2 ? ["timing"] : []),
       ...(isV2 && value.composition !== undefined ? ["composition"] : []),
+      ...(isV3 ? ["scheduleRole", "realizedSchedule", "timing"] : []),
       ...(value.goals === undefined ? [] : ["goals"]),
     ],
     path,
     issues,
   );
-  if (!isV1 && !isV2) push(issues, "unsupportedVersion", `${path}.version`);
-  if (isV2) {
+  if (!isV1 && !isV2 && !isV3) push(issues, "unsupportedVersion", `${path}.version`);
+  if (isV2 || isV3) {
     if (!record(value.timing)) push(issues, "invalidOccurrence", `${path}.timing`);
     else {
       exact(value.timing, ["kind"], `${path}.timing`, issues);
-      if (value.timing.kind !== "allDay" && value.timing.kind !== "timed")
+      if (
+        (isV3 && value.timing.kind !== "timed") ||
+        (isV2 && value.timing.kind !== "allDay" && value.timing.kind !== "timed")
+      )
         push(issues, "invalidOccurrence", `${path}.timing.kind`);
     }
+  }
+  if (isV3) {
+    const fact = validateRealizedScheduleFact(value.realizedSchedule);
+    if (
+      fact.status !== "valid" ||
+      value.sourceFamily !== "acceptedAllocation" ||
+      (fact.status === "valid" &&
+        (value.scheduleRole !== fact.fact.scheduleRole ||
+          !durableOccurrenceReferencesEqual(
+            value.reference as never,
+            realizedScheduleReference(fact.fact),
+          )))
+    )
+      push(issues, "invalidOccurrence", `${path}.realizedSchedule`);
   }
   if (isV2 && value.composition !== undefined) {
     const composition = value.composition;
@@ -347,6 +372,7 @@ function referenceBelongsToDay(
   day: unknown,
 ): boolean {
   if (typeof day !== "string") return false;
+  if (reference.sourceKind === "acceptedAllocation") return reference.userDayDate === day;
   if (reference.sourceKind === "work") return reference.coordinate.localStartDate === day;
   if (reference.sourceKind === "template" && reference.coordinate.scopeKind === "userDay")
     return reference.coordinate.userDayDate === day;

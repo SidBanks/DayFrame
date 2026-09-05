@@ -16,7 +16,9 @@ export type RuntimeAuthorityAdapter<T = unknown> = {
     | "progressObservations"
     | "goalStructure"
     | "goalPlanning"
-    | "composition";
+    | "composition"
+    | "proposals"
+    | "realizations";
   captureRuntimeSnapshot: () => T;
   installRuntimeExact: (target: T) => void;
 };

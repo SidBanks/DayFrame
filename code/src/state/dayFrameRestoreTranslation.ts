@@ -52,8 +52,16 @@ import {
   type GoalStructureAuthorityV1,
 } from "../core/planning/goalStructure.js";
 import type { GoalStructureRuntimeSnapshot } from "./goalStructureSurface.js";
-import type { GoalPlanningAuthorityV1 } from "../core/planning/goalDemand.js";
+import {
+  validateGoalPlanningAuthority,
+  type GoalPlanningAuthorityV2,
+} from "../core/planning/goalDemand.js";
 import type { CompositionAuthorityV1 } from "../core/planning/commitmentComposition.js";
+import type { ProposalAuthorityV1 } from "../core/planning/proposal.js";
+import {
+  validateRealizationAuthority,
+  type RealizationAuthorityV1,
+} from "../core/planning/acceptedAllocationRealization.js";
 
 export type ActiveRestoreRuntimeTarget = {
   activeState: DayFrameState;
@@ -92,8 +100,10 @@ export type RestoreDurablePayloadMap = {
   measurementDefinitions: GoalMeasurementDefinitionAuthorityV1;
   progressObservations: GoalProgressObservationAuthorityV1;
   goalStructure: GoalStructureAuthorityV1;
-  goalPlanning: GoalPlanningAuthorityV1;
+  goalPlanning: GoalPlanningAuthorityV2;
   composition: CompositionAuthorityV1;
+  proposals: ProposalAuthorityV1;
+  realizations: RealizationAuthorityV1;
 };
 export type RestoreRuntimeTargetMap = {
   active: ActiveRestoreRuntimeTarget;
@@ -106,8 +116,8 @@ export type RestoreRuntimeTargetMap = {
   progressObservations: ProgressObservationSnapshot;
   goalStructure: GoalStructureRuntimeSnapshot;
   goalPlanning: {
-    authority: GoalPlanningAuthorityV1;
-    desired: GoalPlanningAuthorityV1;
+    authority: GoalPlanningAuthorityV2;
+    desired: GoalPlanningAuthorityV2;
     ingress: { status: "accepted" };
     durability: "durable";
   };
@@ -116,6 +126,16 @@ export type RestoreRuntimeTargetMap = {
     desired: CompositionAuthorityV1;
     ingress: { status: "accepted" };
     durability: "durable";
+  };
+  proposals: {
+    authority: ProposalAuthorityV1;
+    desired: ProposalAuthorityV1;
+    ingress: { status: "accepted" };
+    durability: "durable";
+  };
+  realizations: {
+    authority: RealizationAuthorityV1;
+    ingress: "ready";
   };
 };
 
@@ -303,18 +323,14 @@ export function translateGoalStructureRestorePayload(value: unknown) {
     : { status: "invalid" as const, reason: "invalidGoalStructure" };
 }
 export function translateGoalPlanningRestorePayload(value: unknown) {
-  const valid =
-    record(value) &&
-    value.version === 1 &&
-    Array.isArray(value.demands) &&
-    Array.isArray(value.priorities);
-  return valid
+  const checked = validateGoalPlanningAuthority(value);
+  return checked.status === "valid"
     ? {
         status: "valid" as const,
-        durable: structuredClone(value) as GoalPlanningAuthorityV1,
+        durable: checked.authority,
         target: {
-          authority: structuredClone(value) as GoalPlanningAuthorityV1,
-          desired: structuredClone(value) as GoalPlanningAuthorityV1,
+          authority: checked.authority,
+          desired: checked.authority,
           ingress: { status: "accepted" as const },
           durability: "durable" as const,
         },
@@ -342,6 +358,41 @@ export function translateCompositionRestorePayload(value: unknown) {
     : { status: "invalid" as const, reason: "invalidComposition" };
 }
 
+export function translateProposalRestorePayload(value: unknown) {
+  const valid =
+    record(value) &&
+    value.version === 1 &&
+    Array.isArray(value.proposals) &&
+    Array.isArray(value.candidates) &&
+    Array.isArray(value.decisions) &&
+    Array.isArray(value.acceptedAllocations);
+  return valid
+    ? {
+        status: "valid" as const,
+        durable: structuredClone(value) as ProposalAuthorityV1,
+        target: {
+          authority: structuredClone(value) as ProposalAuthorityV1,
+          desired: structuredClone(value) as ProposalAuthorityV1,
+          ingress: { status: "accepted" as const },
+          durability: "durable" as const,
+        },
+      }
+    : { status: "invalid" as const, reason: "invalidProposals" };
+}
+
+export function translateRealizationRestorePayload(value: unknown) {
+  if (value === undefined)
+    value = { version: 1, realizations: [], facts: [] } satisfies RealizationAuthorityV1;
+  const checked = validateRealizationAuthority(value);
+  return checked.status === "valid"
+    ? {
+        status: "valid" as const,
+        durable: checked.authority,
+        target: { authority: checked.authority, ingress: "ready" as const },
+      }
+    : { status: "invalid" as const, reason: "invalidRealizations" };
+}
+
 export const restoreTranslators = {
   active: translateActiveRestorePayload,
   profiles: translateProfilesRestorePayload,
@@ -354,6 +405,8 @@ export const restoreTranslators = {
   goalStructure: translateGoalStructureRestorePayload,
   goalPlanning: translateGoalPlanningRestorePayload,
   composition: translateCompositionRestorePayload,
+  proposals: translateProposalRestorePayload,
+  realizations: translateRealizationRestorePayload,
 };
 
 function validExecutionMetadata(

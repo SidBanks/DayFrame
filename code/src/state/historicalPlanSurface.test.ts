@@ -16,6 +16,10 @@ import {
 } from "../infrastructure/storage/dayFrameDurableDb.js";
 import { createHistoricalPlanSurface } from "./historicalPlanSurface.js";
 import { createReadyDayFrameTestStore } from "./tests/dayFrameStoreTestUtils.js";
+import {
+  createReviewScope,
+  publicationRangeFromReviewScope,
+} from "../core/planning/reviewScope.js";
 
 let database = 0;
 const INC = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -87,21 +91,9 @@ function setup() {
 }
 
 describe("HistoricalPlan IndexedDB authority", () => {
-  it("publishes only after the store adopts a fresh authoritative Preview", async () => {
+  it("publishes only after explicit authorization of a fresh reviewed Preview", async () => {
     const { surface } = setup();
     await surface.initialize();
-    let publicationSettled!: () => void;
-    const publicationSettlement = new Promise<void>((resolve) => {
-      publicationSettled = resolve;
-    });
-    const observedSurface = {
-      ...surface,
-      publish: async (...args: Parameters<typeof surface.publish>) => {
-        const result = await surface.publish(...args);
-        publicationSettled();
-        return result;
-      },
-    };
     const timestamps = { createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" };
     const store = createReadyDayFrameTestStore(
       {
@@ -137,7 +129,7 @@ describe("HistoricalPlan IndexedDB authority", () => {
           },
         ],
       },
-      { historicalPlanSurface: observedSurface },
+      { historicalPlanSurface: surface },
     );
     expect(
       (await surface.exportHistoricalPlan()).status === "exported" &&
@@ -151,9 +143,35 @@ describe("HistoricalPlan IndexedDB authority", () => {
       generatedAt: "2026-05-04T12:00:00.000Z",
     });
     expect(state.preview?.isStale).toBe(false);
-    await publicationSettlement;
-    await Promise.resolve();
-    expect(store.getLastHistoricalPlanPublicationResult()?.status).toBe("publishedAndDurable");
+    expect(
+      (await surface.exportHistoricalPlan()).status === "exported" &&
+        ((await surface.exportHistoricalPlan()) as { batches: unknown[] }).batches,
+    ).toHaveLength(0);
+    const reviewScope = createReviewScope({
+      kind: "day",
+      anchorUserDayDate: "2026-05-04",
+      weekStartsOn: "monday",
+    });
+    const review = await store.queryPlanningReview({
+      reviewScope,
+      historyAsOf: "2026-05-04T13:00:00.000Z",
+    });
+    const command = {
+      publicationRange: publicationRangeFromReviewScope(reviewScope),
+      expectedSourceFingerprint: review.sourceFingerprint,
+      publishedAt: "2026-05-04T13:00:00.000Z",
+    };
+    expect(await store.publishScheduleRange(command)).toMatchObject({ status: "published" });
+    expect(await store.publishScheduleRange(command)).toEqual({ status: "alreadyPublished" });
+    expect(
+      await store.publishScheduleRange({ ...command, expectedSourceFingerprint: "old-review" }),
+    ).toEqual({ status: "rejected", reason: "sourceChanged" });
+    expect(
+      await store.publishScheduleRange({
+        ...command,
+        publishedAt: "2026-05-04T14:00:00.000Z",
+      }),
+    ).toEqual({ status: "alreadyPublished" });
     const exported = await surface.exportHistoricalPlan();
     expect(exported.status === "exported" && exported.batches).toHaveLength(1);
     surface.close();
@@ -195,6 +213,26 @@ describe("HistoricalPlan IndexedDB authority", () => {
       await restarted.getHistoricalPlanDay("2026-08-20", "2026-08-20T00:00:00.000Z"),
     ).toMatchObject({ status: "available" });
     restarted.close();
+  });
+  it("keeps explicit atomic publication out of runtime and history when persistence fails", async () => {
+    const { storage } = setup();
+    const surface = createHistoricalPlanSurface({
+      storage: {
+        ...storage,
+        mutate: async () => ({
+          status: "failure" as const,
+          error: { code: "writeFailed" as const, operation: "testAtomicPublication" },
+        }),
+      },
+    });
+    await surface.initialize();
+    expect((await surface.publishAtomically(batch())).status).toBe("materializationUnavailable");
+    expect(surface.getPendingPublications()).toEqual([]);
+    expect(await surface.getHistoricalPlanDay("2026-08-20", "2026-08-21T00:00:00.000Z")).toEqual({
+      status: "unavailableNoPublication",
+      userDayDate: "2026-08-20",
+    });
+    surface.close();
   });
   it("preserves mixed V1/V2 timing provenance through IndexedDB restart and export", async () => {
     const factory = new IDBFactory();

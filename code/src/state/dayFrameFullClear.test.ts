@@ -140,6 +140,8 @@ describe("ten-authority full-clear settlement", () => {
       "goalStructure",
       "goalPlanning",
       "composition",
+      "proposals",
+      "realizations",
     ]);
 
     delete (globalThis as { localStorage?: unknown }).localStorage;

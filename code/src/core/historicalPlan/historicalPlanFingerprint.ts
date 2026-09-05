@@ -10,6 +10,19 @@ import {
 } from "./historicalPlan.js";
 
 export function durableReferenceKey(reference: DurableOccurrenceReference): string {
+  if (reference.sourceKind === "acceptedAllocation")
+    return stable({
+      version: reference.version,
+      sourceKind: reference.sourceKind,
+      realizationId: reference.realizationId,
+      acceptedAllocationId: reference.acceptedAllocationId,
+      acceptedClaimId: reference.acceptedClaimId,
+      scheduledSubjectId: reference.scheduledSubjectId,
+      scheduleRole: reference.scheduleRole,
+      startsAt: reference.startsAt,
+      endsAt: reference.endsAt,
+      userDayDate: reference.userDayDate,
+    });
   if (reference.sourceKind === "manualEvent")
     return stable({
       version: reference.version,
@@ -45,6 +58,13 @@ export function historicalPlanSnapshotFingerprint(
     category: snapshot.category,
     plan: snapshot.plan,
     ...(snapshot.version === 2 ? { timing: snapshot.timing } : {}),
+    ...(snapshot.version === 3
+      ? {
+          timing: snapshot.timing,
+          scheduleRole: snapshot.scheduleRole,
+          realizedSchedule: snapshot.realizedSchedule,
+        }
+      : {}),
     ...(snapshot.version === 2 && snapshot.composition
       ? { composition: snapshot.composition }
       : {}),

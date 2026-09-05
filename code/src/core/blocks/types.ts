@@ -199,6 +199,7 @@ export type PlaceBlockCandidatesInput = {
   visiblePlanningWindowEnd?: Date;
   hardPlacementCandidateIds?: ReadonlySet<string>;
   additionalOccupiedBlocks?: Array<{ startsAt: Date; endsAt: Date }>;
+  fixedAuthorityOccupiedBlocks?: Array<{ startsAt: Date; endsAt: Date }>;
 };
 
 export type PlaceBlockCandidatesResult = {

@@ -54,6 +54,8 @@ const payloads = (suffix: string): RestorePayloadSet => ({
   goalStructure: { version: 1, relationships: [], milestones: [] },
   goalPlanning: { version: 1, demands: [], priorities: [] },
   composition: { version: 1, relationships: [], decisions: [] },
+  proposals: { version: 1, proposals: [], candidates: [], decisions: [], acceptedAllocations: [] },
+  realizations: { version: 1, realizations: [], facts: [] },
 });
 
 describe("restore identity and strict journal", () => {
@@ -123,6 +125,13 @@ describe("durable restore staging and combined replacement", () => {
       goalStructure: { version: 1, relationships: [], milestones: [] },
       goalPlanning: { version: 1, demands: [], priorities: [] },
       composition: { version: 1, relationships: [], decisions: [] },
+      proposals: {
+        version: 1,
+        proposals: [],
+        candidates: [],
+        decisions: [],
+        acceptedAllocations: [],
+      },
     };
     expect(await combined.replaceExact(target)).toEqual({ status: "success" });
     expect(await combined.verifyExact(target)).toEqual({ status: "success" });
@@ -203,6 +212,8 @@ describe("restore coordinator", () => {
         "goalStructure",
         "goalPlanning",
         "composition",
+        "proposals",
+        "realizations",
       ] as const
     ).map((id) => ({
       id,
@@ -213,7 +224,9 @@ describe("restore coordinator", () => {
       id === "progressObservations" ||
       id === "goalStructure" ||
       id === "goalPlanning" ||
-      id === "composition"
+      id === "composition" ||
+      id === "proposals" ||
+      id === "realizations"
         ? "indexedDb"
         : "localStorage") as "indexedDb" | "localStorage",
       getReadiness: () => "ready" as const,
@@ -317,6 +330,8 @@ describe("restore coordinator", () => {
           goalStructure,
           goalPlanning,
           composition,
+          proposals,
+          realizations,
         }) => {
           current = {
             ...current,
@@ -328,6 +343,8 @@ describe("restore coordinator", () => {
             goalStructure: structuredClone(goalStructure),
             goalPlanning: structuredClone(goalPlanning),
             composition: structuredClone(composition),
+            proposals: structuredClone(proposals),
+            realizations: structuredClone(realizations),
           };
           return { status: "success" };
         },
@@ -341,6 +358,8 @@ describe("restore coordinator", () => {
             goalStructure: current.goalStructure,
             goalPlanning: current.goalPlanning,
             composition: current.composition,
+            proposals: current.proposals,
+            realizations: current.realizations,
           }) === semanticFingerprint(value)
             ? { status: "success" }
             : { status: "failure", reason: "mismatch" },
@@ -365,6 +384,8 @@ describe("restore coordinator", () => {
       "goalStructure",
       "goalPlanning",
       "composition",
+      "proposals",
+      "realizations",
     ]);
     expect(test.journalStorage.values.size).toBe(0);
     expect(test.coordinator.getStatus()).toBe("idle");
@@ -403,6 +424,8 @@ describe("restore coordinator", () => {
       "goalStructure",
       "goalPlanning",
       "composition",
+      "proposals",
+      "realizations",
     ]);
   });
 

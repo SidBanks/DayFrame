@@ -2,6 +2,12 @@ import { capacityFingerprint as semanticFingerprint } from "./capacityFingerprin
 import type { DemandProjectionV1 } from "./goalDemandProjection.js";
 import type { CapacityIntervalV1, CapacityResultV1 } from "./capacity.js";
 import type { PlanningProvenanceV1 } from "./planningFoundation.js";
+import type { CanonicalUserDayResolverInput } from "../time/canonicalUserDay.js";
+import {
+  projectDemandResourceFootprint,
+  type ProjectedResourceFootprintV1,
+  type ResolvedDemandFootprintAssociationV1,
+} from "./demandResourceFootprint.js";
 
 export const GOAL_FEASIBILITY_POLICY_V1 = {
   id: "goal-specific-feasibility",
@@ -20,7 +26,15 @@ export type FeasibilityReasonV1 = {
     | "incompleteCapacityCoverage"
     | "unresolvedCapacityLiability"
     | "capacityUnavailable"
-    | "demandInapplicable";
+    | "demandInapplicable"
+    | "footprintUnspecified"
+    | "footprintAssociationAmbiguous"
+    | "footprintRevisionMissing"
+    | "footprintCoverageIncomplete"
+    | "requiredSupportUnavailable"
+    | "requiredBufferUnavailable"
+    | "componentCrossesUserDay"
+    | "resourceConflict";
 };
 export type FeasibleOpportunityV1 = {
   id: string;
@@ -33,6 +47,7 @@ export type FeasibleOpportunityV1 = {
   userDayDate: CapacityIntervalV1["userDayDate"];
   hardConstraintCompatibility: "compatible";
   preference: "preferredDuration" | "neutral";
+  resourceFootprint: ProjectedResourceFootprintV1;
 };
 export type OpportunitySetV1 = {
   id: string;
@@ -69,6 +84,8 @@ export type GoalFeasibilityResultV1 = {
 export function evaluateGoalFeasibility(input: {
   demand: DemandProjectionV1;
   capacity: CapacityResultV1;
+  footprintAssociation?: ResolvedDemandFootprintAssociationV1;
+  resolver?: CanonicalUserDayResolverInput;
 }): GoalFeasibilityResultV1 {
   const demand = input.demand,
     capacity = input.capacity,
@@ -98,12 +115,34 @@ export function evaluateGoalFeasibility(input: {
     terminal = "infeasible";
     reason.push({ code: "demandInapplicable" });
   }
+  if (input.footprintAssociation && input.footprintAssociation.status !== "resolved") {
+    terminal = "unknown";
+    reason.push({
+      code:
+        input.footprintAssociation.status === "unspecified"
+          ? "footprintUnspecified"
+          : input.footprintAssociation.status === "ambiguous"
+            ? "footprintAssociationAmbiguous"
+            : "footprintRevisionMissing",
+    });
+  }
   if (capacity.qualification.liability === "unresolved")
     reason.push({ code: "unresolvedCapacityLiability" });
   const usable = capacity.intervals.filter(
     (item) => item.allocability === "allocatable" && item.coverage === "complete",
   );
-  const sets = terminal ? [] : enumerateSets(demand, capacity, usable);
+  const projectedReasons: FeasibilityReasonV1[] = [];
+  const sets = terminal
+    ? []
+    : enumerateSets(
+        demand,
+        capacity,
+        usable,
+        input.footprintAssociation,
+        input.resolver,
+        projectedReasons,
+      );
+  reason.push(...projectedReasons);
   const requested = demand.requestedEffort.amount,
     compatible = Math.max(0, ...sets.map((item) => item.totalCompatibleMinutes));
   if (!terminal && demand.structuralEligibility === "conditionallyEligible") {
@@ -129,6 +168,10 @@ export function evaluateGoalFeasibility(input: {
     policy: GOAL_FEASIBILITY_POLICY_V1,
     demand: demand.semanticId,
     capacity: capacity.fingerprint,
+    footprint:
+      input.footprintAssociation?.status === "resolved"
+        ? input.footprintAssociation.dependencyFingerprint
+        : (input.footprintAssociation?.status ?? "legacyProductiveOnly"),
   });
   const base = {
     version: 1 as const,
@@ -156,6 +199,9 @@ function enumerateSets(
   demand: DemandProjectionV1,
   capacity: CapacityResultV1,
   intervals: CapacityIntervalV1[],
+  footprintAssociation: ResolvedDemandFootprintAssociationV1 | undefined,
+  resolver: CanonicalUserDayResolverInput | undefined,
+  reasons: FeasibilityReasonV1[],
 ) {
   const requested = demand.requestedEffort.amount;
   if (demand.session.mode === "indivisible") {
@@ -164,8 +210,17 @@ function enumerateSets(
       .filter((item) => item.durationMinutes >= exactMinutes)
       .slice(0, GOAL_FEASIBILITY_POLICY_V1.maximumOpportunitySets)
       .map((item) =>
-        makeSet(demand, capacity, [slice(item, exactMinutes, demand, capacity)], requested),
-      );
+        completeOpportunity(
+          slice(item, exactMinutes, demand, capacity),
+          demand,
+          capacity,
+          footprintAssociation,
+          resolver,
+          reasons,
+        ),
+      )
+      .filter((item): item is FeasibleOpportunityV1 => item !== undefined)
+      .map((item) => makeSet(demand, capacity, [item], requested));
   }
   const output: OpportunitySetV1[] = [];
   for (
@@ -183,7 +238,16 @@ function enumerateSets(
         demand.session.maximumMinutes ?? remaining,
       );
       if (amount < demand.session.minimumMinutes) continue;
-      slices.push(slice(item, amount, demand, capacity));
+      const completed = completeOpportunity(
+        slice(item, amount, demand, capacity),
+        demand,
+        capacity,
+        footprintAssociation,
+        resolver,
+        reasons,
+      );
+      if (!completed) continue;
+      slices.push(completed);
       remaining -= amount;
       if (remaining === 0) break;
       if (demand.cadence.kind === "sessionCount" && slices.length === demand.cadence.count) break;
@@ -204,7 +268,7 @@ function slice(
   amount: number,
   demand: DemandProjectionV1,
   capacity: CapacityResultV1,
-): FeasibleOpportunityV1 {
+): Omit<FeasibleOpportunityV1, "resourceFootprint"> {
   const endsAt = new Date(Date.parse(interval.startsAt) + amount * 60_000).toISOString();
   const semantic = {
     capacityIntervalId: interval.id,
@@ -223,6 +287,76 @@ function slice(
       demand.session.mode === "splittable" && demand.session.preferredMinutes === amount
         ? "preferredDuration"
         : "neutral",
+  };
+}
+function completeOpportunity(
+  opportunity: Omit<FeasibleOpportunityV1, "resourceFootprint">,
+  demand: DemandProjectionV1,
+  capacity: CapacityResultV1,
+  association: ResolvedDemandFootprintAssociationV1 | undefined,
+  resolver: CanonicalUserDayResolverInput | undefined,
+  reasons: FeasibilityReasonV1[],
+): FeasibleOpportunityV1 | undefined {
+  if (!association || !resolver)
+    return { ...opportunity, resourceFootprint: legacyProductiveFootprint(opportunity, demand) };
+  const result = projectDemandResourceFootprint({
+    demandProjection: demand,
+    association,
+    productiveCandidate: opportunity,
+    capacity,
+    resolver,
+  });
+  if (result.status !== "projected") {
+    for (const item of result.reasons)
+      if (!reasons.some((value) => value.code === item.code))
+        reasons.push({ code: item.code as FeasibilityReasonV1["code"] });
+    return undefined;
+  }
+  return { ...opportunity, resourceFootprint: result.footprint };
+}
+function legacyProductiveFootprint(
+  opportunity: Omit<FeasibleOpportunityV1, "resourceFootprint">,
+  demand: DemandProjectionV1,
+): ProjectedResourceFootprintV1 {
+  const claim = {
+    id: opportunity.id,
+    role: "productive" as const,
+    startsAt: opportunity.startsAt,
+    endsAt: opportunity.endsAt,
+    durationMinutes: opportunity.durationMinutes,
+    userDayDate: opportunity.userDayDate,
+    capacityIntervalId: opportunity.capacityIntervalId,
+    requiredness: "required" as const,
+    candidateParentId: opportunity.id,
+    goalId: demand.goalId,
+    demandId: demand.demandId,
+    demandRevision: demand.demandRevision,
+    demandProjectionId: demand.semanticId,
+    productiveOpportunityId: opportunity.id,
+    source: { kind: "direct" as const },
+    relationship: { kind: "productiveRoot" as const },
+    dependencyFingerprint: "legacyProductiveOnly",
+    provenance: {
+      version: 1 as const,
+      role: "derivedArtifact" as const,
+      origin: { kind: "derivedFromDependencies" as const },
+    },
+  };
+  return {
+    version: 1,
+    id: opportunity.id,
+    candidateParentId: opportunity.id,
+    productiveClaims: [claim],
+    supportClaims: [],
+    bufferClaims: [],
+    omittedOptionalComponentIds: [],
+    productiveMinutes: opportunity.durationMinutes,
+    supportMinutes: 0,
+    bufferMinutes: 0,
+    nominalResourceMinutes: opportunity.durationMinutes,
+    unionedResourceMinutes: opportunity.durationMinutes,
+    dependencyFingerprint: "legacyProductiveOnly",
+    provenance: claim.provenance,
   };
 }
 function makeSet(

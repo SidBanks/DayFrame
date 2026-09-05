@@ -1,5 +1,4 @@
 import {
-  emptyGoalPlanningAuthority,
   validateGoalPlanningAuthority,
   type GoalPlanningAuthorityV1,
 } from "../core/planning/goalDemand.js";
@@ -61,13 +60,20 @@ export function validateDayFrameBackupV8(value: unknown): DayFrameBackupV8 {
     surface: "backup",
     version: 8,
     exportedAt: legacy.exportedAt,
-    data: { ...legacy.data, goalPlanning: planning.authority },
+    data: {
+      ...legacy.data,
+      goalPlanning: {
+        version: 1,
+        demands: planning.authority.demands,
+        priorities: planning.authority.priorities,
+      },
+    },
   };
 }
 export function translateBackupV7ToV8(value: unknown, exportedAt?: string) {
   const backup = validateDayFrameBackupV7(value);
   return createDayFrameBackupV8(
-    { ...backup.data, goalPlanning: emptyGoalPlanningAuthority() },
+    { ...backup.data, goalPlanning: { version: 1, demands: [], priorities: [] } },
     exportedAt ?? backup.exportedAt,
   );
 }

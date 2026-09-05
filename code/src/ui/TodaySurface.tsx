@@ -543,6 +543,8 @@ function capitalize(value: string) {
   return value[0]!.toUpperCase() + value.slice(1);
 }
 function referenceLabel(reference: TodayOccurrence["occurrence"]["reference"]) {
+  if (reference.sourceKind === "acceptedAllocation")
+    return `${reference.sourceKind}-${reference.realizationId}-${reference.acceptedClaimId}-${reference.scheduledSubjectId}`;
   if (reference.sourceKind === "manualEvent")
     return `${reference.sourceKind}-${reference.manualEvent.id}-${reference.manualEvent.incarnationId}`;
   if (reference.sourceKind === "work")

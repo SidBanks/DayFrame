@@ -12,12 +12,23 @@ import type { DayFrameBackupV6 } from "./dayFrameBackupV6.js";
 import type { DayFrameBackupV7 } from "./dayFrameBackupV7.js";
 import type { DayFrameBackupV8 } from "./dayFrameBackupV8.js";
 import type { DayFrameBackupV9 } from "./dayFrameBackupV9.js";
+import type { DayFrameBackupV10 } from "./dayFrameBackupV10.js";
+import type { DayFrameBackupV11 } from "./dayFrameBackupV11.js";
+import type { DayFrameBackupV12 } from "./dayFrameBackupV12.js";
+import type { RealizationSurface } from "./realizationSurface.js";
+import type {
+  EffectivePreviewGenerationContextV1,
+  PublicationRangeV1,
+  ReviewScopeV1,
+} from "../core/planning/planningScope.js";
 import type { GoalSurface } from "./goalSurface.js";
 import type { MeasurementDefinitionSurface } from "./measurementDefinitionSurface.js";
 import type { ProgressObservationSurface } from "./progressObservationSurface.js";
 import type { GoalStructureSurface } from "./goalStructureSurface.js";
 import type { GoalPlanningSurface } from "./goalPlanningSurface.js";
 import type { CompositionSurface } from "./compositionSurface.js";
+import type { AllocationSurface } from "./allocationSurface.js";
+import type { ProposalSurface } from "./proposalSurface.js";
 import type { GoalProgressQueryV1 } from "../core/progress/manualQuantityProgress.js";
 import type { GoalProgressQueryResultV1 } from "./goalProgressQuery.js";
 import type { SuggestedFixFeedback } from "../core/friction/types.js";
@@ -61,6 +72,30 @@ export type DayFrameSchedulingPreferences = {
   weekStartsOn: Weekday;
 };
 
+export type PublishScheduleRangeInputV1 = {
+  publicationRange: PublicationRangeV1;
+  expectedSourceFingerprint: string;
+  publishedAt: string;
+};
+
+export type PublishScheduleRangeFailureReasonV1 =
+  | "invalidPublicationRange"
+  | "planningCoverageIncomplete"
+  | "previewMissing"
+  | "previewStale"
+  | "previewRangeMismatch"
+  | "frictionUnresolved"
+  | "acceptedAllocationUnrealized"
+  | "sourceChanged"
+  | "queryFailure"
+  | "materializationFailure"
+  | "persistenceFailure";
+
+export type PublishScheduleRangeResultV1 =
+  | { status: "published"; batchId: string; publishedAt: string }
+  | { status: "alreadyPublished" }
+  | { status: "rejected"; reason: PublishScheduleRangeFailureReasonV1 };
+
 export type DayFramePreviewRangePreset =
   | "threeDays"
   | "oneWeek"
@@ -87,6 +122,7 @@ export type DayFramePreview = {
   revisedAt?: string;
   actionFeedback?: SuggestedFixFeedback;
   isStale: boolean;
+  scopeMetadata?: EffectivePreviewGenerationContextV1;
 };
 
 export type DayFrameSavedProfile = {
@@ -154,6 +190,7 @@ export type GeneratePreviewActionInput = {
   planningWindowStart: Date;
   planningWindowEnd: Date;
   generatedAt: string;
+  reviewScope?: ReviewScopeV1;
 };
 
 export type ApplyPreviewFixActionInput = {
@@ -341,6 +378,26 @@ export type BackupV9ExportResult =
 export type BackupV9ImportResult =
   | { status: "restoredV9"; semanticFingerprint: string }
   | Exclude<BackupV8ImportResult, { status: "restoredV8" }>;
+export type BackupV10ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV10; semanticFingerprint: string }
+  | Exclude<BackupV9ExportResult, { status: "exported" }>
+  | { status: "protectedSurface"; surface: "proposals" };
+export type BackupV10ImportResult =
+  | { status: "restoredV10"; semanticFingerprint: string }
+  | Exclude<BackupV9ImportResult, { status: "restoredV9" }>;
+export type BackupV11ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV11; semanticFingerprint: string }
+  | Exclude<BackupV10ExportResult, { status: "exported" }>;
+export type BackupV11ImportResult =
+  | { status: "restoredV11"; semanticFingerprint: string }
+  | Exclude<BackupV10ImportResult, { status: "restoredV10" }>;
+export type BackupV12ExportResult =
+  | { status: "exported"; backup: DayFrameBackupV12; semanticFingerprint: string }
+  | Exclude<BackupV11ExportResult, { status: "exported" }>
+  | { status: "protectedSurface"; surface: "realizations" };
+export type BackupV12ImportResult =
+  | { status: "restoredV12"; semanticFingerprint: string }
+  | Exclude<BackupV11ImportResult, { status: "restoredV11" }>;
 
 export type FullClearAuthorityResults = {
   active: ActiveRemovalOutcome;
@@ -354,6 +411,8 @@ export type FullClearAuthorityResults = {
   goalStructure: PersistenceRemovalOutcome;
   goalPlanning: PersistenceRemovalOutcome;
   composition: PersistenceRemovalOutcome;
+  proposals: PersistenceRemovalOutcome;
+  realizations: PersistenceRemovalOutcome;
 };
 
 export type ClearLocalDataResult = {
@@ -361,7 +420,7 @@ export type ClearLocalDataResult = {
   authorities: FullClearAuthorityResults;
   previewCleared: true;
   state: DayFrameState;
-  /** Compatibility aliases; `authorities` is the canonical eleven-authority contract. */
+  /** Compatibility aliases; `authorities` is the canonical authority contract. */
   activeState: ActiveRemovalOutcome;
   profiles: PersistenceRemovalOutcome;
   planDecisions: PersistenceRemovalOutcome;
@@ -373,6 +432,8 @@ export type ClearLocalDataResult = {
   goalStructure: PersistenceRemovalOutcome;
   goalPlanning: PersistenceRemovalOutcome;
   composition: PersistenceRemovalOutcome;
+  proposals: PersistenceRemovalOutcome;
+  realizations: PersistenceRemovalOutcome;
   /** Compatibility aggregate; derived from `status`. */
   durability: "cleared" | "partiallyCleared" | "notCleared";
 };
@@ -548,6 +609,7 @@ export type ActiveLocalAbandonmentRecoveryResult =
   | ActiveLocalRecoveryNotAttempted;
 
 export type DayFrameStore = DayFrameReadinessApi & {
+  initializeRestoreAuthority: () => Promise<void>;
   getState: () => DayFrameState;
   getDurabilityStatus: () => StoreDurabilityStatus;
   getActiveLocalIngressStatus: () => ActiveLocalIngressStatus;
@@ -635,6 +697,9 @@ export type DayFrameStore = DayFrameReadinessApi & {
     | BackupV7ImportResult
     | BackupV8ImportResult
     | BackupV9ImportResult
+    | BackupV10ImportResult
+    | BackupV11ImportResult
+    | BackupV12ImportResult
   >;
   exportBackupV4: (exportedAt: string) => Promise<BackupV4ExportResult>;
   importBackupV4: (backup: unknown) => Promise<BackupV4ImportResult>;
@@ -648,7 +713,16 @@ export type DayFrameStore = DayFrameReadinessApi & {
   importBackupV8: (backup: unknown) => Promise<BackupV8ImportResult>;
   exportBackupV9: (exportedAt: string) => Promise<BackupV9ExportResult>;
   importBackupV9: (backup: unknown) => Promise<BackupV9ImportResult>;
+  exportBackupV10: (exportedAt: string) => Promise<BackupV10ExportResult>;
+  importBackupV10: (backup: unknown) => Promise<BackupV10ImportResult>;
+  exportBackupV11: (exportedAt: string) => Promise<BackupV11ExportResult>;
+  importBackupV11: (backup: unknown) => Promise<BackupV11ImportResult>;
+  exportBackupV12: (exportedAt: string) => Promise<BackupV12ExportResult>;
+  importBackupV12: (backup: unknown) => Promise<BackupV12ImportResult>;
   generatePreview: (input: GeneratePreviewActionInput) => DayFrameState;
+  publishScheduleRange: (
+    input: PublishScheduleRangeInputV1,
+  ) => Promise<PublishScheduleRangeResultV1>;
   applySuggestedFixToPreview: (input: ApplyPreviewFixActionInput) => DayFrameState;
   getLastHistoricalPlanPublicationResult: () =>
     | HistoricalPlanPublicationResult
@@ -668,6 +742,10 @@ export type DayFrameStore = DayFrameReadinessApi & {
   queryToday: (
     query: import("./todayQuery.js").TodayQuery,
   ) => Promise<import("./todayQuery.js").TodayQueryResult>;
+  queryPlanningReview: (input: {
+    reviewScope: ReviewScopeV1;
+    historyAsOf: string;
+  }) => Promise<import("./planningScopeQuery.js").PlanningReviewReadModelV1>;
   queryCapacity: (query: {
     startUserDayDate: LocalDateString;
     endUserDayDateExclusive: LocalDateString;
@@ -693,6 +771,7 @@ export type DayFrameStore = DayFrameReadinessApi & {
     | { status: "notFound" | "unknown" }
   >;
 } & Omit<ExecutionHistorySurface, "clearExecutionHistory" | "getRuntimeAuthorityAdapter"> &
+  AllocationSurface &
   Pick<
     HistoricalPlanSurface,
     | "initialize"
@@ -719,7 +798,9 @@ export type DayFrameStore = DayFrameReadinessApi & {
   > &
   Omit<GoalStructureSurface, "clearGoalStructure" | "getRuntimeAuthorityAdapter"> &
   Omit<GoalPlanningSurface, "clearGoalPlanning" | "getRuntimeAuthorityAdapter"> &
-  Omit<CompositionSurface, "clearCompositionAuthority" | "getCompositionRuntimeAdapter">;
+  Omit<CompositionSurface, "clearCompositionAuthority" | "getCompositionRuntimeAdapter"> &
+  Omit<ProposalSurface, "clearProposalAuthority" | "getProposalRuntimeAdapter"> &
+  Omit<RealizationSurface, "clearRealizationAuthority" | "getRealizationRuntimeAdapter">;
 
 export type { SourceIncarnationId };
 export type { PlanDecisionId, PlanDecisionIdAllocator, PlanDecisionV1 };

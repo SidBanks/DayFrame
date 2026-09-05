@@ -54,6 +54,51 @@ function capacity(
 }
 
 describe("Capacity V1", () => {
+  it("represents accepted authority once: liability before realization, exclusion after", () => {
+    const claim = {
+      id: "accepted-claim",
+      startsAt: "2026-09-07T10:00:00.000Z",
+      endsAt: "2026-09-07T11:00:00.000Z",
+      durationMinutes: 60,
+      userDayDate: "2026-09-07",
+    };
+    const before = deriveCapacity({
+      startUserDayDate: "2026-09-07",
+      endUserDayDateExclusive: "2026-09-08",
+      resolver,
+      schedule: {
+        scheduledBlocks: [],
+        generatedWorkBlocks: [],
+        unplacedCandidates: [],
+        planningWindow: window,
+        acceptedUnrealizedClaims: [claim as never],
+      },
+    });
+    expect(before.liabilities).toMatchObject([{ kind: "acceptedAllocation", demandedMinutes: 60 }]);
+    expect(before.summary.liabilityMinutes).toBe(60);
+
+    const after = deriveCapacity({
+      startUserDayDate: "2026-09-07",
+      endUserDayDateExclusive: "2026-09-08",
+      resolver,
+      schedule: {
+        scheduledBlocks: [],
+        generatedWorkBlocks: [],
+        unplacedCandidates: [],
+        planningWindow: window,
+        realizedScheduleFacts: [
+          {
+            ...claim,
+            id: "scheduled-goal",
+            sourceKind: "acceptedAllocation",
+            scheduleRole: "productiveGoalWork",
+          } as never,
+        ],
+      },
+    });
+    expect(after.liabilities).toEqual([]);
+    expect(after.summary.totalEligibleMinutes).toBe(1380);
+  });
   it("returns one full neutral-policy interval for an empty canonical user-day", () => {
     const result = capacity();
     expect(result.intervals).toMatchObject([

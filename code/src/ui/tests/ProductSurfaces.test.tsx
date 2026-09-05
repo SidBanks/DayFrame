@@ -15,7 +15,6 @@ describe("product surface boundaries", () => {
     const openCommitmentLibrary = vi.fn();
     const { rerender } = render(
       <PlannerSurface
-        isSetupDirty={false}
         commitmentLibraryContent={<p>Existing Commitment Library content</p>}
         mode="month"
         monthContent={<p>Month content</p>}
@@ -23,7 +22,6 @@ describe("product surface boundaries", () => {
         onOpenCommitmentLibrary={openCommitmentLibrary}
         onOpenSchedule={openSchedule}
         onOpenWorkPattern={openWorkPattern}
-        previewState="none"
         scheduleContent={<p>Existing Schedule content</p>}
         workPatternContent={<p>Existing Work Pattern content</p>}
       />,
@@ -38,7 +36,6 @@ describe("product surface boundaries", () => {
 
     rerender(
       <PlannerSurface
-        isSetupDirty
         commitmentLibraryContent={<p>Existing Commitment Library content</p>}
         mode="schedule"
         monthContent={<p>Month content</p>}
@@ -46,13 +43,11 @@ describe("product surface boundaries", () => {
         onOpenCommitmentLibrary={openCommitmentLibrary}
         onOpenSchedule={openSchedule}
         onOpenWorkPattern={openWorkPattern}
-        previewState="stale"
         scheduleContent={<p>Existing Schedule content</p>}
         workPatternContent={<p>Existing Work Pattern content</p>}
       />,
     );
     expect(screen.getByText("Existing Schedule content")).toBeInTheDocument();
-    expect(screen.getByText(/Plan has unsaved changes/)).toBeInTheDocument();
   });
 
   it("keeps Today truthful and free of mutation controls", async () => {

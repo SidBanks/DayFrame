@@ -9,6 +9,7 @@ import type { DayFrameAuthoredSetup, DayFramePreview } from "../../state/types.j
 import {
   HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION,
+  createHistoricalRealizedScheduleSnapshot,
   createPlanPublicationBatch,
   type HistoricalPlanConstructionProviders,
   type HistoricalPlanDayPublicationV1,
@@ -18,6 +19,12 @@ import {
   type PlanPublicationBatchV1,
 } from "./historicalPlan.js";
 import type { GoalV1, GoalCommitmentLinkV1 } from "../goals/goal.js";
+import {
+  containsRange,
+  previewRangeFromLegacyInclusive,
+  type PublicationRangeV1,
+} from "../planning/planningScope.js";
+import { addUserDayLabels } from "../time/canonicalUserDay.js";
 
 export type MaterializePlanPublicationResult =
   | { status: "materialized"; batch: PlanPublicationBatchV1 }
@@ -31,12 +38,28 @@ export function materializePlanPublication(input: {
   preview?: DayFramePreview | null;
   providers?: HistoricalPlanConstructionProviders;
   goals?: readonly GoalV1[];
+  publicationRange?: PublicationRangeV1;
 }): MaterializePlanPublicationResult {
   const preview = input.preview;
   if (!preview) return { status: "noPreview" };
   if (preview.isStale) return { status: "stalePreview" };
   if (preview.revisedAt !== undefined) return { status: "tryPreview" };
-  const dates = enumerateDates(preview.rangeStartDate, preview.rangeEndDate);
+  const previewRange =
+    preview.scopeMetadata?.requestedPreviewRange ?? previewRangeFromLegacyInclusive(preview);
+  const publicationRange = input.publicationRange ?? {
+    version: 1 as const,
+    scopeType: "publicationRange" as const,
+    startUserDayDate: previewRange.startUserDayDate,
+    endUserDayDateExclusive: previewRange.endUserDayDateExclusive,
+    provenance: { source: "explicitPublication" as const },
+  };
+  if (!containsRange(previewRange, publicationRange))
+    return {
+      status: "inconsistentPlanContext",
+      detail: "publication range is not completely covered by current schedule materialization",
+    };
+  const publicationEndInclusive = addUserDayLabels(publicationRange.endUserDayDateExclusive, -1);
+  const dates = enumerateDates(publicationRange.startUserDayDate, publicationEndInclusive);
   if (!dates) return { status: "invalidCandidate", detail: "requested range is invalid" };
   const days = new Map<string, HistoricalPlanDayPublicationV1>();
   for (const userDayDate of dates) {
@@ -58,21 +81,23 @@ export function materializePlanPublication(input: {
     ...preview.result.scheduledBlocks
       .filter(
         (block) =>
-          block.userDayDate >= preview.rangeStartDate && block.userDayDate <= preview.rangeEndDate,
+          block.userDayDate >= publicationRange.startUserDayDate &&
+          block.userDayDate < publicationRange.endUserDayDateExclusive,
       )
       .filter((block) => block.source !== "importedCalendar" && block.source !== "rule")
       .map((block) => ({ kind: "scheduledBlock" as const, blockId: block.id })),
     ...preview.result.generatedWorkBlocks
       .filter(
         (block) =>
-          block.userDayDate >= preview.rangeStartDate && block.userDayDate <= preview.rangeEndDate,
+          block.userDayDate >= publicationRange.startUserDayDate &&
+          block.userDayDate < publicationRange.endUserDayDateExclusive,
       )
       .map((block) => ({ kind: "workBlock" as const, blockId: block.id })),
     ...preview.result.unplacedCandidates
       .filter(
         (candidate) =>
-          candidate.userDayDate >= preview.rangeStartDate &&
-          candidate.userDayDate <= preview.rangeEndDate,
+          candidate.userDayDate >= publicationRange.startUserDayDate &&
+          candidate.userDayDate < publicationRange.endUserDayDateExclusive,
       )
       .map((candidate) => ({ kind: "unplacedCandidate" as const, candidateId: candidate.id })),
     ...preview.result.planDecisionResults
@@ -127,9 +152,59 @@ export function materializePlanPublication(input: {
         detail: "duplicate occurrence representations disagree",
       };
   }
+  for (const fact of preview.result.realizedScheduleFacts ?? []) {
+    if (
+      fact.userDayDate < publicationRange.startUserDayDate ||
+      fact.userDayDate >= publicationRange.endUserDayDateExclusive
+    )
+      continue;
+    const containingDay = days.get(fact.userDayDate);
+    if (!containingDay)
+      return {
+        status: "inconsistentPlanContext",
+        detail: "realized fact lies outside requested visible range",
+      };
+    const goal = (input.goals ?? []).find((value) => value.id === fact.lineage.goalId);
+    containingDay.occurrences.push(
+      createHistoricalRealizedScheduleSnapshot({
+        fact,
+        title:
+          fact.scheduleRole === "productiveGoalWork"
+            ? (goal?.title ?? "Goal work")
+            : fact.scheduleRole === "supportActivity"
+              ? "Goal support"
+              : "Goal buffer protection",
+        category:
+          fact.scheduleRole === "productiveGoalWork"
+            ? "work"
+            : fact.scheduleRole === "supportActivity"
+              ? "admin"
+              : "maintenance",
+        ...(goal
+          ? {
+              goals: [
+                {
+                  version: 1,
+                  goalId: goal.id,
+                  goalRevision: goal.revision,
+                  title: goal.title,
+                  status: goal.status,
+                  ...(goal.measurementPolicy
+                    ? { measurementPolicy: { ...goal.measurementPolicy } }
+                    : {}),
+                },
+              ],
+            }
+          : {}),
+      }),
+    );
+  }
   const construction = createPlanPublicationBatch(
     {
-      range: { startUserDayDate: preview.rangeStartDate, endUserDayDate: preview.rangeEndDate },
+      range: {
+        startUserDayDate: publicationRange.startUserDayDate,
+        endUserDayDate: publicationEndInclusive,
+      },
       days: [...days.values()],
     },
     input.providers,
@@ -165,6 +240,7 @@ function matchesReference(
   link: GoalCommitmentLinkV1,
   reference: import("../occurrences/durableOccurrenceReference.js").DurableOccurrenceReference,
 ) {
+  if (reference.sourceKind === "acceptedAllocation") return false;
   const lifetimes =
     reference.sourceKind === "template"
       ? [

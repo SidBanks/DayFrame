@@ -235,6 +235,8 @@ function compareSnapshot(
 
 function referenceKey(reference: DurableOccurrenceReference): string {
   const value = reference;
+  if (value.sourceKind === "acceptedAllocation")
+    return `acceptedAllocation|${value.realizationId}|${value.acceptedClaimId}|${value.scheduledSubjectId}`;
   if (value.sourceKind === "manualEvent")
     return `manualEvent|${value.manualEvent.id}|${value.manualEvent.incarnationId}`;
   if (value.sourceKind === "work")

@@ -84,6 +84,12 @@ function targetLabel(
     );
     return source?.title ?? "previous manual event";
   }
+  if (target.sourceKind === "acceptedAllocation")
+    return target.scheduleRole === "productiveGoalWork"
+      ? "accepted Goal work"
+      : target.scheduleRole === "supportActivity"
+        ? "accepted support activity"
+        : "accepted Buffer protection";
   const source = state.shiftDefinitions.find(
     (item) =>
       item.id === target.shiftDefinition.id &&
@@ -107,6 +113,8 @@ function semanticSummary(decision: PlanDecisionV1, target: string): string {
 
 function occurrenceContext(decision: PlanDecisionV1): string {
   const target = decision.target;
+  if (target.sourceKind === "acceptedAllocation")
+    return `${target.scheduleRole} on ${target.userDayDate}`;
   if (target.sourceKind === "manualEvent") return "Manual event";
   if (target.sourceKind === "work") return `Work occurrence on ${target.coordinate.localStartDate}`;
   const coordinate = target.coordinate;

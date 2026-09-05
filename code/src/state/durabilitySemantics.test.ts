@@ -168,6 +168,8 @@ describe("durability semantics", () => {
       goalStructure: { status: "removed" },
       goalPlanning: { status: "removed" },
       composition: { status: "removed" },
+      proposals: { status: "removed" },
+      realizations: { status: "removed" },
       ...input,
     } as Omit<ClearLocalDataResult, "status" | "authorities" | "previewCleared">;
     const result: ClearLocalDataResult = {
@@ -185,6 +187,8 @@ describe("durability semantics", () => {
         goalStructure: legacyFields.goalStructure,
         goalPlanning: legacyFields.goalPlanning,
         composition: legacyFields.composition,
+        proposals: legacyFields.proposals,
+        realizations: legacyFields.realizations,
       },
       previewCleared: true,
     };

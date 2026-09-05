@@ -4,17 +4,24 @@ import type { LocalDateString } from "../shifts/types.js";
 import type { TimeString, Weekday } from "../time/types.js";
 import { validatePlanPublicationBatch } from "./historicalPlanValidation.js";
 import type { GoalId, GoalMeasurementPolicyReferenceV1, GoalStatus } from "../goals/goal.js";
+import {
+  realizedScheduleReference,
+  type RealizedScheduleFactV1,
+  type RealizedScheduleReferenceV1,
+  type AcceptedScheduleRoleV1,
+} from "../planning/realizedScheduleIdentity.js";
 
 export const HISTORICAL_PLAN_SURFACE_VERSION = 1 as const;
 export const PLAN_PUBLICATION_BATCH_VERSION = 1 as const;
 export const HISTORICAL_PLAN_DAY_PUBLICATION_VERSION = 1 as const;
 export const HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION = 1 as const;
 export const HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION = 2 as const;
+export const HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION = 3 as const;
 export const HISTORICAL_PLAN_TITLE_MAX_LENGTH = 200;
 
 export type PlanPublicationBatchId = string & { readonly __planPublicationBatchId: unique symbol };
 export type PlanPublicationBatchIdAllocator = () => PlanPublicationBatchId;
-export type HistoricalPlanSourceFamily = "template" | "work" | "manualEvent";
+export type HistoricalPlanSourceFamily = "template" | "work" | "manualEvent" | "acceptedAllocation";
 export type HistoricalPlanContext =
   | { state: "scheduled"; startsAt: string; endsAt: string }
   | { state: "unplaced" | "omitted" | "blocked" };
@@ -38,9 +45,22 @@ export type HistoricalPlannedOccurrenceSnapshotV2 = Omit<
   /** compositeId, parentOccurrenceId, pairingId, relationshipId, relationshipRevision */
   composition?: [string, string, string, string, number];
 };
+export type HistoricalRealizedScheduleSnapshotV3 = {
+  version: typeof HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION;
+  reference: RealizedScheduleReferenceV1;
+  sourceFamily: "acceptedAllocation";
+  scheduleRole: AcceptedScheduleRoleV1;
+  realizedSchedule: RealizedScheduleFactV1;
+  title: string;
+  category: BlockCategory;
+  plan: { state: "scheduled"; startsAt: string; endsAt: string };
+  timing: { kind: "timed" };
+  goals?: HistoricalGoalProvenanceV1[];
+};
 export type HistoricalPlannedOccurrenceSnapshot =
   | HistoricalPlannedOccurrenceSnapshotV1
-  | HistoricalPlannedOccurrenceSnapshotV2;
+  | HistoricalPlannedOccurrenceSnapshotV2
+  | HistoricalRealizedScheduleSnapshotV3;
 export type HistoricalOccurrenceTimingSemantics =
   | { coverage: "unavailableLegacy" }
   | { coverage: "available"; kind: HistoricalOccurrenceTimingV2["kind"] };
@@ -50,7 +70,29 @@ export function historicalOccurrenceTimingSemantics(
 ): HistoricalOccurrenceTimingSemantics {
   return snapshot.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION
     ? { coverage: "available", kind: snapshot.timing.kind }
-    : { coverage: "unavailableLegacy" };
+    : snapshot.version === HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION
+      ? { coverage: "available", kind: "timed" }
+      : { coverage: "unavailableLegacy" };
+}
+
+export function createHistoricalRealizedScheduleSnapshot(input: {
+  fact: RealizedScheduleFactV1;
+  title: string;
+  category: BlockCategory;
+  goals?: HistoricalGoalProvenanceV1[];
+}): HistoricalRealizedScheduleSnapshotV3 {
+  return {
+    version: 3,
+    reference: realizedScheduleReference(input.fact),
+    sourceFamily: "acceptedAllocation",
+    scheduleRole: input.fact.scheduleRole,
+    realizedSchedule: structuredClone(input.fact),
+    title: input.title,
+    category: input.category,
+    plan: { state: "scheduled", startsAt: input.fact.startsAt, endsAt: input.fact.endsAt },
+    timing: { kind: "timed" },
+    ...(input.goals === undefined ? {} : { goals: structuredClone(input.goals) }),
+  };
 }
 export type HistoricalGoalProvenanceV1 = {
   version: 1;
@@ -148,6 +190,7 @@ export function createPlanPublicationBatch(
 export function cloneHistoricalPlanSnapshot(
   snapshot: HistoricalPlannedOccurrenceSnapshot,
 ): HistoricalPlannedOccurrenceSnapshot {
+  if (snapshot.version === 3) return structuredClone(snapshot);
   return {
     ...snapshot,
     reference: structuredClone(snapshot.reference),

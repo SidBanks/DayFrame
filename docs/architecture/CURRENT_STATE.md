@@ -2,6 +2,53 @@
 
 # Current State
 
+## Phase 9 — Accepted Allocation Realization V1
+
+Task 9.3 closes the accepted-authority-to-scheduled-reality boundary. A current complete `AcceptedAllocationV2` is realized through one deterministic, immutable `RealizationV1` into first-class productive Goal work, support activity, and Buffer protection facts. The dedicated `realizationAuthority` store is schema 11; one transaction persists the record and its entire footprint, restart retries are idempotent, conflicts fail closed, and acceptance remains intact when installation cannot proceed.
+
+Capacity represents accepted-but-unrealized claims as bounded liabilities and replaces those liabilities with occupied/protected realized facts after success, preventing double consumption. Preview reads fixed realized facts without creating candidates, flexible placement treats them as immovable authority, successful realization stales the prior Preview, and explicit HistoricalPlan publication freezes them as V3 snapshots. Backup V12 and combined restore preserve the authority atomically; older migrations install an empty realization authority and V11 downgrade refuses loss.
+
+Task 9.2.0 resolves the semantic portion of the Task 9.3 architecture reopen with an
+implementation-ready, documentation-only Goal-Demand resource-footprint association
+architecture. A reusable authored Demand Resource Footprint Specification and one
+explicit Demand-specific association distinguish productive-only authority from
+unspecified input, create deterministic hypothetical Candidate Parents, and project
+exact per-session productive/support/Buffer claims without scheduled occurrences.
+Goal links retain their existing meaning; Task 8.4 geometry can cross only through an
+explicit normalized source snapshot. The contract fixes requiredness, variants,
+cross-user-day/coverage rules, freshness, Goal Planning V2 persistence, Backup V11
+migration, and downstream Feasibility-to-Accepted-Allocation propagation. No production
+code or tests changed. Task 9.2.1 is now authorized; Task 9.2.2 and Task 9.3 remain
+blocked in sequence.
+
+Task 9.2 implements bounded ordinary Constructive Proposal V1 over exact Task 9.1
+Allocation, typed No-Proposal outcomes, durable revisioned lifecycle history, explicit
+modification/rejection/acceptance evidence, and immutable conflict-safe Accepted
+Allocation authority. Every acceptance fully revalidates current dependencies and
+atomically records ProposalDecision, Accepted Allocation, lifecycle, and conflicting
+Proposal staleness. Schema 10 and Backup V10 preserve exact authority; older backups
+acquire explicit empty Proposal state and lossy V9 export is refused. Acceptance is
+unrealized and creates no schedule, publication, execution, preference, recurrence,
+Friction, or Progress truth. All 114 test files / 1,051 tests and all hard gates pass.
+The production bundle is 647,952 initial raw, 165,487 initial gzip, 53,187 largest
+lazy, and 895,026 total bytes; gzip-headroom and total architecture-review warnings
+remain. Architecture did not reopen. Recommended next is Task 9.3, an explicit
+Accepted Allocation realization increment.
+
+Task 9.1 implements deterministic Competing Demand Set V1 and provisional Allocation
+V1 over exact Phase 8 Capacity, Demand Projection, Goal Priority, and Feasibility
+contracts. Positive overlap between feasible half-open claims defines competition;
+connected components and singletons preserve exact demand identity. Governed bounded
+search produces non-overlapping maximal alternatives, exact session partitions,
+requested/assigned/unmet accounting, residual Capacity, scoped priority ranking,
+technical tie-breaks, reasons, provenance, and freshness without Proposal, acceptance,
+scheduling, Friction, Progress, persistence, schema, or backup changes. All 111 test
+files / 1,032 tests and all gates pass. The production bundle is 671,863 initial raw,
+169,998 initial gzip, 53,187 largest lazy, and 867,085 total bytes; hard limits pass,
+but only two gzip bytes remain and the total-size architecture-review warning remains.
+Architecture did not reopen. Recommended next is a bounded Proposal/user-decision
+increment that preserves explicit acceptance authority.
+
 Task 8.3 implements first-class Goal Demand Intent V1 and independent Goal Priority
 V1 authored authority plus disposable Demand Projection V1. Complete Demand/Priority
 revision histories persist in a sibling authority and round-trip through Backup V8;
@@ -2120,6 +2167,38 @@ are complete and ready for Phase 9 competing-demand and Allocation work.
 
 **Evidence:** `TASK_8.5_CAPACITY_AND_GOAL_SPECIFIC_FEASIBILITY_V1_RESULT.md`.
 
+## Accepted Resource Footprint Propagation V1
+
+Task 9.2.1 adds explicit reusable Demand Resource Footprint Specifications and
+Demand-specific associations under Goal Planning V2. Feasibility projects and
+proves complete productive, support-activity, and Buffer-protection Candidate
+Parent footprints; Competition and Allocation consider all claims; Proposal and
+new AcceptedAllocation V2 records preserve the exact authorized footprint.
+
+Only productive minutes satisfy Demand. Support consumes Capacity as activity;
+Buffer protects Capacity as non-activity. Legacy accepted V1 records receive no
+inferred authority. IndexedDB remains schema 10; Backup V11 is canonical and
+lossy V10 export is refused. Task 9.3 remains blocked pending Task 9.2.2 identity.
+
+**Evidence:** `TASK_9.2.1_ACCEPTED_RESOURCE_FOOTPRINT_PROPAGATION_V1_RESULT.md`.
+
+## Realized Schedule Identity Foundation V1
+
+Task 9.2.2 defines the downstream identity contract required to realize complete
+AcceptedAllocation V2 authority. `acceptedAllocation` is now a first-class durable
+schedule-reference and publication origin. Productive Goal work, support activity,
+and Buffer protection are separate roles: productive/support own activity time and
+are execution-capable; Buffer protects time and is structurally non-executable.
+
+Pure factories derive deterministic one-claim/one-subject identities with exact
+accepted geometry, canonical user-day, Realization seam, decision/Proposal,
+Goal/Demand, Candidate Parent, component, and target lineage. HistoricalPlan V3
+snapshots can freeze those facts while V1/V2 history stays unchanged. No realization
+store or runtime schedule path exists yet. Schema 10 and Backup V11 remain current.
+The Task 9.3 architecture reopen is closed; Task 9.3 is now unblocked.
+
+**Evidence:** `TASK_9.2.2_REALIZED_SCHEDULE_IDENTITY_FOUNDATION_V1_RESULT.md`.
+
 The current execution boundary is:
 
 ```text
@@ -2202,6 +2281,57 @@ before Backup V3 and broader release.
 Task 3.14A provided an interruption-safe, domain-format-neutral authority replacement transaction across Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan. A strict startup journal, verified target/recovery staging, source recheck, atomic two-participant IndexedDB replacement, verified local writes, anti-resurrection preservation, deterministic roll-forward/rollback, and coherent runtime installation are executable. Store bootstrap recovery precedes ordinary authority initialization. Backup V3 was not yet implemented at this historical point; Task 3.14 subsequently completed it.
 
 **Evidence:** `CHECKPOINT_Phase_3_Durable_Cross_Storage_Restore_Foundation.md`, Task 3.14A.
+
+## Phase 9 Planning Scope Contract
+
+Task 9.4 establishes five separately typed canonical user-day scopes: Planning Data
+Horizon, Proposal Horizon, Review Scope, Preview Range, and Publication Range. All
+use finite half-open `[startUserDayDate, endUserDayDateExclusive)` geometry. The
+planning-horizon resolver records requested/effective bounds and structured
+expansion reasons; Proposal productive authority remains bounded while complete
+support/Buffer footprints must be covered. Review is non-authoritative and defaults
+from the configured preview range without durable navigation state. Preview coverage
+is separate from freshness, publication requires an explicit fully covered range,
+and the planning review query preserves scheduled, accepted, proposed, historical,
+coverage, and display-clipping epistemic distinctions. Schema 11 and Backup V12 are
+unchanged.
+
+## Phase 9 Canonical Planner and Month
+
+Task 9.5 makes Month the first canonical Planner overview over one bounded
+`queryPlanningReview` call per displayed month. A deterministic presentation adapter
+keeps derived Work/Commitments, realized Goal work, support, Buffer protection,
+accepted-unrealized authority, Proposals, Preview coverage/freshness, planning-data
+coverage, and HistoricalPlan coverage explicit. Selected-day presentation filters
+the already-bounded month result without becoming an authority or date model.
+Legacy Review Schedule/Preview and DayVisualizer remain the detailed corrective
+workflow; Today remains operationally separate. Navigation remains session state,
+and schema 11/Backup V12 are unchanged.
+
+## Phase 9 Canonical Review Schedule
+
+Task 9.6 composes the Task 9.4 planning query, Task 9.5 presentation semantics,
+existing Preview/DayVisualizer, Friction/SuggestedFix, and Proposal authority into a
+bounded Review Schedule workflow. Pure ordered reason codes derive review readiness
+and publication readiness. Incomplete planning coverage, missing/stale/mismatched
+Preview, unresolved Friction, accepted-unrealized authority, and invalid publication
+geometry fail closed; actionable Proposal is explicit nonblocking decision attention.
+Proposal accept/reject uses existing commands, prevents duplicate pending action, and
+re-queries canonical truth. Publication readiness is exposed, but a second publish
+command is intentionally not added because current publication materializes through
+Preview generation. No reviewed flag/store exists; schema 11 and Backup V12 remain.
+
+## Phase 9 Explicit Publication Workflow
+
+Task 9.7 separates Preview generation from publication. Review Schedule explicitly
+converts its bounded Review Scope into a distinct Publication Range and calls the
+single `publishScheduleRange` command only after derived readiness. The command
+requeries canonical planning truth, verifies complete coverage, a current covering
+Preview, zero unresolved Friction, zero accepted-unrealized claims, and the reviewed
+source fingerprint, then atomically commits the existing immutable HistoricalPlan
+batch. Exact retries are idempotent; changed later schedule truth may create another
+immutable publication. Publication creates no current schedule, execution, Progress,
+acceptance, or realization authority. Schema 11 and Backup V12 remain unchanged.
 
 Task 3.14A.2 corrected the concrete restore seam: durable payloads no longer masquerade as private runtime snapshots. Active, Profiles, PlanDecision, ExecutionHistory, and HistoricalPlan each reconstruct settled runtime authority from verified durable evidence, and one store-owned coordinator is available before readiness for deterministic interrupted recovery. Backup V3 remained pending at that point and is now implemented by Task 3.14.
 

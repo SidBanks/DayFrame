@@ -91,15 +91,22 @@ describe("Backup V8 integration", () => {
     });
     const restarted = setup();
     expect(await restarted.whenReady()).toEqual({ status: "ready" });
-    expect(restarted.exportGoalPlanningAuthority()).toEqual(exported.backup.data.goalPlanning);
+    expect(restarted.exportGoalPlanningAuthority()).toEqual({
+      ...exported.backup.data.goalPlanning,
+      version: 2,
+      footprintSpecifications: [],
+      footprintAssociations: [],
+    });
     const { goalPlanning: omitted, ...v7data } = exported.backup.data;
     void omitted;
     const v7 = createDayFrameBackupV7(v7data, exported.backup.exportedAt);
     expect((await restarted.importBackupV7(v7)).status).toBe("restoredV7");
     expect(restarted.exportGoalPlanningAuthority()).toEqual({
-      version: 1,
+      version: 2,
       demands: [],
       priorities: [],
+      footprintSpecifications: [],
+      footprintAssociations: [],
     });
   });
   it("rejects dangling Goal planning authority before restore", async () => {

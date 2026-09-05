@@ -169,7 +169,15 @@ describe("real five-participant restore composition", () => {
       goalStructure: { version: 1 as const, relationships: [], milestones: [] },
       goalPlanning: { version: 1 as const, demands: [], priorities: [] },
       composition: { version: 1 as const, relationships: [], decisions: [] },
+      proposals: {
+        version: 1 as const,
+        proposals: [],
+        candidates: [],
+        decisions: [],
+        acceptedAllocations: [],
+      },
     };
+    await store.initializeRestoreAuthority();
     const composition = getDayFrameRestoreComposition(store, DAYFRAME_RESTORE_CAPABILITY);
     expect(await composition.coordinator.restore(target)).toEqual({ status: "completed" });
     expect(store.getState().schedulingPreferences.dayBoundaryStartTime).toBe("03:00");
@@ -196,6 +204,7 @@ describe("real five-participant restore composition", () => {
       executionHistoryIndexedDb: createExecutionHistoryIndexedDb({ storage: db }),
       historicalPlanSurface: createHistoricalPlanSurface({ storage: db }),
     });
+    await first.initializeRestoreAuthority();
     const composition = getDayFrameRestoreComposition(first, DAYFRAME_RESTORE_CAPABILITY);
     const recovery = Object.fromEntries(
       await Promise.all(
@@ -272,6 +281,7 @@ describe("real five-participant restore composition", () => {
           goalStructure: target.goalStructure,
           goalPlanning: target.goalPlanning,
           composition: target.composition,
+          proposals: target.proposals,
         })
       ).status,
     ).toBe("success");

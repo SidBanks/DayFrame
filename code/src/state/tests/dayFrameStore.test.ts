@@ -1375,6 +1375,8 @@ describe("dayFrameStore", () => {
       "goalStructure",
       "goalPlanning",
       "composition",
+      "proposals",
+      "realizations",
     ]);
     expect(store.getDurabilityStatus()).toEqual({
       activeState: "durable",

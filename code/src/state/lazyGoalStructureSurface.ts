@@ -1,6 +1,7 @@
 import type { GoalStructureAuthorityV1 } from "../core/planning/goalStructure.js";
 import type { GoalStructureSurface, createGoalStructureSurface } from "./goalStructureSurface.js";
 import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY } from "./dayFrameRuntimeAuthority.js";
+import { createLazySurface } from "./lazySurface.js";
 
 export function createLazyGoalStructureSurface(
   options: Parameters<typeof createGoalStructureSurface>[0],
@@ -32,6 +33,16 @@ export function createLazyGoalStructureSurface(
         dependencies: [],
         dependencyFingerprint: "unavailable",
       },
+    getGoalStructureRelationshipRevision: (...args) =>
+      (
+        surface?.getGoalStructureRelationshipRevision as
+          | ((...values: never[]) => unknown)
+          | undefined
+      )?.(...args) ?? { status: "notFound" },
+    getGoalStructureMilestoneRevision: (...args) =>
+      (
+        surface?.getGoalStructureMilestoneRevision as ((...values: never[]) => unknown) | undefined
+      )?.(...args) ?? { status: "notFound" },
     exportGoalStructureAuthority: () => surface?.exportGoalStructureAuthority() ?? empty(),
     getGoalStructureIngressStatus: () =>
       surface?.getGoalStructureIngressStatus() ?? { status: "initializing" },
@@ -59,47 +70,25 @@ export function createLazyGoalStructureSurface(
     "subscribeGoalStructure",
     "getRuntimeAuthorityAdapter",
   ];
-  return new Proxy(
-    {},
-    {
-      ownKeys: () => keys,
-      getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
-      get(_target, key: string) {
-        if (sync[key]) return sync[key];
-        if (key === "getRuntimeAuthorityAdapter")
-          return (capability: symbol) => {
-            if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
-              throw new Error("Invalid capability");
-            return {
-              id: "goalStructure",
-              captureRuntimeSnapshot: () =>
-                surface?.getRuntimeAuthorityAdapter(capability).captureRuntimeSnapshot() ?? {
-                  authority: empty(),
-                  desired: empty(),
-                  ingress: { status: "initializing" },
-                  durability: "unknown",
-                },
-              installRuntimeExact: (value: never) =>
-                surface?.getRuntimeAuthorityAdapter(capability).installRuntimeExact(value),
-            };
-          };
-        if (key === "subscribeGoalStructure")
-          return (listener: () => void) =>
-            surface?.subscribeGoalStructure(listener) ?? (() => undefined);
-        if (key.startsWith("get"))
-          return (...args: unknown[]) =>
-            surface
-              ? (surface[key as keyof GoalStructureSurface] as (...values: unknown[]) => unknown)(
-                  ...args,
-                )
-              : { status: "notFound" };
-        return (...args: unknown[]) =>
-          load().then((value) =>
-            (value[key as keyof GoalStructureSurface] as (...values: unknown[]) => unknown)(
-              ...args,
-            ),
-          );
-      },
+  return createLazySurface(keys, load, {
+    ...sync,
+    subscribeGoalStructure: (listener: () => void) =>
+      surface?.subscribeGoalStructure(listener) ?? (() => undefined),
+    getRuntimeAuthorityAdapter: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
+      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
+        throw new Error("Invalid capability");
+      return {
+        id: "goalStructure" as const,
+        captureRuntimeSnapshot: () =>
+          surface?.getRuntimeAuthorityAdapter(capability).captureRuntimeSnapshot() ?? {
+            authority: empty(),
+            desired: empty(),
+            ingress: { status: "initializing" as const },
+            durability: "unknown" as const,
+          },
+        installRuntimeExact: (value: never) =>
+          surface?.getRuntimeAuthorityAdapter(capability).installRuntimeExact(value),
+      };
     },
-  ) as GoalStructureSurface;
+  });
 }

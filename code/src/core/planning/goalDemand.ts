@@ -7,6 +7,11 @@ import {
   type PlanningProvenanceV1,
   type PlanningRevision,
 } from "./planningFoundation.js";
+import {
+  validateDemandResourceAuthority,
+  type DemandResourceFootprintAssociationV1,
+  type DemandResourceFootprintSpecV1,
+} from "./demandResourceFootprint.js";
 
 export const GOAL_DEMAND_AUTHORITY_VERSION = 1 as const;
 export const DEMAND_PROJECTION_POLICY = { id: "goal-demand-projection", version: 1 } as const;
@@ -68,6 +73,14 @@ export type GoalPlanningAuthorityV1 = {
   demands: GoalDemandIntentV1[];
   priorities: GoalPriorityV1[];
 };
+export type GoalPlanningAuthorityV2 = {
+  version: 2;
+  demands: GoalDemandIntentV1[];
+  priorities: GoalPriorityV1[];
+  footprintSpecifications: DemandResourceFootprintSpecV1[];
+  footprintAssociations: DemandResourceFootprintAssociationV1[];
+};
+export type GoalPlanningAuthority = GoalPlanningAuthorityV2;
 export type GoalPlanningIssue = {
   code:
     | "invalidRecord"
@@ -78,8 +91,36 @@ export type GoalPlanningIssue = {
   recordId?: string;
 };
 
-export function emptyGoalPlanningAuthority(): GoalPlanningAuthorityV1 {
-  return { version: 1, demands: [], priorities: [] };
+export function emptyGoalPlanningAuthority(): GoalPlanningAuthorityV2 {
+  return {
+    version: 2,
+    demands: [],
+    priorities: [],
+    footprintSpecifications: [],
+    footprintAssociations: [],
+  };
+}
+export function migrateGoalPlanningAuthorityV1(
+  value: GoalPlanningAuthorityV1,
+): GoalPlanningAuthorityV2 {
+  return {
+    version: 2,
+    demands: structuredClone(value.demands),
+    priorities: structuredClone(value.priorities),
+    footprintSpecifications: [],
+    footprintAssociations: [],
+  };
+}
+export function downgradeGoalPlanningAuthorityV2(
+  value: GoalPlanningAuthorityV2,
+): GoalPlanningAuthorityV1 | undefined {
+  return value.footprintSpecifications.length || value.footprintAssociations.length
+    ? undefined
+    : {
+        version: 1,
+        demands: structuredClone(value.demands),
+        priorities: structuredClone(value.priorities),
+      };
 }
 export function directPlanningAuthoringProvenance(): PlanningProvenanceV1 {
   return { version: 1, role: "authoredAuthority", origin: { kind: "directAuthoring" } };
@@ -91,14 +132,20 @@ export function validateGoalPlanningAuthority(
   value: unknown,
   goals?: readonly GoalV1[],
 ):
-  | { status: "valid"; authority: GoalPlanningAuthorityV1 }
+  | { status: "valid"; authority: GoalPlanningAuthorityV2 }
   | { status: "invalid"; issues: GoalPlanningIssue[] } {
   if (
     !record(value) ||
-    value.version !== 1 ||
-    Object.keys(value).sort().join() !== "demands,priorities,version" ||
+    (value.version !== 1 && value.version !== 2) ||
     !Array.isArray(value.demands) ||
     !Array.isArray(value.priorities)
+  )
+    return { status: "invalid", issues: [{ code: "invalidRecord" }] };
+  if (
+    (value.version === 1 && Object.keys(value).sort().join() !== "demands,priorities,version") ||
+    (value.version === 2 &&
+      Object.keys(value).sort().join() !==
+        "demands,footprintAssociations,footprintSpecifications,priorities,version")
   )
     return { status: "invalid", issues: [{ code: "invalidRecord" }] };
   const demands = value.demands.filter(validateDemand).map((item) => structuredClone(item));
@@ -124,6 +171,12 @@ export function validateGoalPlanningAuthority(
         issues.push({ code: "invalidRevisionHistory", recordId: id });
     }
   }
+  const resource = validateDemandResourceAuthority({
+    specifications: value.version === 2 ? value.footprintSpecifications : [],
+    associations: value.version === 2 ? value.footprintAssociations : [],
+    demandIds: new Set(demands.map((item) => item.id)),
+  });
+  if (resource.status === "invalid") issues.push({ code: "invalidRecord" });
   const activePriorities = latestById(priorities).filter((item) => item.status === "active");
   for (let index = 0; index < activePriorities.length; index++)
     for (let other = index + 1; other < activePriorities.length; other++) {
@@ -137,9 +190,11 @@ export function validateGoalPlanningAuthority(
     : {
         status: "valid",
         authority: {
-          version: 1,
+          version: 2,
           demands: demands.sort(compareRecord),
           priorities: priorities.sort(compareRecord),
+          footprintSpecifications: resource.status === "valid" ? resource.specifications : [],
+          footprintAssociations: resource.status === "valid" ? resource.associations : [],
         },
       };
 }
@@ -223,14 +278,17 @@ export function validatePriority(value: unknown): value is GoalPriorityV1 {
   );
 }
 
-export function currentDemandsForGoal(authority: GoalPlanningAuthorityV1, goalId: GoalId) {
+export function currentDemandsForGoal(
+  authority: GoalPlanningAuthorityV1 | GoalPlanningAuthorityV2,
+  goalId: GoalId,
+) {
   return latestById(authority.demands)
     .filter((item) => item.goalId === goalId && item.lifecycle === "active")
     .sort(compareRecord)
     .map((item) => structuredClone(item));
 }
 export function applicablePriorityForGoal(
-  authority: GoalPlanningAuthorityV1,
+  authority: GoalPlanningAuthorityV1 | GoalPlanningAuthorityV2,
   goalId: GoalId,
   userDayDate: LocalDateString,
 ) {
@@ -243,7 +301,7 @@ export function applicablePriorityForGoal(
   return selected ? structuredClone(selected) : undefined;
 }
 export function resolveDemandRevision(
-  authority: GoalPlanningAuthorityV1,
+  authority: GoalPlanningAuthorityV1 | GoalPlanningAuthorityV2,
   id: PlanningFactId,
   revision: number,
 ) {
@@ -253,7 +311,7 @@ export function resolveDemandRevision(
     : { status: "notFound" as const };
 }
 export function resolvePriorityRevision(
-  authority: GoalPlanningAuthorityV1,
+  authority: GoalPlanningAuthorityV1 | GoalPlanningAuthorityV2,
   id: PlanningFactId,
   revision: number,
 ) {

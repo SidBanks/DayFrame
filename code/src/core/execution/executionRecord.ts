@@ -66,7 +66,12 @@ export type ExecutionSubject =
   | { kind: "planned"; reference: DurableOccurrenceReference }
   | { kind: "unplanned" };
 
-export type ExecutionSnapshotFamily = "template" | "work" | "manualEvent" | "unplanned";
+export type ExecutionSnapshotFamily =
+  | "template"
+  | "work"
+  | "manualEvent"
+  | "acceptedAllocation"
+  | "unplanned";
 export type ExecutionPlanContext =
   | { state: "scheduled"; startsAt: string; endsAt: string }
   | { state: "unplaced" | "omitted" | "blocked" | "unplanned" };
@@ -451,6 +456,11 @@ function validateSubject(value: unknown, issues: string[]): void {
       issues.push("subject reference version is unsupported");
     else if (validation.status === "invalid")
       issues.push(...validation.issues.map((issue) => `subject.reference: ${issue}`));
+    else if (
+      validation.reference.sourceKind === "acceptedAllocation" &&
+      validation.reference.scheduleRole === "bufferProtection"
+    )
+      issues.push("Buffer protection is not an execution subject");
   } else if (value.kind === "unplanned") exact(value, ["kind"], [], "subject", issues);
   else issues.push("subject.kind is invalid");
 }
@@ -461,7 +471,11 @@ function validateSnapshot(value: unknown, issues: string[]): void {
     return;
   }
   exact(value, ["sourceFamily", "title", "category", "userDay", "plan"], [], "snapshot", issues);
-  if (!["template", "work", "manualEvent", "unplanned"].includes(value.sourceFamily as string))
+  if (
+    !["template", "work", "manualEvent", "acceptedAllocation", "unplanned"].includes(
+      value.sourceFamily as string,
+    )
+  )
     issues.push("snapshot.sourceFamily is invalid");
   if (
     typeof value.title !== "string" ||
@@ -563,6 +577,12 @@ function validateSubjectSnapshot(
       issues.push("snapshot source family does not match planned reference");
     if (record(snapshot.plan) && snapshot.plan.state === "unplanned")
       issues.push("planned subject cannot use unplanned plan state");
+    if (
+      subject.reference.sourceKind === "acceptedAllocation" &&
+      record(snapshot.plan) &&
+      snapshot.plan.state !== "scheduled"
+    )
+      issues.push("realized schedule subject requires scheduled plan state");
   }
 }
 

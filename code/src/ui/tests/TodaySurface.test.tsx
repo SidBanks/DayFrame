@@ -135,9 +135,18 @@ describe("TodaySurface", () => {
       }),
     ];
     const elapsed = [timed("Earlier plan", "elapsed")];
-    const unplaced = { ...item("Unplaced").occurrence, plan: { state: "unplaced" as const } };
-    const omitted = { ...item("Omitted").occurrence, plan: { state: "omitted" as const } };
-    const blocked = { ...item("Blocked").occurrence, plan: { state: "blocked" as const } };
+    const unplaced = {
+      ...item("Unplaced").occurrence,
+      plan: { state: "unplaced" as const },
+    } as never;
+    const omitted = {
+      ...item("Omitted").occurrence,
+      plan: { state: "omitted" as const },
+    } as never;
+    const blocked = {
+      ...item("Blocked").occurrence,
+      plan: { state: "blocked" as const },
+    } as never;
     render(
       <TodaySurface
         {...props(

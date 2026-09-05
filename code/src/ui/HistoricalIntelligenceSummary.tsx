@@ -616,6 +616,10 @@ function exclusionCopy(reason: "excludedUnplaced" | "excludedOmitted" | "exclude
       ? "This occurrence was omitted from the effective historical plan."
       : "This occurrence was blocked from placement.";
 }
-function sourceLabel(value: "template" | "work" | "manualEvent") {
-  return value === "manualEvent" ? "manual event" : value;
+function sourceLabel(value: "template" | "work" | "manualEvent" | "acceptedAllocation") {
+  return value === "manualEvent"
+    ? "manual event"
+    : value === "acceptedAllocation"
+      ? "accepted allocation"
+      : value;
 }

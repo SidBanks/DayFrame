@@ -2,6 +2,15 @@
 
 # Changelog
 
+## 2026-09-05 — Task 9.3 Accepted Allocation Realization V1
+
+- Added deterministic `RealizationV1`, structured result/reason/conflict models, complete-footprint staging, and exact productive/support/Buffer mapping.
+- Added the schema-11 `realizationAuthority` store and atomic, idempotent realization surface with restart validation and focused query APIs.
+- Wired automatic post-acceptance realization while preserving distinct acceptance and realization outcomes.
+- Integrated realized truth with Capacity, Preview placement/freshness, HistoricalPlan V3 publication, full clear, and combined restore.
+- Added Backup V12 migration, validation, export/import dispatch, referential checks, and V11 downgrade protection.
+- Added realization, conflict, atomic-failure, Capacity handoff, backup migration, restore, and regression coverage.
+
 This document records significant architectural, planning, governance, and
 implementation milestones for the DayFrame project.
 
@@ -13,6 +22,46 @@ Historical task specifications and result artifacts remain the detailed executio
 record.
 
 ---
+
+# 2026-09-04 — Goal-Demand Resource Footprint Association Architecture Defined
+
+Task 9.2.0 resolves the missing pre-scheduling association semantics exposed by the
+Task 9.3/9.2.1 stop conditions. The accepted architecture introduces reusable authored
+Demand Resource Footprint Specifications plus one explicit Demand-specific selection,
+keeps missing authority distinct from productive-only, and defines deterministic
+Candidate Parent projection of exact productive, support, and Buffer claims. It
+preserves generic Goal-link meaning, reuses Task 8.4 concepts only through explicit
+normalized source evidence, and fixes requiredness, variants, bounded user-day rules,
+freshness, Goal Planning V2/Backup V11 migration, and downstream implementation
+contracts. This is documentation-only. Task 9.2.1 is authorized; Task 9.2.2 and Task
+9.3 remain blocked in sequence.
+
+# 2026-09-04 — Constructive Proposal and Accepted Allocation V1 Implemented
+
+Task 9.2 adds bounded ordinary Constructive Proposals over exact Allocation results,
+typed No-Proposal outcomes, immutable lifecycle/successor history, explicit
+modification and rejection evidence, mandatory current-input revalidation, and atomic
+acceptance into distinct ProposalDecision and unrealized Accepted Allocation
+authority. Exact claim conflicts are prevented without creating schedule,
+publication, execution, preference, recurrence, Friction, or Progress truth. Schema
+10, Backup V10, protected restore/full-clear, older-backup empty migration, and lossy
+V9-export refusal preserve the authority boundary. All 114 test files / 1,051 tests
+and hard quality/bundle gates pass at 647,952 initial raw, 165,487 gzip, 53,187
+largest lazy, and 895,026 total bytes; warning-level gzip headroom and total-size
+architecture review remain acknowledged.
+
+# 2026-09-04 — Competing Demand and Allocation V1 Implemented
+
+Task 9.1 adds exact feasible-claim competition components and singleton contexts plus
+a governed, deterministic, bounded Allocation policy. Alternatives conserve Capacity,
+retain exact provisional session partitions, apply Goal Priority at its authored scope,
+report satisfaction/unmet demand and residual Capacity, and carry identity, freshness,
+provenance, and structured rationale. Allocation remains lazy, disposable, and
+non-authoritative: no Proposal, acceptance, scheduling, Friction, Progress,
+persistence, schema, or backup behavior changed. All 111 test files / 1,032 tests and
+quality gates pass. Bundle hard policy passes at 671,863 initial raw, 169,998 initial
+gzip, 53,187 largest lazy, and 867,085 total bytes, with two gzip bytes of hard-limit
+headroom and an acknowledged total-size architecture-review warning.
 
 # 2026-09-04 — Capacity and Goal-Specific Feasibility V1 Implemented
 
@@ -1534,3 +1583,81 @@ remains the criterion for roadmap-phase completion.
 
 Earlier architectural exploration and design work preceded publication of Version
 1.0.0 and remains part of DayFrame's pre-publication project history.
+
+## 2026-09-05 — Task 9.4 Planning Scope Convergence V1
+
+- Added separately typed half-open Planning Data Horizon, Proposal Horizon, Review
+  Scope, Preview Range, and Publication Range contracts and pure range utilities.
+- Centralized requested/effective horizon expansion with deterministic provenance,
+  including the engine's adjacent canonical-user-day context.
+- Required Proposal Planning Data Horizon coverage for the complete productive,
+  support, and Buffer footprint without widening productive authority.
+- Added Preview scope metadata and separate review coverage/freshness assessment.
+- Added explicit subset-capable Publication Range validation and a non-authoritative
+  planning review read model with full authority plus clipped display geometry.
+- Preserved IndexedDB schema 11, Backup V12, legacy inclusive-range adapters, and
+  all existing authority and DF-006 behavior.
+
+## 2026-09-05 — Task 9.5 Planner and Month Evolution V1
+
+- Connected Month to one bounded Task 9.4 planning-review query per displayed month.
+- Added deterministic semantic presentation for Work, direct Commitments, realized
+  Goal work, support, Buffer, accepted-unrealized claims, and Proposals.
+- Added accessible planning coverage, Preview coverage/freshness, publication,
+  loading, failure, partial/unknown, and known-empty states.
+- Preserved full versus visible interval geometry, stable semantic keys, and
+  selected-day filtering without duplicating authority.
+- Retained Review Schedule/Preview, DayVisualizer, Today, authoring, Friction, and
+  Proposal decisions as their existing bounded workflows.
+- Preserved schema 11, Backup V12, lazy Month architecture, and DF-006 behavior.
+
+## 2026-09-05 — Task 9.6 Review Schedule Evolution V1
+
+- Added deterministic review/publication readiness with ordered, explainable reason codes.
+- Composed one bounded canonical planning query with existing Preview, Friction, and
+  Proposal workflows in the lazy Review Schedule surface.
+- Added explicit summaries for planning coverage, Preview coverage/freshness,
+  conflicts, accepted-unrealized authority, Proposals, and prior publication.
+- Routed Proposal acceptance/rejection through existing Proposal authority commands,
+  with pending-state duplicate protection and canonical re-query.
+- Kept actionable Proposals nonblocking; incomplete coverage, Preview deficiencies,
+  Friction, and accepted-unrealized authority block readiness.
+- Deferred a second publication command while exposing readiness because existing
+  publication remains coupled to Preview generation.
+- Preserved schema 11, Backup V12, existing Preview/Friction behavior, and DF-006.
+
+## 2026-09-05 — Task 9.7 Explicit Publication Workflow V1
+
+- Removed automatic HistoricalPlan publication from Preview generation.
+- Added explicit Review Scope to Publication Range conversion and one canonical
+  `publishScheduleRange` command.
+- Added command-time planning, Preview, Friction, accepted-liability, and source-
+  fingerprint revalidation with typed fail-closed results.
+- Added atomic durable HistoricalPlan publication without exposing failed explicit
+  attempts as pending runtime history.
+- Added range-labelled accessible Publish/republish actions, pending protection,
+  durable success/error announcements, and canonical history requery.
+- Preserved HistoricalPlan V1/V2/V3, schema 11, Backup V12, current schedule
+  independence, and execution/Progress boundaries.
+
+## 2026-09-04 — Task 9.2.1 Accepted Resource Footprint Propagation V1
+
+- Added revisioned Demand Resource Footprint Specification and Association authority.
+- Added deterministic productive/support/Buffer Candidate Parent projection.
+- Propagated complete claims through Feasibility, Competition, Allocation, Proposal,
+  ProposalDecision scope, and AcceptedAllocation V2.
+- Added GoalPlanning V2, strict complete-authority validation, Backup V11, V10
+  migration marking, and lossy downgrade refusal while retaining schema 10.
+- Preserved schedule, execution, publication, recurrence, and Progress boundaries;
+  Task 9.3 remains blocked pending Task 9.2.2.
+
+## 2026-09-04 — Task 9.2.2 Realized Schedule Identity Foundation V1
+
+- Added first-class `acceptedAllocation` schedule-reference/publication origin.
+- Added distinct productive Goal-work, support-activity, and Buffer-protection facts
+  with deterministic IDs, exact accepted geometry, user-day, and full lineage.
+- Extended execution references for productive/support and structurally rejected
+  Buffer execution.
+- Added HistoricalPlan accepted-realization snapshot V3 with legacy V1/V2 readers.
+- Kept schema 10 and Backup V11; created no realization store or runtime instances.
+- Closed the remaining Task 9.3 identity architecture reopen and unblocked Task 9.3.

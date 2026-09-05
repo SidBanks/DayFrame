@@ -14,11 +14,16 @@ import {
   type DemandSatisfactionV1,
   type DemandSessionShapeV1,
   type GoalDemandIntentV1,
-  type GoalPlanningAuthorityV1,
+  type GoalPlanningAuthorityV2,
   type GoalPriorityLevel,
   type GoalPriorityV1,
   type UserDayHorizonV1,
 } from "../core/planning/goalDemand.js";
+import {
+  resolveDemandFootprintAssociation,
+  type DemandResourceFootprintAssociationV1,
+  type DemandResourceFootprintSpecV1,
+} from "../core/planning/demandResourceFootprint.js";
 import {
   createPlanningFactId,
   planningRevision,
@@ -78,8 +83,8 @@ export function createGoalPlanningSurface(options: {
   let durability: GoalPlanningDurabilityStatus = "unknown";
   const listeners = new Set<() => void>();
   const runtime: RuntimeAuthorityAdapter<{
-    authority: GoalPlanningAuthorityV1;
-    desired: GoalPlanningAuthorityV1;
+    authority: GoalPlanningAuthorityV2;
+    desired: GoalPlanningAuthorityV2;
     ingress: GoalPlanningIngressStatus;
     durability: GoalPlanningDurabilityStatus;
   }> = {
@@ -103,10 +108,24 @@ export function createGoalPlanningSurface(options: {
     const priorities = loaded.value.filter(
       (item): item is GoalPriorityV1 => recordType(item) === "priority",
     );
-    if (demands.length + priorities.length !== loaded.value.length)
+    const footprintSpecifications = loaded.value.filter(
+      (item): item is DemandResourceFootprintSpecV1 =>
+        recordType(item) === "demandResourceFootprintSpec",
+    );
+    const footprintAssociations = loaded.value.filter(
+      (item): item is DemandResourceFootprintAssociationV1 =>
+        recordType(item) === "demandResourceFootprintAssociation",
+    );
+    if (
+      demands.length +
+        priorities.length +
+        footprintSpecifications.length +
+        footprintAssociations.length !==
+      loaded.value.length
+    )
       return protect("invalidAuthority");
     const checked = validateGoalPlanningAuthority(
-      { version: 1, demands, priorities },
+      { version: 2, demands, priorities, footprintSpecifications, footprintAssociations },
       options.listGoals(),
     );
     if (checked.status === "invalid") return protect("invalidAuthority");
@@ -275,8 +294,131 @@ export function createGoalPlanningSurface(options: {
     return accept({ ...authority, priorities: [...authority.priorities, candidate] }, candidate);
   }
 
+  async function createDemandResourceFootprintSpec(input: {
+    name: string;
+    variants: DemandResourceFootprintSpecV1["variants"];
+  }) {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
+    const id = allocateIdSafely(allocateId);
+    if (!id) return allocationFailure();
+    const at = now();
+    const candidate: DemandResourceFootprintSpecV1 = {
+      recordType: "demandResourceFootprintSpec",
+      version: 1,
+      id,
+      revision: planningRevision(1),
+      status: "active",
+      name: input.name,
+      variants: structuredClone(input.variants),
+      createdAt: at,
+      updatedAt: at,
+      provenance: directPlanningAuthoringProvenance(),
+    };
+    return accept(
+      {
+        ...authority,
+        footprintSpecifications: [...authority.footprintSpecifications, candidate],
+      },
+      candidate,
+    );
+  }
+  async function reviseDemandResourceFootprintSpec(
+    id: PlanningFactId,
+    expectedRevision: number,
+    patch: Partial<Pick<DemandResourceFootprintSpecV1, "name" | "variants">>,
+  ) {
+    const found = current(authority.footprintSpecifications, id, expectedRevision);
+    if ("status" in found) return found;
+    if (found.value.status === "retired") return rejected("invalidTransition");
+    const semantic = {
+      name: patch.name ?? found.value.name,
+      variants: patch.variants ?? found.value.variants,
+    };
+    if (
+      semanticFingerprint(semantic) ===
+      semanticFingerprint({ name: found.value.name, variants: found.value.variants })
+    )
+      return unchanged(found.value, durability);
+    const candidate: DemandResourceFootprintSpecV1 = {
+      ...found.value,
+      ...structuredClone(semantic),
+      revision: planningRevision(found.value.revision + 1),
+      updatedAt: now(),
+    };
+    return accept(
+      {
+        ...authority,
+        footprintSpecifications: [...authority.footprintSpecifications, candidate],
+      },
+      candidate,
+    );
+  }
+  async function retireDemandResourceFootprintSpec(id: PlanningFactId, expectedRevision: number) {
+    const found = current(authority.footprintSpecifications, id, expectedRevision);
+    if ("status" in found) return found;
+    if (found.value.status === "retired") return unchanged(found.value, durability);
+    const at = now(),
+      candidate: DemandResourceFootprintSpecV1 = {
+        ...found.value,
+        revision: planningRevision(found.value.revision + 1),
+        status: "retired",
+        updatedAt: at,
+        effectiveTo: at,
+      };
+    return accept(
+      {
+        ...authority,
+        footprintSpecifications: [...authority.footprintSpecifications, candidate],
+      },
+      candidate,
+    );
+  }
+  async function setDemandResourceFootprintAssociation(input: {
+    demandId: PlanningFactId;
+    selection: DemandResourceFootprintAssociationV1["selection"];
+    expectedRevision?: number;
+  }) {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
+    const demand = authority.demands.some((value) => value.id === input.demandId);
+    if (!demand) return rejected("notFound");
+    const existing = authority.footprintAssociations
+      .filter((value) => value.demandId === input.demandId)
+      .sort((a, b) => b.revision - a.revision)[0];
+    if (existing && input.expectedRevision !== existing.revision) return rejected("staleRevision");
+    if (!existing && input.expectedRevision !== undefined) return rejected("staleRevision");
+    if (
+      existing?.status === "active" &&
+      semanticFingerprint(existing.selection) === semanticFingerprint(input.selection)
+    )
+      return unchanged(existing, durability);
+    const at = now(),
+      id = existing?.id ?? allocateIdSafely(allocateId);
+    if (!id) return allocationFailure();
+    const candidate: DemandResourceFootprintAssociationV1 = {
+      recordType: "demandResourceFootprintAssociation",
+      version: 1,
+      id,
+      revision: planningRevision((existing?.revision ?? 0) + 1),
+      demandId: input.demandId,
+      status: "active",
+      selection: structuredClone(input.selection),
+      createdAt: existing?.createdAt ?? at,
+      updatedAt: at,
+      provenance: directPlanningAuthoringProvenance(),
+    };
+    return accept(
+      {
+        ...authority,
+        footprintAssociations: [...authority.footprintAssociations, candidate],
+      },
+      candidate,
+    );
+  }
+
   async function accept<T>(
-    next: GoalPlanningAuthorityV1,
+    next: GoalPlanningAuthorityV2,
     value: T,
   ): Promise<GoalPlanningCommandResult<T>> {
     const checked = validateGoalPlanningAuthority(next, options.listGoals());
@@ -302,10 +444,15 @@ export function createGoalPlanningSurface(options: {
       changed: true,
     };
   }
-  async function replaceDurable(value: GoalPlanningAuthorityV1) {
+  async function replaceDurable(value: GoalPlanningAuthorityV2) {
     const result = await storage.mutate([
       { type: "clear", store: GOAL_PLANNING_STORE },
-      ...[...value.demands, ...value.priorities].map((value) => ({
+      ...[
+        ...value.demands,
+        ...value.priorities,
+        ...value.footprintSpecifications,
+        ...value.footprintAssociations,
+      ].map((value) => ({
         type: "put" as const,
         store: GOAL_PLANNING_STORE,
         value,
@@ -348,6 +495,16 @@ export function createGoalPlanningSurface(options: {
     createPriority,
     revisePriority,
     retirePriority,
+    createDemandResourceFootprintSpec,
+    reviseDemandResourceFootprintSpec,
+    retireDemandResourceFootprintSpec,
+    setDemandResourceFootprintAssociation,
+    resolveDemandResourceFootprintAssociation: (demandId: PlanningFactId) =>
+      resolveDemandFootprintAssociation({
+        demandId,
+        specifications: authority.footprintSpecifications,
+        associations: authority.footprintAssociations,
+      }),
     listCurrentGoalDemands: (goalId: GoalId) => currentDemandsForGoal(authority, goalId),
     getApplicableGoalPriority: (goalId: GoalId, date: LocalDateString) =>
       applicablePriorityForGoal(authority, goalId, date),
@@ -367,7 +524,7 @@ export function createGoalPlanningSurface(options: {
       });
     },
     exportGoalPlanningAuthority: () => structuredClone(authority),
-    replaceGoalPlanningAuthority: async (value: GoalPlanningAuthorityV1) => {
+    replaceGoalPlanningAuthority: async (value: GoalPlanningAuthorityV2) => {
       const checked = validateGoalPlanningAuthority(value, options.listGoals());
       if (checked.status === "invalid") return { status: "invalid" as const };
       if (!(await replaceDurable(checked.authority))) return { status: "failure" as const };

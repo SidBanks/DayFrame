@@ -118,6 +118,15 @@ export function planDecisionsSemanticallyEquivalent(
 }
 
 export function getPlanDecisionTargetKey(target: DurableOccurrenceReference): string {
+  if (target.sourceKind === "acceptedAllocation")
+    return [
+      "acceptedAllocation",
+      target.realizationId,
+      target.acceptedAllocationId,
+      target.acceptedClaimId,
+      target.scheduleRole,
+      target.scheduledSubjectId,
+    ].join("|");
   if (target.sourceKind === "manualEvent")
     return ["manualEvent", target.manualEvent.id, target.manualEvent.incarnationId].join("|");
   if (target.sourceKind === "work")

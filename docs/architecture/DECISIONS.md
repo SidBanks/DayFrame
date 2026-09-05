@@ -1,5 +1,15 @@
 # DayFrame Architectural Decisions
 
+## Task 9.3 — realization authority and persistence
+
+- Current scheduled reality produced from acceptance is owned by a dedicated `realizationAuthority` IndexedDB store, not Proposal authority, Preview, or HistoricalPlan.
+- The canonical `RealizationId` derives from Accepted Allocation identity plus policy `accepted-allocation-realization@1`; a successful Accepted Allocation has at most one realization.
+- Acceptance commits first. Realization is a separate automatic, idempotent transaction; realization failure never rolls back valid user acceptance.
+- Failed attempts remain transient structured results in V1. Successful transition evidence and all realized facts are durable and immutable.
+- Accepted-but-unrealized claims are Capacity liabilities. Once realized, scheduled/protected facts replace—not supplement—the liability.
+- Fixed realized facts enter Preview as authoritative inputs and placement obstacles, never as `BlockCandidate`s. Publication remains explicit and uses HistoricalPlan V3.
+- Schema 11 adds the realization store. Backup V12 covers it and participates in the existing combined atomic restore boundary.
+
 This document records the foundational architectural decisions that define the DayFrame architecture.
 
 Once accepted, these decisions remain in force until explicitly superseded by a future Architectural Decision Record (ADR).
@@ -9,6 +19,31 @@ The normative architectural definitions are contained in:
 > **DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md (Version 1.0.0)**
 
 This document records _why_ the architecture is structured as it is.
+
+---
+
+# ADR-9.2.0 — Goal Demand Uses Explicit Resource-Footprint Association
+
+**Status:** Accepted
+
+Goal Demand remains productive-effort authority and does not implicitly inherit
+support or Buffer semantics from generic Goal links. Reusable authored Demand Resource
+Footprint Specifications live in Goal Planning authority, while a separate
+Demand-specific association explicitly selects one specification revision/variant or
+declares productive-only. Missing association is unknown, not zero overhead.
+
+Each hypothetical productive session is a derived Candidate Parent. Pure projection
+applies closed exact per-session geometry rules to produce distinct productive,
+support-activity, and Buffer-protection claims before scheduling. Task 8.4 Composition
+semantics may be normalized through an explicit source snapshot, but no scheduled or
+fake Commitment occurrence is created. Feasibility evaluates complete footprints;
+Competition and Allocation consume them; Proposal and Accepted Allocation snapshot
+them. This preserves user authority and prevents post-acceptance footprint invention.
+
+Goal Planning advances to a V2 authority contract in implementation while reusing its
+existing IndexedDB store; Backup advances to V11. Existing data migrates to
+unspecified footprint authority, and historical productive-only acceptance is never
+retroactively widened.
 
 ---
 
@@ -708,3 +743,108 @@ or retraction instead advances the mounted surface to a fresh app-clock cutoff a
 re-queries canonical truth. Failed/rejected writes do not advance it, and no local
 outcome shadow state is authoritative. See
 `ADR_USER_INITIATED_EVIDENCE_WRITES_AND_TODAY_EVALUATION_CUTOFF_ADVANCEMENT.md`.
+
+# Task 9.2.1 — Accepted Authority Freezes the Complete Resource Footprint
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-04
+
+Goal Demand resource cost is explicit authored authority: a reusable footprint
+specification plus one Demand-specific association. Missing association fails
+closed; `productiveOnly` must be explicit. Feasibility projects exact complete
+Candidate Parent footprints, Competition and Allocation use every resource claim,
+and Proposal and AcceptedAllocation V2 snapshot productive, support-activity, and
+Buffer-protection claims without recomputation. Only productive satisfies Demand.
+
+Legacy AcceptedAllocation V1 remains incomplete productive-only authority and is
+never widened. IndexedDB remains schema 10 because stores/indexes did not change;
+Backup V11 preserves expanded durable semantics and V10 downgrade refuses loss.
+Schedule/execution realization remains blocked until Task 9.2.2 completes.
+
+# Task 9.2.2 — Realized Accepted Claims Use Sibling Schedule Facts
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-04
+
+Future Accepted Allocation realization uses sibling scheduled reality contracts,
+not legacy template, Work, or manual-event identities. `acceptedAllocation` is an
+explicit origin; `productiveGoalWork`, `supportActivity`, and `bufferProtection`
+are explicit roles. Activity roles own time and may receive Execution evidence;
+Buffer protects time and Execution validation rejects it.
+
+Subject identity is a deterministic function of Realization, Accepted Allocation,
+accepted claim, and role. HistoricalPlan occurrence snapshot V3 freezes the full
+realized fact and origin while retaining V1/V2 compatibility. The batch/day/surface,
+ExecutionRecord V1, schema 10, and Backup V11 versions remain sufficient because no
+product-reachable realization persistence exists until Task 9.3.
+
+# Task 9.4 — Planning Scopes Are Semantically Typed Half-Open User-Day Ranges
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-05
+
+Planning Data Horizon, Proposal Horizon, Review Scope, Preview Range, and
+Publication Range are distinct semantic wrappers over finite canonical user-day
+geometry using `[start, endExclusive)`. Equal dates never transfer authority.
+Effective planning expansion is centralized and records structured reasons.
+Proposal Horizon bounds productive action while Planning Data Horizon must cover
+the complete support/Buffer footprint. Review Scope is session-derived navigation,
+not authority. Preview range mismatch is coverage, not staleness. Publication Range
+is independently explicit and must be fully covered before immutable history is
+materialized. Derived scopes introduce no store, schema, or backup version; schema
+11 and Backup V12 remain governing.
+
+# Task 9.5 — Month Is the Canonical Planner Overview, Not a Second Engine
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-05
+
+Planner Month consumes one bounded `queryPlanningReview` result and a pure
+presentation adapter. Epistemic type—not color, title, or cell placement—determines
+presentation and action eligibility. Selected-day detail filters the same result;
+it does not query or own authority. Existing Preview/Review Schedule remains the
+detailed regeneration and Friction workflow, and DayVisualizer remains its schedule
+renderer. Planner navigation is derived session state. No Planner store, authored
+preference, schema change, or backup change is introduced; schema 11 and Backup V12
+remain governing.
+
+# Task 9.6 — Review and Publication Readiness Are Derived, Explainable States
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-05
+
+Review Schedule derives ordered blockers from the canonical planning-review result
+and existing Preview/Friction facts. Review-ready and publication-ready are separate
+computed values, never durable flags. Planning coverage gaps, unavailable/stale/range-
+mismatched Preview, unresolved Friction, accepted-unrealized authority, and invalid
+Publication Range block both in V1. Actionable Proposal is non-authoritative warning
+attention and does not automatically block publication. Proposal decisions and
+SuggestedFixes retain their existing command paths. Publication readiness is shown,
+but no second publication action is added while current publication remains coupled
+to Preview generation. Schema 11 and Backup V12 remain governing.
+
+# Task 9.7 — Publication Is an Explicit Atomic Historical Transition
+
+**Status:** Accepted and implemented
+
+**Date:** 2026-09-05
+
+Preview generation no longer publishes. Review Schedule explicitly converts its
+non-authoritative Review Scope to a separately typed Publication Range and presents
+the exact half-open user-day bounds on the Publish action. The canonical
+`publishScheduleRange` command independently requeries authoritative review truth
+and matches a deterministic reviewed-source fingerprint before materialization.
+
+A current covering Preview remains a V1 materialization dependency, never schedule
+authority. Existing HistoricalPlan remains the sole durable owner and commits each
+explicit publication as one atomic IndexedDB mutation. Exact retries are semantic
+no-ops; unchanged later attempts are not duplicated, while changed current truth may
+produce a later immutable batch. Failed explicit persistence is not adopted as
+pending history. Publication changes no current schedule, Proposal, acceptance,
+Realization, Friction, Execution, Progress, or preference authority. Schema 11 and
+Backup V12 remain governing.

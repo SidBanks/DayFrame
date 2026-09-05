@@ -177,7 +177,7 @@ export function createHistoricalPlanSurface(
   }
 
   function publish(batchValue: PlanPublicationBatchV1): Promise<HistoricalPlanPublicationResult> {
-    const result = publicationChain.then(() => publishOne(batchValue));
+    const result = publicationChain.then(() => publishOne(batchValue, true));
     publicationChain = result.then(
       () => undefined,
       () => undefined,
@@ -187,6 +187,7 @@ export function createHistoricalPlanSurface(
 
   async function publishOne(
     batchValue: PlanPublicationBatchV1,
+    retainFailedForRetry: boolean,
   ): Promise<HistoricalPlanPublicationResult> {
     const checked = validatePlanPublicationBatch(batchValue);
     if (checked.status === "invalid") return { status: "invalidCandidate" };
@@ -200,9 +201,11 @@ export function createHistoricalPlanSurface(
     const classification = await candidateIsIdentical(checked.batch);
     if (classification === "protected") return { status: "publicationBlockedProtected" };
     if (classification === true) return { status: "identicalNoOp" };
-    pending.push(clonePlanPublicationBatch(checked.batch));
-    setStatus({ status: "pending", pendingCount: pending.length });
-    emitHistory({ type: "publicationAccepted", batchId: checked.batch.id });
+    if (retainFailedForRetry) {
+      pending.push(clonePlanPublicationBatch(checked.batch));
+      setStatus({ status: "pending", pendingCount: pending.length });
+      emitHistory({ type: "publicationAccepted", batchId: checked.batch.id });
+    }
     const persisted = await persistBatch(checked.batch);
     if (persisted.status === "success") {
       pending = pending.filter((current) => current.id !== checked.batch.id);
@@ -212,14 +215,32 @@ export function createHistoricalPlanSurface(
           ? { status: "pending", pendingCount: pending.length }
           : { status: "ready", pendingCount: 0 },
       );
+      if (!retainFailedForRetry)
+        emitHistory({ type: "publicationAccepted", batchId: checked.batch.id });
       return { status: "publishedAndDurable", batch: clonePlanPublicationBatch(checked.batch) };
     }
+    if (!retainFailedForRetry)
+      return {
+        status: "materializationUnavailable",
+        batch: clonePlanPublicationBatch(checked.batch),
+      };
     setStatus({ status: "failed", pendingCount: pending.length, error: persisted.error });
     return {
       status: "publishedPendingDurability",
       batch: clonePlanPublicationBatch(checked.batch),
       error: persisted.error,
     };
+  }
+
+  function publishAtomically(
+    batchValue: PlanPublicationBatchV1,
+  ): Promise<HistoricalPlanPublicationResult> {
+    const result = publicationChain.then(() => publishOne(batchValue, false));
+    publicationChain = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
   }
 
   async function retryPendingPublications(): Promise<{
@@ -581,6 +602,7 @@ export function createHistoricalPlanSurface(
   return {
     initialize,
     publish,
+    publishAtomically,
     retryPendingPublications,
     getHistoricalPlanDay,
     getHistoricalPlanRange,
