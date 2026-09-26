@@ -41,7 +41,24 @@ type DecisionBase<K extends string, P> = {
   provenance: PlanDecisionProvenance;
 };
 
+/** Exact geometry and compatibility evidence; revocation retains the original acceptance. */
+export type AcceptedSleepPlacementPayloadV1 = {
+  version: 1;
+  sleepStart: string;
+  sleepEnd: string;
+  footprintStart: string;
+  footprintEnd: string;
+  proofStartUserDayDate: LocalDateString;
+  proofEndUserDayDateExclusive: LocalDateString;
+  requirementRevision: number;
+  durationMinutes: number;
+  bufferBeforeMinutes: number;
+  bufferAfterMinutes: number;
+  dependencyFingerprint: string;
+  revokedAt: string | null;
+};
 export type PlanDecisionV1 =
+  | DecisionBase<"placeSleepOccurrence", AcceptedSleepPlacementPayloadV1>
   | DecisionBase<"placeOccurrence", { userDayDate: LocalDateString; startTime: TimeString }>
   | DecisionBase<"omitOccurrence", Record<string, never>>
   | DecisionBase<"setOccurrenceDuration", { durationMinutes: number }>
@@ -82,6 +99,18 @@ export function validatePlanDecision(value: unknown): PlanDecisionValidation {
     issues.push("acceptedAt must be canonical UTC ISO-8601");
   validateProvenance(value.provenance, issues);
   const target = validateDurableOccurrenceReference(value.target);
+  if (
+    target.status === "valid" &&
+    (target.reference.sourceKind === "sleepRequirement") !== (value.kind === "placeSleepOccurrence")
+  )
+    issues.push("Sleep targets require an exact Sleep placement decision.");
+  if (
+    value.kind === "placeSleepOccurrence" &&
+    record(value.provenance) &&
+    value.provenance.source === "suggestedFix" &&
+    value.provenance.suggestedAction !== "moveBlock"
+  )
+    issues.push("Sleep supports placement only.");
   if (target.status === "unsupportedVersion")
     return { status: "unsupportedTargetVersion", version: target.version };
   if (target.status === "invalid") issues.push(...target.issues.map((issue) => `target: ${issue}`));
@@ -118,6 +147,14 @@ export function planDecisionsSemanticallyEquivalent(
 }
 
 export function getPlanDecisionTargetKey(target: DurableOccurrenceReference): string {
+  if (target.sourceKind === "sleepRequirement")
+    return [
+      "sleepRequirement",
+      target.requirement.id,
+      target.requirement.incarnationId,
+      target.coordinate.userDayDate,
+      target.coordinate.slot,
+    ].join("|");
   if (target.sourceKind === "acceptedAllocation")
     return [
       "acceptedAllocation",
@@ -171,7 +208,73 @@ function validatePayload(kind: unknown, value: unknown, issues: string[]): void 
     issues.push("payload must be an object");
     return;
   }
-  if (kind === "placeOccurrence") {
+  if (kind === "placeSleepOccurrence") {
+    exact(
+      value,
+      [
+        "version",
+        "sleepStart",
+        "sleepEnd",
+        "footprintStart",
+        "footprintEnd",
+        "proofStartUserDayDate",
+        "proofEndUserDayDateExclusive",
+        "requirementRevision",
+        "durationMinutes",
+        "bufferBeforeMinutes",
+        "bufferAfterMinutes",
+        "dependencyFingerprint",
+        "revokedAt",
+      ],
+      "payload",
+      issues,
+    );
+    if (value.version !== 1) issues.push("Unsupported Sleep payload version");
+    if (
+      !validDate(value.proofStartUserDayDate) ||
+      !validDate(value.proofEndUserDayDateExclusive) ||
+      String(value.proofStartUserDayDate) >= String(value.proofEndUserDayDateExclusive)
+    )
+      issues.push("Invalid Sleep proof scope");
+    for (const k of ["sleepStart", "sleepEnd", "footprintStart", "footprintEnd"]) {
+      const t = value[k];
+      if (
+        typeof t !== "string" ||
+        !UTC_ISO.test(t) ||
+        !Number.isFinite(Date.parse(t)) ||
+        Date.parse(t) % 60000 !== 0
+      )
+        issues.push(`payload.${k} must be a minute-aligned UTC instant`);
+    }
+    for (const [k, min, max] of [
+      ["requirementRevision", 1, Number.MAX_SAFE_INTEGER],
+      ["durationMinutes", 1, 1440],
+      ["bufferBeforeMinutes", 0, 1440],
+      ["bufferAfterMinutes", 0, 1440],
+    ] as const)
+      if (
+        !Number.isSafeInteger(value[k]) ||
+        (value[k] as number) < min ||
+        (value[k] as number) > max
+      )
+        issues.push(`payload.${k} is invalid`);
+    if (typeof value.dependencyFingerprint !== "string" || !value.dependencyFingerprint.length)
+      issues.push("Missing Sleep dependency evidence");
+    if (
+      value.revokedAt !== null &&
+      (typeof value.revokedAt !== "string" ||
+        !UTC_ISO.test(value.revokedAt) ||
+        !Number.isFinite(Date.parse(value.revokedAt)))
+    )
+      issues.push("Invalid revocation instant");
+    const t = (k: string) => Date.parse(value[k] as string);
+    if (
+      t("sleepEnd") - t("sleepStart") !== (value.durationMinutes as number) * 60000 ||
+      t("sleepStart") - t("footprintStart") !== (value.bufferBeforeMinutes as number) * 60000 ||
+      t("footprintEnd") - t("sleepEnd") !== (value.bufferAfterMinutes as number) * 60000
+    )
+      issues.push("Sleep geometry must preserve duration and both buffers");
+  } else if (kind === "placeOccurrence") {
     exact(value, ["userDayDate", "startTime"], "payload", issues);
     if (!validDate(value.userDayDate)) issues.push("payload.userDayDate is invalid");
     if (typeof value.startTime !== "string" || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value.startTime))
@@ -234,4 +337,11 @@ function exact(
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Revoked evidence may coexist with one live decision per occurrence. */
+export function getPlanDecisionConflictKey(decision: PlanDecisionV1): string {
+  return decision.kind === "placeSleepOccurrence" && decision.payload.revokedAt !== null
+    ? `revoked:${decision.id}`
+    : getPlanDecisionTargetKey(decision.target);
 }

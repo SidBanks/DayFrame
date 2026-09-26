@@ -1,0 +1,4 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --write src/state/dayFrameStore.ts src/state/acceptanceCoordinator.test.ts
+src/state/dayFrameStore.ts 564ms
+src/state/acceptanceCoordinator.test.ts 17ms

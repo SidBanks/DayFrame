@@ -1,0 +1,44 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/omissionPublication.test.ts (21 tests | 2 failed) 9591ms
+   × keeps the qualification physical admission guard on omitted publication 5020ms
+   × isolates ephemeral context and replaces an omission with the existing exact-target decision precedence 119ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/omissionPublication.test.ts > keeps the qualification physical admission guard on omitted publication
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/state/omissionPublication.test.ts:157:60
+    155| });
+    156|
+    157| it.each(["authored", "decision", "qualification"] as const)("keeps the…
+       |                                                            ^
+    158|   const {deferred}=await import("./acceptanceLifecycleTestFixtures.js"…
+    159|   const f=await omitted(),command=await f.command(),entered=deferred()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/state/omissionPublication.test.ts > isolates ephemeral context and replaces an omission with the existing exact-target decision precedence
+AssertionError: expected 'rejected' to be 'accepted' // Object.is equality
+
+Expected: "accepted"
+Received: "rejected"
+
+ ❯ src/state/omissionPublication.test.ts:185:27
+    183|   expect(f.store.getState().preview!.result.omissionEvidence!.occurren…
+    184|   const replaced=f.store.acceptPlanDecision({kind:"setOccurrenceDurati…
+    185|   expect(replaced.status).toBe("accepted");f.generate();
+       |                           ^
+    186|   expect(f.store.getPlanDecisions()).toHaveLength(1);expect(f.store.ge…
+    187|   expect(f.store.getState().preview!.result.omissionEvidence).toBeUnde…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  21:57:07
+   Duration  10.73s (transform 1.01s, setup 0ms, import 994ms, tests 9.59s, environment 0ms)
+

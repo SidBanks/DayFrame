@@ -1,0 +1,38 @@
+{
+  "320": {
+    "dayContext": true,
+    "staleTry": true,
+    "counts": {
+      "proposal": 0,
+      "realization": 0,
+      "history": 0
+    }
+  },
+  "390": {
+    "dayContext": true,
+    "staleTry": true,
+    "counts": {
+      "proposal": 0,
+      "realization": 0,
+      "history": 0
+    }
+  },
+  "768": {
+    "dayContext": true,
+    "staleTry": true,
+    "counts": {
+      "proposal": 0,
+      "realization": 0,
+      "history": 0
+    }
+  },
+  "1280": {
+    "dayContext": true,
+    "staleTry": true,
+    "counts": {
+      "proposal": 0,
+      "realization": 0,
+      "history": 0
+    }
+  }
+}

@@ -808,3 +808,85 @@ function buildPreview(
     isStale: false,
   };
 }
+
+it("shows required Sleep proof without fake block IDs and exposes the existing Try action", () => {
+  const preview = buildPreview();
+  preview.result.frictionPoints = [
+    {
+      id: "sleep-friction",
+      userId: "u",
+      kind: "sleep",
+      severity: "critical",
+      title: "Accepted Sleep placement needs review",
+      message: "Correct or revoke this placement.",
+      affectedBlockIds: [],
+      canIgnore: false,
+      ignored: false,
+      resolved: false,
+      createdAt: "2026-05-01T00:00:00Z",
+      updatedAt: "2026-05-01T00:00:00Z",
+      sleepEvidence: {
+        kind: "acceptedPlacementReview",
+        reviews: [],
+        underlyingStatus: "satisfied",
+        dependencyFingerprint: "proof",
+        proofScope: { startUserDayDate: "2026-05-01", endUserDayDateExclusive: "2026-05-10" },
+      },
+      suggestedFixes: [{ id: "sleep-fix", label: "Try Sleep at 22:00", action: "moveBlock" }],
+    },
+  ];
+  const onApply = vi.fn();
+  render(
+    <PreviewScreen
+      preview={preview}
+      getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onApplySuggestedFix={onApply}
+    />,
+  );
+  expect(screen.getByText("Accepted Sleep placement needs review")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /Try Sleep at 22:00/ }));
+  expect(onApply).toHaveBeenCalledWith({
+    selectedFrictionPointId: "sleep-friction",
+    selectedSuggestedFixId: "sleep-fix",
+  });
+  expect(screen.queryByRole("button", { name: /ignore/i })).not.toBeInTheDocument();
+});
+
+it("names explicit Sleep revocation and retains disabled revoked evidence", () => {
+  const decision = {
+    decisionId: "00000000-0000-4000-8000-000000000001" as never,
+    summary: "Place required Sleep at 22:00",
+    targetSummary: "required Sleep",
+    occurrenceContext: "Sleep on 2026-05-05",
+    status: "reviewRequired" as const,
+    statusLabel: "Review required",
+    removalLabel: "Revoke" as const,
+  };
+  const remove = vi.fn();
+  const { rerender } = render(
+    <PreviewScreen
+      preview={null}
+      acceptedDecisions={[decision]}
+      getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onApplySuggestedFix={vi.fn()}
+      onRemoveAcceptedDecision={remove}
+    />,
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Revoke accepted choice for required Sleep" }),
+  );
+  expect(remove).toHaveBeenCalledWith(decision.decisionId);
+  rerender(
+    <PreviewScreen
+      preview={null}
+      acceptedDecisions={[
+        { ...decision, status: "revoked", statusLabel: "Revoked — Sleep remains required" },
+      ]}
+      getDayBoundaryStartTimeForUserDayDate={() => "03:00"}
+      onApplySuggestedFix={vi.fn()}
+    />,
+  );
+  expect(
+    screen.getByRole("button", { name: "Revoke accepted choice for required Sleep" }),
+  ).toBeDisabled();
+});

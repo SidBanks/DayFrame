@@ -1,0 +1,193 @@
+[
+  {
+    "label": "390-sleep-try",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Apply Planning Change",
+        "height": 44,
+        "width": 211,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-sleep-accepted",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Accepted and saved. Its replay result is unavailable."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-correction-save-retried",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Accepted choice save retry succeeded."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-correction-save-retried",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Accepted choice save retry succeeded."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-correction-save-retried",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Accepted choice save retry succeeded."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-correction-save-retried",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Accepted choice save retry succeeded."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  }
+]

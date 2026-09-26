@@ -81,7 +81,7 @@ Capacity derivation consumes authoritative facts or deterministic occurrence pro
 |---|---:|---:|---|---|---|
 | Work definition/cycle | At pattern level | Yes | Active authored state | Generates occupied Work occurrences | Source IDs, incarnations, effective segment, relevant values |
 | Generated Work occurrence | Yes | Yes | Deterministic projection | Subtracts occupied interval | Occurrence identity and generating sources |
-| Sleep Commitment | Yes when authored as obligation | Yes | Active template/recurrence | Occupies resolved interval or creates liability | Template/recurrence lifetime and occurrence identity |
+| First-Class Sleep Requirement | Required duration; resolved occurrence owns interval | Yes | Dedicated authored requirement/revision | Consume required Sleep resolution; unresolved requiredness blocks allocability | Requirement lifetime, owner day, revision and resolution fingerprint |
 | Fixed recurring Commitment | Yes | Yes | Active template/recurrence | Subtracts resolved interval | Source and occurrence identity |
 | Movable recurring Commitment | Yes as demanded duration | Yes | Active template/recurrence | Subtracts resolved placement or creates liability | Source, occurrence, demand bounds, placement result |
 | Manual event | Yes | Yes | Active manual-event authority | Subtracts occupied interval | Event lifetime and occurrence/reference |
@@ -861,3 +861,7 @@ This recommendation does not begin the next audit and does not assign it to any 
 > **Capacity Architecture Specification complete.**
 >
 > The specification establishes Capacity as a deterministic, explainable, user-day-based derived planning resource; defines its authoritative inputs, derivation model, temporal semantics, unresolved-Commitment treatment, result qualifications, read-model contract, dependency identity, staleness, provenance, aggregation, historical boundary, and downstream Goal-demand interface; preserves the authority boundaries separating Capacity from allocation, Proposal, Friction, and scheduled work; and identifies the appropriate next architectural step without modifying the implementation or assigning the work to a future implementation phase.
+
+## First-Class Sleep governance amendment — 2026-09-17
+
+[The Task 9.11 Sleep ADR](../adr/ADR_FIRST_CLASS_SLEEP_DOMAIN_AND_PERSISTENCE_FOUNDATION.md) supersedes the old Sleep Commitment input row for first-class sources. Task 9.11 implements only domain/persistence. Legacy Sleep templates retain current occupancy/liability behavior until explicit conversion and later solver activation. There is one Capacity semantic owner, with no separate Sleep Capacity system.

@@ -142,6 +142,7 @@ export function projectHistoricalCompletionDistributionV1(input: {
   const excluded: ExcludedOccurrenceProvenanceV1[] = [];
   for (const evidence of days)
     for (const occurrence of evidence.day.occurrences) {
+      if (occurrence.version === 4) continue;
       const explanation = explain(evidence, occurrence);
       if (occurrence.plan.state !== "scheduled") {
         excluded.push({

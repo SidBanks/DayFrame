@@ -21,7 +21,12 @@ export const HISTORICAL_PLAN_TITLE_MAX_LENGTH = 200;
 
 export type PlanPublicationBatchId = string & { readonly __planPublicationBatchId: unique symbol };
 export type PlanPublicationBatchIdAllocator = () => PlanPublicationBatchId;
-export type HistoricalPlanSourceFamily = "template" | "work" | "manualEvent" | "acceptedAllocation";
+export type HistoricalPlanSourceFamily =
+  | "template"
+  | "work"
+  | "manualEvent"
+  | "acceptedAllocation"
+  | "sleepRequirement";
 export type HistoricalPlanContext =
   | { state: "scheduled"; startsAt: string; endsAt: string }
   | { state: "unplaced" | "omitted" | "blocked" };
@@ -29,7 +34,7 @@ export type HistoricalPlanContext =
 export type HistoricalPlannedOccurrenceSnapshotV1 = {
   version: typeof HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION;
   reference: DurableOccurrenceReference;
-  sourceFamily: HistoricalPlanSourceFamily;
+  sourceFamily: Exclude<HistoricalPlanSourceFamily, "sleepRequirement">;
   title: string;
   category: BlockCategory;
   plan: HistoricalPlanContext;
@@ -58,6 +63,7 @@ export type HistoricalRealizedScheduleSnapshotV3 = {
   goals?: HistoricalGoalProvenanceV1[];
 };
 export type HistoricalPlannedOccurrenceSnapshot =
+  | import("../sleep/publishedSleep.js").HistoricalPublishedSleepSnapshotV4
   | HistoricalPlannedOccurrenceSnapshotV1
   | HistoricalPlannedOccurrenceSnapshotV2
   | HistoricalRealizedScheduleSnapshotV3;
@@ -70,7 +76,8 @@ export function historicalOccurrenceTimingSemantics(
 ): HistoricalOccurrenceTimingSemantics {
   return snapshot.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION
     ? { coverage: "available", kind: snapshot.timing.kind }
-    : snapshot.version === HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION
+    : snapshot.version === HISTORICAL_REALIZED_SCHEDULE_SNAPSHOT_V3_VERSION ||
+        snapshot.version === 4
       ? { coverage: "available", kind: "timed" }
       : { coverage: "unavailableLegacy" };
 }
@@ -112,7 +119,8 @@ export function historicalGoalProvenanceCoverage(
 }
 
 export type HistoricalPlanDayPublicationV1 = {
-  version: typeof HISTORICAL_PLAN_DAY_PUBLICATION_VERSION;
+  version: typeof HISTORICAL_PLAN_DAY_PUBLICATION_VERSION | 2;
+  sleepCoverage?: "notConfigured" | "notApplicable" | "satisfied";
   userDayDate: LocalDateString;
   dayBoundaryStartTime: TimeString;
   weekStartsOn: Weekday;
@@ -190,7 +198,7 @@ export function createPlanPublicationBatch(
 export function cloneHistoricalPlanSnapshot(
   snapshot: HistoricalPlannedOccurrenceSnapshot,
 ): HistoricalPlannedOccurrenceSnapshot {
-  if (snapshot.version === 3) return structuredClone(snapshot);
+  if (snapshot.version === 3 || snapshot.version === 4) return structuredClone(snapshot);
   return {
     ...snapshot,
     reference: structuredClone(snapshot.reference),

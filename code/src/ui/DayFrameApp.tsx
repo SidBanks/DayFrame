@@ -1,3 +1,7 @@
+import { scheduleReviewNavigation } from "./scheduleReviewNavigation.js";
+import { goalInspectionNavigation, goalRecordedNavigation } from "./goalAcceptedPlanningContext.js";
+import { createGoalEditingContext } from "./goalEditingContext.js";
+import { initialAcceptedSummaryContext } from "./acceptedPlanningSummaryContext.js";
 import {
   Component,
   Suspense,
@@ -19,11 +23,7 @@ import { createPlanDecisionAcceptanceCandidate } from "../core/decisions/createP
 import type { AcceptPlanDecisionInput, PlanDecisionV1 } from "../core/decisions/planDecision.js";
 import type { ShiftCycle } from "../core/cycles/types.js";
 import type { LocalDateString } from "../core/shifts/types.js";
-import type {
-  CommitmentTarget,
-  DisplayedMonth,
-  EventTarget,
-} from "../core/monthlyPlanner/queryMonthlyPlanner.js";
+import type { CommitmentTarget, EventTarget } from "../core/monthlyPlanner/queryMonthlyPlanner.js";
 import { parseDayFrameBackupJson, type DayFrameBackup } from "../state/dayFrameBackup.js";
 import { createDayFrameStore } from "../state/dayFrameStore.js";
 import {
@@ -50,8 +50,10 @@ import type {
 } from "../state/types.js";
 import type { DayFrameReadiness } from "../state/dayFrameReadiness.js";
 import type { PlanDecisionIngressStatus } from "../state/planDecisionSurface.js";
-import { PreviewScreen } from "./PreviewScreen.js";
-import { GoalSection } from "./GoalSection.js";
+
+import type { GoalPlanningStore } from "./GoalPlanningSection.js";
+import { currentPlannerView, usePlannerNavigation } from "./plannerNavigation.js";
+export type { PrimarySurface } from "./plannerNavigation.js";
 import { PlannerSurface, type PlannerMode } from "./PlannerSurface.js";
 import type { CommitmentEditorTarget } from "./CommitmentSection.js";
 import { buildAcceptedDecisionViewModels } from "./acceptedDecisionPresentation.js";
@@ -60,14 +62,56 @@ import { buildSetupDraft, buildSetupLifecycleTransaction, type SetupDraft } from
 import { formatPlanningWindow, formatPreviewTimestamp } from "./timeDisplay.js";
 import "./dayFrameUi.css";
 
+const GoalAcceptedPlanningSection = lazy(() =>
+  import("./GoalAcceptedPlanningSection.js").then((module) => ({
+    default: module.GoalAcceptedPlanningSection,
+  })),
+);
+const GoalRecordedInspection = lazy(() =>
+  import("./GoalRecordedInspection.js").then((module) => ({
+    default: module.GoalRecordedInspection,
+  })),
+);
+const GoalStructureSection = lazy(() =>
+  import("./GoalStructureSection.js").then((module) => ({ default: module.GoalStructureSection })),
+);
+const loadGoals = () => import("./GoalSection.js");
+const GoalSection =
+  import.meta.env.MODE === "test"
+    ? (await loadGoals()).GoalSection
+    : lazy(() => loadGoals().then((module) => ({ default: module.GoalSection })));
+
+const GoalPlanningSection = lazy(() =>
+  import("./GoalPlanningSection.js").then((module) => ({ default: module.GoalPlanningSection })),
+);
+
+const loadMySchedule = () => import("./MyScheduleSurface.js");
+const MyScheduleSurface =
+  import.meta.env.MODE === "test"
+    ? (await loadMySchedule()).MyScheduleSurface
+    : lazy(() => loadMySchedule().then((m) => ({ default: m.MyScheduleSurface })));
+const loadSleepEditor = () => import("./SleepRequirementSection.js");
+const SleepRequirementSection =
+  import.meta.env.MODE === "test"
+    ? (await loadSleepEditor()).SleepRequirementSection
+    : lazy(() => loadSleepEditor().then((m) => ({ default: m.SleepRequirementSection })));
+const loadAcceptedSummary = () => import("./AcceptedPlanningSummary.js");
+const AcceptedPlanningSummary =
+  import.meta.env.MODE === "test"
+    ? (await loadAcceptedSummary()).AcceptedPlanningSummary
+    : lazy(() =>
+        loadAcceptedSummary().then((module) => ({ default: module.AcceptedPlanningSummary })),
+      );
 const loadSummarySurface = () => import("./HistoricalIntelligenceSummary.js");
 const HistoricalIntelligenceSummary = lazy(() =>
   loadSummarySurface().then((module) => ({ default: module.HistoricalIntelligenceSummary })),
 );
-const loadTodaySurface = () => import("./TodaySurface.js");
-const TodaySurface = lazy(() =>
-  loadTodaySurface().then((module) => ({ default: module.TodaySurface })),
-);
+const loadDayWorksurface = () => import("./DayWorksurface.js");
+const DayWorksurface =
+  import.meta.env.MODE === "test"
+    ? (await loadDayWorksurface()).DayWorksurface
+    : lazy(() => loadDayWorksurface().then((module) => ({ default: module.DayWorksurface })));
+
 const loadPlanAuthoring = () => import("./SetupScreen.js");
 const SetupScreen =
   import.meta.env.MODE === "test"
@@ -80,11 +124,13 @@ const MonthlyPlannerSurface =
     : lazy(() =>
         loadMonthlyPlanner().then((module) => ({ default: module.MonthlyPlannerSurface })),
       );
-const loadScheduleReview = () => import("./ScheduleReviewPanel.js");
-const ScheduleReviewPanel =
+const loadScheduleReview = () => import("./ScheduleReviewWorkspace.js");
+const ScheduleReviewWorkspace =
   import.meta.env.MODE === "test"
-    ? (await loadScheduleReview()).ScheduleReviewPanel
-    : lazy(() => loadScheduleReview().then((module) => ({ default: module.ScheduleReviewPanel })));
+    ? (await loadScheduleReview()).ScheduleReviewWorkspace
+    : lazy(() =>
+        loadScheduleReview().then((module) => ({ default: module.ScheduleReviewWorkspace })),
+      );
 
 export class LazySurfaceBoundary extends Component<
   { children: ReactNode; name: string },
@@ -147,10 +193,26 @@ export type DayFrameAppStore = Pick<
   | "loadProfile"
   | "deleteProfile"
   | "clearLocalData"
+  | "getGoalStructureQualification"
+  | "createRelationship"
+  | "reviseRelationship"
+  | "retireRelationship"
+  | "createMilestone"
+  | "reviseMilestone"
+  | "listGoalStructureRelationships"
+  | "listGoalStructureMilestones"
+  | "getGoalStructureRelationshipRevision"
+  | "getGoalStructureMilestoneRevision"
+  | "getGoalStructureIngressStatus"
+  | "getGoalStructureDurabilityStatus"
+  | "retryGoalStructurePersistence"
+  | "queryGoalStructure"
   | "exportBackup"
   | "importBackup"
   | "exportBackupV11"
-  | "exportBackupV12"
+  | "exportBackupV14"
+  | "reviewLegacySleepConversion"
+  | "convertLegacySleepToFirstClass"
   | "importBackupV3"
   | "importBackupFile"
   | "mutateManualEvent"
@@ -182,10 +244,24 @@ export type DayFrameAppStore = Pick<
   | "getHistoricalSchedulingRealization"
   | "getGoalActivity"
   | "queryToday"
+  | "querySelectedDayEvidence"
+  | "queryAcceptedPlanningEvidence"
+  | "subscribeProposals"
+  | "authorSleepRequirement"
+  | "listCurrentAttachments"
+  | "getCompositionIngressStatus"
+  | "subscribeComposition"
+  | "queryEffectiveSleepRequirement"
+  | "recordSleepExecution"
   | "queryPlanningReview"
+  | "subscribePlanningReview"
   | "acceptProposalOption"
   | "rejectProposal"
   | "publishScheduleRange"
+  | "realizeAcceptedAllocation"
+  | "listRealizedScheduleFacts"
+  | "getStatus"
+  | "subscribeStatus"
   | "subscribeHistory"
   | "listGoals"
   | "getGoal"
@@ -218,9 +294,9 @@ export type DayFrameAppStore = Pick<
   | "correctProgressObservation"
   | "retractProgressObservation"
   | "queryGoalProgress"
->;
+> &
+  GoalPlanningStore;
 
-export type PrimarySurface = "planner" | "today" | "summary";
 type ProfileDurabilityFeedback = {
   category: DurabilitySemanticCategory;
   operation: "save" | "load" | "delete";
@@ -341,6 +417,7 @@ function ReadyDayFrameApp({
   const storeRef = useRef<DayFrameAppStore>(activeStore);
   storeRef.current = activeStore;
   const importInputRef = useRef<FileInputLike | null>(null);
+  const importButtonRef = useRef<HTMLButtonElement>(null);
   const now = getNow();
   const [stateSnapshot, setStateSnapshot] = useState<DayFrameState>(() => activeStore.getState());
   const [durabilityStatus, setDurabilityStatus] = useState<StoreDurabilityStatus>(() =>
@@ -367,11 +444,50 @@ function ReadyDayFrameApp({
   );
   const [setupDurabilityFeedback, setSetupDurabilityFeedback] =
     useState<DurabilitySemanticCategory | null>(null);
+  const [setupIssues, setSetupIssues] = useState<string[]>([]);
   const [setupValidationMessage, setSetupValidationMessage] = useState("");
-  const [currentScreen, setCurrentScreen] = useState<PrimarySurface>("planner");
-  const [plannerMode, setPlannerMode] = useState<PlannerMode>("month");
+  const {
+    currentScreen,
+    setCurrentScreen,
+    plannerMode,
+    setPlannerMode,
+    calendarView: preservedMonthView,
+    setCalendarView: setPreservedMonthView,
+    canGoBack,
+    goBack,
+    dayOwner,
+    openDay,
+  } = usePlannerNavigation(() => currentPlannerView(activeStore.getState(), getNow()));
+  const [acceptedSummaryContext, setAcceptedSummaryContext] = useState(() =>
+    initialAcceptedSummaryContext(getNow()),
+  );
+  const [goalEditingContext, setGoalEditingContext] = useState(createGoalEditingContext);
+  function resetGoalEditing() {
+    goalEditingContext.invalidate();
+    setGoalEditingContext(createGoalEditingContext());
+    setDayGoalId(undefined);
+  }
+  const [dayGoalId, setDayGoalId] = useState<string | undefined>(undefined);
+  const [calendarEditingTools, setCalendarEditingTools] = useState(false);
+  const navigationHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    // Child editors retain their precise focus targets (for example a fixed-time input).
+    const active = document.activeElement;
+    if (
+      active === document.body ||
+      active?.closest(
+        ".df-foundation-primary, .df-foundation-secondary, .df-foundation-day-nav, .df-foundation-location",
+      )
+    )
+      navigationHeading.current?.focus();
+  }, [currentScreen, plannerMode]);
   const [previewGuardrailMissingItems, setPreviewGuardrailMissingItems] = useState<string[]>([]);
   const [isConfirmingClearLocalData, setIsConfirmingClearLocalData] = useState(false);
+  const [clearFailureMessage, setClearFailureMessage] = useState("");
+  const clearButtonRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (clearFailureMessage) clearButtonRef.current?.focus();
+  }, [clearFailureMessage]);
   const [clearDurabilityFeedback, setClearDurabilityFeedback] =
     useState<ClearDurabilitySemanticClassification | null>(null);
   const [backupMessage, setBackupMessage] = useState("");
@@ -379,6 +495,9 @@ function ReadyDayFrameApp({
     useState<DurabilitySemanticCategory | null>(null);
   const [backupErrorMessage, setBackupErrorMessage] = useState("");
   const [isBackupBusy, setIsBackupBusy] = useState(false);
+  useEffect(() => {
+    if (!isBackupBusy && backupErrorMessage) importButtonRef.current?.focus();
+  }, [isBackupBusy, backupErrorMessage]);
   const [isClearBusy, setIsClearBusy] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
@@ -421,10 +540,6 @@ function ReadyDayFrameApp({
   const [monthPlanWorkspace, setMonthPlanWorkspace] = useState<
     "commitment" | "commitmentLibrary" | "work" | "planningSettings" | null
   >(null);
-  const [preservedMonthView, setPreservedMonthView] = useState<{
-    displayedMonth: DisplayedMonth;
-    selectedLabel: LocalDateString;
-  } | null>(null);
   const [contextualNavigationMessage, setContextualNavigationMessage] = useState("");
   const [pendingReviewFrictionId, setPendingReviewFrictionId] = useState<string | null>(null);
   const [returnToReviewAvailable, setReturnToReviewAvailable] = useState(false);
@@ -476,6 +591,9 @@ function ReadyDayFrameApp({
       )
     : [];
   const isSetupDirty = hasUnsavedSetupChanges(setupDraft, stateSnapshot);
+  useEffect(() => {
+    if (!setupValidationMessage) setSetupIssues([]);
+  }, [setupValidationMessage]);
   const authoredStateFingerprint = JSON.stringify({
     schedulingPreferences: stateSnapshot.schedulingPreferences,
     previewRange: stateSnapshot.previewRange,
@@ -554,15 +672,6 @@ function ReadyDayFrameApp({
   }, [activeLocalIngressStatus.status]);
 
   useEffect(() => {
-    if (plannerMode !== "schedule" || !pendingReviewFrictionId) return;
-    const target = document.getElementById(`review-friction-${pendingReviewFrictionId}`);
-    if (!target) return;
-    target.focus();
-    target.scrollIntoView?.({ block: "center" });
-    setPendingReviewFrictionId(null);
-  }, [pendingReviewFrictionId, plannerMode, stateSnapshot.preview]);
-
-  useEffect(() => {
     setSetupDraft(buildSetupDraft(stateSnapshot, createIsoTimestamp()));
   }, [authoredStateFingerprint]);
 
@@ -604,14 +713,13 @@ function ReadyDayFrameApp({
   }
 
   function openMonthMode(): void {
-    setCurrentScreen("planner");
+    setCalendarEditingTools(false);
     setPlannerMode("month");
     setFocusedTemplateField(null);
     resetShellMessages();
   }
 
   function openWorkPatternMode(): void {
-    setCurrentScreen("planner");
     setPlannerMode("workPattern");
     setWorkPatternReturnToMonth(false);
     setFocusedTemplateField(null);
@@ -619,7 +727,6 @@ function ReadyDayFrameApp({
   }
 
   function openCommitmentLibraryMode(): void {
-    setCurrentScreen("planner");
     setPlannerMode("commitmentLibrary");
     setReturnToReviewAvailable(false);
     setFocusedTemplateField(null);
@@ -629,11 +736,14 @@ function ReadyDayFrameApp({
   }
 
   function openScheduleMode(): void {
-    setCurrentScreen("planner");
     setPlannerMode("schedule");
     setFocusedTemplateField(null);
     resetShellMessages();
-    requestAnimationFrame(() => document.getElementById("review-schedule-heading")?.focus());
+  }
+
+  function openReviewPeriod(range: { start: string; end: string }): void {
+    scheduleReviewNavigation(goalEditingContext).update({ range });
+    openScheduleMode();
   }
 
   function openSummaryScreen(): void {
@@ -643,7 +753,7 @@ function ReadyDayFrameApp({
   }
 
   function openTodayScreen(): void {
-    setCurrentScreen("today");
+    openDay(currentPlannerView(storeRef.current.getState(), getNow()).selectedLabel);
     setFocusedTemplateField(null);
     resetShellMessages();
   }
@@ -687,6 +797,33 @@ function ReadyDayFrameApp({
     setFocusedTemplateField(null);
     setPreviewGuardrailMissingItems([]);
     if (result.status === "rejected") {
+      const labels: Record<string, string> = {
+        invalidTemplate: "Check the Commitment duration, timing and resources",
+        invalidRecurrence: "Check the repeat settings and dates",
+        invalidCycle: "Check the Work period dates and configuration",
+        invalidSegment: "Check the dated Work period",
+        overlappingSegment: "Dated Work periods overlap",
+        overlappingCycle: "Work cycles overlap",
+        invalidSequence: "Check the repeating rotation",
+        invalidSchedulingPreference: "Check day and week start settings",
+        invalidPreviewRange: "Check the planning range",
+        missingSourceReference: "A linked source is missing",
+      };
+      setSetupIssues(
+        result.validation.issues.map((issue) => {
+          const source =
+            setupDraft.templateEntries.find(
+              (e) => e.template.id === issue.sourceId || e.recurrence.id === issue.sourceId,
+            )?.template.title ??
+            setupDraft.shiftDefinitions.find((s) => s.id === issue.sourceId)?.name ??
+            setupDraft.shiftCycles.find((s) => s.id === issue.sourceId)?.name;
+          return (
+            (source ? source + ": " : "") +
+            (labels[issue.code] ??
+              "Check this authored source for conflicting or incomplete fields")
+          );
+        }),
+      );
       setSetupDurabilityFeedback(null);
       setSetupValidationMessage(
         "Setup contains conflicting or incomplete authored data and was not saved.",
@@ -743,7 +880,6 @@ function ReadyDayFrameApp({
   }
 
   function openSetupForFixedTime(templateId: string): void {
-    setCurrentScreen("planner");
     setPlannerMode("commitmentLibrary");
     setFocusedTemplateField({
       templateId,
@@ -753,6 +889,10 @@ function ReadyDayFrameApp({
   }
 
   function handleCompactPreviewDayClick(userDayDate: LocalDateString): void {
+    setPreservedMonthView({
+      selectedLabel: userDayDate,
+      displayedMonth: userDayDate.slice(0, 7) as typeof preservedMonthView.displayedMonth,
+    });
     const currentSelection = selectedPreviewDayRange;
 
     if (
@@ -769,7 +909,6 @@ function ReadyDayFrameApp({
       setPendingPreviewRangeStartDate(null);
     }
 
-    setCurrentScreen("planner");
     setPlannerMode("schedule");
     setFocusedTemplateField(null);
     openManualEventPanel(userDayDate);
@@ -810,6 +949,10 @@ function ReadyDayFrameApp({
   }
 
   function openNewEventFromReview(userDayDate: LocalDateString): void {
+    setPreservedMonthView({
+      selectedLabel: userDayDate,
+      displayedMonth: userDayDate.slice(0, 7) as typeof preservedMonthView.displayedMonth,
+    });
     setManualEventReturnToMonth(false);
     setSelectedPreviewDayRange({ startDate: userDayDate, endDate: userDayDate });
     setPendingPreviewRangeStartDate(null);
@@ -866,7 +1009,6 @@ function ReadyDayFrameApp({
     setRequestedCommitmentEditorTarget(target);
     setReturnToReviewAvailable(true);
     setContextualNavigationMessage("");
-    setCurrentScreen("planner");
     setPlannerMode("commitmentLibrary");
     setFocusedTemplateField(null);
     resetShellMessages();
@@ -969,7 +1111,6 @@ function ReadyDayFrameApp({
     setRequestedWorkEditor(true);
     setReturnToReviewAvailable(true);
     setContextualNavigationMessage("");
-    setCurrentScreen("planner");
     setPlannerMode("workPattern");
     setFocusedTemplateField(null);
     resetShellMessages();
@@ -1136,7 +1277,12 @@ function ReadyDayFrameApp({
     }
   }
 
+  const correctionDispatch = useRef(false);
+  useEffect(() => {
+    correctionDispatch.current = false;
+  }, [pendingPlanDecisionAcceptance, planDecisionFeedback]);
   function acceptPendingPlanDecision(): void {
+    if (correctionDispatch.current) return;
     const pending = pendingPlanDecisionAcceptance;
     const currentPreview = storeRef.current.getState().preview;
     if (!pending || !currentPreview || currentPreview.isStale) {
@@ -1147,6 +1293,7 @@ function ReadyDayFrameApp({
       });
       return;
     }
+    correctionDispatch.current = true;
     const result = storeRef.current.acceptPlanDecision(structuredClone(pending.candidate));
     if (result.status === "rejected") {
       const stale =
@@ -1202,6 +1349,9 @@ function ReadyDayFrameApp({
   ): void {
     const preview = storeRef.current.getState().preview;
     const shouldRegenerate = preview !== null && !preview.isStale;
+    const sleep =
+      storeRef.current.getPlanDecisions().find((d) => d.id === decisionId)?.kind ===
+      "placeSleepOccurrence";
     const result = storeRef.current.removePlanDecision(decisionId);
     if (result.status === "notAttempted") {
       setPlanDecisionFeedback({
@@ -1209,7 +1359,9 @@ function ReadyDayFrameApp({
         message:
           result.reason === "protectedDecisionIngress"
             ? "Accepted choices are protected by recovery-required stored data and cannot be removed."
-            : "That accepted choice is no longer present.",
+            : result.reason === "storageFailure"
+              ? "Saving failed. The accepted placement has not been revoked."
+              : "That accepted choice is no longer present.",
       });
       return;
     }
@@ -1218,7 +1370,9 @@ function ReadyDayFrameApp({
     setPlanDecisionFeedback({
       tone: durable ? "info" : "warning",
       message: durable
-        ? "Accepted choice removed and saved."
+        ? sleep
+          ? "Sleep placement revoked and saved. Required Sleep will be solved again."
+          : "Accepted choice removed and saved."
         : "Accepted choice removed for this session; saving failed. Retry before closing DayFrame.",
     });
     if (shouldRegenerate) {
@@ -1334,6 +1488,47 @@ function ReadyDayFrameApp({
   return (
     <div className="df-app">
       <div className="df-shell">
+        <header className="df-foundation-header">
+          <strong>DayFrame</strong>
+          <nav aria-label="App Sections" className="df-foundation-primary">
+            <button
+              className="df-secondary-button"
+              type="button"
+              aria-pressed={currentScreen === "planner"}
+              onClick={() => setCurrentScreen("planner")}
+            >
+              Planner
+            </button>
+            <button
+              className="df-secondary-button"
+              type="button"
+              aria-pressed={currentScreen === "summary"}
+              onClick={openSummaryScreen}
+            >
+              Summary
+            </button>
+          </nav>
+          <div className="df-foundation-location">
+            <h2 ref={navigationHeading} tabIndex={-1} className="df-foundation-location-title">
+              {currentScreen === "summary"
+                ? "Summary"
+                : plannerMode === "month"
+                  ? "Calendar"
+                  : plannerMode === "today" || plannerMode === "day"
+                    ? "Selected day"
+                    : plannerMode === "goals"
+                      ? "Planner / Goals"
+                      : plannerMode === "schedule"
+                        ? "Planner / Review Schedule"
+                        : "My Schedule"}
+            </h2>
+            {canGoBack ? (
+              <button className="df-secondary-button" type="button" onClick={goBack}>
+                Back
+              </button>
+            ) : null}
+          </div>
+        </header>
         {profileIngressStatus.status === "recoveryRequired" ? (
           <section aria-labelledby="dayframe-profile-recovery-title" className="df-danger-message">
             <h2 id="dayframe-profile-recovery-title">Saved profiles need recovery</h2>
@@ -1576,408 +1771,356 @@ function ReadyDayFrameApp({
           onRetryProfiles={retryProfileDurability}
           status={durabilityStatus}
         />
-        <header className="df-shell-header">
-          <div className="df-shell-header-grid">
-            <section className="df-confirmation df-workflow-block df-workflow-block--profiles">
-              <div className="df-form-stack">
-                <div className="df-screen-header">
-                  <h2 className="df-panel-title">Saved Setup Profiles</h2>
-                  <p className="df-support">
-                    Save named local setups, then load one later to replace the current active
-                    setup.
-                  </p>
-                </div>
-                <div className="df-field">
-                  <label htmlFor="dayframe-profile-name">Profile Name</label>
-                  <input
-                    id="dayframe-profile-name"
-                    onChange={(event) => {
-                      setProfileName((event.target as unknown as { value: string }).value);
-                      setProfileMessage("");
-                      setProfileErrorMessage("");
-                    }}
-                    placeholder="Profile name"
-                    type="text"
-                    value={profileName}
-                  />
+        <div className="df-foundation-support">
+          <div className="df-foundation-support-content">
+            <details className="df-foundation-utilities">
+              <summary>Settings and data</summary>
+              <section className="df-confirmation df-workflow-block df-workflow-block--profiles">
+                <div className="df-form-stack">
+                  <div className="df-screen-header">
+                    <h2 className="df-panel-title">Saved Setup Profiles</h2>
+                    <p className="df-support">
+                      Save named local setups, then load one later to replace the current active
+                      setup.
+                    </p>
+                  </div>
+                  <div className="df-field">
+                    <label htmlFor="dayframe-profile-name">Profile Name</label>
+                    <input
+                      id="dayframe-profile-name"
+                      onChange={(event) => {
+                        setProfileName((event.target as unknown as { value: string }).value);
+                        setProfileMessage("");
+                        setProfileErrorMessage("");
+                      }}
+                      placeholder="Profile name"
+                      type="text"
+                      value={profileName}
+                    />
+                  </div>
+                  <div className="df-screen-actions">
+                    <button
+                      className="df-secondary-button"
+                      onClick={() => {
+                        try {
+                          const result = storeRef.current.saveProfile({
+                            name: profileName,
+                            savedAt: getExportedAt(),
+                          });
+                          if (isBlockedProfileMutation(result)) {
+                            setProfileDurabilityFeedback(null);
+                            setProfileMessage("");
+                            setProfileErrorMessage(
+                              "Profile was not saved because preserved profile data needs recovery first.",
+                            );
+                            return;
+                          }
+                          setProfileDurabilityFeedback({
+                            category: classifyStoreMutationResult(result),
+                            operation: "save",
+                            profileName: profileName.trim(),
+                          });
+                          setProfileMessage("");
+                          setProfileErrorMessage("");
+                          setProfileName("");
+                        } catch (error) {
+                          setProfileMessage("");
+                          setProfileErrorMessage(getProfileErrorMessage(error));
+                        }
+                      }}
+                      type="button"
+                    >
+                      Save Current Setup as Profile
+                    </button>
+                  </div>
+                  {stateSnapshot.savedProfiles.length === 0 ? (
+                    <p className="df-support">No saved profiles yet.</p>
+                  ) : (
+                    <ul className="df-plain-list">
+                      {stateSnapshot.savedProfiles.map((savedProfile) => (
+                        <li key={savedProfile.id}>
+                          <div>
+                            <strong>{savedProfile.name}</strong>
+                            <span className="df-muted"> Saved {savedProfile.savedAt}</span>
+                          </div>
+                          <div className="df-screen-actions">
+                            <button
+                              className="df-secondary-button"
+                              onClick={() => {
+                                const result = storeRef.current.loadProfile(savedProfile.id);
+
+                                if (result.status === "recoveryRequired") {
+                                  setProfileDurabilityFeedback(null);
+                                  setProfileMessage("");
+                                  setProfileErrorMessage(
+                                    "Profile was not loaded. Your current setup and the saved profile were preserved because the profile needs recovery before it can be used.",
+                                  );
+                                  return;
+                                }
+
+                                if (result.status === "activationFailed") {
+                                  setProfileDurabilityFeedback(null);
+                                  setProfileMessage("");
+                                  setProfileErrorMessage(
+                                    "Profile was not loaded because fresh source identity could not be allocated. Your current setup and the saved profile were preserved.",
+                                  );
+                                  return;
+                                }
+
+                                setPlannerMode("month");
+                                clearPreviewSelection();
+                                setSetupDurabilityFeedback(null);
+                                setProfileDurabilityFeedback({
+                                  category: classifyActiveStoreMutationResult(result),
+                                  operation: "load",
+                                  profileName: savedProfile.name,
+                                });
+                                setProfileMessage("");
+                                setProfileErrorMessage("");
+                                setBackupMessage("");
+                                setBackupErrorMessage("");
+                                setClearDurabilityFeedback(null);
+                                setPreviewGuardrailMissingItems([]);
+                                setIsConfirmingClearLocalData(false);
+                              }}
+                              type="button"
+                            >
+                              Load Profile
+                            </button>
+                            <button
+                              className="df-secondary-button"
+                              onClick={() => {
+                                const result = storeRef.current.deleteProfile(savedProfile.id);
+                                if (isBlockedProfileMutation(result)) {
+                                  setProfileDurabilityFeedback(null);
+                                  setProfileMessage("");
+                                  setProfileErrorMessage(
+                                    "Profile was not deleted because preserved profile data needs recovery first.",
+                                  );
+                                  return;
+                                }
+                                setProfileDurabilityFeedback({
+                                  category: classifyStoreMutationResult(result),
+                                  operation: "delete",
+                                  profileName: savedProfile.name,
+                                });
+                                setProfileMessage("");
+                                setProfileErrorMessage("");
+                              }}
+                              type="button"
+                            >
+                              Delete Profile
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="df-screen-actions">
                   <button
                     className="df-secondary-button"
-                    onClick={() => {
-                      try {
-                        const result = storeRef.current.saveProfile({
-                          name: profileName,
-                          savedAt: getExportedAt(),
-                        });
-                        if (isBlockedProfileMutation(result)) {
-                          setProfileDurabilityFeedback(null);
-                          setProfileMessage("");
-                          setProfileErrorMessage(
-                            "Profile was not saved because preserved profile data needs recovery first.",
-                          );
-                          return;
-                        }
-                        setProfileDurabilityFeedback({
-                          category: classifyStoreMutationResult(result),
-                          operation: "save",
-                          profileName: profileName.trim(),
-                        });
-                        setProfileMessage("");
-                        setProfileErrorMessage("");
-                        setProfileName("");
-                      } catch (error) {
-                        setProfileMessage("");
-                        setProfileErrorMessage(getProfileErrorMessage(error));
+                    disabled={isBackupBusy || isClearBusy}
+                    onClick={async () => {
+                      setIsBackupBusy(true);
+                      const result = await storeRef.current.exportBackupV14(getExportedAt());
+                      if (result.status === "exported") {
+                        downloadDayFrameBackup(result.backup);
+                        setBackupMessage("Complete DayFrame backup downloaded.");
+                        setBackupErrorMessage("");
+                      } else {
+                        setBackupMessage("");
+                        setBackupErrorMessage(
+                          result.status === "protectedSurface"
+                            ? `Backup is unavailable while ${result.surface} recovery is protected.`
+                            : "Backup is temporarily unavailable. Your DayFrame authority was preserved.",
+                        );
                       }
+                      setBackupDurabilityFeedback(null);
+                      setProfileMessage("");
+                      setProfileDurabilityFeedback(null);
+                      setProfileErrorMessage("");
+                      setIsConfirmingClearLocalData(false);
+                      setClearDurabilityFeedback(null);
+                      setIsBackupBusy(false);
                     }}
                     type="button"
                   >
-                    Save Current Setup as Profile
+                    {isBackupBusy ? "Preparing Backup…" : "Export Complete Backup"}
+                  </button>
+                  <button
+                    className="df-secondary-button"
+                    aria-describedby={
+                      backupErrorMessage || backupMessage ? "backup-import-feedback" : undefined
+                    }
+                    ref={importButtonRef}
+                    disabled={isBackupBusy || isClearBusy}
+                    onClick={() => {
+                      importInputRef.current?.click();
+                    }}
+                    type="button"
+                  >
+                    Import Setup Backup
+                  </button>
+                  <button
+                    className="df-secondary-button"
+                    disabled={isBackupBusy || isClearBusy}
+                    onClick={() => {
+                      setIsConfirmingClearLocalData(true);
+                      setClearFailureMessage("");
+                      setSetupDurabilityFeedback(null);
+                      setClearDurabilityFeedback(null);
+                      setBackupMessage("");
+                      setBackupDurabilityFeedback(null);
+                      setBackupErrorMessage("");
+                      setProfileMessage("");
+                      setProfileDurabilityFeedback(null);
+                      setProfileErrorMessage("");
+                    }}
+                    ref={clearButtonRef}
+                    type="button"
+                  >
+                    Clear Local Data
                   </button>
                 </div>
-                {stateSnapshot.savedProfiles.length === 0 ? (
-                  <p className="df-support">No saved profiles yet.</p>
-                ) : (
-                  <ul className="df-plain-list">
-                    {stateSnapshot.savedProfiles.map((savedProfile) => (
-                      <li key={savedProfile.id}>
-                        <div>
-                          <strong>{savedProfile.name}</strong>
-                          <span className="df-muted"> Saved {savedProfile.savedAt}</span>
-                        </div>
-                        <div className="df-screen-actions">
-                          <button
-                            className="df-secondary-button"
-                            onClick={() => {
-                              const result = storeRef.current.loadProfile(savedProfile.id);
-
-                              if (result.status === "recoveryRequired") {
-                                setProfileDurabilityFeedback(null);
-                                setProfileMessage("");
-                                setProfileErrorMessage(
-                                  "Profile was not loaded. Your current setup and the saved profile were preserved because the profile needs recovery before it can be used.",
-                                );
-                                return;
-                              }
-
-                              if (result.status === "activationFailed") {
-                                setProfileDurabilityFeedback(null);
-                                setProfileMessage("");
-                                setProfileErrorMessage(
-                                  "Profile was not loaded because fresh source identity could not be allocated. Your current setup and the saved profile were preserved.",
-                                );
-                                return;
-                              }
-
-                              setCurrentScreen("planner");
-                              setPlannerMode("month");
-                              clearPreviewSelection();
-                              setSetupDurabilityFeedback(null);
-                              setProfileDurabilityFeedback({
-                                category: classifyActiveStoreMutationResult(result),
-                                operation: "load",
-                                profileName: savedProfile.name,
-                              });
-                              setProfileMessage("");
-                              setProfileErrorMessage("");
-                              setBackupMessage("");
-                              setBackupErrorMessage("");
-                              setClearDurabilityFeedback(null);
-                              setPreviewGuardrailMissingItems([]);
-                              setIsConfirmingClearLocalData(false);
-                            }}
-                            type="button"
-                          >
-                            Load Profile
-                          </button>
-                          <button
-                            className="df-secondary-button"
-                            onClick={() => {
-                              const result = storeRef.current.deleteProfile(savedProfile.id);
-                              if (isBlockedProfileMutation(result)) {
-                                setProfileDurabilityFeedback(null);
-                                setProfileMessage("");
-                                setProfileErrorMessage(
-                                  "Profile was not deleted because preserved profile data needs recovery first.",
-                                );
-                                return;
-                              }
-                              setProfileDurabilityFeedback({
-                                category: classifyStoreMutationResult(result),
-                                operation: "delete",
-                                profileName: savedProfile.name,
-                              });
-                              setProfileMessage("");
-                              setProfileErrorMessage("");
-                            }}
-                            type="button"
-                          >
-                            Delete Profile
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div className="df-screen-actions">
-                <button
-                  className="df-secondary-button"
-                  disabled={isBackupBusy || isClearBusy}
-                  onClick={async () => {
+                <input
+                  accept="application/json,.json"
+                  aria-label="Import Setup Backup File"
+                  hidden
+                  onChange={async (event) => {
                     setIsBackupBusy(true);
-                    const result = await storeRef.current.exportBackupV12(getExportedAt());
-                    if (result.status === "exported") {
-                      downloadDayFrameBackup(result.backup);
-                      setBackupMessage("Complete DayFrame backup downloaded.");
-                      setBackupErrorMessage("");
-                    } else {
-                      setBackupMessage("");
-                      setBackupErrorMessage(
-                        result.status === "protectedSurface"
-                          ? `Backup is unavailable while ${result.surface} recovery is protected.`
-                          : "Backup is temporarily unavailable. Your DayFrame authority was preserved.",
-                      );
-                    }
-                    setBackupDurabilityFeedback(null);
-                    setProfileMessage("");
-                    setProfileDurabilityFeedback(null);
-                    setProfileErrorMessage("");
-                    setIsConfirmingClearLocalData(false);
-                    setClearDurabilityFeedback(null);
+                    await handleBackupFileSelection(
+                      event,
+                      storeRef.current,
+                      setBackupMessage,
+                      setBackupDurabilityFeedback,
+                      setBackupErrorMessage,
+                      setSetupDurabilityFeedback,
+                      setProfileMessage,
+                      setProfileDurabilityFeedback,
+                      setProfileErrorMessage,
+                      (value) => {
+                        setClearDurabilityFeedback(value);
+                        setClearFailureMessage("");
+                      },
+                      setPlannerMode,
+                      clearPreviewSelection,
+                      setPreviewGuardrailMissingItems,
+                      setIsConfirmingClearLocalData,
+                      resetGoalEditing,
+                    );
                     setIsBackupBusy(false);
                   }}
-                  type="button"
-                >
-                  {isBackupBusy ? "Preparing Backup…" : "Export Complete Backup"}
-                </button>
-                <button
-                  className="df-secondary-button"
-                  disabled={isBackupBusy || isClearBusy}
-                  onClick={() => {
-                    importInputRef.current?.click();
+                  ref={(node) => {
+                    importInputRef.current = node as unknown as FileInputLike | null;
                   }}
-                  type="button"
-                >
-                  Import Setup Backup
-                </button>
-                <button
-                  className="df-secondary-button"
-                  disabled={isBackupBusy || isClearBusy}
-                  onClick={() => {
-                    setIsConfirmingClearLocalData(true);
-                    setSetupDurabilityFeedback(null);
-                    setClearDurabilityFeedback(null);
-                    setBackupMessage("");
-                    setBackupDurabilityFeedback(null);
-                    setBackupErrorMessage("");
-                    setProfileMessage("");
-                    setProfileDurabilityFeedback(null);
-                    setProfileErrorMessage("");
-                  }}
-                  type="button"
-                >
-                  Clear Local Data
-                </button>
-              </div>
-              <input
-                accept="application/json,.json"
-                aria-label="Import Setup Backup File"
-                hidden
-                onChange={async (event) => {
-                  setIsBackupBusy(true);
-                  await handleBackupFileSelection(
-                    event,
-                    storeRef.current,
-                    setBackupMessage,
-                    setBackupDurabilityFeedback,
-                    setBackupErrorMessage,
-                    setSetupDurabilityFeedback,
-                    setProfileMessage,
-                    setProfileDurabilityFeedback,
-                    setProfileErrorMessage,
-                    setClearDurabilityFeedback,
-                    setCurrentScreen,
-                    setPlannerMode,
-                    clearPreviewSelection,
-                    setPreviewGuardrailMissingItems,
-                    setIsConfirmingClearLocalData,
-                  );
-                  setIsBackupBusy(false);
-                }}
-                ref={(node) => {
-                  importInputRef.current = node as unknown as FileInputLike | null;
-                }}
-                type="file"
-              />
-              {isConfirmingClearLocalData ? (
-                <div className="df-form-stack">
-                  <p className="df-danger-message">Clear all locally saved DayFrame setup data?</p>
-                  <div className="df-confirmation-actions">
-                    <button
-                      className="df-danger-button"
-                      disabled={isClearBusy}
-                      onClick={async () => {
-                        setIsClearBusy(true);
-                        const result = await storeRef.current.clearLocalData();
-                        setCurrentScreen("planner");
-                        setPlannerMode("month");
-                        clearPreviewSelection();
-                        setSetupDurabilityFeedback(null);
-                        setPreviewGuardrailMissingItems([]);
-                        setIsConfirmingClearLocalData(false);
-                        setClearDurabilityFeedback(classifyClearLocalDataResult(result));
-                        setBackupMessage("");
-                        setBackupDurabilityFeedback(null);
-                        setBackupErrorMessage("");
-                        setProfileMessage("");
-                        setProfileDurabilityFeedback(null);
-                        setProfileErrorMessage("");
-                        setProfileName("");
-                        setIsClearBusy(false);
-                      }}
-                      type="button"
-                    >
-                      {isClearBusy ? "Clearing Local Data…" : "Confirm Clear Local Data"}
-                    </button>
-                    <button
-                      className="df-secondary-button"
-                      disabled={isClearBusy}
-                      onClick={() => {
-                        setIsConfirmingClearLocalData(false);
-                      }}
-                      type="button"
-                    >
-                      Cancel
-                    </button>
+                  type="file"
+                />
+                {clearFailureMessage ? (
+                  <p role="alert" className="df-danger-message">
+                    {clearFailureMessage}
+                  </p>
+                ) : null}
+                {isConfirmingClearLocalData ? (
+                  <div className="df-form-stack">
+                    <p className="df-danger-message">
+                      Clear all locally saved DayFrame setup data?
+                    </p>
+                    <div className="df-confirmation-actions">
+                      <button
+                        className="df-danger-button"
+                        disabled={isClearBusy}
+                        onClick={async () => {
+                          setIsClearBusy(true);
+                          setClearFailureMessage("");
+                          try {
+                            const result = await storeRef.current.clearLocalData();
+                            resetGoalEditing();
+                            setPlannerMode("month");
+                            clearPreviewSelection();
+                            setSetupDurabilityFeedback(null);
+                            setPreviewGuardrailMissingItems([]);
+                            setIsConfirmingClearLocalData(false);
+                            setClearDurabilityFeedback(classifyClearLocalDataResult(result));
+                            setBackupMessage("");
+                            setBackupDurabilityFeedback(null);
+                            setBackupErrorMessage("");
+                            setProfileMessage("");
+                            setProfileDurabilityFeedback(null);
+                            setProfileErrorMessage("");
+                            setProfileName("");
+                          } catch (error) {
+                            setIsConfirmingClearLocalData(false);
+                            setClearFailureMessage(
+                              error instanceof Error &&
+                                "reason" in error &&
+                                error.reason === "protected"
+                                ? "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path."
+                                : error instanceof Error &&
+                                    "reason" in error &&
+                                    error.reason === "authorityTransactionActive"
+                                  ? "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+                                  : error instanceof Error &&
+                                      "reason" in error &&
+                                      error.reason === "initializing"
+                                    ? "DayFrame is still initializing. Clear was not started."
+                                    : "The clear result could not be confirmed. Local data may have changed; inspect its status before retrying.",
+                            );
+                          } finally {
+                            setIsClearBusy(false);
+                          }
+                        }}
+                        type="button"
+                      >
+                        {isClearBusy ? "Clearing Local Data…" : "Confirm Clear Local Data"}
+                      </button>
+                      <button
+                        className="df-secondary-button"
+                        disabled={isClearBusy}
+                        onClick={() => {
+                          setIsConfirmingClearLocalData(false);
+                        }}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : clearDurabilityFeedback ? (
-                <p className={getClearFeedbackClassName(clearDurabilityFeedback)}>
-                  {getClearFeedbackMessage(clearDurabilityFeedback)}
-                </p>
-              ) : backupErrorMessage ? (
-                <p className="df-danger-message">{backupErrorMessage}</p>
-              ) : backupDurabilityFeedback ? (
-                <p className={getDurabilityFeedbackClassName(backupDurabilityFeedback)}>
-                  {getMutationFeedbackMessage("backupImport", backupDurabilityFeedback)}
-                </p>
-              ) : backupMessage ? (
-                <p className="df-success-message">{backupMessage}</p>
-              ) : profileErrorMessage ? (
-                <p className="df-danger-message">{profileErrorMessage}</p>
-              ) : profileDurabilityFeedback ? (
-                <p className={getDurabilityFeedbackClassName(profileDurabilityFeedback.category)}>
-                  {getProfileFeedbackMessage(profileDurabilityFeedback)}
-                </p>
-              ) : profileMessage ? (
-                <p className="df-success-message">{profileMessage}</p>
-              ) : (
-                <p className="df-support">
-                  Complete backups include setup, profiles, accepted decisions, historical plans,
-                  execution outcomes, notes, and timestamps. Preview data is not included; protect
-                  the downloaded JSON as private personal data.
-                </p>
-              )}
-            </section>
-
-            <section className="df-workflow-panel df-workflow-block df-workflow-block--summary">
-              <div className="df-brand">
-                <h1>DayFrame</h1>
-                <p className="df-shell-subtitle">Built for life that does not run 9 to 5.</p>
-                <p className="df-support">
-                  Set up your shifts, connect them to a cycle, add repeatable life blocks, then
-                  generate a schedule.
-                </p>
-              </div>
-
-              <div className="df-workflow-status">
-                <p className="df-workflow-eyebrow">Workspace</p>
-                <h2 className="df-panel-title">
-                  {currentScreen === "planner"
-                    ? plannerMode === "month"
-                      ? "Navigate your month"
-                      : plannerMode === "workPattern"
-                        ? "Configure your work pattern"
-                        : plannerMode === "commitmentLibrary"
-                          ? "Manage your commitments"
-                          : "Review your schedule"
-                    : currentScreen === "today"
-                      ? "Today"
-                      : "Review your history"}
-                </h2>
-                <p className="df-support">
-                  {currentScreen === "planner"
-                    ? plannerMode === "month"
-                      ? "Select a canonical DayFrame day and review the schedule DayFrame generated."
-                      : plannerMode === "workPattern"
-                        ? "Manage the structural Work inputs shared by your monthly plan."
-                        : plannerMode === "commitmentLibrary"
-                          ? "Manage the complete scheduling intent you have taught DayFrame."
-                          : "Review the generated schedule and resolve what still needs attention."
-                    : currentScreen === "today"
-                      ? "Review the published plan and reported outcomes known for the current user-day."
-                      : "Inspect plan coverage, scheduled outcomes, and the evidence behind the counts."}
-                </p>
-              </div>
-
-              <nav aria-label="App Sections" className="df-primary-nav">
-                <button
-                  aria-label="Planner"
-                  aria-pressed={currentScreen === "planner"}
-                  className={
-                    currentScreen === "planner"
-                      ? "df-primary-nav-button is-active"
-                      : "df-primary-nav-button"
-                  }
-                  onClick={openMonthMode}
-                  type="button"
-                >
-                  <span className="df-primary-nav-title">Planner</span>
-                  <span aria-hidden="true" className="df-primary-nav-detail">
-                    Build your plan and review its generated schedule
-                  </span>
-                </button>
-                <button
-                  aria-label="Today"
-                  aria-pressed={currentScreen === "today"}
-                  className={
-                    currentScreen === "today"
-                      ? "df-primary-nav-button is-active"
-                      : "df-primary-nav-button"
-                  }
-                  onClick={openTodayScreen}
-                  onFocus={() => void loadTodaySurface()}
-                  onMouseEnter={() => void loadTodaySurface()}
-                  type="button"
-                >
-                  <span className="df-primary-nav-title">Today</span>
-                  <span aria-hidden="true" className="df-primary-nav-detail">
-                    Review the published current user-day
-                  </span>
-                </button>
-                <button
-                  aria-label="Summary"
-                  aria-pressed={currentScreen === "summary"}
-                  className={
-                    currentScreen === "summary"
-                      ? "df-primary-nav-button is-active"
-                      : "df-primary-nav-button"
-                  }
-                  onClick={openSummaryScreen}
-                  onFocus={() => void loadSummarySurface()}
-                  onMouseEnter={() => void loadSummarySurface()}
-                  type="button"
-                >
-                  <span className="df-primary-nav-title">Summary</span>
-                  <span aria-hidden="true" className="df-primary-nav-detail">
-                    Inspect plan coverage and scheduled outcomes
-                  </span>
-                </button>
-              </nav>
-
-              {previewSummary ? (
+                ) : clearDurabilityFeedback ? (
+                  <p className={getClearFeedbackClassName(clearDurabilityFeedback)}>
+                    {getClearFeedbackMessage(clearDurabilityFeedback)}
+                  </p>
+                ) : backupErrorMessage ? (
+                  <p id="backup-import-feedback" className="df-danger-message" role="alert">
+                    {backupErrorMessage}
+                  </p>
+                ) : backupDurabilityFeedback ? (
+                  <p className={getDurabilityFeedbackClassName(backupDurabilityFeedback)}>
+                    {getMutationFeedbackMessage("backupImport", backupDurabilityFeedback)}
+                  </p>
+                ) : backupMessage ? (
+                  <p id="backup-import-feedback" className="df-success-message" role="status">
+                    {backupMessage}
+                  </p>
+                ) : profileErrorMessage ? (
+                  <p className="df-danger-message">{profileErrorMessage}</p>
+                ) : profileDurabilityFeedback ? (
+                  <p className={getDurabilityFeedbackClassName(profileDurabilityFeedback.category)}>
+                    {getProfileFeedbackMessage(profileDurabilityFeedback)}
+                  </p>
+                ) : profileMessage ? (
+                  <p className="df-success-message">{profileMessage}</p>
+                ) : (
+                  <p className="df-support">
+                    Complete backups include setup, profiles, accepted decisions, historical plans,
+                    execution outcomes, notes, and timestamps. Preview data is not included; protect
+                    the downloaded JSON as private personal data.
+                  </p>
+                )}
+              </section>
+            </details>
+            <section className="df-compatibility-actions">
+              {currentScreen === "planner" && plannerMode === "schedule" && previewSummary ? (
                 <section className="df-compact-preview" aria-labelledby="compact-preview-heading">
                   <div className="df-compact-preview-header">
                     <div className="df-screen-header">
@@ -2054,7 +2197,10 @@ function ReadyDayFrameApp({
                 </section>
               ) : null}
 
-              {activeManualEventDate && manualEventDraft ? (
+              {currentScreen === "planner" &&
+              (plannerMode === "month" || plannerMode === "schedule") &&
+              activeManualEventDate &&
+              manualEventDraft ? (
                 <section className="df-compact-preview" aria-labelledby="manual-event-heading">
                   <div className="df-screen-header">
                     <p className="df-workflow-eyebrow">Calendar Day</p>
@@ -2241,6 +2387,19 @@ function ReadyDayFrameApp({
                           requestAnimationFrame(() =>
                             document.getElementById("selected-day-heading")?.focus(),
                           );
+                        } else if (plannerMode === "schedule") {
+                          const intent = goalEditingContext
+                            .cell("review-return-focus", () => ({ key: "", section: "" }))
+                            .get();
+                          requestAnimationFrame(() => {
+                            if (!goalEditingContext.isValid()) return;
+                            const origin = [
+                              ...document.querySelectorAll<HTMLElement>("[data-review-return]"),
+                            ].find((element) => element.dataset.reviewReturn === intent.key);
+                            (
+                              origin ?? document.getElementById("schedule-friction-heading")
+                            )?.focus();
+                          });
                         }
                       }}
                       type="button"
@@ -2331,21 +2490,142 @@ function ReadyDayFrameApp({
               ) : null}
             </section>
           </div>
-        </header>
+        </div>
 
         {currentScreen === "planner" ? (
           <PlannerSurface
             mode={plannerMode}
+            onOpenGoals={() => setPlannerMode("goals")}
+            onOpenToday={openTodayScreen}
+            selectedDay={plannerMode === "day" ? dayOwner : preservedMonthView.selectedLabel}
+            goalsContent={
+              <LazySurfaceBoundary name="Goals">
+                <Suspense fallback={<LazySurfaceLoading name="Goals" />}>
+                  <GoalSection
+                    {...(dayGoalId ? { initialGoalId: dayGoalId } : {})}
+                    context={goalEditingContext}
+                    onInitialGoalHandled={() => setDayGoalId(undefined)}
+                    store={storeRef.current}
+                    state={stateSnapshot}
+                    renderRecorded={(goal) => (
+                      <Suspense fallback={<LazySurfaceLoading name="Recorded evidence" />}>
+                        <GoalRecordedInspection
+                          {...(goalRecordedNavigation(goalEditingContext, goal.id).get().range
+                            ? {
+                                navigationRange: goalRecordedNavigation(
+                                  goalEditingContext,
+                                  goal.id,
+                                ).get().range!,
+                              }
+                            : {})}
+                          onNavigationConsumed={() =>
+                            goalRecordedNavigation(goalEditingContext, goal.id).update({
+                              range: null,
+                            })
+                          }
+                          goal={goal}
+                          store={activeStore}
+                          context={goalEditingContext}
+                          currentDay={(instant) =>
+                            currentPlannerView(stateSnapshot, instant).selectedLabel
+                          }
+                          now={getNow}
+                          onDay={openDay}
+                        />
+                      </Suspense>
+                    )}
+                    renderStructure={(goal, onGoal) => (
+                      <Suspense fallback={<LazySurfaceLoading name="Goal Structure" />}>
+                        <GoalStructureSection
+                          key={goal.id}
+                          goal={goal}
+                          context={goalEditingContext}
+                          store={storeRef.current}
+                          onGoal={onGoal}
+                          now={getNow}
+                        />
+                      </Suspense>
+                    )}
+                    renderInspection={(goalId) => (
+                      <Suspense fallback={<LazySurfaceLoading name="Goal evidence" />}>
+                        <GoalAcceptedPlanningSection
+                          key={goalId}
+                          goalId={goalId}
+                          context={goalEditingContext}
+                          currentDay={currentPlannerView(stateSnapshot, getNow()).selectedLabel}
+                          query={activeStore.queryAcceptedPlanningEvidence}
+                          store={activeStore}
+                          now={getNow}
+                          onDay={(owner) => openDay(owner)}
+                          onReview={openScheduleMode}
+                        />
+                      </Suspense>
+                    )}
+                    renderPlanning={(goal) => (
+                      <Suspense fallback={<LazySurfaceLoading name="Goal planning" />}>
+                        <GoalPlanningSection
+                          key={goal.id}
+                          context={goalEditingContext}
+                          goal={goal}
+                          store={storeRef.current}
+                          state={stateSnapshot}
+                          now={getNow}
+                          onOpenReview={openScheduleMode}
+                        />
+                      </Suspense>
+                    )}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
+            }
+            todayContent={
+              <LazySurfaceBoundary name="Day">
+                <Suspense fallback={<LazySurfaceLoading name="Day" />}>
+                  <DayWorksurface
+                    ownerDay={dayOwner}
+                    now={getNow}
+                    query={activeStore.querySelectedDayEvidence}
+                    store={activeStore}
+                    refreshKey={stateSnapshot}
+                    onReview={() => openReviewPeriod({ start: dayOwner, end: dayOwner })}
+                    onWork={openWorkPatternMode}
+                    onGoal={(id) => {
+                      setDayGoalId(id);
+                      setPlannerMode("goals");
+                    }}
+                    onAddEvent={() => {
+                      setCalendarEditingTools(true);
+                      setPlannerMode("month");
+                      openNewEventFromMonth(dayOwner as LocalDateString);
+                    }}
+                    onEditEvent={(target) => {
+                      setCalendarEditingTools(true);
+                      setPlannerMode("month");
+                      openExistingEventFromMonth(target);
+                    }}
+                    onCompatibility={() => {
+                      setCalendarEditingTools(true);
+                      setPlannerMode("month");
+                    }}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
+            }
             monthContent={
               <LazySurfaceBoundary name="Monthly Planner">
                 <Suspense fallback={<LazySurfaceLoading name="Planner" />}>
                   <MonthlyPlannerSurface
+                    onOpenEditingTools={() => setCalendarEditingTools(true)}
+                    {...(!calendarEditingTools
+                      ? { onOpenDay: (label: LocalDateString) => openDay(label, true) }
+                      : {})}
+                    goalNames={Object.fromEntries(
+                      activeStore.listGoals().map((goal) => [goal.id, goal.title]),
+                    )}
+                    realizedScheduleFacts={activeStore.listRealizedScheduleFacts()}
                     contextualPlanContent={
                       monthPlanWorkspace ? (
                         <>
-                          {monthPlanWorkspace === "planningSettings" ? (
-                            <GoalSection store={storeRef.current} state={stateSnapshot} />
-                          ) : null}
                           <LazySurfaceBoundary
                             name={
                               monthPlanWorkspace === "planningSettings"
@@ -2365,6 +2645,19 @@ function ReadyDayFrameApp({
                               }
                             >
                               <SetupScreen
+                                saveIssues={setupIssues}
+                                conversionStore={storeRef.current}
+                                compositionStore={activeStore}
+                                onDiscardDraft={() => {
+                                  setSetupDraft(
+                                    buildSetupDraft(
+                                      storeRef.current.getState(),
+                                      createIsoTimestamp(),
+                                    ),
+                                  );
+                                  setSetupValidationMessage("");
+                                  setSetupDurabilityFeedback(null);
+                                }}
                                 draft={setupDraft}
                                 embedded
                                 focusedTemplateField={focusedTemplateField}
@@ -2429,7 +2722,7 @@ function ReadyDayFrameApp({
                       monthPlanWorkspace === "commitmentLibrary"
                     }
                     getNow={getNow}
-                    {...(preservedMonthView ? { initialView: preservedMonthView } : {})}
+                    view={preservedMonthView}
                     onAddCommitment={openNewCommitmentFromMonth}
                     onAddEvent={openNewEventFromMonth}
                     onBackToDay={() => {
@@ -2457,10 +2750,17 @@ function ReadyDayFrameApp({
                     onOpenPlanningSettings={openPlanningSettingsFromMonth}
                     onOpenCommitmentLibrary={openCommitmentLibraryFromMonth}
                     onOpenReview={openScheduleMode}
+                    onReviewPeriod={(scope) =>
+                      openReviewPeriod({
+                        start: scope.startUserDayDate,
+                        end: addUserDayLabels(scope.endUserDayDateExclusive, -1),
+                      })
+                    }
                     onOpenWorkPattern={openWorkPatternFromMonth}
                     onViewChange={setPreservedMonthView}
                     readiness={activeStore.getReadiness()}
                     queryPlanningReview={activeStore.queryPlanningReview}
+                    subscribePlanningReview={activeStore.subscribePlanningReview}
                     previewState={
                       stateSnapshot.preview?.isStale
                         ? "stale"
@@ -2475,6 +2775,35 @@ function ReadyDayFrameApp({
             }
             onOpenMonth={openMonthMode}
             onOpenSchedule={openScheduleMode}
+            onOpenMySchedule={() => setPlannerMode("mySchedule")}
+            onOpenSleep={() => setPlannerMode("sleep")}
+            myScheduleContent={
+              <LazySurfaceBoundary name="My Schedule">
+                <Suspense fallback={<LazySurfaceLoading name="My Schedule" />}>
+                  <MyScheduleSurface
+                    state={stateSnapshot}
+                    dirty={isSetupDirty}
+                    onWork={openWorkPatternMode}
+                    onSleep={() => setPlannerMode("sleep")}
+                    onCommitments={openCommitmentLibraryMode}
+                    onReview={openScheduleMode}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
+            }
+            sleepContent={
+              <LazySurfaceBoundary name="Sleep">
+                <Suspense fallback={<LazySurfaceLoading name="Sleep" />}>
+                  <SleepRequirementSection
+                    store={activeStore}
+                    state={stateSnapshot}
+                    ownerDay={currentPlannerView(stateSnapshot, getNow()).selectedLabel}
+                    setupDirty={isSetupDirty}
+                    onReview={openScheduleMode}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
+            }
             onOpenWorkPattern={openWorkPatternMode}
             onOpenCommitmentLibrary={openCommitmentLibraryMode}
             commitmentLibraryContent={
@@ -2501,6 +2830,16 @@ function ReadyDayFrameApp({
                 <LazySurfaceBoundary name="Commitment Library">
                   <Suspense fallback={<LazySurfaceLoading name="Commitment Library" />}>
                     <SetupScreen
+                      saveIssues={setupIssues}
+                      conversionStore={storeRef.current}
+                      compositionStore={activeStore}
+                      onDiscardDraft={() => {
+                        setSetupDraft(
+                          buildSetupDraft(storeRef.current.getState(), createIsoTimestamp()),
+                        );
+                        setSetupValidationMessage("");
+                        setSetupDurabilityFeedback(null);
+                      }}
                       draft={setupDraft}
                       focusedTemplateField={focusedTemplateField}
                       isDirty={isSetupDirty}
@@ -2584,6 +2923,16 @@ function ReadyDayFrameApp({
                 <LazySurfaceBoundary name="Work Pattern">
                   <Suspense fallback={<LazySurfaceLoading name="Work Pattern" />}>
                     <SetupScreen
+                      saveIssues={setupIssues}
+                      conversionStore={storeRef.current}
+                      compositionStore={activeStore}
+                      onDiscardDraft={() => {
+                        setSetupDraft(
+                          buildSetupDraft(storeRef.current.getState(), createIsoTimestamp()),
+                        );
+                        setSetupValidationMessage("");
+                        setSetupDurabilityFeedback(null);
+                      }}
                       draft={setupDraft}
                       isDirty={isSetupDirty}
                       onSave={saveCurrentSetup}
@@ -2612,143 +2961,113 @@ function ReadyDayFrameApp({
               </div>
             }
             scheduleContent={
-              <div className="df-screen df-workflow-block df-workflow-block--preview">
-                <div className="df-panel">
-                  <h2 className="df-screen-title" id="review-schedule-heading" tabIndex={-1}>
-                    Review Schedule
-                  </h2>
-                  <div className="df-screen-actions">
-                    <button
-                      className="df-action-button"
-                      onClick={generatePreviewFromSavedState}
-                      type="button"
-                    >
-                      {stateSnapshot.preview ? "Refresh Schedule" : "Generate Schedule"}
-                    </button>
-                  </div>
-                  {contextualNavigationMessage ? (
-                    <p className="df-warning-message" role="status">
-                      {contextualNavigationMessage}
-                    </p>
-                  ) : null}
-                  {previewGuardrailMissingItems.length > 0 ? (
-                    <div className="df-form-stack">
-                      <p className="df-danger-message">
-                        Finish setup before generating a schedule:
-                      </p>
-                      <ul className="df-plain-list">
-                        {previewGuardrailMissingItems.map((missingItem) => (
-                          <li key={missingItem}>{missingItem}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  {stateSnapshot.preview && savedRangeWarnings.length > 0 ? (
-                    <div className="df-form-stack">
-                      <p className="df-warning-message">Planning range warnings:</p>
-                      <ul className="df-plain-list">
-                        {savedRangeWarnings.map((warning) => (
-                          <li key={warning.id}>{warning.message}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  {stateSnapshot.preview ? (
-                    <label className="df-field df-schedule-review-navigation">
-                      Review one user-day
-                      <input
-                        max={stateSnapshot.preview.rangeEndDate}
-                        min={stateSnapshot.preview.rangeStartDate}
-                        onChange={(event) => {
-                          const date = event.target.value as LocalDateString;
-                          setSelectedPreviewDayRange({ startDate: date, endDate: date });
-                          setPendingPreviewRangeStartDate(null);
-                        }}
-                        type="date"
-                        value={selectedPreviewDayRange?.startDate ?? ""}
-                      />
-                    </label>
-                  ) : null}
-                </div>
-                <LazySurfaceBoundary name="Review">
-                  <Suspense fallback={<LazySurfaceLoading name="Review" />}>
-                    <ScheduleReviewPanel
-                      endUserDayDateExclusive={addUserDayLabels(
+              <LazySurfaceBoundary name="Review Schedule">
+                <Suspense fallback={<LazySurfaceLoading name="Review Schedule" />}>
+                  <ScheduleReviewWorkspace
+                    context={goalEditingContext}
+                    onGoal={(id, range) => {
+                      goalInspectionNavigation(goalEditingContext, id).update({ range });
+                      setDayGoalId(id);
+                      setPlannerMode("goals");
+                    }}
+                    attentionId={pendingReviewFrictionId}
+                    onAttentionHandled={() => setPendingReviewFrictionId(null)}
+                    missingSetup={previewGuardrailMissingItems}
+                    message={contextualNavigationMessage}
+                    onOpenSetup={openWorkPatternMode}
+                    onDay={openDay}
+                    review={{
+                      goalNames: Object.fromEntries(
+                        activeStore.listGoals().map((goal) => [goal.id, goal.title]),
+                      ),
+                      refreshKey: stateSnapshot,
+                      startUserDayDate:
+                        stateSnapshot.preview?.rangeStartDate ??
+                        stateSnapshot.previewRange.startDate,
+                      endUserDayDateExclusive: addUserDayLabels(
                         stateSnapshot.preview?.rangeEndDate ?? stateSnapshot.previewRange.endDate,
                         1,
-                      )}
-                      historyAsOf={now.toISOString()}
-                      getPublishedAt={getExportedAt}
-                      onAcceptProposal={activeStore.acceptProposalOption}
-                      onGeneratePreview={generatePreviewFromSavedState}
-                      onOpenFriction={() => {
-                        document.getElementById("preview-heading")?.focus();
-                      }}
-                      onPublish={activeStore.publishScheduleRange}
-                      onRejectProposal={activeStore.rejectProposal}
-                      query={activeStore.queryPlanningReview}
-                      startUserDayDate={
-                        stateSnapshot.preview?.rangeStartDate ??
-                        stateSnapshot.previewRange.startDate
-                      }
-                      unresolvedFrictionCount={
+                      ),
+                      historyAsOf: now.toISOString(),
+                      getPublishedAt: getExportedAt,
+                      onAcceptProposal: activeStore.acceptProposalOption,
+                      onGeneratePreview: generatePreviewFromSavedState,
+                      onOpenFriction: () => undefined,
+                      onPublish: activeStore.publishScheduleRange,
+                      onRetryRealization: activeStore.realizeAcceptedAllocation,
+                      onRejectProposal: activeStore.rejectProposal,
+                      query: activeStore.queryPlanningReview,
+                      subscribeReview: activeStore.subscribePlanningReview,
+                      unresolvedFrictionCount:
                         stateSnapshot.preview?.result.frictionPoints.filter(
                           (point) => !point.ignored,
-                        ).length ?? 0
-                      }
-                      weekStartsOn={stateSnapshot.schedulingPreferences.weekStartsOn}
-                    />
-                  </Suspense>
-                </LazySurfaceBoundary>
-                <PreviewScreen
-                  authoredSetup={stateSnapshot}
-                  acceptedDecisions={acceptedDecisionViewModels}
-                  decisionRemovalProtected={planDecisionIngress.status === "recoveryRequired"}
-                  getDayBoundaryStartTimeForUserDayDate={getDayBoundaryStartTimeForUserDayDate}
-                  getUserDayWindowForUserDayDate={getUserDayWindowForUserDayDate}
-                  now={now}
-                  onAcceptPlanDecision={acceptPendingPlanDecision}
-                  onAddEvent={openNewEventFromReview}
-                  onApplySuggestedFix={handlePreviewSuggestedFix}
-                  onEditCommitment={openCommitmentFromReview}
-                  onEditEvent={openExistingEventFromReview}
-                  onEditWork={openWorkFromReview}
-                  onRetryPlanDecisionDurability={retryPlanDecisionDurability}
-                  onRemoveAcceptedDecision={removeAcceptedDecision}
-                  pendingPlanDecisionAcceptance={pendingPlanDecisionAcceptance !== null}
-                  planDecisionFeedback={planDecisionFeedback}
-                  planDecisionRetryAvailable={
-                    planDecisionDurability === "storageFailure" ||
-                    planDecisionDurability === "unavailable"
-                  }
-                  preview={stateSnapshot.preview}
-                  rangeWarnings={stateSnapshot.preview ? savedRangeWarnings : []}
-                  visibleRangeEndDate={selectedPreviewDayRange?.endDate ?? null}
-                  visibleRangeStartDate={selectedPreviewDayRange?.startDate ?? null}
-                />
-              </div>
+                        ).length ?? 0,
+                      weekStartsOn: stateSnapshot.schedulingPreferences.weekStartsOn,
+                    }}
+                    preview={{
+                      authoredSetup: stateSnapshot,
+                      acceptedDecisions: acceptedDecisionViewModels,
+                      decisionRemovalProtected: planDecisionIngress.status === "recoveryRequired",
+                      getDayBoundaryStartTimeForUserDayDate,
+                      getUserDayWindowForUserDayDate,
+                      now,
+                      onAcceptPlanDecision: acceptPendingPlanDecision,
+                      onAddEvent: openNewEventFromReview,
+                      onApplySuggestedFix: handlePreviewSuggestedFix,
+                      onEditCommitment: openCommitmentFromReview,
+                      onEditEvent: openExistingEventFromReview,
+                      onEditWork: openWorkFromReview,
+                      onRetryPlanDecisionDurability: retryPlanDecisionDurability,
+                      onRemoveAcceptedDecision: removeAcceptedDecision,
+                      pendingPlanDecisionAcceptance: pendingPlanDecisionAcceptance !== null,
+                      planDecisionFeedback,
+                      planDecisionRetryAvailable:
+                        planDecisionDurability === "storageFailure" ||
+                        planDecisionDurability === "unavailable",
+                      preview: stateSnapshot.preview,
+                      rangeWarnings: stateSnapshot.preview ? savedRangeWarnings : [],
+                      visibleRangeStartDate: selectedPreviewDayRange?.startDate ?? null,
+                      visibleRangeEndDate: selectedPreviewDayRange?.endDate ?? null,
+                    }}
+                  />
+                </Suspense>
+              </LazySurfaceBoundary>
             }
           />
         ) : null}
-        {currentScreen === "today" ? (
-          <LazySurfaceBoundary name="Today">
-            <Suspense fallback={<LazySurfaceLoading name="Today" />}>
-              <TodaySurface
-                now={getNow}
-                onOpenPlanner={openMonthMode}
-                queryToday={activeStore.queryToday}
-                reportingStore={activeStore}
-                subscribeExecutionHistory={activeStore.subscribeExecutionHistory}
-                subscribeHistoricalPlan={activeStore.subscribeHistory}
-              />
-            </Suspense>
-          </LazySurfaceBoundary>
-        ) : null}
         {currentScreen === "summary" ? (
           <div className="df-screen df-workflow-block df-workflow-block--summary">
+            <LazySurfaceBoundary name="Accepted planning">
+              <Suspense fallback={<LazySurfaceLoading name="Accepted planning" />}>
+                <AcceptedPlanningSummary
+                  query={activeStore.queryAcceptedPlanningEvidence}
+                  now={getNow}
+                  context={acceptedSummaryContext}
+                  onContextChange={setAcceptedSummaryContext}
+                  onGoal={(id) => {
+                    goalInspectionNavigation(goalEditingContext, id).update({
+                      range: {
+                        start: acceptedSummaryContext.start,
+                        end: acceptedSummaryContext.end,
+                      },
+                    });
+                    setDayGoalId(id);
+                    setPlannerMode("goals");
+                  }}
+                  onDay={(owner) => openDay(owner)}
+                  onReview={openScheduleMode}
+                />
+              </Suspense>
+            </LazySurfaceBoundary>
             <LazySurfaceBoundary name="Summary">
               <Suspense fallback={<LazySurfaceLoading name="Summary" />}>
                 <HistoricalIntelligenceSummary
+                  onInspectGoal={(id, range) => {
+                    goalRecordedNavigation(goalEditingContext, id).update({ range });
+                    setDayGoalId(id);
+                    setPlannerMode("goals");
+                  }}
+                  context={goalEditingContext}
                   now={getNow}
                   onOpenPlanner={openMonthMode}
                   store={activeStore}
@@ -3166,11 +3485,11 @@ async function handleBackupFileSelection(
   setProfileDurabilityFeedback: (feedback: ProfileDurabilityFeedback | null) => void,
   setProfileErrorMessage: (message: string) => void,
   setClearDurabilityFeedback: (feedback: ClearDurabilitySemanticClassification | null) => void,
-  setCurrentScreen: (screen: PrimarySurface) => void,
   setPlannerMode: (mode: PlannerMode) => void,
   clearPreviewSelection: () => void,
   setPreviewGuardrailMissingItems: (items: string[]) => void,
   setIsConfirmingClearLocalData: (value: boolean) => void,
+  resetGoalEditing: () => void,
 ): Promise<void> {
   const input = event.target as unknown as FileInputLike;
   const file = input.files?.[0];
@@ -3182,22 +3501,43 @@ async function handleBackupFileSelection(
   }
 
   try {
-    const backup = parseDayFrameBackupJson(await file.text());
+    const backupText = await file.text();
+    let parsedBackup: unknown;
+    try {
+      parsedBackup = JSON.parse(backupText);
+    } catch {
+      throw new Error("Backup file is not valid JSON.");
+    }
+    const backup =
+      parsedBackup &&
+      typeof parsedBackup === "object" &&
+      "version" in parsedBackup &&
+      (parsedBackup.version === 13 || parsedBackup.version === 14)
+        ? parsedBackup
+        : parseDayFrameBackupJson(backupText);
 
     const result = await store.importBackupFile(backup);
 
     if (
+      result.status === "restoredV14" ||
+      result.status === "restoredV13" ||
       result.status === "restoredV3" ||
       result.status === "restoredV4" ||
       result.status === "restoredV5" ||
       result.status === "restoredV6"
     ) {
+      // Only a confirmed authority replacement discards ephemeral Goal drafts.
+      resetGoalEditing();
       setBackupMessage(
-        result.status === "restoredV4" ||
-          result.status === "restoredV5" ||
-          result.status === "restoredV6"
-          ? "Complete backup restored across setup, history, goals, measurement definitions, and observations."
-          : "Complete Backup V3 restored across setup and history.",
+        store.getGoalStructureQualification().status === "protected"
+          ? "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired."
+          : result.status === "restoredV14" ||
+              result.status === "restoredV13" ||
+              result.status === "restoredV4" ||
+              result.status === "restoredV5" ||
+              result.status === "restoredV6"
+            ? "Complete backup restored across setup, history, goals, measurement definitions, and observations."
+            : "Complete Backup V3 restored across setup and history.",
       );
       setBackupDurabilityFeedback(null);
       setBackupErrorMessage("");
@@ -3206,7 +3546,6 @@ async function handleBackupFileSelection(
       setProfileMessage("");
       setProfileDurabilityFeedback(null);
       setProfileErrorMessage("");
-      setCurrentScreen("planner");
       setPlannerMode("month");
       clearPreviewSelection();
       setPreviewGuardrailMissingItems([]);
@@ -3214,6 +3553,7 @@ async function handleBackupFileSelection(
       return;
     }
 
+    if (result.status === "recoveryRequired") resetGoalEditing();
     if (
       result.status !== "rejected" &&
       result.status !== "instantiatedFromLegacy" &&
@@ -3223,11 +3563,13 @@ async function handleBackupFileSelection(
       setBackupDurabilityFeedback(null);
       setClearDurabilityFeedback(null);
       setBackupErrorMessage(
-        result.status === "protectedCurrentState"
-          ? "Backup restore is blocked until protected local authority is explicitly resolved."
-          : result.status === "recoveryRequired"
-            ? "Backup restore requires recovery before DayFrame can continue safely."
-            : "Complete backup restore did not finish. Existing authority was not reported as restored.",
+        result.status === "restoreBusy"
+          ? "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+          : result.status === "protectedCurrentState"
+            ? "Backup restore is blocked until protected local authority is explicitly resolved."
+            : result.status === "recoveryRequired"
+              ? "Backup restore requires recovery before DayFrame can continue safely."
+              : "Complete backup restore did not finish. Existing authority was not reported as restored.",
       );
       return;
     }
@@ -3261,7 +3603,6 @@ async function handleBackupFileSelection(
     setProfileMessage("");
     setProfileDurabilityFeedback(null);
     setProfileErrorMessage("");
-    setCurrentScreen("planner");
     setPlannerMode("month");
     clearPreviewSelection();
     setPreviewGuardrailMissingItems([]);

@@ -1,0 +1,22 @@
+{
+  "baseline-hashes": {
+    "count": 1086,
+    "changed": [
+      "code/src/ui/ScheduleReviewPanel.tsx",
+      "code/src/ui/DayFrameApp.tsx",
+      "code/src/ui/ScheduleReviewWorkspace.tsx",
+      "code/src/ui/PreviewScreen.tsx"
+    ],
+    "missing": []
+  },
+  "prior-evidence-hashes": {
+    "count": 926,
+    "changed": [],
+    "missing": []
+  },
+  "governing-hashes": {
+    "count": 631,
+    "changed": [],
+    "missing": []
+  }
+}

@@ -1,0 +1,8 @@
+cwd: repository root
+command argv: ["npm", "exec", "--prefix", "code", "prettier", "--", "--check", "docs/architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md", "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md", "docs/implementation/phase-9/evidence/task-9.29.5/EXECUTABLE_CONTRACT_MAP_RESULT.md", "docs/implementation/phase-9/evidence/task-9.29.5/FILE_MANIFEST_RESULT.md", "docs/implementation/phase-9/evidence/task-9.29.5/FUTURE_REGRESSION_MATRIX_RESULT.md", "docs/implementation/phase-9/evidence/task-9.29.5/REPRODUCTION_AND_VALIDATION_RESULT.md", "docs/implementation/phase-9/evidence/task-9.29.5/protection-preflight-RESULT.test.ts", "docs/implementation/phase-9/evidence/task-9.29.5/protection-preflight-config-RESULT.mjs"]
+Checking formatting...
+All matched files use Prettier code style!
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --check docs/architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md docs/implementation/phase-9/evidence/task-9.29.5/EXECUTABLE_CONTRACT_MAP_RESULT.md docs/implementation/phase-9/evidence/task-9.29.5/FILE_MANIFEST_RESULT.md docs/implementation/phase-9/evidence/task-9.29.5/FUTURE_REGRESSION_MATRIX_RESULT.md docs/implementation/phase-9/evidence/task-9.29.5/REPRODUCTION_AND_VALIDATION_RESULT.md docs/implementation/phase-9/evidence/task-9.29.5/protection-preflight-RESULT.test.ts docs/implementation/phase-9/evidence/task-9.29.5/protection-preflight-config-RESULT.mjs
+
+exitCode: 0

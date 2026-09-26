@@ -1,0 +1,25 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ScheduleReviewWorkspace.test.tsx src/ui/tests/DayFrameApp.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx (5 tests | 1 failed) 2495ms
+   × bounds more than ten canonically generated offers without deciding 452ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ScheduleReviewWorkspace.test.tsx > bounds more than ten canonically generated offers without deciding
+AssertionError: expected 3 to be greater than 10
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx:34:42
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 128 passed (129)
+   Start at  20:44:20
+   Duration  33.96s (transform 2.55s, setup 0ms, import 2.19s, tests 30.59s, environment 989ms)
+

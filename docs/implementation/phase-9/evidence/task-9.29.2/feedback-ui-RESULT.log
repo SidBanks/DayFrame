@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/ui/tests/PublicationReplacementFeedback.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:20:50
+   Duration  5.04s (transform 2.42s, setup 0ms, import 2.14s, tests 1.97s, environment 781ms)
+

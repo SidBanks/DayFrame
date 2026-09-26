@@ -1,0 +1,3 @@
+npm notice run dayframe@0.1.0 typecheck
+npm notice run tsc --noEmit
+src/state/publicationSourceAdmission.test.ts(294,33): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'unique symbol'.

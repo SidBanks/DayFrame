@@ -700,7 +700,7 @@ describe("generateSchedulePreview", () => {
     expect(result.frictionPoints).toEqual([]);
   });
 
-  it("keeps conflicting manual events in the preview while still surfacing friction", () => {
+  it("keeps manual events fixed while placing flexible Sleep around their occupancy", () => {
     const result = generateSchedulePreview({
       shiftDefinitions: [],
       shiftCycles: [
@@ -763,8 +763,13 @@ describe("generateSchedulePreview", () => {
         (scheduledBlock) => scheduledBlock.id === "manual_event_late_call",
       ),
     ).toBe(true);
-    expect(result.frictionPoints).toHaveLength(1);
-    expect(result.frictionPoints[0]?.title).toContain("Late Call");
+    const event = result.scheduledBlocks.find((block) => block.id === "manual_event_late_call")!;
+    const sleep = result.scheduledBlocks.find((block) => block.templateId === "default_sleep")!;
+    expect(event.startsAt).toEqual(new Date(2026, 4, 5, 23));
+    expect(event.endsAt).toEqual(new Date(2026, 4, 5, 23, 30));
+    expect(sleep.endsAt.getTime() - sleep.startsAt.getTime()).toBe(480 * 60_000);
+    expect(sleep.startsAt < event.endsAt && event.startsAt < sleep.endsAt).toBe(false);
+    expect(result.frictionPoints).toHaveLength(0);
   });
 
   it("treats non-work days as downtime days for flexible templates without generating friction", () => {

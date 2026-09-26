@@ -269,3 +269,59 @@ describe("IndexedDB durable collection storage", () => {
     });
   });
 });
+
+it("registers terminal receipt before enqueue exception and waits for atomic abort", async () => {
+  const storage = createIndexedDbCollectionStorage({
+    schema: schema(nextName()),
+    indexedDB: new IDBFactory(),
+  });
+  const order: string[] = [];
+  const result = await storage.mutate(
+    [
+      { type: "put", store: "items", value: { id: "good" } },
+      { type: "put", store: "items", value: { id: "bad", value: () => {} } },
+    ],
+    () => {
+      order.push("admit");
+      return true;
+    },
+    (receipt) => {
+      order.push("registered");
+      void receipt.terminal.then((state) => order.push(state));
+    },
+  );
+  order.push("returned");
+  expect(order).toEqual(["admit", "registered", "aborted", "returned"]);
+  expect(result).toMatchObject({ status: "failure", error: { code: "cloneFailure" } });
+  expect(await storage.getAll("items")).toMatchObject({ value: [] });
+});
+
+it("request/transaction error is not the receipt's terminal event", async () => {
+  const storage = createIndexedDbCollectionStorage({
+    schema: schema(nextName()),
+    indexedDB: new IDBFactory(),
+  });
+  const opened = await storage.open();
+  if (opened.status !== "success") throw Error("open");
+  let observedError = false;
+  let ended = false;
+  opened.value.addEventListener("error", () => {
+    observedError = true;
+    expect(ended).toBe(false);
+  });
+  const result = await storage.mutate(
+    [
+      { type: "put", store: "items", value: { id: "a", slug: "same" } },
+      { type: "put", store: "items", value: { id: "b", slug: "same" } },
+    ],
+    undefined,
+    (receipt) => {
+      void receipt.terminal.then(() => {
+        ended = true;
+      });
+    },
+  );
+  expect(observedError).toBe(true);
+  expect(ended).toBe(true);
+  expect(result.status).toBe("failure");
+});

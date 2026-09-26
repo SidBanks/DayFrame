@@ -1,0 +1,26 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ReviewIndependentDrafts.test.tsx (1 test | 1 failed) 737ms
+   × Review and Summary preserve Measurement and Observation corrections at their original revisions 735ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ReviewIndependentDrafts.test.tsx > Review and Summary preserve Measurement and Observation corrections at their original revisions
+TypeError: Cannot read properties of undefined (reading 'id')
+ ❯ src/ui/tests/ReviewIndependentDrafts.test.tsx:11:67
+      9| it("Review and Summary preserve Measurement and Observation correction…
+     10|   const { store, goal } = await fixture();
+     11|   const measurement = store.listMeasurementDefinitionHistory(goal.id).…
+       |                                                                   ^
+     12|   const observation = store.exportProgressObservationAuthority().obser…
+     13|   const revise = vi.spyOn(store, "reviseMeasurementDefinition"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  13:26:58
+   Duration  2.87s (transform 1.41s, setup 0ms, import 1.43s, tests 737ms, environment 592ms)
+

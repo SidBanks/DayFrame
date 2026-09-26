@@ -1,0 +1,2063 @@
+{
+  "scope": "Every task-created evidence file plus changed/new application and test files and separately saved input/result. Self excluded. Generated dist identified separately in source/build freeze; node_modules untouched.",
+  "entries": [
+    {
+      "path": "code/src/ui/ScheduleReviewPanel.tsx",
+      "kind": "modified",
+      "purpose": "Exhaustive refusal copy and contextual control keys",
+      "sha256": "a939459a5eac604d89313cb50114e0625000da5937f0cc5093cfda86bc134dc9",
+      "bytes": 36386
+    },
+    {
+      "path": "code/src/ui/DayFrameApp.tsx",
+      "kind": "modified",
+      "purpose": "In-place Event Close returns focus to Review origin",
+      "sha256": "db25295b220aa3e0fe04d2e39d866954b5da4306acb27bd10598d88d3ab81236",
+      "bytes": 168338
+    },
+    {
+      "path": "code/src/ui/ScheduleReviewWorkspace.tsx",
+      "kind": "modified",
+      "purpose": "Bounded Review origin focus integration",
+      "sha256": "03636e8066cfcaff0092e2a20d2fafe849a19d751993d59a94ce12fa62101c87",
+      "bytes": 14228
+    },
+    {
+      "path": "code/src/ui/PreviewScreen.tsx",
+      "kind": "modified",
+      "purpose": "Existing source editor origin focus keys",
+      "sha256": "137610fc2cdfbd8cf1ba2956a3324ede30d75a6f9eb8e6eca69e4770ebedf39a",
+      "bytes": 36819
+    },
+    {
+      "path": "code/src/ui/useReviewReturnFocus.ts",
+      "kind": "created",
+      "purpose": "New ephemeral exact-control Review return focus hook",
+      "sha256": "6d2fa03fb41e6e7988c4583b285c961a3ac800696c8add6fd562e1704caca060",
+      "bytes": 1896
+    },
+    {
+      "path": "code/src/ui/tests/ReviewIndependentDrafts.test.tsx",
+      "kind": "created",
+      "purpose": "Measurement/Observation original-revision draft retention",
+      "sha256": "c55b142a44a813c64b6e3c810a81804dc0e8362b5bd352f7bbca4de8017447a4",
+      "bytes": 2677
+    },
+    {
+      "path": "code/src/ui/tests/ReviewCertaintyWorkflow.test.tsx",
+      "kind": "created",
+      "purpose": "61 actual-fault and labelled typed consumer result/receipt cases",
+      "sha256": "72d83ddb60baba5681baef048975fc28041b5397e13e052d597a9c465ee4473b",
+      "bytes": 21443
+    },
+    {
+      "path": "code/src/ui/tests/GoalStructureAuthoring.test.tsx",
+      "kind": "modified",
+      "purpose": "Real restore completion synchronization and exact status assertion",
+      "sha256": "21e905bea40d593a8da5a8f960317cb1b5371b4291262ef1f786725278b311b6",
+      "bytes": 36134
+    },
+    {
+      "path": "code/src/ui/tests/ReviewReturnFocus.test.tsx",
+      "kind": "created",
+      "purpose": "Four actual-App focus and zero-history regressions",
+      "sha256": "c1ff45bac258b7b087c551bd3d8ec61c13cb6dc122ae37b17466153827c017a7",
+      "bytes": 2622
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/FINAL_CAPABILITY_AND_REQUIREMENT_MATRIX_RESULT.md",
+      "kind": "created",
+      "purpose": "Task evidence ledger, capability matrix, union audit or validation history",
+      "sha256": "1858034e65ec566583af4ad8ccb44017c089bc5f14ad446569e44c6c9ad12a8a",
+      "bytes": 9365
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/REMAINING_WORK_LEDGER_RESULT.md",
+      "kind": "created",
+      "purpose": "Task evidence ledger, capability matrix, union audit or validation history",
+      "sha256": "4df7d2e1298e0a417caab25e74bfa99d7a4bc2938688e499d54eabe8e51f0fde",
+      "bytes": 5271
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/RESULT_UNION_AND_CERTAINTY_AUDIT_RESULT.md",
+      "kind": "created",
+      "purpose": "Task evidence ledger, capability matrix, union audit or validation history",
+      "sha256": "d218c882d9a2ad4163fe9d6d7de58cf889417ea476b3494244a9c1631b4bf225",
+      "bytes": 6730
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/VALIDATION_HISTORY_RESULT.md",
+      "kind": "created",
+      "purpose": "Task evidence ledger, capability matrix, union audit or validation history",
+      "sha256": "153c543ee82fe8968b5b4d6b2b72c7d529195757095864fe1e745a85ae76a956",
+      "bytes": 8543
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-build-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e739b874e95aa584a84091e92aad810775cc8ccddef68ea4da4738b8ecabb40d",
+      "bytes": 8142
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-bundle-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "9a650ddac82106846b4defc7ffb231c095d8ed7a44c90a8efc5ec008f6336b89",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-format-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "bytes": 66
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-hashes-RESULT.json",
+      "kind": "created",
+      "purpose": "Pre-edit dirty-tree baseline preservation",
+      "sha256": "f6c8e6f4acb4b7c0094b86a97cdf9f4d94cc72a0f21f332557d9e1ef450cd05f",
+      "bytes": 160262
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-head-RESULT.txt",
+      "kind": "created",
+      "purpose": "Pre-edit dirty-tree baseline preservation",
+      "sha256": "647337dda1d5afeb8ae43c754a6d18cce5ac2ea718b4116e211060b41fb1259a",
+      "bytes": 41
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-lint-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "bytes": 35
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-source-RESULT.tar.gz",
+      "kind": "created",
+      "purpose": "Pre-edit dirty-tree baseline preservation",
+      "sha256": "63cb95f280338da392cc736dc2dde493761151567108081be123a8ba88973883",
+      "bytes": 6519781
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-status-RESULT.txt",
+      "kind": "created",
+      "purpose": "Pre-edit dirty-tree baseline preservation",
+      "sha256": "2fbd42e07d8e1b825e820341c41544b254fec6eff9472bc3e7e54038b530b622",
+      "bytes": 19608
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/baseline-tests-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "892839701293fa669542734f08d0c10718e2e12641603c3219f1f5f6c50cad41",
+      "bytes": 299
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/390-sleep-accepted-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "aa5233775850b8138fc29bf560c976ad76e9cfb06c2d5238f2b1cb89480000b1",
+      "bytes": 96155
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/390-sleep-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a21fc95d053b80a948402f20b4e314e534dc860aab8ab9e69bd8815f36676835",
+      "bytes": 91038
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "44a78cbe2545384c3dd7d9726f187e740b1ce338457ffdd51e7ae5c7892e0a8e",
+      "bytes": 1555
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/sleep-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "ee4be9700b357e5dca9a4740e62dd5a6a80fa7533fbddb8ead3eabc670a8e8ff",
+      "bytes": 321841
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/sleep-before-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "9a76f9952e47817d7637aaa8acb2eb81c9990038caac909d61747de89d6d4a1c",
+      "bytes": 249478
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-1-RESULT/sleep-trial-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "2b4f3b7f407f8b8f2abb109ace547faa6c0c03befd255819084cc6375bf499f7",
+      "bytes": 76415
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/1280-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "294a2624fee8a030e3f541afe6286c146a1d18db95f6e6279549201ac2c3d056",
+      "bytes": 130435
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/320-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d765e76eb216ec67d5c18b6b8097f125da852238fe79d81bf2f7f71ccb7d81c8",
+      "bytes": 85390
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/390-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "36f856b352605e43511f7b7d3272cee30251e62929ce353165a20913b1027494",
+      "bytes": 93384
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/768-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "96e1d894f6cf20af4fd6679c53416574dcae7a790f86e8ef52414fa2f634f7d4",
+      "bytes": 111041
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "d689e313c32bfc1f0bfe859f54f1757278d68cc0345ce07b07c67356577a90d7",
+      "bytes": 927
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "22388382be345ca48a8915687264d4dd7e12d0e4583d761442e0423003a6efa0",
+      "bytes": 2760
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-10-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "901092395edbfd2fd8e482ad923cdfd2b3c117bbec2b2893e2d08bb456dd63fd",
+      "bytes": 29
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "4a6589764695b8d5a7af78114831cb5a804a55752fffccd0bb74489ea0569307",
+      "bytes": 124215
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7dcdb2388b4ebf4b70b58cf4961efe860add0b47cfa7979f0e132bada7558636",
+      "bytes": 166100
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f77309134cd66b943da43733e63e12f19101b64643f29b779495b6abe5ee9ca6",
+      "bytes": 165851
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b04da883963a5fcda233b0ef27077a858e764e34abc7fb00f2dd09a9f08ef8da",
+      "bytes": 157084
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "64dd3d6a8fac760d9cd1584e8ff2c63ce2f5c087970ba716cefd0cbb4f22a191",
+      "bytes": 144364
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7d5b6ec5d949c5622a0cd22eacfd135fa1ecb47270f6b4b76c04cdc4421e6f24",
+      "bytes": 170416
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b17d825088d3ec2514b8dc8c18adbd11b0c6c5a516eca7fb756e41d74d61a937",
+      "bytes": 167270
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/1280-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "ffa24715f17b9dbf95e610b05c09e023e0df0c2dc49a23f8d0338dd0652cb7ca",
+      "bytes": 166876
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "c99e5b27193a1ccb20abece593c30aa994b4dbfd6a9e4cc2503c84cb3c6abe71",
+      "bytes": 52860
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "6c9ab9d05db0083238e5f2b1239dd680da293c2bd18947c3b42a66740949d73e",
+      "bytes": 85973
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "2d2579fce829c16ade8c85c5368bde74bce081dd2744df89d828140505780800",
+      "bytes": 85011
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f30e1bb994e30eb176c43eaa596edcc91d10d6603535d5566529fb4ece31f0c9",
+      "bytes": 81619
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "2ec6acac02aaabbbfbe86e298846570dbf9f72da5c2cf66508af9f61787bbf0e",
+      "bytes": 71252
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f77d2791624564c1ad2a589b7a1963f992594ccb7540b116da5e5f2dfe71392c",
+      "bytes": 66043
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d5783a2e1beac679772cca891ddbd17f2d76ef3484a6ee203adc3663f6db9d11",
+      "bytes": 85584
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "dad835f02a47f9d0e2cbe97507dd10d4a7e64ca87b0d862717d83ffef4aca633",
+      "bytes": 85536
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/320-reduced-height-focus-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "977f018e5fe0a29a4a7f959e0ad53221aefe6e90890d86bc64a2e675343e8130",
+      "bytes": 54278
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "8b9a021e92347bfea1a497bd055752edfef404d3146475ecb9ca2c003ec5790b",
+      "bytes": 102480
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "5c2f63fcb5ef11576482963d24adc439a8dc2827c9a2fbb6ee0c2bd60d2c79b0",
+      "bytes": 117342
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "0b4309ffee06dbc4b6ce9b7efc54f52e987b3c10278c302afb1a8c42c0059afe",
+      "bytes": 116513
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a3f4ac3c0d59872edd3553c2474148c557feb6718089271fecf0730cf8bcf79d",
+      "bytes": 115333
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "39d4af600a0c0259f5cbe580f60183b2a1f4e4a17e336903eabe18b2c9a098f9",
+      "bytes": 99431
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "1238cf262fee033805b8abe4f83d3a4738f1ff59f9d5e57eba7dd2efb5ee250b",
+      "bytes": 101949
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "99e717b2061492cb736a043c1acfe66b9a790ac3bfe62dc8d5839b7395e0fcde",
+      "bytes": 116610
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/390-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "74cad03cac8f0c4d0ec728f5b48fafa5aef2f1c4af6005318ef98768009cd13b",
+      "bytes": 116609
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "223e8308247037e445a8018e2cb26e41d2363895397c8af332de68f6316d09db",
+      "bytes": 118914
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "864b34a6b1b71418e41f00bb46fe512f89800f041170dd5e7cc893710593d914",
+      "bytes": 157071
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "706fde7bc8b092f6d4ac21954426e9725c398724f31c38e8da39b1941c465ecb",
+      "bytes": 156260
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "24b62b08128ddb599508289da8ce5dab1958f0f25de2302ea2e0cb92f278a5f8",
+      "bytes": 153466
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "e2bb209ebfd04f34e8f9fb4478c2c7b11aead7bba9a5f5a67d0a08f0389dfcb0",
+      "bytes": 136106
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "95f2151fa95e6b547b1f4272ebfb75239b62cfcc9961388b9588ebf5fbdc5d57",
+      "bytes": 160297
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "dd77141f27cbf6ad8d81572f146d40c6c526261e00b615ba1a009d3fbd0c23d2",
+      "bytes": 157753
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/768-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "5f8f85b75120cc13a0596e503d6cc2a28f2e94d0a6cfba315f83fb02a015a590",
+      "bytes": 157656
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "283bb597adf1813de586e8dfa689ce1cd0d59d7b3b1837c1bbdc70adc8da185c",
+      "bytes": 257225
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "d9861cf2ea16ee5c68c58ca6f9faec2d025104ebbd4e43b71e433d416e18952a",
+      "bytes": 31573
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/native-verification-authority-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "f60a3020c0ce34fbc561eb9626f4667e6b7d8add4f5429b9709263d91c4ffce9",
+      "bytes": 199137
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT/protected-native-authority-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "e6e3298c0eb828dc3625a4a32c9bbaae7b0b2f396124007332603e5e190cc007",
+      "bytes": 199137
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-11-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "004dbc3b4e244cf8e889df89879959d97f850c5ba5447cc56452fcd2c55ce573",
+      "bytes": 25
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/1280-stale-source-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "bd42b1a00b0ba25678d128abc23446202cebfe58955c2affc3315912ef7c283f",
+      "bytes": 144898
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/320-stale-source-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f80c488de801a844ff7bd8b66833de96af34c71e49a737438a3e50987af5e15d",
+      "bytes": 87531
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/390-stale-source-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "da333f1bb905b1cb9270ef2b2ee728931b5c5917034d366fd79858b3113ec9aa",
+      "bytes": 92749
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/768-stale-source-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d41683e42874fcec750806e0ba04454421db1e8f0768003e39253b3ea4e37569",
+      "bytes": 127923
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "49524adabb0b7ce46b887bdd115eaefa871516dc3a691ad5f99dd8b0953decfa",
+      "bytes": 595
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "f6094dbaedeeb4107bdc666d603bc9a038ef8fb58b052cae2c2aa0354700d3f3",
+      "bytes": 3572
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-12-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "4c000dcdc99a4b37bb21e8bc2b2c252f42334a9c0df5e7ed9c32ca15d5a753d1",
+      "bytes": 24
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "759725bd002a1b9ec94b65782873ad246a388aae73fca3e461e6f962480ae585",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "d8015ed5b7f71cd513338f53fae7c6b15395e4cecbd33c74404d92c2efec7a3e",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "e77be86ef70ef849c7671d203d04eba882a301fedfd5ca7713e52ee9346665b0",
+      "bytes": 280203
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "519a95e56531aa3f198cd93d5cc5d1b4ec7feb59712ffca4f21d54839744dd14",
+      "bytes": 141230
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "14ce8c3d87c1262fe2de3209e18dd1d586cc5d5a585b2d9b3e24aea3a253bc82",
+      "bytes": 259901
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "77dda48aafb7dad95c64f3e0b2ad910fb939f2104c248648695bd115652f9d76",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/1280-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "e73e5ccdfcab5e27f9677fc39aa86a2b7623bc77f5279e54cab035bd0b0a9919",
+      "bytes": 135036
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "3f007e98c2862f631a9cb0569754fdaf346d2f3728a59852b74b66533c2952bc",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "877eba3ca9ff3ff0902c5034ce9e6fdf5a371dfa4aa30268dbfd78c56fa64044",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "5741fbfd8ccf374c68dad8d620d9df73a0311fa49c89118c45beab168cd11f3e",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7989d3a827244b04ad7a2e899ff8e838915ba6e98342563da964921d7544c9de",
+      "bytes": 54737
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "1a3ca09ca0479c0009750049add0ce34ed533c04a23fd348a3d31d6012fd7c9b",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "88479e81301ad9a9ce0e533cf3ee500486e93233ca3837e154f460c1b7e97020",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-reduced-height-focus-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "bf326d60a263fb135b77ceffd5ae11a2836c584a7bb72f6f74492b379258d113",
+      "bytes": 55481
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/320-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "1bad4bcab2bdca1eb051f38a133992095c2dd160036fd1aaea2abff288ecbcd4",
+      "bytes": 55281
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "def72b417554a7ae737aefc251630df2d9a205aef627d443a7c94ff60e5ebf3b",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "f9c22fb5c132a66c9b976dfc890626af303b51e9b9d752a62d6f400f3fe8449a",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "b9b0d430fa89e0b91cad72bd730f3a55e4644571befd7700d28d904391679366",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "577d608252f2676c49ba129008b071562efbed4e8a33ce6168aa284319102b89",
+      "bytes": 91849
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "c7ea7d2edf8a8f113917f9f065a2e807067364222e522ba30213edde0fe7cb39",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "25092cf3e1f9a24cbf710554c844b25b5872ba4c18e1bb247deb330cb50f6997",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-removed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d7e21b1960c724ea9f45f90486e1b30bfeb3f0cdb6c2dbc69cdcb49e85a25103",
+      "bytes": 99838
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/390-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "e93eadc3faac412bdb84c11d0140166b18465f5b2f6dff1aa37b7f87f52f5d06",
+      "bytes": 92224
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "20aa5b5d9dd8f7c1bae5d897a2271387cc514cc27e28fc61a9c1c3c146d54b92",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "1119d771ca4feaaceee147f848e9c81ea51feef3e1d477c034032d353f5e390b",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "bf549a89914f1f2b76cfee7181aa4a669e30d40933171ebfab5c2f6f3e05412c",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b085b97717147fd603b6b8122c3db62867d0a0e8dea9e4437ab41e28af10bf62",
+      "bytes": 130625
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "fbb1aa06014d2d2904e65cb8e9461882cdd2dbc5a9a2a618c8c6dfc1a096d86c",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "0c6eea21b87d29fd379b63ec77553ddf6a75e08631731f2895147e02377bdb41",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/768-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d403fa72eee488c524f89f996d3b35e7f4b997a8d8f14acd853bda2db19b9712",
+      "bytes": 122028
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "d5ef953be391b5cbe37056ee3c6c0d60f84b4e87b24dca5e110a7c77acab54f8",
+      "bytes": 7052
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "74e58b7f16d39a54a66bf12d57900388c86177f1a24127836b014e9fed7d364e",
+      "bytes": 10395
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/destination-after-removal-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "b9b0d430fa89e0b91cad72bd730f3a55e4644571befd7700d28d904391679366",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/destination-reexport-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "5828f5393800413f51e29322d56d254777123287127ce895c68dd6d067f1aa21",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT/destination-reload-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "e9ad1592b6a8b2ca17c9fae3e57268668f66f11564adac4f3ff5d6b7d996f20f",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "7ae6ec7935650a046063ae246db72f425e822d04f545952e490aebf2c48c7722",
+      "bytes": 23
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "abb33df8afebff19b15faee94917ec9230be930885f3d46bb967448d6497b0f9",
+      "bytes": 124301
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7dcdb2388b4ebf4b70b58cf4961efe860add0b47cfa7979f0e132bada7558636",
+      "bytes": 166100
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f77309134cd66b943da43733e63e12f19101b64643f29b779495b6abe5ee9ca6",
+      "bytes": 165851
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b04da883963a5fcda233b0ef27077a858e764e34abc7fb00f2dd09a9f08ef8da",
+      "bytes": 157084
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "64dd3d6a8fac760d9cd1584e8ff2c63ce2f5c087970ba716cefd0cbb4f22a191",
+      "bytes": 144364
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7d5b6ec5d949c5622a0cd22eacfd135fa1ecb47270f6b4b76c04cdc4421e6f24",
+      "bytes": 170416
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b17d825088d3ec2514b8dc8c18adbd11b0c6c5a516eca7fb756e41d74d61a937",
+      "bytes": 167270
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/1280-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "ffa24715f17b9dbf95e610b05c09e023e0df0c2dc49a23f8d0338dd0652cb7ca",
+      "bytes": 166876
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "c99e5b27193a1ccb20abece593c30aa994b4dbfd6a9e4cc2503c84cb3c6abe71",
+      "bytes": 52860
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "6c9ab9d05db0083238e5f2b1239dd680da293c2bd18947c3b42a66740949d73e",
+      "bytes": 85973
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "2d2579fce829c16ade8c85c5368bde74bce081dd2744df89d828140505780800",
+      "bytes": 85011
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f30e1bb994e30eb176c43eaa596edcc91d10d6603535d5566529fb4ece31f0c9",
+      "bytes": 81619
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "2ec6acac02aaabbbfbe86e298846570dbf9f72da5c2cf66508af9f61787bbf0e",
+      "bytes": 71252
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "f77d2791624564c1ad2a589b7a1963f992594ccb7540b116da5e5f2dfe71392c",
+      "bytes": 66043
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d5783a2e1beac679772cca891ddbd17f2d76ef3484a6ee203adc3663f6db9d11",
+      "bytes": 85584
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "dad835f02a47f9d0e2cbe97507dd10d4a7e64ca87b0d862717d83ffef4aca633",
+      "bytes": 85536
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/320-reduced-height-focus-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "977f018e5fe0a29a4a7f959e0ad53221aefe6e90890d86bc64a2e675343e8130",
+      "bytes": 54278
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "62d4bb41d41da886072a16150b6c935bfc706b9482356c16dc19ee581cdbdb24",
+      "bytes": 102403
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "5c2f63fcb5ef11576482963d24adc439a8dc2827c9a2fbb6ee0c2bd60d2c79b0",
+      "bytes": 117342
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "0b4309ffee06dbc4b6ce9b7efc54f52e987b3c10278c302afb1a8c42c0059afe",
+      "bytes": 116513
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a3f4ac3c0d59872edd3553c2474148c557feb6718089271fecf0730cf8bcf79d",
+      "bytes": 115333
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "39d4af600a0c0259f5cbe580f60183b2a1f4e4a17e336903eabe18b2c9a098f9",
+      "bytes": 99431
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "1238cf262fee033805b8abe4f83d3a4738f1ff59f9d5e57eba7dd2efb5ee250b",
+      "bytes": 101949
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "99e717b2061492cb736a043c1acfe66b9a790ac3bfe62dc8d5839b7395e0fcde",
+      "bytes": 116610
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/390-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "74cad03cac8f0c4d0ec728f5b48fafa5aef2f1c4af6005318ef98768009cd13b",
+      "bytes": 116609
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-busy-replacement-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a76038532f26e6bf32f70e5f069ba272e78378abbabdf93c3820df0f71f65b9a",
+      "bytes": 119155
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-controlled-native-commit-unconfirmed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "864b34a6b1b71418e41f00bb46fe512f89800f041170dd5e7cc893710593d914",
+      "bytes": 157071
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-controlled-native-verification-failed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "706fde7bc8b092f6d4ac21954426e9725c398724f31c38e8da39b1941c465ecb",
+      "bytes": 156260
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-known-accepted-unrealized-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "24b62b08128ddb599508289da8ce5dab1958f0f25de2302ea2e0cb92f278a5f8",
+      "bytes": 153466
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-known-native-abort-qualified-prior-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "e2bb209ebfd04f34e8f9fb4478c2c7b11aead7bba9a5f5a67d0a08f0389dfcb0",
+      "bytes": 136106
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-native-active-write-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "95f2151fa95e6b547b1f4272ebfb75239b62cfcc9961388b9588ebf5fbdc5d57",
+      "bytes": 160297
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-protected-clear-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "dd77141f27cbf6ad8d81572f146d40c6c526261e00b615ba1a009d3fbd0c23d2",
+      "bytes": 157753
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/768-protected-import-denied-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "5f8f85b75120cc13a0596e503d6cc2a28f2e94d0a6cfba315f83fb02a015a590",
+      "bytes": 157656
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "0976dc4ba9de455a13b959f9e41014d07cd6c1d9e9a048a9cea0f8b3b3dc9693",
+      "bytes": 257225
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "d9861cf2ea16ee5c68c58ca6f9faec2d025104ebbd4e43b71e433d416e18952a",
+      "bytes": 31573
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/native-verification-authority-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "2e613ef9a4365adba01a22e94bed4b9deefacf5919f92179145315887be8f2c7",
+      "bytes": 199137
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT/protected-native-authority-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "556c5e4e827c0da66349b2e10b33e2144018134fb9dd3250f757703597c6d602",
+      "bytes": 199137
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "004dbc3b4e244cf8e889df89879959d97f850c5ba5447cc56452fcd2c55ce573",
+      "bytes": 25
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/1280-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a8d8f7a1dad8ef151af72ecb9430b4d121fb9b0c04bf632ac2c75d6bf7790935",
+      "bytes": 129134
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/320-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "2f6b718a9710f7ec30ca4a245181705e1c59af789d4b94cf35ca8ea9ec1927ad",
+      "bytes": 69367
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/390-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b38e84c9a3ab97680f598cea16ae6224c478d7675197bd0b9bb868a4e1d7c472",
+      "bytes": 79234
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/768-contextual-returns-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "fe9c8558baf6d65103d61e23d35617ed1087c4fbb6c3ca0ccf9d489524d34ae1",
+      "bytes": 112566
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "fad461c385c7a97020122c198f4a5759cdadbcd1abdcdacab1cd81092b24e57d",
+      "bytes": 851
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "08a5aeb1e35406f2a8c692a8bdbe1caa0c6fef02d67d2df943b0e6d422145dee",
+      "bytes": 2784
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-4-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "901092395edbfd2fd8e482ad923cdfd2b3c117bbec2b2893e2d08bb456dd63fd",
+      "bytes": 29
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-5-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "1c6772382ea9c37b28432991c9f2572b91912b5e1f27f854c2b879ce4a84994b",
+      "bytes": 1238
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/390-sleep-accepted-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "aa5233775850b8138fc29bf560c976ad76e9cfb06c2d5238f2b1cb89480000b1",
+      "bytes": 96155
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/390-sleep-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a21fc95d053b80a948402f20b4e314e534dc860aab8ab9e69bd8815f36676835",
+      "bytes": 91038
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "44a78cbe2545384c3dd7d9726f187e740b1ce338457ffdd51e7ae5c7892e0a8e",
+      "bytes": 1555
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/native-timeout-diagnostic-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "308bed69c9f162e281373dff7cbc10b0d758a0339b7bee621e0baa37176745e4",
+      "bytes": 95733
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/sleep-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "1d1ac77c9002fbc558b96d49d782550bfda8c63238bfbcb07eb2f04718461685",
+      "bytes": 321841
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/sleep-before-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "93302af9388bf3c1c60257332b85789e67256c4fc3a349104994d4b4d57d6a4b",
+      "bytes": 249478
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT/sleep-trial-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "baeb813bbbed88fe5e2b55974b5be532196c79ad02c42b89c417205db5b21ba2",
+      "bytes": 76415
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-6-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "1cf21966c95c736817b83cfd0239fb0b59065541393ad85e4ff54d3786d2fdf8",
+      "bytes": 4598
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/390-sleep-accepted-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "aa5233775850b8138fc29bf560c976ad76e9cfb06c2d5238f2b1cb89480000b1",
+      "bytes": 96155
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/390-sleep-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a21fc95d053b80a948402f20b4e314e534dc860aab8ab9e69bd8815f36676835",
+      "bytes": 91038
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "44a78cbe2545384c3dd7d9726f187e740b1ce338457ffdd51e7ae5c7892e0a8e",
+      "bytes": 1555
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/native-timeout-diagnostic-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "468ab00ae502f44cb5c9c1af5a5abf9e65e7fda3279f5093fa052b7259650d7f",
+      "bytes": 95684
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/sleep-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "7ad82dadf2cbc92279f145f587a34237e5f0a571f69dd8863aaf83ea86e56c5b",
+      "bytes": 321841
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/sleep-before-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "c10ead6c8fa0c64903f96acf9b0e0aa82d29e220bb699893116a1370f2dc01ee",
+      "bytes": 249478
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT/sleep-trial-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "93196deeb82814a5119ad157fe4614bd84a0076e50c3cd656b06e35cc95dda40",
+      "bytes": 76415
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-7-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "5261fdb439155a0ee0adc6adea9a0b7280cb678adab288d4c6d708e0fa04411e",
+      "bytes": 4653
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/1280-correction-save-retried-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "774f8f2419f50d8f20f4be62e9b1715d2fc44169506d15c555bed34b9d45fe26",
+      "bytes": 172809
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/320-correction-save-retried-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a158c6cbaa381023aa9486f5af5c3bcaf2b18b3561d3479182a8ee6632ba80f7",
+      "bytes": 73459
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/390-correction-save-retried-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "b882d805ecfcd7759e22289c74f9ef5ad20f034baa8c5339982bad202754d447",
+      "bytes": 123913
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/390-sleep-accepted-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "aa5233775850b8138fc29bf560c976ad76e9cfb06c2d5238f2b1cb89480000b1",
+      "bytes": 96155
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/390-sleep-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "a21fc95d053b80a948402f20b4e314e534dc860aab8ab9e69bd8815f36676835",
+      "bytes": 91038
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/768-correction-save-retried-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "02573cc20647138c11d54c7d3a0823a609af16c39760689a599a0ff5cae51036",
+      "bytes": 160531
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "a4e3cd52f04d89210da87b361849aee4db228987c42a6ea7b4b530f2e79d9f84",
+      "bytes": 2702
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "fb1a22b669163cf4cc3d0f043da78526c47aec0da5fe4761dfe01d6b2292d010",
+      "bytes": 4529
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/sleep-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "fd38d8056f9d4cd9b6954d28309251678435624979f29f6ea65c7ab6dd50f272",
+      "bytes": 321841
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/sleep-before-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "cb63967f87371b48797c57bc6ab0fc2d7c43fd5cf2ae63bb870a1468e2eaa614",
+      "bytes": 249478
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT/sleep-trial-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "e50a375da0d4b5b242f66c5b24c73d62ce99d17e35c25b1921100708e2868ad4",
+      "bytes": 76415
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-8-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "9f27061642f3d0990ccb375e6e1a3267c5d0fb815935c294875cf3a38d65f168",
+      "bytes": 29
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "174e9ccd00888ba759e14e7fdba3801351582422b3b58bedfa63d3b4ce3826a3",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "fb7c0f9d6a90df5733ae3822b4ae6e2f0de3c8b03e97cda8761c65321fcc54b9",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "cbaf89328107b4cd1beaacaef60b6c46fe1f75767ea3826cb813433c48389ec5",
+      "bytes": 280203
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "37fc518bb6d7f504262a4e822d0b4ff9d4930f6643b5fbe2f7333a664f6318ab",
+      "bytes": 141412
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "dfecb14d919901dfc9afb8c2b4f77c11d2633dc55a000cf3b607e81eb7bcacab",
+      "bytes": 259901
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "a6c3698588fdcfc7e138e3e9aed3b98329f2db123cda30d7be91e64c6c4ccab7",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/1280-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "6cce91f1634a431ede86c55c39e6ab3bc17ba1389357ba5bde4ab761a9956409",
+      "bytes": 135248
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "b25df371490ffd8a4d2eeba2cf257b04e87c88bbd17cf401667105b170486d39",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "b06282a2582a06760c82c4d2705ce4f385a7365b2559f0c5252eb2b2ec7d8ad3",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "02e32a8de917dbbfd4054a24567ee9191ae00f45af3bb9790d4bf7b6655d261f",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "7989d3a827244b04ad7a2e899ff8e838915ba6e98342563da964921d7544c9de",
+      "bytes": 54737
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "fcd833796d0695bb017b9e87506ce578dbd5615570936d56b57e567d79b96d84",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "acf825e7c4c53e4cd9a367c5c5304f72daf223db486de839da473ad1801fda97",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-reduced-height-focus-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "bf326d60a263fb135b77ceffd5ae11a2836c584a7bb72f6f74492b379258d113",
+      "bytes": 55481
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/320-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "1bad4bcab2bdca1eb051f38a133992095c2dd160036fd1aaea2abff288ecbcd4",
+      "bytes": 55281
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "6c11bc717461368851ac0915c147320dd6961b964998ede46a5276b5cc2bc190",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "83381679413e4b7f42a28a90f3997c488b0480c22f38eea4bf54e23e65eb1df2",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "74183a98c91c0e0c7fc8fe86410009f9b8eb49abcdff54f42831abd0557dbb65",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "577d608252f2676c49ba129008b071562efbed4e8a33ce6168aa284319102b89",
+      "bytes": 91849
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "541e612690c3f051aaadb3f4378ae73505d50e7fe93317b9d24ba39bb7837083",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "636b5749d5eb39a1ede398fa7892b78f0de911f65abf3b892a99fe5bb6d7c858",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-removed-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "0e62f6a5c80c5e33e876d4f744eb1624e1350c69d72d6dbca4f817f1afcd28ed",
+      "bytes": 100264
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/390-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "e93eadc3faac412bdb84c11d0140166b18465f5b2f6dff1aa37b7f87f52f5d06",
+      "bytes": 92224
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-accepted-generation-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "da6ad14ffa7bf17933e5d277396c7ff5a242f40c38474be5c86b573c2a27397b",
+      "bytes": 61054
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-before-correction-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "b692facf1981ae0780e9e7b947f83d0303bf9208285cb41dbff7beaca36921b8",
+      "bytes": 205747
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-durable-after-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "39bb6e988df4324da2e38429ad2a26244342c87273c1e3b742a39d8ad5bf868b",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-published-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "d1dff04be797e5b764d18964754224092c1fdda177bc431f1ad5d0d96c0b1fe7",
+      "bytes": 130736
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-published-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "06821eff5e539a03b7792dc9eda3632a96b360a33970ba05810f3c36de087268",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-qualified-review-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "a203829246d9758d4c8fc684350bceb045dfe33f8a0cc7a8059bd79bd5bc7194",
+      "bytes": 12426
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/768-try-RESULT.png",
+      "kind": "created",
+      "purpose": "Native viewport screenshot; attempt-specific retained capture",
+      "sha256": "796c0a125645137f2d114d247430ef7bc57e43f8dffab4ea2bc56d3122581dc3",
+      "bytes": 122130
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/browser-checks-RESULT.json",
+      "kind": "created",
+      "purpose": "Executed native assertions and authority readbacks for this attempt",
+      "sha256": "14b6dc8c0566442953437553de59d8e99464fdc7d7e8e3e343f7127ab95af4b4",
+      "bytes": 7052
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/browser-measurements-RESULT.json",
+      "kind": "created",
+      "purpose": "Native viewport overflow, focus and target measurements",
+      "sha256": "74e58b7f16d39a54a66bf12d57900388c86177f1a24127836b014e9fed7d364e",
+      "bytes": 10395
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/destination-after-removal-RESULT.json",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "74183a98c91c0e0c7fc8fe86410009f9b8eb49abcdff54f42831abd0557dbb65",
+      "bytes": 280187
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/destination-reexport-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "49e132109bf1f434f197db152bad0a92f3e3f726a8b88e057505c14ed07f6a73",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT/destination-reload-export-RESULT.json",
+      "kind": "created",
+      "purpose": "Actual downloaded V14 authority for exact round-trip comparison",
+      "sha256": "0329942c467ffc5d858707d8d90e82062bc3d1e1e70212ca487ed2d04a603396",
+      "bytes": 259896
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-attempt-9-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "7ae6ec7935650a046063ae246db72f425e822d04f545952e490aebf2c48c7722",
+      "bytes": 23
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "c8120e873a3086287f8f50b763228b6e4908d65f123a34e50b8729293d688c49",
+      "bytes": 19231
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/canonical-seed-RESULT.ts",
+      "kind": "created",
+      "purpose": "Canonical supporting-state fixture/build configuration",
+      "sha256": "f6b8479fa581942add20880e40780ddd6e38e36753365959ae84360ef24be613",
+      "bytes": 6151
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/canonical-seed-build-RESULT.js",
+      "kind": "created",
+      "purpose": "Canonical supporting-state fixture/build configuration",
+      "sha256": "86dfb498e8de15b3d8e6ea01c1a4bb724bb33492dd617561a93208c2fc2df8f9",
+      "bytes": 692392
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/certainty-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "03842446e87e5356a7b54b98ae475554e0ca39ef7c186e8d4602c8fc966355e7",
+      "bytes": 35109
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/certainty-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "0c4516022fbce1043074dba8c01b0f83bd1bae09df2146b0d1870a912b37ca32",
+      "bytes": 233
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/chromium-process-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "41a2997fe7bf11e7cfe8a082a01e398ebf87ecae1ae2f6822ae1691751634e88",
+      "bytes": 1539
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/consumer-matrix-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "b58768da188d8b25e0a19e41a22f2087ba31d7c0bc90f9e09ff6bce5a132a967",
+      "bytes": 234
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/consumer-matrix-attempt-4-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "3a22bd42d2231168e6869455b2be7466068ea39c5612190c23a2bc77b9900e51",
+      "bytes": 233
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/consumer-matrix-attempt-5-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "6b4ce1513fcbf6b7f1b16ebf7fe1b34374f11b003dac9dea3ed13c2304602425",
+      "bytes": 235
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/consumer-matrix-attempt-6-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "dae3b2d592e08be3721854fc33d6e2c02f3ed55eb7dd0022e1487262b9afb045",
+      "bytes": 1410
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/consumer-typecheck-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "bytes": 44
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/continuation-only-diff-RESULT.patch",
+      "kind": "created",
+      "purpose": "Continuation-only diff against exact dirty-tree baseline",
+      "sha256": "7f9ed6f378e3a0e8aa2cfef5e114d633b14e98b661c4eff69403eb3858501a07",
+      "bytes": 41136
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/correction-browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "01f1815e8521871eeb23d25b8835737f53a02ba1cfc9dc709c46f1b8a202de7c",
+      "bytes": 15969
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/event-focus-reproduction-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "24936b302c243cbea8a940e9d91696cfdd2f694033f31db5b789302c6eb0a551",
+      "bytes": 9221
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/fault-browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "9278dc855e38f66dceed7239d598defa316e560d3364d45fb90b32198c69aa00",
+      "bytes": 21034
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-build-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "552395885c07ed0563c8b68524110fdda90a19e04d48c8e39c7864e33224ee51",
+      "bytes": 1967
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-build-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "7f491c9348ba6be908b63b78f6cbfb389c7616b86ab30b2c7620a6b3abdf0ed7",
+      "bytes": 8142
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-bundle-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e8a670d92692f81321441e8c5bb5751f7954830e5d7909bb5230394d90d489ab",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-changed-source-RESULT.tar.gz",
+      "kind": "created",
+      "purpose": "Locally retained source archive",
+      "sha256": "c7d5052bd63e52f2a33f539c07f3b27b15e8ac86dcc3c3c96b14d15fba08eeaa",
+      "bytes": 52280
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-changed-source-attempt-2-RESULT.tar.gz",
+      "kind": "created",
+      "purpose": "Locally retained source archive",
+      "sha256": "90a2c28f8b0b7a43e8e5792908d4a55b93e0d6d612d50a3149b4ba74cb751557",
+      "bytes": 59169
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-continuation-only-diff-RESULT.patch",
+      "kind": "created",
+      "purpose": "Continuation-only diff against exact dirty-tree baseline",
+      "sha256": "c733a1ce1989d681fe30813493e26ac46c70de4bc0b9e3773e3909d948832f4c",
+      "bytes": 42291
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-diff-check-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-document-diff-check-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-format-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "bytes": 66
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-format-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "bytes": 66
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-isolated-tests-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "281dc669da99e4a92a5b2654170bb30fdaa5d483b4626d07800245c4b3d72319",
+      "bytes": 15739
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-isolated-tests-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "8920b9751abecef07b59e93266d7ab7e6fe463583137ea9f20d12d0e47afac75",
+      "bytes": 299
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-lint-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "ed5795ffa03cdca70860a4322ecc113d87ec287e259a97d4bb9328476aeb07a1",
+      "bytes": 234
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-lint-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "bytes": 35
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-lint-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "bytes": 35
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-preservation-verification-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "7932672b2fbf2b8a4fbece42b7b1d035ce9aa62d2f91c4294ebc866e6f45c1e8",
+      "bytes": 492
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-source-build-freeze-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "fae59b8bdbe5ced28012ae29793e028f7f497ed52e7d81cc50a5189112ef0eb7",
+      "bytes": 62582
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-status-RESULT.txt",
+      "kind": "created",
+      "purpose": "Attempt-specific native state/authority or validation evidence",
+      "sha256": "a4f597d46434b6326a77c2838c7e7622b8bb9187ec9fad5899c3a1be49207605",
+      "bytes": 20024
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/final-typecheck-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "bytes": 44
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/first-ui-build-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "53fd6cf623d5e08be9a39b378e45a09491c0e0803a29bb12edd6ea2fe1557362",
+      "bytes": 599
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/first-ui-build-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "1545b8f1792b5cdec28f3728567c69145877a986c2b9f72724368bec2b5f2eca",
+      "bytes": 8142
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/first-ui-bundle-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "6bb652cdf186f599b1cf8974b774aaa62e013619a6a097729cd201d8fc31283f",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/focus-repair-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "6cfbaf493a9f348e0b0cb39930d1608046cd28554fc27e2af08ee939c98221c7",
+      "bytes": 231
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/focus-reproduction-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "d3ed28c91f17e6bd71b94933a61c6cfd9f9f39d0b83e7dbfbeeb103e687e6e9c",
+      "bytes": 25325
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/governing-hashes-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "6897ed9108bc5cc56bb40f53c1d41de6a26d4985ddefc688ef35fcb349b9419a",
+      "bytes": 106865
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/independent-drafts-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "54f91e211c3fb10c439d1096c8980daf62989c460b81b75c884b4855205ccd9d",
+      "bytes": 1282
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/independent-drafts-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "877ba51baeca3724cb551976bc5cede347904ea5a9c4d6696651a38d2f0a00c3",
+      "bytes": 231
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/navigation-browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "3f9ca62f7edc2cb44201973d88fbd37d92cc38c6295db1ba83f4499ce7b46a78",
+      "bytes": 15404
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-build-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "b03a993c1bf9da43bc08becc660facea201b867f83fe823b4dc40130ef72c78f",
+      "bytes": 8142
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-bundle-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e8a670d92692f81321441e8c5bb5751f7954830e5d7909bb5230394d90d489ab",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-diff-check-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-format-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "bytes": 66
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-lint-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "bytes": 35
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-restore-source-build-freeze-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "065bfd0692afa86354a9ea423dd2c94e9a2609f0b4aaab9f99660d0d9687b76d",
+      "bytes": 62701
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/post-suite-verification-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "86f1da88d28a13997dea858801185d02771430cc4a883bb872d409161a34fbd4",
+      "bytes": 373
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/pre-suite-freeze-verification-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "1c6e2109d8f3001bb5fe141eaf3b9996ac685b3ac02d9e5dfcd276b5ec53ca65",
+      "bytes": 87
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/pre-suite-process-check-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/preservation-verification-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "ab6abefa82fa8223bea197c342409a6d37239428882f555f11674ef081b35902",
+      "bytes": 433
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/preview-destination-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "f176b00a5ab18ed1a2c92d4a660b725795dc0266b655d713a36c7ce4f285fe63",
+      "bytes": 123
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/preview-source-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "190463d6b542de5295d0f50cca0625c1195cfe0b14267e2493c4c0b12fd132f5",
+      "bytes": 123
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/prior-evidence-hashes-RESULT.json",
+      "kind": "created",
+      "purpose": "Identity, preservation or source/build verification",
+      "sha256": "ba07d7cdbff719933f5d4cd4eaa8e3563d879a52c8967c864253d4614e9615ae",
+      "bytes": 145774
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/seed-build-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "97083b7aa062012e37b0650941818ae49c8872ce62bf90ec9ae198cd59cc1e53",
+      "bytes": 413
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/seed-build-config-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Canonical supporting-state fixture/build configuration",
+      "sha256": "206c4a3cf683ae21cff5a28e661cd61e97d19bd447021b037f1ac64bd682b87b",
+      "bytes": 363
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/sleep-browser-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "cea95eb7632adda73ca9ac158d872b1312abe87448008aa4d1d416b268923c89",
+      "bytes": 24
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/sleep-browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "23e16a62dd94a3c6ae046b0c5aa70ca75d6e15ed0ea90f718479a666982c74af",
+      "bytes": 13074
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/stale-browser-driver-RESULT.mjs",
+      "kind": "created",
+      "purpose": "Disposable browser workflow driver; attempt directories refuse overwrite",
+      "sha256": "8a5be281173a225d2319a55648e3ac96a28229344c75a0c56a51348b5b040766",
+      "bytes": 13750
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/structure-restore-completion-attempt-2-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "730080c07e47c6ba08eec673bb5fdf2ead61058d4ae0b53862dbb19339c0088a",
+      "bytes": 235
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/structure-restore-diagnostic-attempt-1-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "e487e7c4dc4ca3ef66ee38891049fd2d7acf33bb7ae490f786ece85de91ee117",
+      "bytes": 233
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/ui-build-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "6a1b61114338e72748dfd8d356e57bd3f8bbb4dbf4bf5b3aec9e4b17099b4ffb",
+      "bytes": 8142
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/ui-bundle-attempt-3-RESULT.log",
+      "kind": "created",
+      "purpose": "Distinct execution log; failure/pass interpretation in VALIDATION_HISTORY_RESULT.md",
+      "sha256": "2f7a77d4f39580401ce00f5bf7631bb1210f961ed249275ad9b09d503597cfc1",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-4/write-artifact-inventory-RESULT.py",
+      "kind": "created",
+      "purpose": "Reproducible final artifact inventory generator; excludes its output self-hash",
+      "sha256": "eb007a142cebe42d54ad839d98b637aa7bca58c1ef139c33994ccc733aaeea25",
+      "bytes": 3710
+    },
+    {
+      "path": "docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_4.md",
+      "kind": "created",
+      "purpose": "Exact separately saved authorized input",
+      "sha256": "4dd0851d16017ae6a5c4a3cb991543c09f71e39a1e74becfc0c0ed94f3ba86db",
+      "bytes": 23664
+    },
+    {
+      "path": "docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_4_RESULT.md",
+      "kind": "created",
+      "purpose": "Fourth continuation determination and evidence summary",
+      "sha256": "5ac4561aa05f434a418e23b0b40cb1e623bd26dc03b3db343b50a2db317e1ce9",
+      "bytes": 12933
+    }
+  ]
+}

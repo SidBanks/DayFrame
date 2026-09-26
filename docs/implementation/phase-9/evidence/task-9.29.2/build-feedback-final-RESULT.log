@@ -1,0 +1,9 @@
+npm notice run dayframe@0.1.0 build
+npm notice run tsc --noEmit && vite build
+src/ui/DayFrameApp.tsx(2000,49): error TS1005: ',' expected.
+src/ui/DayFrameApp.tsx(2000,60): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/ui/DayFrameApp.tsx(2000,97): error TS1005: '}' expected.
+src/ui/DayFrameApp.tsx(2000,127): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/ui/DayFrameApp.tsx(2008,19): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/ui/DayFrameApp.tsx(2008,20): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/ui/DayFrameApp.tsx(2013,18): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?

@@ -1,0 +1,29 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts src/ui/tests/ReviewSourceQualification.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/publicationSourceAdmission.test.ts (11 tests | 1 failed) 6095ms
+   × existing-row fast path checks the original source witness after physical readback 5017ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/publicationSourceAdmission.test.ts > existing-row fast path checks the original source witness after physical readback
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/state/publicationSourceAdmission.test.ts:111:1
+    109|   const exported=await f.history.exportHistoricalPlan();expect(exporte…
+    110| });
+    111| it("existing-row fast path checks the original source witness after ph…
+       | ^
+    112|   const f=await publicationFixture();expect((await f.store.publishSche…
+    113|   const exported=await f.history.exportHistoricalPlan();if(exported.st…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 38 passed (39)
+   Start at  11:45:46
+   Duration  11.17s (transform 1.67s, setup 0ms, import 1.66s, tests 8.65s, environment 523ms)
+

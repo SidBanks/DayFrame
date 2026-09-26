@@ -31,8 +31,8 @@ describe("product surface boundaries", () => {
     expect(screen.getByText("Month content")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review Schedule" }));
     expect(openSchedule).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("button", { name: "Commitment Library" }));
-    expect(openCommitmentLibrary).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "My Schedule" }));
+    expect(openWorkPattern).toHaveBeenCalledTimes(1);
 
     rerender(
       <PlannerSurface

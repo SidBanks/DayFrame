@@ -1,0 +1,41 @@
+{
+  "baselineFileCount": 1435,
+  "baselineStatusEntries": 261,
+  "head": "c0cc9ae2ae68af626e64747539a417f10df1cf3a",
+  "headUnchanged": true,
+  "changedBaselineFiles": [
+    "code/src/core/planning/deriveFoundationalSchedule.ts",
+    "code/src/state/goalStructurePlanningSafety.test.ts",
+    "code/src/ui/GoalPlanningSection.tsx",
+    "code/src/ui/planningResultCopy.ts",
+    "code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx",
+    "code/src/core/planning/acceptedAllocationRealization.ts",
+    "code/src/state/dayFrameStore.ts",
+    "code/src/state/lazyProposalSurface.ts",
+    "code/src/state/lazyRealizationSurface.ts",
+    "code/src/state/proposalSurface.ts",
+    "code/src/state/realizationSurface.ts",
+    "code/src/state/types.ts",
+    "code/src/ui/ScheduleReviewPanel.tsx",
+    "code/src/ui/tests/ScheduleReviewPanel.test.tsx"
+  ],
+  "missingBaselineFiles": [],
+  "unexpectedBaselineChanges": [],
+  "sourceFilesChangedAfterFinalBuild": [],
+  "newApplicationTestFiles": [
+    "code/src/state/acceptanceCoordinator.test.ts",
+    "code/src/state/acceptanceLifecycle.ts",
+    "code/src/state/acceptanceLifecycleTestFixtures.ts",
+    "code/src/state/acceptanceOwnerLifecycle.test.ts",
+    "code/src/state/acceptancePersistence.ts",
+    "code/src/state/acceptanceReplacementIsolation.test.ts",
+    "code/src/state/acceptanceSourceWitness.test.ts",
+    "code/src/state/proposalWriteLifecycle.test.ts",
+    "code/src/state/realizationConcurrency.test.ts"
+  ],
+  "priorDocumentationChanged": [],
+  "unchangedPrior9293Artifacts": 42,
+  "contractSha256": "611eb5c0b800c8e3d9d7a0254d4b807e0fe456e59ac1a5309cd07a53baa498c7",
+  "contractHashMatchesAcceptedADR": true,
+  "dependenciesSchemaRestoreAndPublicationChanges": []
+}

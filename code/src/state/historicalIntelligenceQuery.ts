@@ -1,22 +1,17 @@
-import {
-  projectHistoricalCompletionDistributionV1,
-  validateHistoricalCompletionDistributionQuery,
-  type HistoricalCompletionDistributionQueryV1,
-  type HistoricalCompletionDistributionResultV1,
+import type {
+  HistoricalCompletionDistributionQueryV1,
+  HistoricalCompletionDistributionResultV1,
 } from "../core/historicalIntelligence/completionDistribution.js";
 import type { ExecutionHistorySurface } from "./executionHistorySurface.js";
 import type { HistoricalPlanSurface } from "./historicalPlanSurface.js";
 import type { LocalDateString } from "../core/shifts/types.js";
-import {
-  projectHistoricalSchedulingRealizationV1,
-  type HistoricalSchedulingRealizationQueryV1,
-  type HistoricalSchedulingRealizationResultV1,
+import type {
+  HistoricalSchedulingRealizationQueryV1,
+  HistoricalSchedulingRealizationResultV1,
 } from "../core/historicalIntelligence/schedulingRealization.js";
-import {
-  projectGoalActivityV1,
-  validateGoalActivityQueryV1,
-  type GoalActivityQueryV1,
-  type GoalActivityResultV1,
+import type {
+  GoalActivityQueryV1,
+  GoalActivityResultV1,
 } from "../core/historicalIntelligence/goalActivity.js";
 import type { GoalSurface } from "./goalSurface.js";
 
@@ -56,6 +51,8 @@ export function createGoalActivityQuery(options: {
   return async function getGoalActivity(
     query: GoalActivityQueryV1,
   ): Promise<GoalActivityQueryResultV1> {
+    const { projectGoalActivityV1, validateGoalActivityQueryV1 } =
+      await import("../core/historicalIntelligence/goalActivity.js");
     const issues = validateGoalActivityQueryV1(query);
     if (issues.length) return { status: "invalidQuery", issues };
     const goalIngress = options.goals.getGoalIngressStatus();
@@ -99,6 +96,10 @@ export function createHistoricalIntelligenceQuery(options: {
   return async function getHistoricalCompletionDistribution(
     query: HistoricalCompletionDistributionQueryV1,
   ): Promise<HistoricalCompletionDistributionQueryResultV1> {
+    const {
+      projectHistoricalCompletionDistributionV1,
+      validateHistoricalCompletionDistributionQuery,
+    } = await import("../core/historicalIntelligence/completionDistribution.js");
     const issues = validateHistoricalCompletionDistributionQuery(query);
     if (issues.length) return { status: "invalidQuery", issues };
     const executionIngress = options.executionHistory.getExecutionHistoryIngressStatus();
@@ -134,6 +135,10 @@ export function createHistoricalSchedulingRealizationQuery(options: {
   return async function getHistoricalSchedulingRealization(
     query: HistoricalSchedulingRealizationQueryV1,
   ): Promise<HistoricalSchedulingRealizationQueryResultV1> {
+    const { validateHistoricalCompletionDistributionQuery } =
+      await import("../core/historicalIntelligence/completionDistribution.js");
+    const { projectHistoricalSchedulingRealizationV1 } =
+      await import("../core/historicalIntelligence/schedulingRealization.js");
     const issues = validateHistoricalCompletionDistributionQuery(query);
     if (issues.length) return { status: "invalidQuery", issues };
     const range = await options.historicalPlan.getHistoricalPlanRange(

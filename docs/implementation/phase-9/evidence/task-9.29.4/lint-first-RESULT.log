@@ -1,0 +1,14 @@
+npm notice run dayframe@0.1.0 lint
+npm notice run eslint .
+
+/home/sid/Penn Digital Services/DayFrame/code/src/state/acceptanceLifecycle.ts
+  27:29  error  '_epoch' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/sid/Penn Digital Services/DayFrame/code/src/state/acceptanceOwnerLifecycle.test.ts
+  264:7  error  'owner' is never reassigned. Use 'const' instead  prefer-const
+
+/home/sid/Penn Digital Services/DayFrame/code/src/state/dayFrameStore.ts
+  746:7  error  'realizeAcceptedAllocationAfterAcceptance' is never reassigned. Use 'const' instead  prefer-const
+
+✖ 3 problems (3 errors, 0 warnings)
+

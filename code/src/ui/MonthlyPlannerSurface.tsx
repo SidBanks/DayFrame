@@ -1,3 +1,5 @@
+import type { RealizedScheduleFactV1 } from "../core/planning/realizedScheduleIdentity.js";
+import { ScheduledGoalFacts } from "./ScheduledGoalFacts.js";
 import {
   useEffect,
   useRef,
@@ -27,17 +29,22 @@ import {
   queryMonthlyPlannerFromState,
 } from "../state/monthlyPlannerQuery.js";
 import type { DayFrameState } from "../state/types.js";
-import type { PlanningReviewReadModelV1 } from "../state/planningScopeQuery.js";
+import type { PlanningReviewReadModelV2 } from "../state/planningScopeQuery.js";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 import { PlanningReviewPanel } from "./PlanningReviewPanel.js";
 
 export type MonthlyPlannerSurfaceProps = {
+  onOpenEditingTools?: () => void;
+  onOpenDay?: (label: LocalDateString) => void;
   state: DayFrameState;
+  goalNames?: Readonly<Record<string, string>>;
+  realizedScheduleFacts?: readonly RealizedScheduleFactV1[];
   readiness: DayFrameReadiness;
   getNow: () => Date;
   onOpenPlanningSettings: () => void;
   onOpenWorkPattern: () => void;
   onOpenCommitmentLibrary: () => void;
+  onReviewPeriod?: (scope: ReviewScopeV1) => void;
   onOpenReview: () => void;
   onOpenAttention: (input: { frictionPointId: string; userDayDate: LocalDateString }) => void;
   onGenerateSchedule: () => void;
@@ -49,26 +56,33 @@ export type MonthlyPlannerSurfaceProps = {
   onEditCommitment: (target: CommitmentTarget) => void;
   onEditEvent: (target: EventTarget) => void;
   onEditWork: () => void;
+  view?: { displayedMonth: DisplayedMonth; selectedLabel: LocalDateString };
   initialView?: { displayedMonth: DisplayedMonth; selectedLabel: LocalDateString };
   onViewChange?: (view: { displayedMonth: DisplayedMonth; selectedLabel: LocalDateString }) => void;
   contextualMessage?: string;
   contextualPlanContent?: ReactNode;
   contextualPlanWide?: boolean;
   onBackToDay?: () => void;
+  subscribePlanningReview?: (listener: () => void) => () => void;
   queryPlanningReview?: (input: {
     reviewScope: ReviewScopeV1;
     historyAsOf: string;
-  }) => Promise<PlanningReviewReadModelV1>;
+  }) => Promise<PlanningReviewReadModelV2>;
 };
 
 export function MonthlyPlannerSurface({
+  onOpenDay,
+  onOpenEditingTools,
   state,
+  realizedScheduleFacts = [],
+  goalNames = {},
   readiness,
   getNow,
   onOpenPlanningSettings,
   onOpenWorkPattern,
   onOpenCommitmentLibrary,
   onOpenReview,
+  onReviewPeriod,
   onOpenAttention,
   onGenerateSchedule,
   previewState,
@@ -79,6 +93,7 @@ export function MonthlyPlannerSurface({
   onEditCommitment,
   onEditEvent,
   onEditWork,
+  view,
   initialView: preservedView,
   onViewChange,
   contextualMessage = "",
@@ -86,17 +101,18 @@ export function MonthlyPlannerSurface({
   contextualPlanWide = false,
   onBackToDay,
   queryPlanningReview,
+  subscribePlanningReview,
 }: MonthlyPlannerSurfaceProps): ReactElement {
   const [evaluationInstant, setEvaluationInstant] = useState(() => getNow());
   const [initial] = useState(() => getInitialMonthlyPlannerView(state, evaluationInstant));
-  const [displayedMonth, setDisplayedMonth] = useState<DisplayedMonth>(
-    preservedView?.displayedMonth ?? initial.displayedMonth,
-  );
-  const [selectedLabel, setSelectedLabel] = useState<LocalDateString>(
-    preservedView?.selectedLabel ?? initial.selectedLabel,
-  );
+  const [localView, setLocalView] = useState(preservedView ?? initial);
+  const { displayedMonth, selectedLabel } = view ?? localView;
+  function changeView(next: { displayedMonth: DisplayedMonth; selectedLabel: LocalDateString }) {
+    if (view) onViewChange?.(next);
+    else setLocalView(next);
+  }
   const [focusedLabel, setFocusedLabel] = useState<LocalDateString>(
-    preservedView?.selectedLabel ?? initial.selectedLabel,
+    view?.selectedLabel ?? preservedView?.selectedLabel ?? initial.selectedLabel,
   );
   const dayRefs = useRef(new Map<LocalDateString, HTMLButtonElement>());
   const pendingFocus = useRef<LocalDateString | null>(null);
@@ -122,8 +138,8 @@ export function MonthlyPlannerSurface({
     pendingFocus.current = null;
   });
   useEffect(() => {
-    onViewChange?.({ displayedMonth, selectedLabel });
-  }, [displayedMonth, onViewChange, selectedLabel]);
+    if (!view) onViewChange?.({ displayedMonth, selectedLabel });
+  }, [displayedMonth, onViewChange, selectedLabel, view]);
   useEffect(() => {
     document.getElementById("month-heading")?.focus();
   }, []);
@@ -152,24 +168,22 @@ export function MonthlyPlannerSurface({
     const nextMonth = shiftDisplayedMonth(displayedMonth, offset);
     const nextSelected = projectLabelToDisplayedMonth(selectedLabel, nextMonth);
     const nextFocused = projectLabelToDisplayedMonth(focusedLabel, nextMonth);
-    setDisplayedMonth(nextMonth);
-    setSelectedLabel(nextSelected);
+    changeView({ displayedMonth: nextMonth, selectedLabel: nextSelected });
     setFocusedLabel(nextFocused);
     if (!focusControl) pendingFocus.current = nextFocused;
   }
 
   function selectLabel(label: LocalDateString): void {
-    setSelectedLabel(label);
+    changeView({ displayedMonth: label.slice(0, 7) as DisplayedMonth, selectedLabel: label });
     setFocusedLabel(label);
-    if (label.slice(0, 7) !== displayedMonth)
-      setDisplayedMonth(label.slice(0, 7) as DisplayedMonth);
+    onOpenDay?.(label);
   }
 
   function moveFocus(offset: number): void {
     const target = addUserDayLabels(focusedLabel, offset);
     setFocusedLabel(target);
     if (!model.cells.some((cell) => cell.label === target)) {
-      setDisplayedMonth(target.slice(0, 7) as DisplayedMonth);
+      changeView({ displayedMonth: target.slice(0, 7) as DisplayedMonth, selectedLabel });
     }
     pendingFocus.current = target;
   }
@@ -215,8 +229,7 @@ export function MonthlyPlannerSurface({
     const nextInstant = getNow();
     const next = getInitialMonthlyPlannerView(state, nextInstant);
     setEvaluationInstant(nextInstant);
-    setDisplayedMonth(next.displayedMonth);
-    setSelectedLabel(next.selectedLabel);
+    changeView(next);
     setFocusedLabel(next.selectedLabel);
     pendingFocus.current = next.selectedLabel;
   }
@@ -261,6 +274,15 @@ export function MonthlyPlannerSurface({
             Next
           </button>
         </div>
+        {onReviewPeriod && (
+          <button
+            type="button"
+            className="df-secondary-button"
+            onClick={() => onReviewPeriod(monthReviewScope)}
+          >
+            Review this period
+          </button>
+        )}
         <MonthStatus
           generationMessage={generationMessage}
           isSetupDirty={isSetupDirty}
@@ -308,25 +330,45 @@ export function MonthlyPlannerSurface({
           </div>
         </section>
 
-        <SelectedDayWorkspace
-          contextualPlanContent={contextualPlanContent}
-          contextualPlanWide={contextualPlanWide}
-          contextualMessage={contextualMessage}
-          onAddCommitment={onAddCommitment}
-          onAddEvent={onAddEvent}
-          onEditCommitment={onEditCommitment}
-          onEditEvent={onEditEvent}
-          onEditWork={onEditWork}
-          onOpenAttention={onOpenAttention}
-          onOpenPlanningSettings={onOpenPlanningSettings}
-          {...(onBackToDay ? { onBackToDay } : {})}
-          selectedDay={model.selectedDay}
-        />
+        {!onOpenDay || contextualPlanContent ? (
+          <SelectedDayWorkspace
+            goalNames={goalNames}
+            realizedScheduleFacts={realizedScheduleFacts}
+            contextualPlanContent={contextualPlanContent}
+            contextualPlanWide={contextualPlanWide}
+            contextualMessage={contextualMessage}
+            onAddCommitment={onAddCommitment}
+            onAddEvent={onAddEvent}
+            onEditCommitment={onEditCommitment}
+            onEditEvent={onEditEvent}
+            onEditWork={onEditWork}
+            onOpenAttention={onOpenAttention}
+            onOpenPlanningSettings={onOpenPlanningSettings}
+            {...(onBackToDay ? { onBackToDay } : {})}
+            selectedDay={model.selectedDay}
+          />
+        ) : (
+          <div>
+            <button
+              type="button"
+              className="df-secondary-button"
+              onClick={() => onOpenDay(selectedLabel)}
+            >
+              Open selected day
+            </button>
+            {onOpenEditingTools && (
+              <button type="button" className="df-secondary-button" onClick={onOpenEditingTools}>
+                Calendar editing tools
+              </button>
+            )}
+          </div>
+        )}
       </div>
       {queryPlanningReview ? (
         <PlanningReviewPanel
           historyAsOf={evaluationInstant.toISOString()}
           query={queryPlanningReview}
+          {...(subscribePlanningReview ? { subscribeReview: subscribePlanningReview } : {})}
           refreshKey={state}
           reviewScope={monthReviewScope}
           selectedDay={selectedLabel}
@@ -457,6 +499,8 @@ function MonthStatus({
 
 function SelectedDayWorkspace({
   selectedDay,
+  goalNames,
+  realizedScheduleFacts,
   onOpenPlanningSettings,
   onAddCommitment,
   onAddEvent,
@@ -469,6 +513,8 @@ function SelectedDayWorkspace({
   contextualPlanWide,
   onBackToDay,
 }: {
+  goalNames: Readonly<Record<string, string>>;
+  realizedScheduleFacts: readonly RealizedScheduleFactV1[];
   selectedDay: Extract<
     ReturnType<typeof queryMonthlyPlannerFromState>,
     { kind: "available" }
@@ -633,6 +679,10 @@ function SelectedDayWorkspace({
           </ul>
         </section>
       ) : null}
+      <ScheduledGoalFacts
+        goalNames={goalNames}
+        facts={realizedScheduleFacts.filter((fact) => fact.userDayDate === selectedDay.label)}
+      />
       <button className="df-secondary-button" onClick={onOpenPlanningSettings} type="button">
         Planning settings
       </button>

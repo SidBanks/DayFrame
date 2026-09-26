@@ -1,0 +1,90 @@
+{
+  "sleep": {
+    "pins": [
+      {
+        "kind": "placeSleepOccurrence",
+        "target": {
+          "version": 1,
+          "sourceKind": "sleepRequirement",
+          "requirement": {
+            "id": "sleep",
+            "incarnationId": "56facc96-3cb6-4fcc-9af6-d9afe7f04fe0"
+          },
+          "coordinate": {
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-27",
+            "slot": 0
+          }
+        },
+        "provenance": {
+          "source": "user"
+        },
+        "payload": {
+          "version": 1,
+          "proofStartUserDayDate": "2026-09-27",
+          "proofEndUserDayDateExclusive": "2026-09-28",
+          "sleepStart": "2026-09-27T07:00:00.000Z",
+          "sleepEnd": "2026-09-27T09:00:00.000Z",
+          "footprintStart": "2026-09-27T06:30:00.000Z",
+          "footprintEnd": "2026-09-27T09:30:00.000Z",
+          "durationMinutes": 120,
+          "bufferBeforeMinutes": 30,
+          "bufferAfterMinutes": 30,
+          "requirementRevision": 1,
+          "dependencyFingerprint": "6572adf7d20a2053",
+          "revokedAt": "2026-09-26T18:24:18.662Z"
+        },
+        "version": 1,
+        "id": "c1e6e0ff-bdf1-4d82-ba00-d45a0b261d40",
+        "acceptedAt": "2026-09-26T18:24:17.182Z"
+      },
+      {
+        "kind": "placeSleepOccurrence",
+        "target": {
+          "version": 1,
+          "sourceKind": "sleepRequirement",
+          "requirement": {
+            "id": "sleep",
+            "incarnationId": "56facc96-3cb6-4fcc-9af6-d9afe7f04fe0"
+          },
+          "coordinate": {
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-27",
+            "slot": 0
+          }
+        },
+        "provenance": {
+          "source": "suggestedFix",
+          "suggestedAction": "moveBlock"
+        },
+        "payload": {
+          "version": 1,
+          "proofStartUserDayDate": "2026-09-23",
+          "proofEndUserDayDateExclusive": "2026-10-02",
+          "sleepStart": "2026-09-27T11:45:00.000Z",
+          "sleepEnd": "2026-09-27T13:45:00.000Z",
+          "footprintStart": "2026-09-27T11:15:00.000Z",
+          "footprintEnd": "2026-09-27T14:15:00.000Z",
+          "durationMinutes": 120,
+          "bufferBeforeMinutes": 30,
+          "bufferAfterMinutes": 30,
+          "requirementRevision": 1,
+          "dependencyFingerprint": "3e73ae76cb6144d9",
+          "revokedAt": null
+        },
+        "version": 1,
+        "id": "eab76d17-4924-4be1-9cff-57c6540f2034",
+        "acceptedAt": "2026-09-26T18:24:18.662Z"
+      }
+    ],
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 1
+    },
+    "revoked": true
+  },
+  "persistenceRetry": {
+    "exactDecision": true
+  }
+}

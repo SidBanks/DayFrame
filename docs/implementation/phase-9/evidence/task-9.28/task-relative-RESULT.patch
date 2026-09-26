@@ -1,0 +1,2273 @@
+--- baseline/code/src/ui/DayFrameApp.tsx
++++ task-9.28/code/src/ui/DayFrameApp.tsx
+@@ -1,4 +1,4 @@
+-import { goalInspectionNavigation } from "./goalAcceptedPlanningContext.js";
++import { goalInspectionNavigation, goalRecordedNavigation } from "./goalAcceptedPlanningContext.js";
+ import { createGoalEditingContext } from "./goalEditingContext.js";
+ import { initialAcceptedSummaryContext } from "./acceptedPlanningSummaryContext.js";
+ import {
+@@ -64,6 +64,11 @@
+ const GoalAcceptedPlanningSection = lazy(() =>
+   import("./GoalAcceptedPlanningSection.js").then((module) => ({
+     default: module.GoalAcceptedPlanningSection,
++  })),
++);
++const GoalRecordedInspection = lazy(() =>
++  import("./GoalRecordedInspection.js").then((module) => ({
++    default: module.GoalRecordedInspection,
+   })),
+ );
+ const GoalStructureSection = lazy(() =>
+@@ -256,6 +261,8 @@
+   | "publishScheduleRange"
+   | "realizeAcceptedAllocation"
+   | "listRealizedScheduleFacts"
++  | "getStatus"
++  | "subscribeStatus"
+   | "subscribeHistory"
+   | "listGoals"
+   | "getGoal"
+@@ -2451,6 +2458,33 @@
+                     onInitialGoalHandled={() => setDayGoalId(undefined)}
+                     store={storeRef.current}
+                     state={stateSnapshot}
++                    renderRecorded={(goal) => (
++                      <Suspense fallback={<LazySurfaceLoading name="Recorded evidence" />}>
++                        <GoalRecordedInspection
++                          {...(goalRecordedNavigation(goalEditingContext, goal.id).get().range
++                            ? {
++                                navigationRange: goalRecordedNavigation(
++                                  goalEditingContext,
++                                  goal.id,
++                                ).get().range!,
++                              }
++                            : {})}
++                          onNavigationConsumed={() =>
++                            goalRecordedNavigation(goalEditingContext, goal.id).update({
++                              range: null,
++                            })
++                          }
++                          goal={goal}
++                          store={activeStore}
++                          context={goalEditingContext}
++                          currentDay={(instant) =>
++                            currentPlannerView(stateSnapshot, instant).selectedLabel
++                          }
++                          now={getNow}
++                          onDay={openDay}
++                        />
++                      </Suspense>
++                    )}
+                     renderStructure={(goal, onGoal) => (
+                       <Suspense fallback={<LazySurfaceLoading name="Goal Structure" />}>
+                         <GoalStructureSection
+@@ -3031,6 +3065,12 @@
+             <LazySurfaceBoundary name="Summary">
+               <Suspense fallback={<LazySurfaceLoading name="Summary" />}>
+                 <HistoricalIntelligenceSummary
++                  onInspectGoal={(id, range) => {
++                    goalRecordedNavigation(goalEditingContext, id).update({ range });
++                    setDayGoalId(id);
++                    setPlannerMode("goals");
++                  }}
++                  context={goalEditingContext}
+                   now={getNow}
+                   onOpenPlanner={openMonthMode}
+                   store={activeStore}
+--- baseline/code/src/ui/GoalActivitySummary.tsx
++++ task-9.28/code/src/ui/GoalActivitySummary.tsx
+@@ -1,3 +1,5 @@
++import type { GoalEditingContext } from "./goalEditingContext.js";
++import { useGoalPresentationState } from "./useGoalPresentationState.js";
+ import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from "react";
+ import {
+   GOAL_ACTIVITY_POLICY_V1,
+@@ -11,13 +13,13 @@
+ import { formatHumanTimeRange } from "./timeDisplay.js";
+ import { GoalProgressSummary } from "./GoalProgressSummary.js";
+ 
+-type Available = Extract<
++export type Available = Extract<
+   GoalActivityResultV1,
+   { status: "available" | "partialCoverage" | "unavailable" }
+ >;
+ type PlanningCategory = "scheduled" | "unplaced" | "omitted" | "blocked";
+ type ExecutionCategory = "completed" | "partial" | "skipped" | "unknown" | "notReported";
+-type Detail =
++export type Detail =
+   | { kind: "planning"; category: PlanningCategory }
+   | { kind: "execution"; category: ExecutionCategory }
+   | null;
+@@ -45,19 +47,39 @@
+   range,
+   evaluationAsOf,
+   onOpenPlanner,
++  context,
++  onInspectGoal,
+ }: {
+   store: HistoricalIntelligenceSummaryStore;
+   range: { start: LocalDateString; end: LocalDateString };
+   evaluationAsOf: string;
+   onOpenPlanner?: () => void;
++  context?: GoalEditingContext;
++  onInspectGoal?: (id: string) => void;
+ }): ReactElement {
+   const [goals, setGoals] = useState(() => store.listGoals());
+   const [ingress, setIngress] = useState(() => store.getGoalIngressStatus());
+-  const [selectedId, setSelectedId] = useState("");
++  const [selectedId, setSelectedId] = useGoalPresentationState(
++    context,
++    store,
++    "summary:goal-selectedId",
++    "",
++  );
+   const [result, setResult] = useState<GoalActivityQueryResultV1 | null>(null);
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(false);
+-  const [detail, setDetail] = useState<Detail>(null);
++  const [detail, setDetail] = useGoalPresentationState<Detail>(
++    context,
++    store,
++    "summary:goal-detail",
++    null,
++  );
++  const [progressOpen, setProgressOpen] = useGoalPresentationState(
++    context,
++    store,
++    "summary:progress-open",
++    false,
++  );
+   const request = useRef(0);
+   const detailRef = useRef<HTMLDivElement>(null);
+   const focusDetail = useRef(false);
+@@ -88,7 +110,7 @@
+     setLoading(true);
+     setError(false);
+     setResult(null);
+-    setDetail(null);
++    if (!context) setDetail(null);
+     void store
+       .getGoalActivity({
+         policy: GOAL_ACTIVITY_POLICY_V1,
+@@ -180,6 +202,11 @@
+       {selected ? (
+         <div className="df-goal-activity-context">
+           <h4 className="df-group-title">{selected.title}</h4>
++          {onInspectGoal && (
++            <button type="button" onClick={() => onInspectGoal(selected.id)}>
++              Inspect this Goal
++            </button>
++          )}
+           <p>{statusLabel(selected.status)}</p>
+           {selected.description ? <p>{selected.description}</p> : null}
+           {selected.targetDate ? <p>Target date: {selected.targetDate}</p> : null}
+@@ -187,6 +214,7 @@
+       ) : null}
+       {selected ? (
+         <GoalProgressSummary
++          {...(context ? { disclosure: { open: progressOpen, setOpen: setProgressOpen } } : {})}
+           evaluationAsOf={evaluationAsOf}
+           goal={selected}
+           {...(onOpenPlanner ? { onOpenPlanner } : {})}
+@@ -235,16 +263,27 @@
+   );
+ }
+ 
+-function Activity({
++export function Activity({
+   value,
+   detail,
+   activate,
+   detailRef,
++  bounds,
++  onDay,
+ }: {
+   value: Available;
+   detail: Detail;
+   activate: (next: Exclude<Detail, null>, event: MouseEvent<HTMLButtonElement>) => void;
+   detailRef: { current: HTMLDivElement | null };
++  bounds?: {
++    rows: number;
++    coverage: number;
++    coverageOpen: boolean;
++    moreRows: () => void;
++    moreCoverage: () => void;
++    setCoverageOpen: (value: boolean) => void;
++  };
++  onDay?: (day: LocalDateString) => void;
+ }) {
+   const frozenTitles = [
+     ...new Set(
+@@ -266,7 +305,7 @@
+   const reports = value.reportingCoverage;
+   return (
+     <div className="df-goal-activity-result">
+-      {frozenTitles.map((title) => (
++      {frozenTitles.slice(0, bounds ? 10 : undefined).map((title) => (
+         <p className="df-muted" key={title}>
+           Goal at the time: {title}
+         </p>
+@@ -359,13 +398,21 @@
+           <p className="df-muted">{categoryExplanation(detail)}</p>
+           {evidence.length ? (
+             <ul className="df-history-detail-list">
+-              {evidence.map((item) => (
++              {evidence.slice(0, bounds?.rows).map((item) => (
+                 <Evidence
+                   currentGoalTitle={value.goalContext.title}
+                   key={`${item.userDayDate}:${JSON.stringify(item.reference)}`}
+                   value={item}
++                  {...(onDay ? { onDay } : {})}
+                 />
+               ))}
++              {bounds && evidence.length > bounds.rows && (
++                <li>
++                  <button type="button" onClick={bounds.moreRows}>
++                    Show more Activity rows
++                  </button>
++                </li>
++              )}
+             </ul>
+           ) : (
+             <p className="df-empty">No occurrences in this category.</p>
+@@ -373,10 +420,20 @@
+         </div>
+       ) : null}
+       {value.provenance.coverage.length ? (
+-        <details>
++        <details
++          {...(bounds
++            ? {
++                open: bounds.coverageOpen,
++                onToggle: (event: React.SyntheticEvent<HTMLDetailsElement>) => {
++                  if (event.currentTarget.open !== bounds.coverageOpen)
++                    bounds.setCoverageOpen(event.currentTarget.open);
++                },
++              }
++            : {})}
++        >
+           <summary>Goal-link coverage details ({value.provenance.coverage.length})</summary>
+           <ul className="df-history-detail-list">
+-            {value.provenance.coverage.map((item) => (
++            {value.provenance.coverage.slice(0, bounds?.coverage).map((item) => (
+               <li key={`${item.reason}:${item.userDayDate}:${JSON.stringify(item.reference)}`}>
+                 <strong>{item.title}</strong>
+                 <span>
+@@ -389,6 +446,13 @@
+                 </span>
+               </li>
+             ))}
++            {bounds && value.provenance.coverage.length > bounds.coverage && (
++              <li>
++                <button type="button" onClick={bounds.moreCoverage}>
++                  Show more coverage details
++                </button>
++              </li>
++            )}
+           </ul>
+         </details>
+       ) : null}
+@@ -458,9 +522,11 @@
+ function Evidence({
+   value,
+   currentGoalTitle,
++  onDay,
+ }: {
+   value: GoalActivityLinkedProvenanceV1;
+   currentGoalTitle: string;
++  onDay?: (day: LocalDateString) => void;
+ }) {
+   const time =
+     value.plan.state === "scheduled"
+@@ -477,6 +543,17 @@
+         {value.category} ·{" "}
+         {value.sourceFamily === "manualEvent" ? "manual event" : value.sourceFamily}
+       </span>
++      {onDay && (
++        <>
++          <span>
++            Publication: {value.batchId} · {value.publishedAt}
++          </span>
++          <span>Frozen Goal: {value.frozenGoal.goalId}</span>
++          <button type="button" onClick={() => onDay(value.userDayDate)}>
++            Open Activity day {value.userDayDate}
++          </button>
++        </>
++      )}
+       {value.frozenGoal.title !== currentGoalTitle ? (
+         <span>Goal at the time: {value.frozenGoal.title}</span>
+       ) : null}
+@@ -491,7 +568,7 @@
+     </p>
+   );
+ }
+-function Unavailable({
++export function Unavailable({
+   reason,
+ }: {
+   reason:
+--- baseline/code/src/ui/GoalMeasurementSection.tsx
++++ task-9.28/code/src/ui/GoalMeasurementSection.tsx
+@@ -1,3 +1,5 @@
++import { useGoalPresentationState } from "./useGoalPresentationState.js";
++import type { GoalEditingContext } from "./goalEditingContext.js";
+ import { useEffect, useId, useRef, useState, type ReactElement, type RefObject } from "react";
+ import {
+   MANUAL_QUANTITY_TARGET_POLICY_V1,
+@@ -37,18 +39,55 @@
+ export function GoalMeasurementSection({
+   goal,
+   store,
++  context,
+ }: {
+   goal: GoalV1;
+   store: Store;
++  context?: GoalEditingContext;
+ }): ReactElement {
+   const [history, setHistory] = useState(() => store.listMeasurementDefinitionHistory(goal.id));
+-  const [mode, setMode] = useState<Mode>(null);
+-  const [draft, setDraft] = useState<Draft>(blank);
+-  const [expected, setExpected] = useState<number | null>(null);
+-  const [confirmStop, setConfirmStop] = useState(false);
+-  const [error, setError] = useState("");
+-  const [message, setMessage] = useState("");
+-  const [targetError, setTargetError] = useState("");
++  const [mode, setMode] = useGoalPresentationState<Mode>(
++    context,
++    store,
++    `measurement:${goal.id}:mode`,
++    null,
++  );
++  const [draft, setDraft] = useGoalPresentationState<Draft>(
++    context,
++    store,
++    `measurement:${goal.id}:draft`,
++    blank,
++  );
++  const [expected, setExpected] = useGoalPresentationState<number | null>(
++    context,
++    store,
++    `measurement:${goal.id}:expected`,
++    null,
++  );
++  const [confirmStop, setConfirmStop] = useGoalPresentationState(
++    context,
++    store,
++    `measurement:${goal.id}:confirmStop`,
++    false,
++  );
++  const [error, setError] = useGoalPresentationState(
++    context,
++    store,
++    `measurement:${goal.id}:error`,
++    "",
++  );
++  const [message, setMessage] = useGoalPresentationState(
++    context,
++    store,
++    `measurement:${goal.id}:message`,
++    "",
++  );
++  const [targetError, setTargetError] = useGoalPresentationState(
++    context,
++    store,
++    `measurement:${goal.id}:targetError`,
++    "",
++  );
+   const targetRef = useRef<HTMLInputElement>(null),
+     headingRef = useRef<HTMLHeadingElement>(null),
+     openerRef = useRef<HTMLButtonElement | null>(null),
+@@ -59,12 +98,6 @@
+     durability = store.getMeasurementDefinitionDurabilityStatus();
+   useEffect(() => {
+     setHistory(store.listMeasurementDefinitionHistory(goal.id));
+-    setMode(null);
+-    setDraft(blank);
+-    setExpected(null);
+-    setConfirmStop(false);
+-    setError("");
+-    setMessage("");
+   }, [goal.id, store]);
+   useEffect(
+     () =>
+--- baseline/code/src/ui/GoalProgressReportingSection.tsx
++++ task-9.28/code/src/ui/GoalProgressReportingSection.tsx
+@@ -1,3 +1,5 @@
++import { useGoalPresentationState } from "./useGoalPresentationState.js";
++import type { GoalEditingContext } from "./goalEditingContext.js";
+ import { useEffect, useId, useRef, useState, type ReactElement, type RefObject } from "react";
+ import type { GoalV1 } from "../core/goals/goal.js";
+ import {
+@@ -29,23 +31,60 @@
+ export function GoalProgressReportingSection({
+   goal,
+   store,
++  context,
+ }: {
+   goal: GoalV1;
+   store: Store;
++  context?: GoalEditingContext;
+ }): ReactElement {
+   const [history, setHistory] = useState<GoalProgressObservationHistoryResult>(() =>
+     store.queryGoalProgressObservationHistory(goal.id),
+   );
+-  const [editing, setEditing] = useState<Editing>(null);
+-  const [draft, setDraft] = useState<Draft>({
+-    value: "",
+-    observedLocal: localDateTime(new Date()),
+-  });
+-  const [remove, setRemove] = useState<GoalProgressObservationV1 | null>(null);
+-  const [error, setError] = useState("");
+-  const [message, setMessage] = useState("");
+-  const [valueError, setValueError] = useState(""),
+-    [timeError, setTimeError] = useState("");
++  const [editing, setEditing] = useGoalPresentationState<Editing>(
++    context,
++    store,
++    `observation:${goal.id}:editing`,
++    null,
++  );
++  const [draft, setDraft] = useGoalPresentationState<Draft>(
++    context,
++    store,
++    `observation:${goal.id}:draft`,
++    {
++      value: "",
++      observedLocal: localDateTime(new Date()),
++    },
++  );
++  const [remove, setRemove] = useGoalPresentationState<GoalProgressObservationV1 | null>(
++    context,
++    store,
++    `observation:${goal.id}:remove`,
++    null,
++  );
++  const [error, setError] = useGoalPresentationState(
++    context,
++    store,
++    `observation:${goal.id}:error`,
++    "",
++  );
++  const [message, setMessage] = useGoalPresentationState(
++    context,
++    store,
++    `observation:${goal.id}:message`,
++    "",
++  );
++  const [valueError, setValueError] = useGoalPresentationState(
++      context,
++      store,
++      `observation:${goal.id}:valueError`,
++      "",
++    ),
++    [timeError, setTimeError] = useGoalPresentationState(
++      context,
++      store,
++      `observation:${goal.id}:timeError`,
++      "",
++    );
+   const headingRef = useRef<HTMLHeadingElement>(null),
+     valueRef = useRef<HTMLInputElement>(null),
+     timeRef = useRef<HTMLInputElement>(null),
+@@ -56,10 +95,6 @@
+   const durability = store.getProgressObservationDurabilityStatus();
+   useEffect(() => {
+     setHistory(store.queryGoalProgressObservationHistory(goal.id));
+-    setEditing(null);
+-    setRemove(null);
+-    setError("");
+-    setMessage("");
+   }, [goal.id, store]);
+   useEffect(() => {
+     const refresh = () => setHistory(store.queryGoalProgressObservationHistory(goal.id));
+--- baseline/code/src/ui/GoalProgressSummary.tsx
++++ task-9.28/code/src/ui/GoalProgressSummary.tsx
+@@ -1,6 +1,5 @@
+-import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from "react";
++import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactElement } from "react";
+ import type { GoalV1 } from "../core/goals/goal.js";
+-import type { GoalProgressQueryResultV1 } from "../state/goalProgressQuery.js";
+ import type { HistoricalIntelligenceSummaryStore } from "./HistoricalIntelligenceSummary.js";
+ 
+ export function GoalProgressSummary({
+@@ -8,14 +7,29 @@
+   store,
+   evaluationAsOf,
+   onOpenPlanner,
++  disclosure,
++  showIdentity = false,
++  refreshKey,
+ }: {
+   goal: GoalV1;
+-  store: HistoricalIntelligenceSummaryStore;
++  store: Pick<
++    HistoricalIntelligenceSummaryStore,
++    | "queryGoalProgress"
++    | "listMeasurementDefinitionHistory"
++    | "subscribeMeasurementDefinitions"
++    | "subscribeProgressObservations"
++  >;
+   evaluationAsOf: string;
+   onOpenPlanner?: () => void;
++  disclosure?: { open: boolean; setOpen: (value: boolean) => void };
++  showIdentity?: boolean;
++  refreshKey?: number;
+ }): ReactElement {
+   const [revision, setRevision] = useState(0);
+-  const [detail, setDetail] = useState(false);
++  const [localDetail, setLocalDetail] = useState(false);
++  const detail = disclosure?.open ?? localDetail;
++  const setDetail = (value: boolean) =>
++    disclosure ? disclosure.setOpen(value) : setLocalDetail(value);
+   const detailRef = useRef<HTMLDivElement>(null),
+     focusDetail = useRef(false);
+   useEffect(() => {
+@@ -28,17 +42,28 @@
+     };
+   }, [store]);
+   useEffect(() => {
+-    setDetail(false);
++    if (!disclosure) setLocalDetail(false);
+   }, [evaluationAsOf, goal.id]);
+   useEffect(() => {
+     if (detail && focusDetail.current) detailRef.current?.focus();
+     focusDetail.current = false;
+   }, [detail]);
+-  let result: GoalProgressQueryResultV1;
+-  try {
+-    void revision;
+-    result = store.queryGoalProgress({ goalId: goal.id, evaluationAsOf });
+-  } catch {
++  const read = useMemo(() => {
++    try {
++      const result = store.queryGoalProgress({ goalId: goal.id, evaluationAsOf });
++      const stopped =
++        result.status === "notDefined" &&
++        store
++          .listMeasurementDefinitionHistory(goal.id)
++          .filter((item) => item.effectiveFrom <= evaluationAsOf)
++          .at(-1)?.status === "inactive";
++      return { result, stopped };
++    } catch {
++      return { result: undefined };
++    }
++  }, [store, goal, evaluationAsOf, revision, refreshKey]);
++  const result = read.result;
++  if (!result) {
+     return (
+       <ProgressShell>
+         <p className="df-danger-message" role="alert">
+@@ -88,10 +113,7 @@
+       </ProgressShell>
+     );
+   if (result.status === "notDefined") {
+-    const definitions = store
+-      .listMeasurementDefinitionHistory(goal.id)
+-      .filter((item) => item.effectiveFrom <= evaluationAsOf);
+-    const stopped = definitions.at(-1)?.status === "inactive";
++    const stopped = read.stopped;
+     return (
+       <ProgressShell>
+         <p>
+@@ -144,20 +166,24 @@
+           : "Above target";
+   function activate(event: MouseEvent<HTMLButtonElement>) {
+     focusDetail.current = event.detail === 0;
+-    setDetail((value) => !value);
++    setDetail(!detail);
+   }
+   return (
+     <ProgressShell>
+       <div
+         className="df-progress-quantity"
+-        aria-label={`${quantity(result.quantity.observedValue)} of ${quantity(result.quantity.targetValue)} ${result.quantity.unitId}; ${result.percentage} percent`}
++        aria-label={`${quantity(result.quantity.observedValue)} of ${quantity(result.quantity.targetValue)} ${result.quantity.unitId}; ${result.percentage} percent${result.comparison === "belowTarget" && result.percentage === "100" ? "; rounded percentage, below target" : ""}`}
+       >
+         <strong>{quantity(result.quantity.observedValue)}</strong>
+         <span>
+           of {quantity(result.quantity.targetValue)} {result.quantity.unitId}
+         </span>
+       </div>
+-      <p className="df-progress-percentage">{percentage}%</p>
++      <p className="df-progress-percentage">
++        {result.comparison === "belowTarget" && percentage === "100"
++          ? "Below 100% (canonical percentage rounds to 100%)"
++          : `${percentage}%`}
++      </p>
+       <p>{comparison}</p>
+       <p className="df-muted">Observed {formatInstant(result.observation.observedAt)}</p>
+       <button
+@@ -177,6 +203,26 @@
+           tabIndex={-1}
+         >
+           <h5>Measurement details</h5>
++          {showIdentity && (
++            <>
++              <Detail
++                label="Definition identity / revision"
++                value={`${result.definition.id} / ${result.definition.revision}`}
++              />
++              <Detail label="Measurement epoch begins" value={result.definition.effectiveFrom} />
++              <Detail
++                label="Observation identity / revision"
++                value={`${result.observation.id} / ${result.observation.revision}`}
++              />
++              <Detail label="Exact observation time" value={result.observation.observedAt} />
++              <Detail label="Exact record time" value={result.observation.recordedAt} />
++              <p>
++                Values are absolute totals, not increments. This measurement epoch is independent of
++                the Activity period. Current Goal title and status are current context, not
++                reconstructed historical Goal state.
++              </p>
++            </>
++          )}
+           <Detail label="Measurement method" value="Quantity toward a target" />
+           <Detail
+             label="Target"
+--- baseline/code/src/ui/GoalSection.tsx
++++ task-9.28/code/src/ui/GoalSection.tsx
+@@ -49,6 +49,7 @@
+   renderPlanning,
+   renderInspection,
+   renderStructure,
++  renderRecorded,
+   initialGoalId,
+   onInitialGoalHandled,
+   context: suppliedContext,
+@@ -59,6 +60,7 @@
+   store: GoalStore;
+   state: DayFrameState;
+   renderPlanning?: (goal: GoalV1) => ReactNode;
++  renderRecorded?: (goal: GoalV1) => ReactNode;
+   renderInspection?: (goalId: string) => ReactNode;
+   renderStructure?: (goal: GoalV1, navigate: (id: GoalId) => void) => ReactNode;
+ }): ReactElement {
+@@ -538,7 +540,24 @@
+           onUnlink={unlink}
+         />
+       ) : null}
++      {selected ? (
++        <>
++          <GoalMeasurementSection
++            key={`measurement:${selected.id}`}
++            goal={selected}
++            store={store}
++            context={context}
++          />
++          <GoalProgressReportingSection
++            key={`reporting:${selected.id}`}
++            goal={selected}
++            store={store}
++            context={context}
++          />
++        </>
++      ) : null}
+       {!editing && selected ? renderPlanning?.(selected) : null}
++      {selected ? renderRecorded?.(selected) : null}
+       {selected ? renderStructure?.(selected, openRelated) : null}
+       {selectedId ? renderInspection?.(selectedId) : null}
+     </section>
+@@ -660,8 +679,7 @@
+         Completing or archiving this Goal does not release accepted scheduled work or change
+         recorded Progress.
+       </p>
+-      <GoalMeasurementSection goal={goal} store={store} />
+-      <GoalProgressReportingSection goal={goal} store={store} />
++
+       <div>
+         <h4>Supporting commitments</h4>
+         {availability.length ? (
+--- baseline/code/src/ui/HistoricalIntelligenceSummary.tsx
++++ task-9.28/code/src/ui/HistoricalIntelligenceSummary.tsx
+@@ -1,3 +1,5 @@
++import type { GoalEditingContext } from "./goalEditingContext.js";
++import { useGoalPresentationState } from "./useGoalPresentationState.js";
+ import { SleepHistorySection } from "./SleepHistorySection.js";
+ import {
+   useEffect,
+@@ -67,22 +69,53 @@
+   store,
+   now = systemNow,
+   onOpenPlanner,
++  context,
++  onInspectGoal,
+ }: {
+   store: HistoricalIntelligenceSummaryStore;
+   now?: () => Date;
+   onOpenPlanner?: () => void;
++  context?: GoalEditingContext;
++  onInspectGoal?: (id: string, range: { start: string; end: string }) => void;
+ }): ReactElement {
+   const initial = defaultWindow(now());
+-  const [draftStart, setDraftStart] = useState<LocalDateString>(initial.start);
+-  const [draftEnd, setDraftEnd] = useState<LocalDateString>(initial.end);
+-  const [range, setRange] = useState(initial);
++  const [draftStart, setDraftStart] = useGoalPresentationState<LocalDateString>(
++    context,
++    store,
++    "summary:draftStart",
++    initial.start,
++  );
++  const [draftEnd, setDraftEnd] = useGoalPresentationState<LocalDateString>(
++    context,
++    store,
++    "summary:draftEnd",
++    initial.end,
++  );
++  const [range, setRange] = useGoalPresentationState(context, store, "summary:range", initial);
+   const [results, setResults] = useState<Results | null>(null);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(false);
+   const [revision, setRevision] = useState(0);
+-  const [evaluationAsOf, setEvaluationAsOf] = useState(() => now().toISOString());
+-  const [selectedPlan, setSelectedPlan] = useState<SchedulingRealizationCategoryV1 | null>(null);
+-  const [selectedOutcome, setSelectedOutcome] = useState<CompletionClassificationV1 | null>(null);
++  const [evaluationAsOf, setEvaluationAsOf] = useGoalPresentationState(
++    context,
++    store,
++    "summary:evaluationAsOf",
++    () => now().toISOString(),
++  );
++  const [selectedPlan, setSelectedPlan] =
++    useGoalPresentationState<SchedulingRealizationCategoryV1 | null>(
++      context,
++      store,
++      "summary:selectedPlan",
++      null,
++    );
++  const [selectedOutcome, setSelectedOutcome] =
++    useGoalPresentationState<CompletionClassificationV1 | null>(
++      context,
++      store,
++      "summary:selectedOutcome",
++      null,
++    );
+   const request = useRef(0);
+   const planDetail = useRef<HTMLDivElement>(null);
+   const outcomeDetail = useRef<HTMLDivElement>(null);
+@@ -106,8 +139,10 @@
+     setLoading(true);
+     setError(false);
+     setResults(null);
+-    setSelectedPlan(null);
+-    setSelectedOutcome(null);
++    if (!context) {
++      setSelectedPlan(null);
++      setSelectedOutcome(null);
++    }
+     const query: HistoricalCompletionDistributionQueryV1 = {
+       policy: HISTORICAL_METRIC_POLICY_V1,
+       startUserDayDate: range.start,
+@@ -145,6 +180,8 @@
+     if (draftStart <= draftEnd) {
+       setEvaluationAsOf(now().toISOString());
+       setRange({ start: draftStart, end: draftEnd });
++      setSelectedPlan(null);
++      setSelectedOutcome(null);
+     }
+   }
+ 
+@@ -225,6 +262,8 @@
+             />
+           ) : null}
+           <GoalActivitySummary
++            {...(onInspectGoal ? { onInspectGoal: (id: string) => onInspectGoal(id, range) } : {})}
++            {...(context ? { context } : {})}
+             evaluationAsOf={evaluationAsOf}
+             {...(onOpenPlanner ? { onOpenPlanner } : {})}
+             range={range}
+--- baseline/code/src/ui/dayFrameUi.css
++++ task-9.28/code/src/ui/dayFrameUi.css
+@@ -2355,3 +2355,29 @@
+   border-inline-start: 4px solid #ad2436;
+   padding: 0.5rem;
+ }
++
++.df-recorded-inspection {
++  min-width: 0;
++  overflow-wrap: anywhere;
++}
++.df-recorded-inspection button,
++.df-recorded-inspection input,
++.df-goal-measurement button,
++.df-goal-reporting button {
++  min-height: 44px;
++  max-width: 100%;
++  box-sizing: border-box;
++}
++.df-recorded-inspection input {
++  width: 100%;
++  min-width: 0;
++}
++.df-recorded-inspection :focus-visible,
++.df-recorded-inspection [tabindex="-1"]:focus {
++  outline: 3px solid var(--df-focus, #285a85);
++  outline-offset: 2px;
++}
++.df-recorded-inspection [role="alert"] {
++  border-left: 3px solid #a52a2a;
++  padding: 0.75rem;
++}
+--- baseline/code/src/ui/goalAcceptedPlanningContext.ts
++++ task-9.28/code/src/ui/goalAcceptedPlanningContext.ts
+@@ -7,3 +7,11 @@
+     () => ({ range: null }),
+   );
+ }
++
++/** Separate navigation intent: Activity uses inclusive labels and never changes G2's period. */
++export function goalRecordedNavigation(context: GoalEditingContext, goalId: string) {
++  return context.cell<{ range: GoalInspectionRange | null }>(
++    `recorded-navigation:${goalId}`,
++    () => ({ range: null }),
++  );
++}
+--- /dev/null
++++ task-9.28/code/src/ui/GoalRecordedInspection.tsx
+@@ -0,0 +1,460 @@
++import { useEffect, useId, useMemo, useRef, useState } from "react";
++import type { GoalV1 } from "../core/goals/goal.js";
++import type { LocalDateString } from "../core/shifts/types.js";
++import { GOAL_ACTIVITY_POLICY_V1 } from "../core/historicalIntelligence/goalActivity.js";
++import type { GoalActivityQueryResultV1 } from "../state/historicalIntelligenceQuery.js";
++import type { DayFrameStore } from "../state/types.js";
++import type { GoalEditingContext } from "./goalEditingContext.js";
++import { useGoalEditingState } from "./useGoalEditingState.js";
++import { presentationOwner } from "./useGoalPresentationState.js";
++import { Activity, Unavailable, type Available, type Detail } from "./GoalActivitySummary.js";
++import { GoalProgressSummary } from "./GoalProgressSummary.js";
++
++type Store = Pick<
++  DayFrameStore,
++  | "getGoalActivity"
++  | "queryGoalProgress"
++  | "listMeasurementDefinitionHistory"
++  | "subscribeGoals"
++  | "subscribeMeasurementDefinitions"
++  | "subscribeProgressObservations"
++  | "subscribeHistory"
++  | "subscribeStatus"
++  | "subscribeExecutionHistory"
++  | "subscribeExecutionHistoryIngress"
++  | "getStatus"
++  | "getGoalIngressStatus"
++>;
++type Range = { start: string; end: string };
++type State = Range & {
++  open: boolean;
++  draftStart: string;
++  draftEnd: string;
++  error: string;
++  cutoff: string;
++  detail: Detail;
++  rows: number;
++  coverage: number;
++  coverageOpen: boolean;
++  provenance: boolean;
++  missing: number;
++  missingOpen: boolean;
++  returnFocus: boolean;
++  reporting: boolean;
++};
++export function validActivityRange(start: string, end: string) {
++  const valid = (s: string) =>
++    /^\d{4}-\d{2}-\d{2}$/.test(s) &&
++    Number.isFinite(Date.parse(s + "T00:00:00Z")) &&
++    new Date(s + "T00:00:00Z").toISOString().slice(0, 10) === s;
++  return (
++    valid(start) &&
++    valid(end) &&
++    start <= end &&
++    (Date.parse(end) - Date.parse(start)) / 86400000 < 366
++  );
++}
++function month(day: string): Range {
++  const start = day.slice(0, 7) + "-01";
++  const date = new Date(start + "T00:00:00Z");
++  date.setUTCMonth(date.getUTCMonth() + 1, 0);
++  return { start, end: date.toISOString().slice(0, 10) };
++}
++export function GoalRecordedInspection({
++  goal,
++  store,
++  context,
++  currentDay,
++  now,
++  onDay,
++  navigationRange,
++  onNavigationConsumed,
++}: {
++  goal: GoalV1;
++  store: Store;
++  context: GoalEditingContext;
++  currentDay: string | ((instant: Date) => string);
++  now: () => Date;
++  onDay: (day: string) => void;
++  navigationRange?: Range;
++  onNavigationConsumed?: () => void;
++}) {
++  const [c, update, get] = useGoalEditingState<State>(
++    context,
++    `recorded:${presentationOwner(store)}:${goal.id}`,
++    () => {
++      const range =
++        navigationRange && validActivityRange(navigationRange.start, navigationRange.end)
++          ? navigationRange
++          : typeof currentDay === "string"
++            ? month(currentDay)
++            : { start: "", end: "" };
++      return {
++        ...range,
++        draftStart: range.start,
++        draftEnd: range.end,
++        open: false,
++        error: "",
++        cutoff: "",
++        detail: null,
++        rows: 10,
++        coverage: 10,
++        coverageOpen: false,
++        provenance: false,
++        missing: 10,
++        missingOpen: false,
++        returnFocus: false,
++        reporting: false,
++      };
++    },
++  );
++  useEffect(() => {
++    if (!navigationRange) return;
++    if (validActivityRange(navigationRange.start, navigationRange.end))
++      update({
++        ...navigationRange,
++        draftStart: navigationRange.start,
++        draftEnd: navigationRange.end,
++        detail: null,
++        rows: 10,
++        coverage: 10,
++      });
++    onNavigationConsumed?.();
++  }, [navigationRange]);
++  const [revision, setRevision] = useState(0);
++  const generation = useRef(0),
++    nowRef = useRef(now),
++    heading = useRef<HTMLHeadingElement>(null),
++    detailRef = useRef<HTMLDivElement>(null);
++  nowRef.current = now;
++  const uid = useId();
++  const [view, setView] = useState<{
++    key: string;
++    store: Store;
++    context: GoalEditingContext;
++    value?: GoalActivityQueryResultV1;
++    error?: boolean;
++  }>();
++  const key = `${goal.id}|${c.start}|${c.end}|${c.cutoff}|${revision}|${c.open}`;
++  // Re-entry is an explicit inspection refresh; subscriptions below retain the cutoff.
++  useEffect(() => {
++    if (get().open) update({ cutoff: nowRef.current().toISOString() });
++    return () => {
++      generation.current++;
++    };
++  }, [goal.id, store, context]);
++  useEffect(() => {
++    const invalidate = () => {
++      generation.current++;
++      setRevision((v) => v + 1);
++    };
++    const stops = [
++      store.subscribeGoals(invalidate),
++      store.subscribeMeasurementDefinitions(invalidate),
++      store.subscribeProgressObservations(invalidate),
++      store.subscribeHistory(invalidate),
++      store.subscribeStatus(invalidate),
++      store.subscribeExecutionHistory(invalidate),
++      store.subscribeExecutionHistoryIngress(invalidate),
++    ];
++    return () => stops.forEach((stop) => stop());
++  }, [store]);
++  useEffect(() => {
++    if (!c.open || !c.cutoff || !context.isValid()) return;
++    const request = ++generation.current;
++    let active = true;
++    void Promise.resolve()
++      .then(() =>
++        store.getGoalActivity({
++          policy: GOAL_ACTIVITY_POLICY_V1,
++          goalId: goal.id,
++          startUserDayDate: c.start as LocalDateString,
++          endUserDayDate: c.end as LocalDateString,
++          evaluationAsOf: c.cutoff,
++        }),
++      )
++      .then(
++        (value) => {
++          if (active && request === generation.current && context.isValid())
++            setView({ key, store, context, value });
++        },
++        () => {
++          if (active && request === generation.current && context.isValid())
++            setView({ key, store, context, error: true });
++        },
++      );
++    return () => {
++      active = false;
++    };
++  }, [key, store, context]);
++  useEffect(() => {
++    if (c.open && c.returnFocus && view?.key === key) {
++      heading.current?.focus();
++      update({ returnFocus: false });
++    }
++  }, [c.open, c.returnFocus, key, view]);
++  const disclosure = useMemo(
++    () => ({ open: c.provenance, setOpen: (provenance: boolean) => update({ provenance }) }),
++    [c.provenance, update],
++  );
++  function refresh() {
++    generation.current++;
++    update({ cutoff: nowRef.current().toISOString(), returnFocus: true, reporting: false });
++    setRevision((v) => v + 1);
++  }
++  function handoff(kind: "measurement" | "reporting") {
++    update({ reporting: true });
++    document.getElementById(`${kind}-${goal.id}`)?.focus();
++    document.getElementById(`${kind}-${goal.id}`)?.scrollIntoView?.({ block: "center" });
++  }
++  const current =
++    view?.key === key && view.store === store && view.context === context && context.isValid()
++      ? view
++      : undefined;
++  const ingress = store.getGoalIngressStatus(),
++    planStatus = store.getStatus();
++  const value = current?.value;
++  const available =
++    value &&
++    value.status !== "invalidQuery" &&
++    !(value.status === "unavailable" && "reason" in value)
++      ? (value as Available)
++      : undefined;
++  return (
++    <section
++      className="df-panel df-recorded-inspection"
++      aria-label="Recorded Progress and Activity"
++    >
++      <h3 ref={heading} tabIndex={-1}>
++        Recorded Progress and Activity
++      </h3>
++      <p>Recorded measurement and linked historical work are independent evidence.</p>
++      <button
++        type="button"
++        aria-expanded={c.open}
++        onClick={() => {
++          if (c.open) update({ open: false });
++          else {
++            const instant = nowRef.current();
++            const range = c.start
++              ? { start: c.start, end: c.end }
++              : month(typeof currentDay === "function" ? currentDay(instant) : currentDay);
++            update({
++              ...range,
++              draftStart: c.start ? c.draftStart : range.start,
++              draftEnd: c.start ? c.draftEnd : range.end,
++              open: true,
++              cutoff: instant.toISOString(),
++              returnFocus: true,
++            });
++          }
++        }}
++      >
++        {c.open ? "Close recorded inspection" : "Inspect recorded Progress and Activity"}
++      </button>
++      {c.open && (
++        <>
++          <p>
++            Knowledge cutoff: <time dateTime={c.cutoff}>{c.cutoff}</time>. Not continuously live;
++            later records may require Refresh. This shared cutoff does not guarantee an atomic
++            cross-authority snapshot.
++          </p>
++          <button type="button" onClick={refresh}>
++            Refresh recorded evidence
++          </button>
++          <GoalProgressSummary
++            goal={goal}
++            store={store}
++            evaluationAsOf={c.cutoff}
++            disclosure={disclosure}
++            refreshKey={revision}
++            showIdentity
++          />
++          <div className="df-screen-actions">
++            <button type="button" onClick={() => handoff("measurement")}>
++              Open Measurement controls
++            </button>
++            <button type="button" onClick={() => handoff("reporting")}>
++              Open value reporting and correction history
++            </button>
++            {c.reporting && (
++              <button type="button" onClick={refresh}>
++                Return to recorded inspection
++              </button>
++            )}
++          </div>
++          <p>
++            Reporting history shows current lineage heads, independently of this cutoff. Existing
++            controls decide whether recording, correction or retraction is permitted; navigation
++            saves nothing.
++          </p>
++          <h4>Goal Activity</h4>
++          <p>
++            Published work with this Goal's frozen identity in the inclusive User Day period below,
++            known at the cutoff. Current links, names and Structure do not rewrite membership.
++            Published productive work, support and protection entries are included when they carry
++            that identity. Counts do not imply reportability. Unpublished and unrealized work is not
++            a complete activity ledger.
++          </p>
++          <button
++            type="button"
++            onClick={() => {
++              const section =
++                heading.current
++                  ?.closest(".df-goals-section")
++                  ?.querySelector(".df-goal-inspection") ??
++                document.querySelector(".df-goal-inspection");
++              const button = Array.from(section?.querySelectorAll("button") ?? []).find(
++                (b) => b.textContent === "Inspect accepted planning",
++              );
++              button?.click();
++              section?.querySelector<HTMLElement>("h3")?.focus();
++            }}
++          >
++            Open accepted planning and scheduled work
++          </button>
++          <form
++            className="df-form-stack"
++            aria-label="Activity period"
++            aria-describedby={c.error ? uid : undefined}
++            onSubmit={(event) => {
++              event.preventDefault();
++              if (!validActivityRange(c.draftStart, c.draftEnd)) {
++                update({
++                  error:
++                    "Choose 1–366 inclusive User Days in date order. The applied period is unchanged.",
++                });
++                return;
++              }
++              update({
++                start: c.draftStart,
++                end: c.draftEnd,
++                error: "",
++                cutoff: nowRef.current().toISOString(),
++                detail: null,
++                rows: 10,
++                coverage: 10,
++                missing: 10,
++              });
++              setRevision((v) => v + 1);
++            }}
++          >
++            <label>
++              Activity start User Day
++              <input
++                type="date"
++                value={c.draftStart}
++                onChange={(e) => update({ draftStart: e.target.value })}
++              />
++            </label>
++            <label>
++              Activity end User Day (inclusive)
++              <input
++                type="date"
++                value={c.draftEnd}
++                onChange={(e) => update({ draftEnd: e.target.value })}
++              />
++            </label>
++            <button type="submit">Apply Activity period</button>
++            {c.error && (
++              <p id={uid} role="alert">
++                {c.error}
++              </p>
++            )}
++          </form>
++          <p>
++            Applied Activity period: {c.start} through {c.end}, inclusive. This does not filter
++            Progress observations or change their target.
++          </p>
++          {ingress.status !== "accepted" ? (
++            <Unavailable reason="goalProtected" />
++          ) : planStatus.status === "protected" ? (
++            <Unavailable reason="historicalPlanProtected" />
++          ) : (
++            <>
++              {!current && <p role="status">Loading Goal Activity…</p>}
++              {current?.error && (
++                <p role="alert">
++                  Goal Activity could not be loaded. Progress remains independent. Use Refresh to
++                  try again.
++                </p>
++              )}
++              {value?.status === "invalidQuery" && (
++                <p role="alert">Activity is unavailable for this query.</p>
++              )}
++              {value?.status === "unavailable" && "reason" in value && (
++                <Unavailable reason={value.reason} />
++              )}
++              {available && (
++                <>
++                  <p>
++                    Policy: {available.policy.id}@{available.policy.version}. Counts describe this
++                    published population, not all work performed.
++                  </p>
++                  <Activity
++                    value={available}
++                    detail={c.detail}
++                    detailRef={detailRef}
++                    activate={(next, event) => {
++                      update({
++                        detail:
++                          c.detail?.kind === next.kind && c.detail.category === next.category
++                            ? null
++                            : next,
++                        rows: 10,
++                      });
++                      if (event.detail === 0)
++                        requestAnimationFrame(() => detailRef.current?.focus());
++                    }}
++                    bounds={{
++                      rows: c.rows,
++                      coverage: c.coverage,
++                      coverageOpen: c.coverageOpen,
++                      moreRows: () => update({ rows: c.rows + 10 }),
++                      moreCoverage: () => update({ coverage: c.coverage + 10 }),
++                      setCoverageOpen: (coverageOpen) => update({ coverageOpen }),
++                    }}
++                    onDay={(day) => {
++                      update({ returnFocus: true });
++                      onDay(day);
++                    }}
++                  />
++                  {available.provenance.missingPlanUserDayDates.length > 0 && (
++                    <details
++                      open={c.missingOpen}
++                      onToggle={(event) => {
++                        if (event.currentTarget.open !== c.missingOpen)
++                          update({ missingOpen: event.currentTarget.open });
++                      }}
++                    >
++                      <summary>
++                        Missing plan days ({available.provenance.missingPlanUserDayDates.length})
++                      </summary>
++                      <ul>
++                        {available.provenance.missingPlanUserDayDates
++                          .slice(0, c.missing)
++                          .map((day) => (
++                            <li key={day}>{day}</li>
++                          ))}
++                      </ul>
++                      {available.provenance.missingPlanUserDayDates.length > c.missing && (
++                        <button type="button" onClick={() => update({ missing: c.missing + 10 })}>
++                          Show more missing days
++                        </button>
++                      )}
++                    </details>
++                  )}
++                </>
++              )}
++            </>
++          )}
++          <p>
++            Opening an Activity day shows the current Daily Planner. Later publication or correction
++            may differ from this retained evidence. A day link does not promise a historical
++            reporting target; unplaced or omitted work gains no reporting action here.
++          </p>
++        </>
++      )}
++    </section>
++  );
++}
+--- /dev/null
++++ task-9.28/code/src/ui/useGoalPresentationState.ts
+@@ -0,0 +1,33 @@
++import { useRef, type SetStateAction } from "react";
++import { createGoalEditingContext, type GoalEditingContext } from "./goalEditingContext.js";
++import { useGoalEditingState } from "./useGoalEditingState.js";
++const owners = new WeakMap<object, number>();
++let nextOwner = 0;
++export function presentationOwner(owner: object) {
++  let id = owners.get(owner);
++  if (id === undefined) {
++    id = ++nextOwner;
++    owners.set(owner, id);
++  }
++  return id;
++}
++/** Ephemeral drafts only; no query, command, storage or implicit revision rebase. */
++export function useGoalPresentationState<T>(
++  context: GoalEditingContext | undefined,
++  owner: object,
++  key: string,
++  initial: T | (() => T),
++) {
++  const local = useRef<GoalEditingContext | null>(null);
++  if (!local.current) local.current = createGoalEditingContext();
++  const [cell, update] = useGoalEditingState(
++    context ?? local.current,
++    `${presentationOwner(owner)}:${key}`,
++    () => ({ value: typeof initial === "function" ? (initial as () => T)() : initial }),
++  );
++  const set = (value: SetStateAction<T>) =>
++    update((previous) => ({
++      value: typeof value === "function" ? (value as (previous: T) => T)(previous.value) : value,
++    }));
++  return [cell.value, set] as const;
++}
+--- /dev/null
++++ task-9.28/code/src/ui/tests/GoalRecordedInspection.test.tsx
+@@ -0,0 +1,858 @@
++import {
++  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++  getDayFrameRuntimeAuthorityController,
++} from "../../state/dayFrameRuntimeAuthority.js";
++import { buildExecutionReportInput } from "../executionReportingWorkflow.js";
++import { definitionSemanticFingerprint } from "../../core/measurement/measurementDefinition.js";
++import { createGoalActivityQuery } from "../../state/historicalIntelligenceQuery.js";
++import { currentPlannerView } from "../plannerNavigation.js";
++/* @vitest-environment jsdom */
++import "@testing-library/jest-dom/vitest";
++import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
++import { afterEach, beforeEach, expect, it, vi } from "vitest";
++import { IDBFactory } from "fake-indexeddb";
++import { createDayFrameStore } from "../../state/dayFrameStore.js";
++import { createGoalEditingContext } from "../goalEditingContext.js";
++import { GoalRecordedInspection } from "../GoalRecordedInspection.js";
++import { DayFrameApp } from "../DayFrameApp.js";
++import { goalRecordedCanonicalFixture } from "./goalRecordedCanonicalFixture.js";
++import type { GoalActivityQueryResultV1 } from "../../state/historicalIntelligenceQuery.js";
++import { MANUAL_QUANTITY_TARGET_POLICY_V1 as policy } from "../../core/measurement/measurementDefinition.js";
++const click = (name: string | RegExp) => fireEvent.click(screen.getByRole("button", { name }));
++const change = (name: string, value: string) =>
++  fireEvent.change(screen.getByLabelText(name), { target: { value } });
++beforeEach(() => {
++  localStorage.clear();
++  vi.stubGlobal("indexedDB", new IDBFactory());
++  vi.useFakeTimers({ toFake: ["Date"] });
++  vi.setSystemTime(new Date("2026-09-23T12:00:00.000Z"));
++});
++afterEach(() => {
++  cleanup();
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++  vi.useRealTimers();
++});
++async function basic(value?: string) {
++  const store = createDayFrameStore();
++  await store.whenReady();
++  const g = await store.createGoal({ title: "Measured Goal" });
++  if (g.status !== "accepted") throw Error("Goal");
++  const d = await store.createMeasurementDefinition(g.goal.id, policy, {
++    targetValue: "100",
++    unitId: "words",
++  });
++  if (d.status !== "accepted") throw Error("definition");
++  if (value !== undefined) {
++    const o = await store.createProgressObservation({
++      goalId: g.goal.id,
++      value,
++      observedAt: new Date().toISOString(),
++      expectedDefinitionRevision: 1,
++    });
++    if (o.status !== "accepted") throw Error(JSON.stringify(o));
++  }
++  return { store, goal: g.goal, definition: d.definition };
++}
++async function mount(f: Awaited<ReturnType<typeof basic>>) {
++  const props = {
++    goal: f.goal,
++    store: f.store,
++    context: createGoalEditingContext(),
++    currentDay: "2026-09-23",
++    now: vi.fn(() => new Date()),
++    onDay: vi.fn(),
++  };
++  const mounted = render(<GoalRecordedInspection {...props} />);
++  click("Inspect recorded Progress and Activity");
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  return { ...mounted, props };
++}
++it("queries only the selected Goal with a shared cutoff and inclusive range; invalid intent never queries or writes", async () => {
++  const f = await basic("17");
++  const p = vi.spyOn(f.store, "queryGoalProgress"),
++    a = vi.spyOn(f.store, "getGoalActivity");
++  const m = await mount(f);
++  expect(p).toHaveBeenLastCalledWith({
++    goalId: f.goal.id,
++    evaluationAsOf: "2026-09-23T12:00:00.000Z",
++  });
++  expect(a).toHaveBeenLastCalledWith(
++    expect.objectContaining({
++      goalId: f.goal.id,
++      startUserDayDate: "2026-09-01",
++      endUserDayDate: "2026-09-30",
++      evaluationAsOf: "2026-09-23T12:00:00.000Z",
++    }),
++  );
++  expect(m.props.now).toHaveBeenCalledTimes(1);
++  const counts = [p.mock.calls.length, a.mock.calls.length];
++  change("Activity start User Day", "2026-10-01");
++  click("Apply Activity period");
++  expect(screen.getByRole("alert")).toHaveTextContent("applied period is unchanged");
++  expect([p.mock.calls.length, a.mock.calls.length]).toEqual(counts);
++  change("Activity start User Day", "2024-01-01");
++  click("Apply Activity period");
++  expect(a).toHaveBeenCalledTimes(counts[1]!);
++  change("Activity start User Day", "2026-09-10");
++  change("Activity end User Day (inclusive)", "2026-09-11");
++  click("Apply Activity period");
++  await waitFor(() =>
++    expect(a).toHaveBeenLastCalledWith(
++      expect.objectContaining({ startUserDayDate: "2026-09-10", endUserDayDate: "2026-09-11" }),
++    ),
++  );
++  expect(screen.getByLabelText("17 of 100 words; 17 percent")).toBeVisible();
++  expect(f.store.exportProgressObservationAuthority().observations).toHaveLength(1);
++});
++it.each([undefined, "0", "40", "100", "120", "99.999999"])(
++  "presents canonical value %s without invented zero, summation, clamp or false target attainment",
++  async (value) => {
++    const f = await basic(value);
++    await mount(f);
++    if (value === undefined) {
++      expect(screen.getByText("No current value recorded.")).toBeVisible();
++      expect(screen.queryByText("0%")).not.toBeInTheDocument();
++    } else {
++      expect(
++        screen.getByText(
++          value === "99.999999" ? "Below 100% (canonical percentage rounds to 100%)" : `${value}%`,
++          { selector: ".df-progress-percentage" },
++        ),
++      ).toBeVisible();
++      click("How this Progress was calculated");
++      expect(screen.getByText(f.definition.id + " / 1")).toBeVisible();
++    }
++  },
++);
++it("retains the cutoff on notification, resolves absolute backdated correction/retraction and epoch changes only canonically", async () => {
++  const f = await basic("17");
++  await mount(f);
++  const old = f.store.exportProgressObservationAuthority().observations[0]!;
++  vi.setSystemTime(new Date("2026-09-23T13:00:00.000Z"));
++  await act(async () => {
++    expect(
++      await f.store.createProgressObservation({
++        goalId: f.goal.id,
++        value: "20",
++        observedAt: "2026-09-23T12:30:00.000Z",
++        expectedDefinitionRevision: 1,
++      }),
++    ).toMatchObject({ status: "accepted" });
++  });
++  expect(screen.getByText("17%")).toBeVisible();
++  click("Refresh recorded evidence");
++  await screen.findByText("20%");
++  const current = f.store
++    .exportProgressObservationAuthority()
++    .observations.find((o) => o.id !== old.id)!;
++  vi.setSystemTime(new Date("2026-09-23T14:00:00.000Z"));
++  await act(async () => {
++    await f.store.correctProgressObservation({
++      id: current.id,
++      expectedRevision: 1,
++      value: "30",
++      observedAt: current.observedAt,
++    });
++  });
++  expect(screen.getByText("20%")).toBeVisible();
++  click("Refresh recorded evidence");
++  await screen.findByText("30%");
++  vi.setSystemTime(new Date("2026-09-23T15:00:00.000Z"));
++  await act(async () => {
++    await f.store.retractProgressObservation(current.id, 2);
++  });
++  click("Refresh recorded evidence");
++  await screen.findByText("17%");
++  vi.setSystemTime(new Date("2026-09-23T16:00:00.000Z"));
++  await act(async () => {
++    await f.store.reviseMeasurementDefinition(f.definition.id, 1, policy, {
++      targetValue: "200",
++      unitId: "pages",
++    });
++  });
++  expect(screen.getByText("17%")).toBeVisible();
++  click("Refresh recorded evidence");
++  await screen.findByText("No current value recorded.");
++  vi.setSystemTime(new Date("2026-09-23T17:00:00.000Z"));
++  await act(async () => {
++    await f.store.stopMeasuringGoal(f.definition.id, 2);
++  });
++  click("Refresh recorded evidence");
++  await screen.findByText("Measurement is currently stopped.");
++  vi.setSystemTime(new Date("2026-09-23T18:00:00.000Z"));
++  await act(async () => {
++    await f.store.restartMeasurement(f.definition.id, 3, policy, {
++      targetValue: "100",
++      unitId: "words",
++    });
++  });
++  click("Refresh recorded evidence");
++  await screen.findByText("No current value recorded.");
++});
++it("bounds valid historical rows and coverage, includes modern frozen Goal work and opens exact User Day across midnight", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  const m = render(
++    <GoalRecordedInspection
++      goal={f.goal}
++      store={f.store}
++      context={createGoalEditingContext()}
++      currentDay="2026-09-23"
++      now={() => new Date()}
++      onDay={vi.fn()}
++    />,
++  );
++  click("Inspect recorded Progress and Activity");
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  change("Activity start User Day", "2026-09-10");
++  change("Activity end User Day (inclusive)", "2026-09-11");
++  click("Apply Activity period");
++  await screen.findByRole("button", { name: "Scheduled: 13" });
++  click("Scheduled: 13");
++  expect(screen.getAllByRole("button", { name: "Open Activity day 2026-09-10" })).toHaveLength(10);
++  click("Show more Activity rows");
++  expect(screen.getAllByRole("button", { name: "Open Activity day 2026-09-10" })).toHaveLength(13);
++  expect(screen.getByText(/1 covered day has/)).toBeVisible();
++  expect(screen.getByText(/legacy unavailable/)).toBeVisible();
++  expect(screen.getByText("Linked intended occurrences: 16")).toBeVisible();
++  expect(screen.getByRole("button", { name: "Unplaced: 1" })).toBeVisible();
++  expect(screen.getByRole("button", { name: "Omitted: 1" })).toBeVisible();
++  expect(screen.getByRole("button", { name: "Blocked: 1" })).toBeVisible();
++  const before = await f.store.getGoalActivity({
++    goalId: f.goalId,
++    startUserDayDate: "2026-09-04",
++    endUserDayDate: "2026-09-05",
++    evaluationAsOf: new Date().toISOString(),
++    policy: {
++      id: "goalActivityPolicy",
++      version: 1,
++      historicalPolicy: { id: "historicalMetricPolicy", version: 1 },
++    },
++  });
++  expect(before).toMatchObject({
++    provenance: {
++      linked: expect.arrayContaining([
++        expect.objectContaining({ sourceFamily: "acceptedAllocation" }),
++      ]),
++    },
++  });
++  m.unmount();
++});
++it("isolates delayed Goal/range/owner success and failure; Activity failure does not erase Progress", async () => {
++  const f = await basic("17");
++  let reject!: (e: Error) => void;
++  const original = f.store.getGoalActivity;
++  vi.spyOn(f.store, "getGoalActivity").mockImplementationOnce(
++    () =>
++      new Promise((_r, r) => {
++        reject = r;
++      }),
++  );
++  const props = {
++    goal: f.goal,
++    store: f.store,
++    context: createGoalEditingContext(),
++    currentDay: "2026-09-23",
++    now: () => new Date(),
++    onDay: vi.fn(),
++  };
++  const m = render(<GoalRecordedInspection {...props} />);
++  click("Inspect recorded Progress and Activity");
++  await waitFor(() => expect(reject).toBeDefined());
++  change("Activity start User Day", "2026-09-10");
++  click("Apply Activity period");
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  await act(async () => reject(Error("old range")));
++  expect(screen.queryByText(/could not be loaded/)).not.toBeInTheDocument();
++  vi.spyOn(f.store, "getGoalActivity").mockRejectedValueOnce(Error("current failure"));
++  click("Refresh recorded evidence");
++  await screen.findByText(/Goal Activity could not be loaded/);
++  expect(screen.getByText("17%")).toBeVisible();
++  vi.spyOn(f.store, "getGoalActivity").mockImplementation(original);
++  const g = await f.store.createGoal({ title: "B" });
++  if (g.status !== "accepted") throw Error("B");
++  let resolve!: (v: GoalActivityQueryResultV1) => void;
++  vi.spyOn(f.store, "getGoalActivity").mockImplementationOnce(
++    () =>
++      new Promise((r) => {
++        resolve = r;
++      }),
++  );
++  click("Refresh recorded evidence");
++  await waitFor(() => expect(resolve).toBeDefined());
++  m.rerender(<GoalRecordedInspection {...props} goal={g.goal} />);
++  click("Inspect recorded Progress and Activity");
++  await screen.findByText("No quantity measurement configured.");
++  await act(async () =>
++    resolve(
++      await original({
++        goalId: f.goal.id,
++        startUserDayDate: "2026-09-01",
++        endUserDayDate: "2026-09-30",
++        evaluationAsOf: new Date().toISOString(),
++        policy: {
++          id: "goalActivityPolicy",
++          version: 1,
++          historicalPolicy: { id: "historicalMetricPolicy", version: 1 },
++        },
++      }),
++    ),
++  );
++  expect(screen.queryByText("17%")).not.toBeInTheDocument();
++});
++async function openApp(f: Awaited<ReturnType<typeof goalRecordedCanonicalFixture>>) {
++  render(<DayFrameApp store={f.store} getNow={() => new Date()} />);
++  click("Goals");
++  fireEvent.click(await screen.findByRole("button", { name: /Recorded evidence Goal/ }));
++  fireEvent.click(
++    await screen.findByRole("button", { name: "Inspect recorded Progress and Activity" }),
++  );
++  await screen.findByText(/Policy: goalActivityPolicy/);
++}
++it("real reporting and Daily Planner return preserve independent drafts and refresh only canonical evidence", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  vi.setSystemTime(new Date("2026-09-23T13:00:00.000Z"));
++  await openApp(f);
++  const inspector = () =>
++    within(screen.getByRole("region", { name: "Recorded Progress and Activity" }));
++  change("Requested Time hours", "7");
++  click("Edit Goal");
++  change("Goal title", "Unwritten Goal draft");
++  click("Open Structure");
++  await screen.findByRole("button", { name: "Create Milestone" });
++  click("Create Milestone");
++  change("Milestone title", "Unwritten checkpoint");
++  click("Open Measurement controls");
++  expect(screen.getByRole("heading", { name: "Measurement" })).toHaveFocus();
++  click("Change Measurement");
++  change("Quantity target", "555");
++  click("Open value reporting and correction history");
++  click("Record New Value");
++  change("Current value", "25");
++  click("Return to recorded inspection");
++  expect(screen.getByLabelText("Current value")).toHaveValue("25");
++  expect(screen.getByLabelText("Quantity target")).toHaveValue("555");
++  click(/Open related Goal:/);
++  await screen.findByRole("button", { name: "Back to previous Goal and drafts" });
++  click("Back to previous Goal and drafts");
++  await screen.findByLabelText("Current value");
++  expect(screen.getByLabelText("Current value")).toHaveValue("25");
++  expect(screen.getByLabelText("Quantity target")).toHaveValue("555");
++  const record = vi.spyOn(f.store, "createProgressObservation");
++  click("Record Value");
++  await screen.findByText("Value recorded.");
++  click("Refresh recorded evidence");
++  await waitFor(() => expect(inspector().getByText("25%")).toBeVisible());
++  expect(record).toHaveBeenCalledTimes(1);
++  change("Activity start User Day", "2026-09-10");
++  change("Activity end User Day (inclusive)", "2026-09-11");
++  click("Apply Activity period");
++  await screen.findByRole("button", { name: "Scheduled: 13" });
++  click("Scheduled: 13");
++  click("Show more Activity rows");
++  const progress = f.store.exportProgressObservationAuthority();
++  const planned = f.store.exportGoalPlanningAuthority();
++  fireEvent.click(screen.getAllByRole("button", { name: "Open Activity day 2026-09-10" })[0]!);
++  await screen.findByRole("heading", { name: /Day agenda/ });
++  fireEvent.click(
++    (await screen.findAllByRole("button", { name: /Details: Historical linked work 00/ }))[0]!,
++  );
++  click("Report outcome");
++  click("Save outcome");
++  await waitFor(() => expect(f.store.getExecutionHistory().length).toBeGreaterThan(1));
++  click("Back");
++  await screen.findByRole("button", { name: "Scheduled: 13" });
++  await waitFor(() =>
++    expect(screen.getByRole("heading", { name: "Recorded Progress and Activity" })).toHaveFocus(),
++  );
++  expect(screen.getAllByRole("button", { name: "Open Activity day 2026-09-10" })).toHaveLength(13);
++  expect(await screen.findByRole("button", { name: "Reported completed: 1" })).toBeVisible();
++  expect(inspector().getByText("25%")).toBeVisible();
++  expect(screen.getByLabelText("Goal title")).toHaveValue("Unwritten Goal draft");
++  expect(screen.getByLabelText("Milestone title")).toHaveValue("Unwritten checkpoint");
++  expect(screen.getByLabelText("Quantity target")).toHaveValue("555");
++  expect(f.store.exportProgressObservationAuthority()).toEqual(progress);
++  expect(f.store.exportGoalPlanningAuthority()).toEqual(planned);
++  click("Open value reporting and correction history");
++  fireEvent.click(screen.getAllByRole("button", { name: /Correct record: 25/ })[0]!);
++  change("Current value", "30");
++  vi.setSystemTime(new Date("2026-09-23T14:00:00.000Z"));
++  click("Save Correction");
++  await screen.findByText("Correction saved.");
++  click("Return to recorded inspection");
++  await waitFor(() => expect(inspector().getByText("30%")).toBeVisible());
++  expect(await screen.findByRole("button", { name: "Reported completed: 1" })).toBeVisible();
++  click("Open value reporting and correction history");
++  fireEvent.click(screen.getAllByRole("button", { name: /Remove invalid record: 30/ })[0]!);
++  vi.setSystemTime(new Date("2026-09-23T15:00:00.000Z"));
++  click("Remove Invalid Record");
++  await screen.findByText("Invalid record removed from current measurement history.");
++  click("Return to recorded inspection");
++  await waitFor(() => expect(inspector().getByText("17%")).toBeVisible());
++  expect(await screen.findByRole("button", { name: "Reported completed: 1" })).toBeVisible();
++}, 20000);
++it("rejected V14 import retains all new contexts; complete restore and clear invalidate them; profile is independent", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  await openApp(f);
++  click("How this Progress was calculated");
++  click("Record New Value");
++  change("Current value", "88");
++  click("Change Measurement");
++  change("Quantity target", "555");
++  await act(async () => {
++    f.store.loadProfile(f.store.getState().savedProfiles[0]!.id);
++  });
++  expect(screen.getByLabelText("Current value")).toHaveValue("88");
++  expect(screen.getByLabelText("Quantity target")).toHaveValue("555");
++  const upload = async (text: string) => {
++    await act(async () => {
++      fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
++        target: { files: [{ text: async () => text }] },
++      });
++    });
++  };
++  await upload("{bad");
++  await screen.findByText(/Backup file is not valid JSON/);
++  expect(screen.getByLabelText("Current value")).toHaveValue("88");
++  const original = f.store.importBackupFile;
++  let done!: () => void;
++  const completion = new Promise<void>((r) => {
++    done = r;
++  });
++  vi.spyOn(f.store, "importBackupFile").mockImplementationOnce(async (input) => {
++    try {
++      return await original(input);
++    } finally {
++      done();
++    }
++  });
++  await act(async () => {
++    await upload(JSON.stringify(f.backup));
++    await completion;
++  });
++  await screen.findByText(/Complete backup restored across setup/);
++  click("Goals");
++  fireEvent.click(await screen.findByRole("button", { name: /Recorded evidence Goal/ }));
++  expect(screen.queryByLabelText("Current value")).not.toBeInTheDocument();
++  expect(screen.queryByLabelText("Quantity target")).not.toBeInTheDocument();
++  expect(screen.queryByText("Measurement details")).not.toBeInTheDocument();
++  fireEvent.click(
++    await screen.findByRole("button", { name: "Inspect recorded Progress and Activity" }),
++  );
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  click("Clear Local Data");
++  click("Confirm Clear Local Data");
++  await screen.findByText("Local DayFrame setup data cleared from this device.");
++  click("Goals");
++  expect(
++    screen.queryByRole("region", { name: "Recorded Progress and Activity" }),
++  ).not.toBeInTheDocument();
++}, 20000);
++it("known empty, missing plan, frozen membership and multi-Goal evidence remain distinct after current edits", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  const context = createGoalEditingContext();
++  render(
++    <GoalRecordedInspection
++      goal={f.goal}
++      store={f.store}
++      context={context}
++      currentDay="2026-09-23"
++      now={() => new Date()}
++      onDay={vi.fn()}
++    />,
++  );
++  click("Inspect recorded Progress and Activity");
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  change("Activity start User Day", "2026-09-11");
++  change("Activity end User Day (inclusive)", "2026-09-11");
++  click("Apply Activity period");
++  await screen.findByText("No Goal-linked activity was recorded in this range.");
++  expect(screen.getByRole("button", { name: "Scheduled: 0" })).toBeVisible();
++  change("Activity start User Day", "2026-09-12");
++  change("Activity end User Day (inclusive)", "2026-09-12");
++  click("Apply Activity period");
++  await waitFor(() =>
++    expect(screen.queryByRole("button", { name: "Scheduled: 0" })).not.toBeInTheDocument(),
++  );
++  expect(
++    screen.queryByText("No Goal-linked activity was recorded in this range."),
++  ).not.toBeInTheDocument();
++  const q = {
++    goalId: f.goal.id,
++    startUserDayDate: "2026-09-10" as const,
++    endUserDayDate: "2026-09-10" as const,
++    evaluationAsOf: new Date().toISOString(),
++    policy: {
++      id: "goalActivityPolicy",
++      version: 1,
++      historicalPolicy: { id: "historicalMetricPolicy", version: 1 },
++    } as const,
++  };
++  const before = await f.store.getGoalActivity(q);
++  const observations = f.store.exportProgressObservationAuthority();
++  await act(async () => {
++    await f.store.updateGoal(f.goal.id, f.goal.revision, { title: "Renamed current Goal" });
++    const g = f.store.getGoal(f.goal.id)!;
++    await f.store.unlinkCommitment(g.id, g.revision, g.links[0]!);
++    const milestone = await f.store.createMilestone({
++      ownerGoalId: g.id,
++      title: "Manual checkpoint",
++    });
++    if (milestone.status !== "accepted") throw Error("milestone");
++    await f.store.reviseMilestone(milestone.value.id, milestone.value.revision, {
++      state: "satisfied",
++    });
++  });
++  const after = await f.store.getGoalActivity(q);
++  expect(after).toMatchObject({
++    provenance: "provenance" in before ? before.provenance : undefined,
++  });
++  expect(f.store.exportProgressObservationAuthority()).toEqual(observations);
++  const child = f.store.listGoals().find((g) => g.id !== f.goal.id)!;
++  expect(await f.store.getGoalActivity({ ...q, goalId: child.id })).toMatchObject({
++    planningDistribution: { linkedIntendedOccurrenceCount: 16 },
++  });
++});
++it("a replaced owner/context cannot receive an old Activity continuation", async () => {
++  const f = await basic("17");
++  const original = f.store.getGoalActivity;
++  let resolve!: (r: GoalActivityQueryResultV1) => void;
++  vi.spyOn(f.store, "getGoalActivity").mockImplementationOnce(
++    () =>
++      new Promise((r) => {
++        resolve = r;
++      }),
++  );
++  const context = createGoalEditingContext(),
++    props = {
++      goal: f.goal,
++      store: f.store,
++      context,
++      currentDay: "2026-09-23",
++      now: () => new Date(),
++      onDay: vi.fn(),
++    };
++  const m = render(<GoalRecordedInspection {...props} />);
++  click("Inspect recorded Progress and Activity");
++  await waitFor(() => expect(resolve).toBeDefined());
++  context.invalidate();
++  const next = createGoalEditingContext();
++  const replacement = createDayFrameStore();
++  await replacement.whenReady();
++  m.rerender(<GoalRecordedInspection {...props} store={replacement} context={next} />);
++  await act(async () =>
++    resolve(
++      await original({
++        goalId: f.goal.id,
++        startUserDayDate: "2026-09-01",
++        endUserDayDate: "2026-09-30",
++        evaluationAsOf: new Date().toISOString(),
++        policy: {
++          id: "goalActivityPolicy",
++          version: 1,
++          historicalPolicy: { id: "historicalMetricPolicy", version: 1 },
++        },
++      }),
++    ),
++  );
++  expect(screen.queryByText("17%")).not.toBeInTheDocument();
++  expect(screen.queryByText(/Policy: goalActivityPolicy/)).not.toBeInTheDocument();
++});
++it.each(["goalProtected", "definitionProtected", "observationProtected"] as const)(
++  "%s immediately replaces cached Progress while Activity remains independently readable",
++  async (status) => {
++    const f = await basic("17");
++    const m = await mount(f);
++    vi.spyOn(f.store, "queryGoalProgress").mockImplementation((q) => ({
++      status,
++      reason: "invalidAuthority",
++      query: q,
++    }));
++    click("Refresh recorded evidence");
++    await screen.findByText(/unavailable until stored data can be recovered/);
++    expect(screen.queryByText("17%")).not.toBeInTheDocument();
++    await screen.findByText(/Policy: goalActivityPolicy/);
++    m.unmount();
++  },
++);
++it("Structure-only temporal protection does not suppress independent Progress or Activity", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  const backup = structuredClone(f.backup),
++    row = backup.data.goalStructure.relationships[0]!;
++  backup.data.goalStructure.relationships.push({
++    ...row,
++    revision: 2 as never,
++    status: "retired",
++    effectiveTo: "2026-09-01T00:00:00.000Z",
++    updatedAt: "2026-09-01T00:00:00.000Z",
++  });
++  expect(await f.store.importBackupFile(backup)).toMatchObject({ status: "restoredV14" });
++  await openApp(f);
++  expect(
++    within(screen.getByRole("region", { name: "Recorded Progress and Activity" })).getByText("17%"),
++  ).toBeVisible();
++  expect(screen.getByText(/Policy: goalActivityPolicy/)).toBeVisible();
++});
++it("execution protection invalidates cached counts immediately but keeps canonical planning and measured Progress", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  let notify!: () => void;
++  vi.spyOn(f.store, "subscribeExecutionHistoryIngress").mockImplementation((listener) => {
++    notify = () =>
++      listener({ status: "recoveryRequired", reason: "corruptJson", sourcePreserved: true });
++    return () => true;
++  });
++  render(
++    <GoalRecordedInspection
++      goal={f.goal}
++      store={f.store}
++      context={createGoalEditingContext()}
++      currentDay="2026-09-23"
++      now={() => new Date()}
++      onDay={vi.fn()}
++    />,
++  );
++  click("Inspect recorded Progress and Activity");
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  const protectedQuery = createGoalActivityQuery({
++    historicalPlan: f.store,
++    goals: f.store,
++    executionHistory: {
++      getExecutionHistory: f.store.getExecutionHistory,
++      getExecutionHistoryIngressStatus: () => ({
++        status: "recoveryRequired",
++        reason: "corruptJson",
++        sourcePreserved: true,
++      }),
++    },
++  });
++  vi.spyOn(f.store, "getGoalActivity").mockImplementation(protectedQuery);
++  act(() => notify());
++  expect(
++    screen.queryByRole("group", { name: "Execution Goal Activity counts" }),
++  ).not.toBeInTheDocument();
++  await screen.findByText(
++    /Planning activity is available, but reported outcomes cannot be interpreted/,
++  );
++  expect(screen.getByText("17%")).toBeVisible();
++  expect(screen.getByRole("group", { name: "Planning Goal Activity counts" })).toBeVisible();
++});
++it("defaults from the canonical User Day across midnight rather than the civil month", async () => {
++  const f = await basic();
++  const a = vi.spyOn(f.store, "getGoalActivity");
++  const instant = new Date(2026, 8, 1, 1, 0, 0);
++  f.store.commitAuthoredSetup({
++    ...f.store.getState(),
++    schedulingPreferences: { dayBoundaryStartTime: "03:00", weekStartsOn: "monday" },
++  });
++  render(
++    <GoalRecordedInspection
++      goal={f.goal}
++      store={f.store}
++      context={createGoalEditingContext()}
++      currentDay={(at) => currentPlannerView(f.store.getState(), at).selectedLabel}
++      now={() => instant}
++      onDay={vi.fn()}
++    />,
++  );
++  expect(a).not.toHaveBeenCalled();
++  click("Inspect recorded Progress and Activity");
++  await waitFor(() =>
++    expect(a).toHaveBeenCalledWith(
++      expect.objectContaining({
++        startUserDayDate: "2026-08-01",
++        endUserDayDate: "2026-08-31",
++        evaluationAsOf: instant.toISOString(),
++      }),
++    ),
++  );
++});
++it("Summary handoff honors an independent Activity period and returns to preserved Summary selection, cutoff and provenance", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  render(<DayFrameApp store={f.store} getNow={() => new Date()} />);
++  click("Summary");
++  await screen.findByLabelText("History start date");
++  change("History start date", "2026-09-10");
++  change("History end date", "2026-09-11");
++  click("Update history");
++  await screen.findByLabelText("Goal");
++  change("Goal", f.goalId);
++  await screen.findByText("17%");
++  click("How this Progress was calculated");
++  const query = vi.spyOn(f.store, "queryGoalProgress");
++  click("Inspect this Goal");
++  fireEvent.click(
++    await screen.findByRole("button", { name: "Inspect recorded Progress and Activity" }),
++  );
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  expect(screen.getByLabelText("Activity start User Day")).toHaveValue("2026-09-10");
++  expect(screen.getByLabelText("Activity end User Day (inclusive)")).toHaveValue("2026-09-11");
++  change("Activity start User Day", "2026-09-11");
++  click("Apply Activity period");
++  await screen.findByText("No Goal-linked activity was recorded in this range.");
++  vi.setSystemTime(new Date("2026-09-24T12:00:00.000Z"));
++  click("Back");
++  await screen.findByLabelText("Goal");
++  expect(screen.getByLabelText("Goal")).toHaveValue(f.goalId);
++  expect(screen.getByLabelText("History start date")).toHaveValue("2026-09-10");
++  expect(screen.getByLabelText("History end date")).toHaveValue("2026-09-11");
++  await screen.findByText("Measurement details");
++  expect(query).toHaveBeenLastCalledWith({
++    goalId: f.goalId,
++    evaluationAsOf: "2026-09-23T12:00:00.000Z",
++  });
++}, 20000);
++it("preserves an unsupported definition through actual V14 import without inventing a measured value", async () => {
++  const f = await basic();
++  const exported = await f.store.exportBackupV14(new Date().toISOString());
++  if (exported.status !== "exported") throw Error("export");
++  const definition = exported.backup.data.measurementDefinitions.definitions[0]!;
++  definition.policyRef = { id: "futureMeasurement", version: 1 };
++  definition.config = { target: "uninterpreted" };
++  definition.fingerprint = definitionSemanticFingerprint(definition);
++  expect(await f.store.importBackupFile(exported.backup)).toMatchObject({ status: "restoredV14" });
++  await mount(f);
++  expect(
++    screen.getByText("This measurement method is not supported by this version of DayFrame."),
++  ).toBeVisible();
++  expect(screen.queryByText("0%")).not.toBeInTheDocument();
++});
++it.each(["goalProtected", "definitionProtected", "observationProtected"] as const)(
++  "%s initialization is loading rather than absence or recorded zero",
++  async (status) => {
++    const f = await basic();
++    vi.spyOn(f.store, "queryGoalProgress").mockImplementation((query) => ({
++      status,
++      reason: "initializing",
++      query,
++    }));
++    await mount(f);
++    expect(screen.getByText("Loading Progress…")).toBeVisible();
++    expect(screen.queryByText("No current value recorded.")).not.toBeInTheDocument();
++  },
++);
++it("a Progress query or definition-history failure stays local to Progress", async () => {
++  const f = await basic("17");
++  await mount(f);
++  vi.spyOn(f.store, "queryGoalProgress").mockImplementation(() => {
++    throw Error("controlled query failure");
++  });
++  click("Refresh recorded evidence");
++  await screen.findByText(/Progress could not be loaded/);
++  await screen.findByText(/Policy: goalActivityPolicy/);
++});
++it("completed-below-target and active-at-target remain independent current Goal facts", async () => {
++  const f = await basic("40");
++  await f.store.completeGoal(f.goal.id, f.goal.revision);
++  f.goal = f.store.getGoal(f.goal.id)!;
++  await mount(f);
++  expect(screen.getByText("40%")).toBeVisible();
++  expect(f.store.getGoal(f.goal.id)?.status).toBe("completed");
++});
++it("canonical completed, partial, skipped, withdrawn and never-reported categories retain separate counts", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  const day = await f.store.querySelectedDayEvidence({
++    ownerDay: "2026-09-10",
++    asOf: new Date().toISOString(),
++  });
++  if (day.status !== "projected" || day.published.status !== "available") throw Error("day");
++  for (const [n, outcome] of ["completed", "partial", "skipped", "completed"].entries()) {
++    const item = day.published.value
++      .flatMap((p) => p.items)
++      .find((i) => i.snapshot.title === `Historical linked work 0${n}`)!;
++    if (item.reporting.status !== "targetAvailable" || !("reference" in item.reporting.target))
++      throw Error("report target");
++    const built = buildExecutionReportInput(item.reporting.target, {
++      outcome: outcome as "completed" | "partial" | "skipped",
++      occurredAtLocal: "",
++      durationMinutes: "",
++      note: "",
++    });
++    if (built.status !== "valid") throw Error(built.message);
++    const result = f.store.recordExecution(built.input);
++    if (result.status !== "accepted") throw Error(JSON.stringify(result));
++    if (n === 3)
++      expect(
++        f.store.retractExecutionRecord(result.record.subjectId, result.record.id),
++      ).toMatchObject({ status: "accepted" });
++  }
++  render(
++    <GoalRecordedInspection
++      goal={f.goal}
++      store={f.store}
++      context={createGoalEditingContext()}
++      currentDay="2026-09-23"
++      navigationRange={{ start: "2026-09-10", end: "2026-09-11" }}
++      now={() => new Date()}
++      onDay={vi.fn()}
++    />,
++  );
++  click("Inspect recorded Progress and Activity");
++  for (const name of [
++    "Reported completed: 1",
++    "Partial: 1",
++    "Skipped: 1",
++    "Unknown: 1",
++    "Not reported: 9",
++  ])
++    expect(await screen.findByRole("button", { name })).toBeVisible();
++  expect(screen.getByText("17%")).toBeVisible();
++  expect(screen.getByText("Linked scheduled occurrences: 13")).toBeVisible();
++});
++it("a 24-Goal catalog does not fan out inspection queries", async () => {
++  const f = await basic("17");
++  for (let n = 0; n < 23; n++) await f.store.createGoal({ title: `Other ${n}` });
++  const progress = vi.spyOn(f.store, "queryGoalProgress"),
++    activity = vi.spyOn(f.store, "getGoalActivity");
++  render(<DayFrameApp store={f.store} />);
++  click("Goals");
++  await screen.findByRole("button", { name: /Measured Goal/ });
++  expect(progress).not.toHaveBeenCalled();
++  expect(activity).not.toHaveBeenCalled();
++  click(/Measured Goal/);
++  fireEvent.click(
++    await screen.findByRole("button", { name: "Inspect recorded Progress and Activity" }),
++  );
++  await screen.findByText(/Policy: goalActivityPolicy/);
++  expect(new Set(progress.mock.calls.map(([q]) => q.goalId))).toEqual(new Set([f.goal.id]));
++  expect(new Set(activity.mock.calls.map(([q]) => q.goalId))).toEqual(new Set([f.goal.id]));
++});
++it("aborted coordinator work preserves drafts; recovery-required readiness removes the open inspector", async () => {
++  const f = await goalRecordedCanonicalFixture();
++  await openApp(f);
++  click("Record New Value");
++  change("Current value", "88");
++  const runtime = getDayFrameRuntimeAuthorityController(
++    f.store,
++    DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++  );
++  await act(async () => {
++    runtime.begin("restore");
++    runtime.abort();
++  });
++  expect(screen.getByLabelText("Current value")).toHaveValue("88");
++  expect(screen.getByRole("region", { name: "Recorded Progress and Activity" })).toBeVisible();
++  vi.spyOn(runtime, "install").mockReturnValue({ status: "installFailed" });
++  const original = f.store.importBackupFile;
++  let finish!: () => void;
++  const completed = new Promise<void>((resolve) => {
++    finish = resolve;
++  });
++  vi.spyOn(f.store, "importBackupFile").mockImplementationOnce(async (data) => {
++    try {
++      return await original(data);
++    } finally {
++      finish();
++    }
++  });
++  await act(async () => {
++    fireEvent.change(screen.getByLabelText("Import Setup Backup File"), {
++      target: { files: [{ text: async () => JSON.stringify(f.backup) }] },
++    });
++    await completed;
++  });
++  expect(f.store.getReadiness().status).toBe("protected");
++  expect(
++    screen.queryByRole("region", { name: "Recorded Progress and Activity" }),
++  ).not.toBeInTheDocument();
++  expect(screen.queryByLabelText("Current value")).not.toBeInTheDocument();
++});
+--- /dev/null
++++ task-9.28/code/src/ui/tests/goalRecordedCanonicalFixture.ts
+@@ -0,0 +1,86 @@
++import type { SourceIncarnationId } from "../../core/authored/sourceIncarnation.js";
++import { v14RestoreFixture } from "./v14RestoreFixture.js";
++import type {
++  PlanPublicationBatchV1,
++  HistoricalPlannedOccurrenceSnapshot,
++} from "../../core/historicalPlan/historicalPlan.js";
++import { validatePlanPublicationBatch } from "../../core/historicalPlan/historicalPlanValidation.js";
++/** Validated historical fixture, not an authoring/persistence or storage-performance simulation. */
++export async function goalRecordedCanonicalFixture() {
++  const f = await v14RestoreFixture("Recorded evidence Goal");
++  const backup = structuredClone(f.backup);
++  const frozen = {
++    version: 1 as const,
++    goalId: f.goalId,
++    goalRevision: 1,
++    title: "Original frozen name",
++    status: "active" as const,
++  };
++  const occurrences: HistoricalPlannedOccurrenceSnapshot[] = Array.from({ length: 29 }, (_, n) => ({
++    version: 1,
++    reference: {
++      version: 1,
++      sourceKind: "manualEvent",
++      manualEvent: {
++        id: `evidence-${n}`,
++        incarnationId:
++          `00000000-0000-4000-8000-${String(n + 1).padStart(12, "0")}` as SourceIncarnationId,
++      },
++    },
++    sourceFamily: "manualEvent",
++    title: `Historical linked work ${String(n).padStart(2, "0")}`,
++    category: "work",
++    plan:
++      n < 13
++        ? {
++            state: "scheduled",
++            startsAt: new Date(Date.parse("2026-09-11T06:00:00.000Z") + n * 60000).toISOString(),
++            endsAt: new Date(
++              Date.parse("2026-09-11T06:00:00.000Z") + (n + 1) * 60000,
++            ).toISOString(),
++          }
++        : { state: n === 13 ? "unplaced" : n === 14 ? "omitted" : "blocked" },
++    ...(n === 28
++      ? {}
++      : {
++          goals:
++            n < 16
++              ? [
++                  frozen,
++                  { ...frozen, goalId: backup.data.goals.goals.find((g) => g.id !== f.goalId)!.id },
++                ]
++              : [],
++        }),
++  }));
++  const batch: PlanPublicationBatchV1 = {
++    version: 1,
++    surfaceVersion: 1,
++    id: "99999999-9999-4999-8999-999999999928" as PlanPublicationBatchV1["id"],
++    publishedAt: new Date().toISOString(),
++    range: { startUserDayDate: "2026-09-10", endUserDayDate: "2026-09-11" },
++    days: [
++      {
++        version: 1,
++        userDayDate: "2026-09-10",
++        dayBoundaryStartTime: "03:00",
++        weekStartsOn: "monday",
++        utcOffsetMinutes: -300,
++        occurrences,
++      },
++      {
++        version: 1,
++        userDayDate: "2026-09-11",
++        dayBoundaryStartTime: "03:00",
++        weekStartsOn: "monday",
++        utcOffsetMinutes: -300,
++        occurrences: [],
++      },
++    ],
++  };
++  const checked = validatePlanPublicationBatch(batch);
++  if (checked.status !== "valid") throw Error(JSON.stringify(checked));
++  backup.data.historicalPlan.batches.push(checked.batch);
++  const imported = await f.store.importBackupFile(backup);
++  if (imported.status !== "restoredV14") throw Error(JSON.stringify(imported));
++  return { ...f, backup, goal: f.store.getGoal(f.goalId)! };
++}

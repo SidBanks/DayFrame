@@ -187,6 +187,23 @@ export function evaluateDemandProjectionFreshness(
   },
 ): PlanningFreshnessV1 {
   if (!input) return evaluatePlanningFreshness({ dependencyKind: "goal.demandProjection" });
+  const reprojected = projectDemand({
+    demand: input.demand,
+    goal: input.goal,
+    structuralEligibility: input.structuralEligibility,
+    coverage: projection.coverage,
+  });
+  if (reprojected.semanticId !== projection.semanticId)
+    return {
+      status: "stale",
+      reasons: [
+        {
+          version: 1,
+          code: "freshness.dependencyMismatch",
+          dependencyKind: "goal.demandProjection",
+        },
+      ],
+    };
   const current = fingerprintDependencies([
     demandDependency(input.demand),
     goalDependency(input.goal),

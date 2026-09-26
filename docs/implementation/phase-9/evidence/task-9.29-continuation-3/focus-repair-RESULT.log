@@ -1,0 +1,13 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/GoalAcceptedPlanning.test.tsx src/ui/tests/GoalInspectionNavigation.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  19:38:23
+   Duration  9.23s (transform 1.92s, setup 0ms, import 1.80s, tests 6.22s, environment 1.02s)
+

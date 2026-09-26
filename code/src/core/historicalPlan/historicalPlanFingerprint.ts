@@ -1,3 +1,4 @@
+import { publishedSleepSemanticValue } from "../sleep/publishedSleep.js";
 import {
   cloneDurableOccurrenceReference,
   type DurableOccurrenceReference,
@@ -10,6 +11,7 @@ import {
 } from "./historicalPlan.js";
 
 export function durableReferenceKey(reference: DurableOccurrenceReference): string {
+  if (reference.sourceKind === "sleepRequirement") return stable(reference);
   if (reference.sourceKind === "acceptedAllocation")
     return stable({
       version: reference.version,
@@ -50,6 +52,7 @@ export function durableReferenceKey(reference: DurableOccurrenceReference): stri
 export function historicalPlanSnapshotFingerprint(
   snapshot: HistoricalPlannedOccurrenceSnapshot,
 ): string {
+  if (snapshot.version === 4) return stable(publishedSleepSemanticValue(snapshot));
   return stable({
     version: snapshot.version,
     reference: cloneDurableOccurrenceReference(snapshot.reference),
@@ -78,6 +81,7 @@ export function historicalPlanDayFingerprint(day: HistoricalPlanDayPublicationV1
   return stable({
     version: day.version,
     userDayDate: day.userDayDate,
+    ...(day.version === 2 ? { sleepCoverage: day.sleepCoverage } : {}),
     dayBoundaryStartTime: day.dayBoundaryStartTime,
     weekStartsOn: day.weekStartsOn,
     utcOffsetMinutes: day.utcOffsetMinutes,
@@ -139,4 +143,22 @@ function stable(value: unknown): string {
       .map(([key, item]) => `${JSON.stringify(key)}:${stable(item)}`)
       .join(",")}}`;
   return JSON.stringify(value);
+}
+
+/** Physical verification includes all frozen evidence, even scope-only provenance excluded from equivalence. */
+export function historicalPlanDayStorageFingerprint(day: HistoricalPlanDayPublicationV1): string {
+  const sleep = day.occurrences.filter((snapshot) => snapshot.version === 4).sort(compareSnapshots);
+  return sleep.length
+    ? stable({ semantic: historicalPlanDayFingerprint(day), sleep })
+    : historicalPlanDayFingerprint(day);
+}
+export function historicalPlanBatchStorageFingerprint(batch: PlanPublicationBatchV1): string {
+  return batch.days.some((day) => day.occurrences.some((snapshot) => snapshot.version === 4))
+    ? stable({
+        semantic: historicalPlanBatchFingerprint(batch),
+        days: [...batch.days]
+          .sort((a, b) => a.userDayDate.localeCompare(b.userDayDate))
+          .map(historicalPlanDayStorageFingerprint),
+      })
+    : historicalPlanBatchFingerprint(batch);
 }

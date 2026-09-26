@@ -68,6 +68,9 @@ export function createGoalPlanningSurface(options: {
   getGoal: (id: GoalId) => GoalV1 | undefined;
   listGoals: () => GoalV1[];
   getStructuralEligibility: (id: GoalId) => StructuralEligibilityV1;
+  queryGoalStructure?: (
+    input: import("../core/planning/goalStructureTemporal.js").StructureEvaluationInput,
+  ) => import("../core/planning/goalStructureTemporal.js").StructureQueryResult;
   getUserDayResolver: () => CanonicalUserDayResolverInput;
   allocateId?: () => PlanningFactId;
   now?: () => string;
@@ -512,7 +515,12 @@ export function createGoalPlanningSurface(options: {
       resolveDemandRevision(authority, id, revision),
     getGoalPriorityRevision: (id: PlanningFactId, revision: number) =>
       resolvePriorityRevision(authority, id, revision),
-    projectGoalDemand: async (id: PlanningFactId, revision?: number) => {
+    projectGoalDemand: async (
+      id: PlanningFactId,
+      revision?: number,
+      evaluationInstant?: string,
+    ) => {
+      const at = evaluationInstant ?? now();
       const { queryGoalDemandProjection } = await import("./goalDemandProjectionQuery.js");
       return queryGoalDemandProjection({
         authority,
@@ -520,6 +528,8 @@ export function createGoalPlanningSurface(options: {
         ...(revision === undefined ? {} : { revision }),
         getGoal: options.getGoal,
         getStructuralEligibility: options.getStructuralEligibility,
+        ...(options.queryGoalStructure ? { queryGoalStructure: options.queryGoalStructure } : {}),
+        evaluationInstant: at,
         getUserDayResolver: options.getUserDayResolver,
       });
     },

@@ -1,0 +1,233 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ReviewReturnFocus.test.tsx (4 tests | 1 failed) 3147ms
+   × returns focus after closing the in-place Event editor without saving 1302ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ReviewReturnFocus.test.tsx > returns focus after closing the in-place Event editor without saving
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  aria-label="Add event to Thursday, 2026-09-17"
+  class="df-secondary-button"
+  data-review-return="add-event:2026-09-17"
+  data-review-section="schedule-friction-heading"
+  type="button"
+>
+  Add Event
+</button>
+Received element with focus:
+  <body>
+  <div>
+    <div
+      class="df-app"
+    >
+      <div
+        class="df-shell"
+      >
+        <header
+          class="df-foundation-header"
+        >
+          <strong … />
+          <nav … />
+          <div … />
+        </header>
+        <div
+          class="df-foundation-support"
+        >
+          <div … />
+        </div>
+        <main
+          aria-labelledby="planner-heading"
+          class="df-product-surface"
+        >
+          <section … />
+          <div … />
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-app"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-shell"[39m
+        [36m>[39m
+          [36m<header[39m
+            [33mclass[39m=[32m"df-foundation-header"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mDayFrame[0m
+            [36m</strong>[39m
+            [36m<nav[39m
+              [33maria-label[39m=[32m"App Sections"[39m
+              [33mclass[39m=[32m"df-foundation-primary"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"true"[39m
+                [33mclass[39m=[32m"df-secondary-button"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mPlanner[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-pressed[39m=[32m"false"[39m
+                [33mclass[39m=[32m"df-secondary-button"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mSummary[0m
+              [36m</button>[39m
+            [36m</nav>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-foundation-location"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"df-foundation-location-title"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mPlanner / Review Schedule[0m
+              [36m</h2>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"df-secondary-button"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mBack[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</header>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-support"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-foundation-support-content"[39m
+            [36m>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"df-foundation-utilities"[39m
+              [36m>[39m
+                [36m<summary>[39m
+                  [0mSettings and data[0m
+                [36m</summary>[39m
+                [36m<section[39m
+                  [33mclass[39m=[32m"df-confirmation df-workflow-block df-workflow-block--profiles"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-form-stack"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"df-screen-header"[39m
+                    [36m>[39m
+                      [36m<h2[39m
+                        [33mclass[39m=[32m"df-panel-title"[39m
+                      [36m>[39m
+                        [0mSaved Setup Profiles[0m
+                      [36m</h2>[39m
+                      [36m<p[39m
+                        [33mclass[39m=[32m"df-support"[39m
+                      [36m>[39m
+                        [0mSave named local setups, then load one later to replace the current active setup.[0m
+                      [36m</p>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"df-field"[39m
+                    [36m>[39m
+                      [36m<label[39m
+                        [33mfor[39m=[32m"dayframe-profile-name"[39m
+                      [36m>[39m
+                        [0mProfile Name[0m
+                      [36m</label>[39m
+                      [36m<input[39m
+                        [33mid[39m=[32m"dayframe-profile-name"[39m
+                        [33mplaceholder[39m=[32m"Profile name"[39m
+                        [33mtype[39m=[32m"text"[39m
+                        [33mvalue[39m=[32m""[39m
+                      [36m/>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"df-screen-actions"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"df-secondary-button"[39m
+                        [33mtype[39m=[32m"button"[39m
+                      [36m>[39m
+                        [0mSave Current Setup as Profile[0m
+                      [36m</button>[39m
+                    [36m</div>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-support"[39m
+                    [36m>[39m
+                      [0mNo saved profiles yet.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-actions"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mExport Complete Backup[0m
+                    [36m</button>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mImport Setup Backup[0m
+                    [36m</button>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mClear Local Data[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                  [36m<input[39m
+                    [33maccept[39m=[32m"application/json,.json"[39m
+                    [33maria-label[39m=[32m"Import Setup Backup File"[39m
+                    [33mhidden[39m=[32m""[39m
+                    [33mtype[39m=[32m"file"[39m
+                  [36m/>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"df-support"[39m
+                  [36m>[39m
+                    [0mComplete backups include setup, profiles, accepted decisions, historical plans, execution outcomes, notes, and timestamps. Preview data is not included; protect the downloaded JSON as private personal data.[0m
+                  [36m</p>[39m
+                [36m</section>[39m
+              [36m</details>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"df-compatibility-actions"[39m
+              [36m>[39m
+                [36m<section[39m
+                  [33maria-labelledby[39m=[32m"compact-preview-heading"[39m
+                  [33mclass[39m=[32m"df-compact-preview"[39m
+                [36m>[39m
+                  [36m<div[39m
+               ...
+ ❯ src/ui/tests/ReviewReturnFocus.test.tsx:48:35
+     46|  const origin=screen.getByRole("button",{name:/Add event to/});origin.…
+     47|  const close=screen.getByRole("button",{name:"Close"});close.focus();f…
+     48|  await waitFor(()=>expect(origin).toHaveFocus());expect(f.counts().tra…
+       |                                   ^
+     49| });
+     50|
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  13:20:29
+   Duration  5.43s (transform 1.85s, setup 0ms, import 1.60s, tests 3.15s, environment 537ms)
+

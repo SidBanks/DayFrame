@@ -161,6 +161,7 @@ export function createExecutionHistorySurface(
     serialize?: (value: unknown) => string;
     indexedDb?: ExecutionHistoryIndexedDb;
     notificationScheduler?: DayFrameNotificationScheduler;
+    authorizeSleepWrite?: () => boolean;
   } = {},
 ) {
   const legacyStorage = getStorage();
@@ -488,6 +489,29 @@ export function createExecutionHistorySurface(
     };
   }
   function recordExecution(input: CreateExecutionAssertionInput): RecordExecutionResult {
+    if (
+      (input.subject.kind === "publishedSleep" || input.subject.kind === "unplannedSleep") &&
+      !options.authorizeSleepWrite?.()
+    )
+      return {
+        status: "rejected",
+        reason: "invalidInput",
+        issues: ["Use the Sleep execution command to validate immutable publication authority"],
+      };
+    if (
+      input.subject.kind === "publishedSleep" &&
+      records.some(
+        (record) =>
+          record.kind === "assertion" &&
+          record.subject.kind === "publishedSleep" &&
+          record.subject.publicationBatchId ===
+            (input.subject as Extract<typeof input.subject, { kind: "publishedSleep" }>)
+              .publicationBatchId &&
+          record.subject.snapshotId ===
+            (input.subject as Extract<typeof input.subject, { kind: "publishedSleep" }>).snapshotId,
+      )
+    )
+      return { status: "rejected", reason: "duplicatePlannedSubject" };
     if (ingress.status === "recoveryRequired")
       return { status: "rejected", reason: "protectedHistoryIngress" };
     if (input.subject.kind === "planned" && findSubjectByReference(input.subject.reference)) {
@@ -504,6 +528,16 @@ export function createExecutionHistorySurface(
     currentRecordId: ExecutionRecordId,
     input: CorrectExecutionAssertionInput,
   ): ReviseExecutionResult {
+    if (
+      records.some(
+        (record) =>
+          record.subjectId === subjectId &&
+          record.kind === "assertion" &&
+          (record.subject.kind === "publishedSleep" || record.subject.kind === "unplannedSleep"),
+      ) &&
+      !options.authorizeSleepWrite?.()
+    )
+      return { status: "rejected", reason: "invalidInput" };
     if (ingress.status === "recoveryRequired")
       return { status: "rejected", reason: "protectedHistoryIngress" };
     if (
@@ -520,6 +554,16 @@ export function createExecutionHistorySurface(
     currentRecordId: ExecutionRecordId,
     note?: string,
   ): ReviseExecutionResult {
+    if (
+      records.some(
+        (record) =>
+          record.subjectId === subjectId &&
+          record.kind === "assertion" &&
+          (record.subject.kind === "publishedSleep" || record.subject.kind === "unplannedSleep"),
+      ) &&
+      !options.authorizeSleepWrite?.()
+    )
+      return { status: "rejected", reason: "invalidInput" };
     if (ingress.status === "recoveryRequired")
       return { status: "rejected", reason: "protectedHistoryIngress" };
     if (

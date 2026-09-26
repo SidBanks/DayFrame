@@ -1,0 +1,3 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --write code/src/state/historicalPlanLifecycle.test.ts
+code/src/state/historicalPlanLifecycle.test.ts 249ms

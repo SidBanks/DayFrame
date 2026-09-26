@@ -1,0 +1,67 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/GoalInspectionNavigation.test.tsx (4 tests | 1 failed) 4686ms
+   × real G2 → Daily Planner → report → Back refreshes outcomes while retaining Requested Time and Goal drafts 1694ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/GoalInspectionNavigation.test.tsx > real G2 → Daily Planner → report → Back refreshes outcomes while retaining Requested Time and Goal drafts
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h3
+  id="_r_h_-heading"
+  tabindex="-1"
+>
+  Accepted planning and scheduled work
+</h3>
+Received element with focus:
+  <h3
+  id="selected-goal-heading"
+  tabindex="-1"
+>
+  Network+ renamed
+</h3>
+ ❯ src/ui/tests/GoalInspectionNavigation.test.tsx:85:5
+     83|   expect(
+     84|     screen.getByRole("heading", { name: "Accepted planning and schedul…
+     85|   ).toHaveFocus();
+       |     ^
+     86|   expect(screen.getByText(/Goal name at publication: Network\+ origina…
+     87|   fireEvent.click(screen.getByRole("button", { name: "Edit Goal" }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+ReferenceError: window is not defined
+ ❯ resolveUpdatePriority node_modules/react-dom/cjs/react-dom-client.development.js:1308:7
+ ❯ requestUpdateLane node_modules/react-dom/cjs/react-dom-client.development.js:16345:11
+ ❯ dispatchSetState node_modules/react-dom/cjs/react-dom-client.development.js:9126:14
+ ❯ src/ui/HistoricalIntelligenceSummary.tsx:158:11
+    156|       ([completion, realization]) => {
+    157|         if (request.current === id) {
+    158|           setResults({ completion, realization });
+       |           ^
+    159|           setLoading(false);
+    160|         }
+ ❯ runNextTicks node:internal/process/task_queues:64:5
+ ❯ processImmediate node:internal/timers:452:9
+
+This error originated in "src/ui/tests/DayFrameApp.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 175 passed (176)
+      Tests  1 failed | 1820 passed (1821)
+     Errors  1 error
+   Start at  13:01:06
+   Duration  207.58s (transform 6.55s, setup 0ms, import 21.98s, tests 140.46s, environment 25.46s)
+

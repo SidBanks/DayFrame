@@ -1,0 +1,1202 @@
+[
+  {
+    "path": "code/src/state/acceptanceLifecycle.ts",
+    "effect": "modified",
+    "sha256": "2db468c0e298b5dd72ca9ec544d567e486a47df2f15700ebf7261f8eb320346d",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/compositionSurface.ts",
+    "effect": "modified",
+    "sha256": "a09c3f967c14b9bbb931b06cea474bcb4abee2a54c67ae8b88643d50d0964c36",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/dayFrameStore.ts",
+    "effect": "modified",
+    "sha256": "5ba21a1cc5a6145a89078128e42bd4b954db4bd325da5541775c2b2857513649",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/goalSurface.ts",
+    "effect": "modified",
+    "sha256": "f36de71eebf0bd7ad6928fb41aef80466a318fb4450484847068d818fb59f8d2",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/historicalPlanSurface.test.ts",
+    "effect": "modified",
+    "sha256": "81b582c4a677d823913e47fc4a0a7ebdb8bddd3a3a6ad64bcf1fbaccdc355c31",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/historicalPlanSurface.ts",
+    "effect": "modified",
+    "sha256": "51fa48ed77c166095d1040e7cc10570358f7b7334b03949361e05e20f379cbd7",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/lazyCompositionSurface.ts",
+    "effect": "modified",
+    "sha256": "ca732a2420718c7e184face00b655d7d652c801cbccfccf99d597ebc8ba8566b",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/lazyProposalSurface.ts",
+    "effect": "modified",
+    "sha256": "59666a1e4fc5330d9da1030de6d1796793e7a65e8cc67a2cbeac69b445b7e18b",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/lazyRealizationSurface.ts",
+    "effect": "modified",
+    "sha256": "4ab8f86cea5cc6d64fbde0da1fe720e2988d5c07ec7e06484f728a4c02ef7d04",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/planDecisionSurface.ts",
+    "effect": "modified",
+    "sha256": "ed73cc016eaa9992cee5a56314c1790951c4221b6227963872d9275d710651ab",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/planningScopeQuery.test.ts",
+    "effect": "modified",
+    "sha256": "c02e76a690710a69627bc624556a3dce2ff2be0595240b6c36faba36ed6b2b32",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/planningScopeQuery.ts",
+    "effect": "modified",
+    "sha256": "12be9845a3ce674343d815bd92770875ecb3124f1114332eebe42e10ffd755b0",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/proposalSurface.ts",
+    "effect": "modified",
+    "sha256": "7a80e4925e372f040bd4337b70e290a053f7022b67b1ed860dee7c68e54ea415",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/publicationEligibility.ts",
+    "effect": "modified",
+    "sha256": "12c71bfeac847305ab22b45e3084af93311d07b5c87b8fafcdd8a44323e56db6",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/publicationSourceAdmission.test.ts",
+    "effect": "created",
+    "sha256": "4d6f6b154257e3eee56c3c2596339d768b5f27c05277f186f4739001cf7c4584",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/publicationSourceCommitFaults.test.ts",
+    "effect": "created",
+    "sha256": "3b285a00a62bac5349f3a343792a389a7457bd044c35dc558a0852aa9278dc27",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/publicationSourceQualification.test.ts",
+    "effect": "created",
+    "sha256": "25bd194ca62e1088168a21c61769cc155067295e88b6aafb9e5324e756543a46",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/publicationSourceTestFixtures.ts",
+    "effect": "created",
+    "sha256": "f0fb9a7da990808b902894b66dc8754876223155b483f15dfe75a1eaff5bcdd5",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/realizationSurface.ts",
+    "effect": "modified",
+    "sha256": "8a44b94251d276d773eaea5d677df44050d461b497d868b7813a271b69f4b240",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/reviewSourceQualification.ts",
+    "effect": "created",
+    "sha256": "ac748e3fbe7b0aefed445c828b43bb4dd062399d091f78238f3849efc72dd94a",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/reviewSourceTestFixtures.ts",
+    "effect": "created",
+    "sha256": "c4c3e7a8f86c8fb6039efb423f5fd6344628c02e2c9f7d020fb85bc6904ab380",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/schedulePublication.test.ts",
+    "effect": "modified",
+    "sha256": "652efac59e393ca3711684d7795bdca430ad887d7b3afb2797c1700729adcb64",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/state/schedulePublication.ts",
+    "effect": "modified",
+    "sha256": "1255bd3eb7c91c42fc54f66929e5341da2c2ad8396603047f4716bb5252ac10c",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/sourceObservation.ts",
+    "effect": "created",
+    "sha256": "53cb86c3685cd653bbf251b8415c2b3371c1b438234078cc2fb324b6d32c7d10",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/state/types.ts",
+    "effect": "modified",
+    "sha256": "ce6a59b4d5c4dc98fa26fc7f0312182441fd1ab251297029d85c867fd6505718",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/DayFrameApp.tsx",
+    "effect": "modified",
+    "sha256": "e58b39f34522fd67c9be09b022a49aa2b737956efe6240a3d55a3f41d12a9435",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/MonthlyPlannerSurface.tsx",
+    "effect": "modified",
+    "sha256": "126547c794b8d659e57079380d9eef1c3a3169812bd5670f2c9e6bfc12d3d4ba",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/PlanningReviewPanel.tsx",
+    "effect": "modified",
+    "sha256": "35b22a927f5b569f1bf43ef0635ac48639b215dae60fef89b286e813527c4960",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/ScheduleReviewPanel.tsx",
+    "effect": "modified",
+    "sha256": "eb305af60ffe726995258f4dd7aa68f6db8dcbfa99cdf408a83ee7294c0f13f7",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/dayFrameUi.css",
+    "effect": "modified",
+    "sha256": "97a1446e5934f15adc0f411e5ce5b46baf5145c8a4e941cdb1798f2af9249954",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/plannerReviewPresentation.ts",
+    "effect": "modified",
+    "sha256": "efe28b2961271fcf4fcb05cedf43b2ea52780984cc31cdd6917548d95618eb2c",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/reviewSourceFeedback.ts",
+    "effect": "created",
+    "sha256": "e84deee9bdc9681cab27d8cadb449f5f9f1d40fcd7d967a134ac4525c6118d4f",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/scheduleReviewReadiness.ts",
+    "effect": "modified",
+    "sha256": "128a5b2bf720f92a1d2ffe0518440ede5af2bbebfe4c5c09d626b469b0626b2b",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "code/src/ui/tests/PlanningReviewPanel.test.tsx",
+    "effect": "modified",
+    "sha256": "a2c419614a19e20160ff451be47609915510af71fb7e8bd1ab17ab5b673e6e3f",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/ui/tests/ReviewSourceQualification.test.tsx",
+    "effect": "created",
+    "sha256": "f1730de05176a3fd9cd7eaaf4b321217693d93f479a4a9872f3e14fa4056a146",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/ui/tests/ScheduleReviewPanel.test.tsx",
+    "effect": "modified",
+    "sha256": "e5836cae6694e85e469251996256ba8556ca4c8d89ca0d4e2a531e223cf348bf",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/ui/tests/plannerReviewPresentation.test.ts",
+    "effect": "modified",
+    "sha256": "94bcdfb9a1bd40c5924fae82ce822fb28c1dc53320f8c77ef42baf62fd42a18b",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/ui/tests/scheduleReviewReadiness.test.ts",
+    "effect": "modified",
+    "sha256": "5d182d6a4612de6055af063f9f30a5727561119704c48a39540033ad993a4f64",
+    "purpose": "Permanent regression or explicit V2 fixture migration."
+  },
+  {
+    "path": "code/src/ui/useReviewInvalidation.ts",
+    "effect": "created",
+    "sha256": "83f12ad299400f059bd2bd4b70108df13a9e4f5f7dacdfd22fe05a090b75402a",
+    "purpose": "Implementation role detailed in IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md."
+  },
+  {
+    "path": "docs/adr/ADR_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_V1_RESULT.md",
+    "effect": "created",
+    "sha256": "c1bc53b351323eb6afa1d7d61be27641ee9ae8d5dcf1abbcb1e717f7ee047704",
+    "purpose": "Records architectural acceptance of the entire pinned contract before application changes."
+  },
+  {
+    "path": "docs/implementation/phase-9/TASK_9.29.6_CANONICAL_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_ADMISSION_REPAIR_V1_RESULT.md",
+    "effect": "created",
+    "sha256": "f65bf31ad7fa7e8ed503a5d467462d447a8dab57c4748be15269351055aa5e23",
+    "purpose": "Final bounded implementation, validation, failure history, compatibility and completion report."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-busy-replacement-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "5a197f1bafcf551d30bf1b42f68c30571119e3666e2ed2ce416d96719a6fd8b9",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-controlled-native-commit-unconfirmed-RESULT.png",
+    "effect": "created",
+    "sha256": "c842a5106baedba8ec4424fca687b22354718410e272495558bc2fe19e5fc16b",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-controlled-native-verification-failed-RESULT.png",
+    "effect": "created",
+    "sha256": "9d414d796c3fb83013a2cd54a29a4f316d22b669ee8062d80aab91a15fad006e",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-healthy-publication-RESULT.png",
+    "effect": "created",
+    "sha256": "010b3da128d3819d0d3b8de67ee0861a37e3db39ae0f05da135bacd493144a41",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-known-accepted-unrealized-RESULT.png",
+    "effect": "created",
+    "sha256": "1e4a27e5582a04031fc60ba88a1a419155132b88f145cbe46ffe053dd9db0a2c",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-known-native-abort-qualified-prior-RESULT.png",
+    "effect": "created",
+    "sha256": "14b7acaf1cb5c7a2229f78f04ecc6e5d3f0eebe22e8579a76331301454c544cf",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-native-active-write-RESULT.png",
+    "effect": "created",
+    "sha256": "8fc95b46ac7a20e86b59c492de2dbbea773e90dc00545194673fdcb1ac6f840a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-nonempty-restored-RESULT.png",
+    "effect": "created",
+    "sha256": "dfc9cd266411549fe44e48bc8b509e0ace1b0d9bc78598c91b4328d3bc0215a0",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-protected-clear-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "644b685cbf4ce0a1d302b61304e90759c83a6f0940f7c8db29bc7b805e93d950",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-protected-import-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "485b6af32c2fe6dbb95af42338621b4b34c87197ddfaea76aac36fd96ffc95b5",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-qualified-offers-RESULT.png",
+    "effect": "created",
+    "sha256": "6537e51779e6097c41079e948f444732a7f7b06f1e64e7e169894e14b8cf09ed",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/1280-realized-ready-RESULT.png",
+    "effect": "created",
+    "sha256": "10626aaf6a8139c27f01e6e4f4be90ee8030c7c610daac14dda1dcd42b8390be",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-busy-replacement-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "60eaaaa3aeea298d2f06ebb5348edba155a943c8c14b5691546ef9af3dd1f469",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-controlled-native-commit-unconfirmed-RESULT.png",
+    "effect": "created",
+    "sha256": "f56d4e2c53eb3a09bdbe19add79edd0adca3d7e26ade0d03570103a55ce9bcd5",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-controlled-native-verification-failed-RESULT.png",
+    "effect": "created",
+    "sha256": "219c80fe31b0fec7ce8d70c758c640dc4b03a08bfbe58057ef9378d8e333cd12",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-healthy-publication-RESULT.png",
+    "effect": "created",
+    "sha256": "efb3eef4f9311a5c6c3fbaf50bb5c427920ca2cbbe725aae24c272757b1aba71",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-known-accepted-unrealized-RESULT.png",
+    "effect": "created",
+    "sha256": "67e4940248bde49afc453a0c41cd3fe48e6b708d379eac69fbbef807e5a8e737",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-known-native-abort-qualified-prior-RESULT.png",
+    "effect": "created",
+    "sha256": "4c18874974a58057c0bd7c8e5a727a6c240e005e9287e8a1d00921efcb3b4c69",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-native-active-write-RESULT.png",
+    "effect": "created",
+    "sha256": "5ddd42a1ca0063e0edd165331af20cde0c2293c6ad1811c2ca80ff54c66426ff",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-nonempty-restored-RESULT.png",
+    "effect": "created",
+    "sha256": "5600e0e75062ad08771c65a98f370947fd6788bf8eb9bc332e806cae7373665a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-protected-clear-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "f3e3e74b3b097c45bdc9f7ae87117d471e11fdfda2b5c8be29ba7f18b51f4ee6",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-protected-import-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "e908b406ece2dbe78fef08d78c310c16e5f45c9dc1c09e07d442f58b2439e23f",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-qualified-offers-RESULT.png",
+    "effect": "created",
+    "sha256": "7c17780f3787e4a8cf456d94a5641129193e7b502a1b1ac6d18a9a42ad52824a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-realized-ready-RESULT.png",
+    "effect": "created",
+    "sha256": "1d96992d8c68029789e983d957900c601329003cfc77087c0727c23abea31011",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/320-reduced-height-focus-RESULT.png",
+    "effect": "created",
+    "sha256": "0b7bed87cff411e58f1631d56ab3f33e16f3985f3d5ec0d64abae6c57dfbda73",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-busy-replacement-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "7fd5fa6c32eeafda5ef805091c1b48aedfa9a725cbdb38dd93d1526d1a4ce10f",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-controlled-native-commit-unconfirmed-RESULT.png",
+    "effect": "created",
+    "sha256": "6323f448507d4a2e044a41e71c643f1d4e1847dc0cf43a89dfede5ac0d9b70d6",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-controlled-native-verification-failed-RESULT.png",
+    "effect": "created",
+    "sha256": "929c56b9e3f7fbcb3e3df18c131e2ca8886f6efb1d48d9c7bac3aea7e6b1c797",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-healthy-publication-RESULT.png",
+    "effect": "created",
+    "sha256": "75f515983b4ee1a5b52bb6bf70adbbc573c5674c3b554fba7e301f269551794a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-known-accepted-unrealized-RESULT.png",
+    "effect": "created",
+    "sha256": "654867e790c75ec8b1a8285a264e12f040dfc1e8661a8843ee5cb68d86ca11e9",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-known-native-abort-qualified-prior-RESULT.png",
+    "effect": "created",
+    "sha256": "94bd3a0b43bc4a960e46639bf357198f9cfe45bf6f4b1e2d88109df3a811f1b6",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-native-active-write-RESULT.png",
+    "effect": "created",
+    "sha256": "690f618516a8239acf36ff4d662508b0ebe6d6517eb46ee7b83fddb21f88caf0",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-nonempty-restored-RESULT.png",
+    "effect": "created",
+    "sha256": "ed9ffc2bba425c935c4073db7152e27bb0cf5dac9339c796682f50b74405a86a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-protected-clear-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "b5484d6eea6577140a5a4ed509da9247810056676eb1036e566ac943abb53f88",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-protected-import-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "5f24cbab1c3ba268352c21802831ba9a003b7ae6192f3fedb0d14a86dd863e14",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-qualified-offers-RESULT.png",
+    "effect": "created",
+    "sha256": "8d5f1c5e1239045fa40a63733a7dbe944f9d4ebd5bfc1d9947d0d667183d138a",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/390-realized-ready-RESULT.png",
+    "effect": "created",
+    "sha256": "d25120e2945a1d8f23f721cb6b4f2c0cae791a94098f384ade033bf14fc554f3",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-busy-replacement-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "d70ad9f4ee70564513837c958de1ced6a7b8f2fdeba709db25ddadd4a4596432",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-controlled-native-commit-unconfirmed-RESULT.png",
+    "effect": "created",
+    "sha256": "93e46d221e9cb750fa88578363195bae5ce8c11b88a0231cd20aa999c3532318",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-controlled-native-verification-failed-RESULT.png",
+    "effect": "created",
+    "sha256": "bbe48a4295360ea918a44cfdee09852803edbd0e09f5de2c31a6381f5b0894b5",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-healthy-publication-RESULT.png",
+    "effect": "created",
+    "sha256": "8c53b28ff3aa2a760a4bce8ed9fb75bb6f35b80fb85152e9199e5c3b418113a5",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-known-accepted-unrealized-RESULT.png",
+    "effect": "created",
+    "sha256": "58cddaab721eb34eedd0ee6a9f1989f511504fa36d31b6629fa7622fd325dfc4",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-known-native-abort-qualified-prior-RESULT.png",
+    "effect": "created",
+    "sha256": "2aab621d3e25221f6a3710e7e2ff13588fe3701bf1b0c7b0046b51a3e29e9b17",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-native-active-write-RESULT.png",
+    "effect": "created",
+    "sha256": "db0b6516b9a276813cd895d27344d4a7124ef298436c2039994fe5b71e74726d",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-nonempty-restored-RESULT.png",
+    "effect": "created",
+    "sha256": "215cac5f85f17a33ae9d97e6b95ff7d396d8aede4c05c581742ca13941d0eac5",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-protected-clear-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "ab5aa69972c3a9a19ae5e1b56f81efa9bddd565262ce9646fd29c4cebe8abde1",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-protected-import-denied-RESULT.png",
+    "effect": "created",
+    "sha256": "3aa6f5cb8f083f8749c74f1662e00c17969e6021fb870e8828c5673c0b584d78",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-qualified-offers-RESULT.png",
+    "effect": "created",
+    "sha256": "73f6bc4638e279a015033ad1cc9421cfcc533f7726f6c309f866790a54429d62",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/768-realized-ready-RESULT.png",
+    "effect": "created",
+    "sha256": "ebccd620c532eac2081ddb6a3f92fe33fc7594dddf5d514520a6adcd3541340d",
+    "purpose": "Native production viewport screenshot; scenario and width in filename."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/EXECUTION_INPUT_RESULT.md",
+    "effect": "created",
+    "sha256": "743acdceb3dd37aa476e608613a4dc45b7fd2378c127aa7f11c57a24b6fa1868",
+    "purpose": "Complete user execution instruction preserved separately from RESULT."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md",
+    "effect": "created",
+    "sha256": "ba19b207796edf939b817ec337aec0e7bf4e2450e7244295812369ae48dee678",
+    "purpose": "Source/consumer map and 24-case regression evidence mapping."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-archived-format-RESULT.log",
+    "effect": "created",
+    "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-build-RESULT.log",
+    "effect": "created",
+    "sha256": "d6758f8ad8b416fb9693b3b1e7860a7842de14c0edfb22c6beaa51a471277e81",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-bundle-RESULT.log",
+    "effect": "created",
+    "sha256": "bca029d1bb28224d4b07b406ece23f533db2926600c5fe1b80620991ac0e979f",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-hashes-RESULT.json",
+    "effect": "created",
+    "sha256": "bc3bd29a586cc96a38385366376264ad2de59c06932d29255fc2a91de68f6221",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-head-RESULT.txt",
+    "effect": "created",
+    "sha256": "647337dda1d5afeb8ae43c754a6d18cce5ac2ea718b4116e211060b41fb1259a",
+    "purpose": "Pre-edit dirty-tree forensic baseline."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-lint-RESULT.log",
+    "effect": "created",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-source-RESULT.tar.gz",
+    "effect": "created",
+    "sha256": "a22f059c2b70933900c7327a941ef7a29328bcca583cfc370359a8a94bee54df",
+    "purpose": "Pre-edit dirty-tree forensic baseline."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-status-RESULT.txt",
+    "effect": "created",
+    "sha256": "e1df76ba9f2eb1a8e48156486deb5540fbaa25941fe46c470ee2c314f0a1b21f",
+    "purpose": "Pre-edit dirty-tree forensic baseline."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/baseline-tests-RESULT.log",
+    "effect": "created",
+    "sha256": "86ea0b5d0f10b34da03fb95d881dd1b71065dbb4109f365603319c01a5a1377a",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-actual-envelope-RESULT.log",
+    "effect": "created",
+    "sha256": "aadc42a4b5c98c50999474df68dd39fc229ceb6ce2fc2ba5ad8a5078565e6ad2",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-before-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "927c87272655ba552076d4c6a6dbe9572644f14a382d5dc3747cd77949d62c9d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-checks-RESULT.json",
+    "effect": "created",
+    "sha256": "e80446873692c1f8af751b358917f8415a65c4d4c5e46f706015bb9f29f01fb2",
+    "purpose": "Native assertions, exact authority checks and transaction counters."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-core-pass-RESULT.log",
+    "effect": "created",
+    "sha256": "927c87272655ba552076d4c6a6dbe9572644f14a382d5dc3747cd77949d62c9d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs",
+    "effect": "created",
+    "sha256": "e7dbcc004c6faa1dbe281c9a9c0e5b34ab5479ab71f2d4c37169e24251ce0987",
+    "purpose": "Reproducible CDP native UI and controlled physical-fault validation."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-extended-pass-before-freeze-RESULT.log",
+    "effect": "created",
+    "sha256": "927c87272655ba552076d4c6a6dbe9572644f14a382d5dc3747cd77949d62c9d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-first-RESULT.log",
+    "effect": "created",
+    "sha256": "e84d25e2de2473a7cf9df5e91d159118d7ec8efdcb59e59be5830c9ac3d2f14a",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-fixture-precondition-RESULT.log",
+    "effect": "created",
+    "sha256": "54595f93fa5e2523f82628b6622b8a13ceb077f0b752ddb2407f1c314a6a45ce",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-goal-load-wait-RESULT.log",
+    "effect": "created",
+    "sha256": "95cec8f738c8faadffdc02a3b5d879ed8f34ca7d311e9fa00b31eccb66a07aa5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-measurements-RESULT.json",
+    "effect": "created",
+    "sha256": "c2795581331cffbb0e5cfaa12668c3afc233edfae6f07c43c40f697b44f002f8",
+    "purpose": "Native viewport, overflow, target and focus measurements."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-measurements-before-target-fix-RESULT.json",
+    "effect": "created",
+    "sha256": "66fc9bb415158c3a36ca12cf9e0a9748f5eb393691ee04a87dbc43c5dcf74baa",
+    "purpose": "Native viewport, overflow, target and focus measurements."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-month-target-RESULT.log",
+    "effect": "created",
+    "sha256": "ebb7097873cae50bd0984f18c4aa90a44a966b2eeb72bf824d0c3a8369a5c41a",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-native-RESULT.log",
+    "effect": "created",
+    "sha256": "927c87272655ba552076d4c6a6dbe9572644f14a382d5dc3747cd77949d62c9d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-physical-store-name-RESULT.log",
+    "effect": "created",
+    "sha256": "e598175777e5b3444cd96e58b3e49236501b46fe8796133bf89eba810c16d813",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/browser-protected-import-copy-RESULT.log",
+    "effect": "created",
+    "sha256": "37f9b2be56e4a12ccce2e4a25cac9e796bed1247093ca149d3ac739b5ca4de75",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-acceptance-RESULT.log",
+    "effect": "created",
+    "sha256": "f872384c0239a957368ed5e9b7ddda7f8b789e387d2262a1cf2fbe9f3e21dd88",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "71e15475f7d1ed8bb3c5fd0911f5c683642efa113fc04007a5727d899d145281",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-final-RESULT.log",
+    "effect": "created",
+    "sha256": "ac5b555c72788c51e36cc5dea7c0531cf249f0814bb501bb7edc031a9c5ebf25",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-native-RESULT.log",
+    "effect": "created",
+    "sha256": "7d3a3dd8bb16f197c4a8b0fcd32f9f6c9799d70c77b6d2e50250e038eec3b530",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-native-target-fix-RESULT.log",
+    "effect": "created",
+    "sha256": "0c317c5f33a301c5b89081a410837667ed34e84151c959fefc1f10bc82f85d09",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-pre-native-RESULT.log",
+    "effect": "created",
+    "sha256": "7bdcb1fa16acc31a6c5e4922cd068471026afa23507af0a4c9c94f4d22aca8b3",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/build-verified-RESULT.log",
+    "effect": "created",
+    "sha256": "8462fa3c1ef32c9a72dd3a0cc072b333721a8a17e99795e70d33ab52cdaaa0cf",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/bundle-acceptance-RESULT.log",
+    "effect": "created",
+    "sha256": "a8660990efbb52c01499eec53a175ba8cc16242da6ff7e587b7b5ee6569ca0a6",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/bundle-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "51bc423e199666fcaf35721da59f4b4ed89243bf7f00315500e38f3c6f78d3da",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/bundle-pre-native-RESULT.log",
+    "effect": "created",
+    "sha256": "0b8ee8c0424cfd7d407c544528e568af596a8eb14c29b5506153114419704c57",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/bundle-verified-RESULT.log",
+    "effect": "created",
+    "sha256": "9d5cf49975691e4a0e7956600d02e7073d9138346a521f847714c704a795784d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/canonical-seed-RESULT.ts",
+    "effect": "created",
+    "sha256": "1cfeb7e6aee5fa53f74cdc8ede67baacbc5cd5e624edd36bde8f379be9c43d34",
+    "purpose": "Canonical supporting fixture or its production compiler configuration; not a substitute for native UI actions."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/consumer-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "63b51a85ac4a3fcf84a49ff94b0350547e09905aec367bacd07e7ced1f5c3813",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/consumer-final-RESULT.log",
+    "effect": "created",
+    "sha256": "36d58011e2f769a18b4171c7c3d29097ab6b65f059155461a42bda17f63fccaf",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/destination-nonempty-reexport-RESULT.json",
+    "effect": "created",
+    "sha256": "e5657e5a2e22ed1b98f0fb10f49bab994562189b1d086694fcf20414559d3a14",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/destination-nonempty-reload-export-RESULT.json",
+    "effect": "created",
+    "sha256": "2c217a4d0618f4702b1b0804ab20b4c94184c3770bb15a3378f2d57248adcdcd",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/diff-check-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/diff-check-final-RESULT.log",
+    "effect": "created",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/existing-row-retry-RESULT.log",
+    "effect": "created",
+    "sha256": "620699fdfdb3f0ec9ab428b6992db1479d562d2540757a01c974568f2685e69a",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/expanded-matrix-RESULT.log",
+    "effect": "created",
+    "sha256": "a9337fc55c15090c7cad68d2a1bd410c036293b3184389a1cfa7a3ba8a455c12",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/final-head-RESULT.txt",
+    "effect": "created",
+    "purpose": "Final task validation output or forensic execution metadata; role identified by filename.",
+    "sha256": "647337dda1d5afeb8ae43c754a6d18cce5ac2ea718b4116e211060b41fb1259a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/final-status-RESULT.txt",
+    "effect": "created",
+    "purpose": "Final task validation output or forensic execution metadata; role identified by filename.",
+    "sha256": "c2b42ba5fa5a56d32a70c0b20609a2f0942dab115c50b13849d6bfb6d7f2279a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-acceptance-RESULT.log",
+    "effect": "created",
+    "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-acceptance-source-RESULT.log",
+    "effect": "created",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-check-final-RESULT.log",
+    "effect": "created",
+    "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-delivery-final-RESULT.log",
+    "effect": "created",
+    "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-family-feedback-RESULT.log",
+    "effect": "created",
+    "sha256": "a86282f6b2980421f52f766622bea88fe293a362ff9767ba994a980b9dbfabc5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-final-source-RESULT.log",
+    "effect": "created",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-implementation-RESULT.log",
+    "effect": "created",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-protected-feedback-RESULT.log",
+    "effect": "created",
+    "sha256": "7cc118526e1a4ee7a18e305b53a9b637149cc2836a4339f8ef415377191c59b4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-reports-RESULT.log",
+    "effect": "created",
+    "purpose": "Final task validation output or forensic execution metadata; role identified by filename.",
+    "sha256": "be92b36c5c74c2cc103a59a28c4042d5362a81955dc51bb013e2de169e6543fc"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-transitive-RESULT.log",
+    "effect": "created",
+    "sha256": "8f99ffbc4a85e09dfc06c6e621803f34d45e34300974a2de92c6e099b0aefb65",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/format-verified-RESULT.log",
+    "effect": "created",
+    "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/full-failure-followup-RESULT.log",
+    "effect": "created",
+    "sha256": "10cfcd97e784e1397ee170cd4e9d37b7c4e40647af869692459358d257edb5ca",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/full-tests-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "85626e1f7295d27313ab4021aab07879ca5808535a579938028fab2842c7a05e",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/full-tests-first-RESULT.log",
+    "effect": "created",
+    "sha256": "f8e29af55514547f53a1970f07a609da5b17cb8700ea77c929f97537b8f589fc",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/full-tests-isolated-final-RESULT.log",
+    "effect": "created",
+    "sha256": "ff4b4da90dc2e9152050836318770e49034bb0152b4eeb01587355eaa2e1b73e",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/governing-source-hashes-RESULT.json",
+    "effect": "created",
+    "sha256": "fcdf639d7f0b5ee07aca20c81e3ba8c19d941ef036c6e3ab585401030f5723c1",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/implementation-build-RESULT.log",
+    "effect": "created",
+    "sha256": "32277399681b3eee9c751ccb69da61b11501e80d0bad2eca75ff31ad1339eb7f",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/implementation-bundle-RESULT.log",
+    "effect": "created",
+    "sha256": "6bae1d818f81727cbfafce59f09548d7bc4246d0a35e561481fbae167df1d1f4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/implementation-typecheck-RESULT.log",
+    "effect": "created",
+    "sha256": "049f30d16d457b1a0fd5c0f85e352f9036436c044e1906fddf4803014ee81027",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-acceptance-RESULT.log",
+    "effect": "created",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-final-RESULT.log",
+    "effect": "created",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-isolated-after-suite-RESULT.log",
+    "effect": "created",
+    "purpose": "Final task validation output or forensic execution metadata; role identified by filename.",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-pre-native-RESULT.log",
+    "effect": "created",
+    "sha256": "f8d36c3f837498b901483838d1f3ef1507bd79099a3954d67ff3a41b2bb2fef4",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/lint-verified-RESULT.log",
+    "effect": "created",
+    "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/matrix-final-pass-RESULT.log",
+    "effect": "created",
+    "sha256": "1b8aee66e01733f8b1b4956a8e0d0f36e6ce47fc5e1149118c7d97b03f60e911",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/native-build-before-precedence-RESULT.json",
+    "effect": "created",
+    "sha256": "3e4f8012544c5558ac0994ffd3062e19465eb57ccd785df35d972d07bbc860f4",
+    "purpose": "Task execution metadata and review evidence."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/native-build-before-transitive-RESULT.json",
+    "effect": "created",
+    "sha256": "d2692859d25121da4744b5af70e78e94493850205e9a073e6bf16acdb0ba71b6",
+    "purpose": "Task execution metadata and review evidence."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/native-build-hashes-RESULT.json",
+    "effect": "created",
+    "sha256": "bff7da86794c049eaedb0a402b9bb46863d13ae8b9dc4ad9cc69b374cded98ec",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/native-build-hashes-before-delivery-RESULT.json",
+    "effect": "created",
+    "sha256": "7e36fbfe9b9156114f72827a4d7f5508bc99aaf49249ddc46e891a86c145f7a5",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/native-verification-authority-RESULT.json",
+    "effect": "created",
+    "sha256": "cc4d4e3185aa1849a6007abaa47fb515e6291f5d33c89f3c76bb4340ac79d3e7",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/owner-regression-RESULT.log",
+    "effect": "created",
+    "sha256": "784893feec61e35d66be7ee9c54454e9c66effdcda86a86a227b3398b3b5f031",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/precedence-owner-RESULT.log",
+    "effect": "created",
+    "sha256": "7d0098375d1c994aaf7e29ae8a4d35d87b8d01a1af4eac1d6c0d011230d2d66e",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/preservation-delivery-RESULT.json",
+    "effect": "created",
+    "sha256": "1848abd74b10b1fab8b064ca62ff24a9bcd7b3415c840a54e078781a9a122141",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/preview-destination-RESULT.log",
+    "effect": "created",
+    "sha256": "efed13179a87d29faef6b3f853fb4fdf335efd82ec1bb8b5578cb5d698ee83b2",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/preview-source-RESULT.log",
+    "effect": "created",
+    "sha256": "b52886fa992cae42bbbe2b96136525809b37ddaf8ca91d793e2397d4b11be1cd",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/protected-native-authority-RESULT.json",
+    "effect": "created",
+    "sha256": "3953c02cf69a550bb0038c134ba0da5d5524e15e455dd87b280ed9e70e3a9225",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/seed-build-RESULT.log",
+    "effect": "created",
+    "sha256": "bcd75ffad368225b6cad6d35063a8b3556af93867c79f69f591ece7af604d472",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/seed-build-acceptance-RESULT.log",
+    "effect": "created",
+    "sha256": "a426440b894620a4c70867974555ae29d7ee9a0abb2e2790734318488bfbddac",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/seed-build-config-RESULT.mjs",
+    "effect": "created",
+    "sha256": "edcf6eeeea2996fd47b38b98c11e7da7df0d3b2cc6ec3b215d6c80b25659ccda",
+    "purpose": "Canonical supporting fixture or its production compiler configuration; not a substitute for native UI actions."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/seed-build-current-RESULT.log",
+    "effect": "created",
+    "sha256": "fbf2b795ecf1e0b1de07345c57bafda63b9b001de92e509758fdb61ba5c3dba0",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/seed-build-qualified-RESULT.log",
+    "effect": "created",
+    "sha256": "7a11e9ef14fc9c326a087046b1ac7d6d156337fd53c1e2b5929ee9b0b0db3e5e",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-admission-matrix-RESULT.log",
+    "effect": "created",
+    "sha256": "af2afb1f07ebafba4c670ca710188c46a6c63c10f1292fdf6a061e420f64349d",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-admission-matrix-retry-RESULT.log",
+    "effect": "created",
+    "sha256": "ea939e43ec819767729e0ca72de32289e0b84f37c1f65df416868fce968ebdb6",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-controls-RESULT.log",
+    "effect": "created",
+    "sha256": "9b97ec3ca176836d52fd5df06ee4733fb4dbed42a298bec0725e8e39dab4dfed",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-controls-retry-RESULT.log",
+    "effect": "created",
+    "sha256": "8780d829a1db48cb8b53ec9b26cdedfbb80974c0ab06a3c825bc214f52d12c78",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-freeze-RESULT.json",
+    "effect": "created",
+    "sha256": "1b4c8052e52772f6ad648dacbd847376154894dbc6166a927e5e93aef059a95a",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-freeze-before-delivery-RESULT.json",
+    "effect": "created",
+    "sha256": "7d46797bc30714f5cd6c3187c6a40fc1f1eb2bbe2753aeca5abff5f768bc436e",
+    "purpose": "Task-relative byte identity or preservation audit."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-matrix-RESULT.log",
+    "effect": "created",
+    "sha256": "85df7db12dfa0b74903b7b5f5f3dedb7eb3b1ab7ec6208dcfe7791de14e55f7f",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-nonempty-export-RESULT.json",
+    "effect": "created",
+    "sha256": "63e9d2df4a71b5c882f91b28b8e1de40c1c4d18306c20085963006c3bebf5e33",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-nonempty-physical-RESULT.json",
+    "effect": "created",
+    "sha256": "5ba0f14c7038cbe81f9502592729be740ea51d1e08e44f2b323136069a1d20b0",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-undecided-export-RESULT.json",
+    "effect": "created",
+    "sha256": "9fc5b1a1a775fb77ddee20d8cfb218c92be8998bb34e2cb9575dffc496943b58",
+    "purpose": "Exact disposable authority/export evidence for native controls and round-trip comparison."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/source-undecided-pre-wait-RESULT.json",
+    "effect": "created",
+    "sha256": "7f3ef7259eb26b8d7fc75f6315d7adad559caffd1fe02a8d98571c9d921b34db",
+    "purpose": "Task execution metadata and review evidence."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/targeted-RESULT.log",
+    "effect": "created",
+    "sha256": "ef3c342ba577bc2b0434337d4cfa133ccc2b5c1c67f61610a3c69cd092eca17b",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/targeted-retry-RESULT.log",
+    "effect": "created",
+    "sha256": "fcfb0bf2b7cdab1c444ea5c2618d532ffeddca05ab270471386d249f95be3d47",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/task-touched-source-RESULT.json",
+    "effect": "created",
+    "sha256": "4f16412a89400d235085ecc2d8c7e2f2af3469e91bb61900f0fbdfcfba468c42",
+    "purpose": "Task execution metadata and review evidence."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/typecheck-delivery-RESULT.log",
+    "effect": "created",
+    "sha256": "049f30d16d457b1a0fd5c0f85e352f9036436c044e1906fddf4803014ee81027",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/typecheck-final-RESULT.log",
+    "effect": "created",
+    "sha256": "049f30d16d457b1a0fd5c0f85e352f9036436c044e1906fddf4803014ee81027",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/typecheck-pre-native-RESULT.log",
+    "effect": "created",
+    "sha256": "f78ae0f0c44c0905bbdc6089a3c0fdd23541161b2aece231eb606c0c098ab1a9",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/typecheck-verified-RESULT.log",
+    "effect": "created",
+    "sha256": "049f30d16d457b1a0fd5c0f85e352f9036436c044e1906fddf4803014ee81027",
+    "purpose": "Retained command output, including failed/intermediate runs; see validation-log-index-RESULT.json."
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.6/validation-log-index-RESULT.json",
+    "effect": "created",
+    "sha256": "e44656df31dce6710cece2084121469d93b62ddedb73a8b09db10bafa3dbcf36",
+    "purpose": "Task execution metadata and review evidence."
+  }
+]

@@ -1,0 +1,50 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/acceptanceOwnerLifecycle.test.ts src/state/acceptanceReplacementIsolation.test.ts src/state/proposalSurface.test.ts src/state/realizationSurface.test.ts src/state/goalStructurePlanningSafety.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/acceptanceOwnerLifecycle.test.ts (16 tests | 1 failed) 979ms
+   × proposals lazy install before module dispatch retains target and invalidates old command 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/acceptanceOwnerLifecycle.test.ts > proposals lazy install before module dispatch retains target and invalidates old command
+TypeError: adapter.captureRuntimeSnapshot is not a function
+ ❯ src/state/acceptanceOwnerLifecycle.test.ts:125:88
+    123|     expect(owner.getProposalIngressStatus().status).toBe("accepted");
+    124|   } else {
+    125|     const adapter = owner.getRealizationRuntimeAdapter(capability), sn…
+       |                                                                                        ^
+    126|     const pending = owner.realizeAcceptedAllocation("missing");
+    127|     adapter.installRuntimeExact({ ...snapshot, ingress: "ready" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: surface[key] is not a function
+ ❯ src/state/lazySurface.ts:16:26
+     14|           : (...args: unknown[]) =>
+     15|               load().then((surface) =>
+     16|                 (surface[key as keyof T] as (...values: unknown[]) => …
+       |                          ^
+     17|               ),
+     18|     },
+
+This error originated in "src/state/acceptanceOwnerLifecycle.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "replacement at the exact released acceptance handoff makes the outer historical and inner displaced". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 51 passed (52)
+     Errors  1 error
+   Start at  08:20:32
+   Duration  9.68s (transform 1.64s, setup 0ms, import 1.79s, tests 6.35s, environment 942ms)
+

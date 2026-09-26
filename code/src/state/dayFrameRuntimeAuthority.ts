@@ -26,7 +26,10 @@ export type RuntimeAuthorityAdapter<T = unknown> = {
 export type DayFrameRuntimeAuthorityController = {
   begin: (
     kind?: "bootstrap" | "restore" | "internalReplacement",
-  ) => { status: "begun"; epoch: number } | { status: "busy" | "snapshotFailed" };
+  ) =>
+    | { status: "begun"; epoch: number }
+    | { status: "busy" | "snapshotFailed" }
+    | { status: "protected"; participantId: string };
   install: (
     participantId: RuntimeAuthorityAdapter["id"],
     target: unknown,
@@ -34,6 +37,7 @@ export type DayFrameRuntimeAuthorityController = {
   commit: () => { status: "committed" | "notActive" | "flushFailed" };
   abort: () => { status: "aborted" | "notActive" | "abortFailed" };
   getState: () => { status: string };
+  getEpoch?: () => number;
   captureAll: () => Record<string, unknown>;
 };
 

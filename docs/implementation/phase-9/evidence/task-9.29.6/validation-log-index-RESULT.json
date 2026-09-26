@@ -1,0 +1,984 @@
+[
+  {
+    "file": "baseline-archived-format-RESULT.log",
+    "commandOrInitialOutput": [
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "baseline-build-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 223 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-BU1nAfUr.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "baseline-bundle-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-DMHEgbFQ.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-BU1nAfUr.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "baseline-lint-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "baseline-tests-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 test",
+      "npm notice run vitest run --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  172 passed (172)",
+      "Tests  1767 passed (1767)",
+      "Duration  179.52s (transform 5.67s, setup 0ms, import 18.28s, tests 121.10s, environment 21.12s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-actual-envelope-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:199",
+      "if(sourceRows.historicalPlanBatches.length!==1||!sourceRows.historicalPlanDays.length||sourceRows.realizationAuthority.length!==4||!sourceRows.executionHistoryRecords.filter(row=>row.kind === \"assertion\").length||!sourceRows.progressObservations.length)throw Error('Nonempty round-trip fixture missing a required family '+JSON.stringify(Object.fromEntries(Object.entries(sourceRows).map(([k,v])=>[k,v.length]))));",
+      "                                                                                                                                                                                                                                                                   ^",
+      "",
+      "Error: Nonempty round-trip fixture missing a required family {\"proposalAuthority\":4,\"realizationAuthority\":4,\"historicalPlanBatches\":1,\"historicalPlanDays\":1,\"executionHistoryRecords\":1,\"progressObservations\":1}"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-before-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "NATIVE_9296_PASS"
+    ],
+    "observedSummaries": [
+      "NATIVE_9296_PASS"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-core-pass-RESULT.log",
+    "commandOrInitialOutput": [
+      "NATIVE_9296_PASS"
+    ],
+    "observedSummaries": [
+      "NATIVE_9296_PASS"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-extended-pass-before-freeze-RESULT.log",
+    "commandOrInitialOutput": [
+      "NATIVE_9296_PASS"
+    ],
+    "observedSummaries": [
+      "NATIVE_9296_PASS"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-first-RESULT.log",
+    "commandOrInitialOutput": [
+      "node:internal/deps/undici/undici:15157",
+      "      Error.captureStackTrace(err);",
+      "            ^",
+      "",
+      "TypeError: fetch failed"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-fixture-precondition-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:42",
+      "  throw Error(",
+      "        ^",
+      "",
+      "Error: Timed out: document.body?.innerText.includes(\"Ready to publish\")"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-goal-load-wait-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:33",
+      "  if (r.exceptionDetails) throw Error(JSON.stringify(r.exceptionDetails));",
+      "                                ^",
+      "",
+      "Error: {\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":148,\"scriptId\":\"109\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"109\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":154},{\"functionName\":\"\",\"scriptId\":\"109\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":207}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"Error\",\"description\":\"Error: Missing Native full footprint\\n    at <anonymous>:1:155\\n    at <anonymous>:1:208\",\"objectId\":\"-1060878202303417646.4.2\"}}"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-month-target-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:155",
+      " if(value.controls.some(c=>c.height<43.5)) throw Error('Small primary target '+label);",
+      "                                                 ^",
+      "",
+      "Error: Small primary target 320-nonempty-restored"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "NATIVE_9296_PASS"
+    ],
+    "observedSummaries": [
+      "NATIVE_9296_PASS"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-physical-store-name-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:199",
+      "if(sourceRows.historicalPlanBatches.length!==1||!sourceRows.historicalPlanDays.length||sourceRows.realizationAuthority.length!==4||!sourceRows.executionHistory.length||!sourceRows.progressObservations.length)throw Error('Nonempty round-trip fixture missing a required family '+JSON.stringify(Object.fromEntries(Object.entries(sourceRows).map(([k,v])=>[k,v.length]))));",
+      "                                                                                                                                                                ^",
+      "",
+      "TypeError: Cannot read properties of undefined (reading 'length')"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "browser-protected-import-copy-RESULT.log",
+    "commandOrInitialOutput": [
+      "file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:42",
+      "  throw Error(",
+      "        ^",
+      "",
+      "Error: Timed out: document.body?.innerText.includes(\"Backup restore was not started\")"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-acceptance-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-native-target-fix-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-pre-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "build-verified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "bundle-acceptance-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-ChSTt1Tp.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-L6sAQna_.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "bundle-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-Ckd1kepa.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-L6sAQna_.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "bundle-pre-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-BRMBrjCK.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-L6sAQna_.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "bundle-verified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-CT47evaH.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-L6sAQna_.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "consumer-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/ui/tests/ReviewSourceQualification.test.tsx --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  1 passed (1)",
+      "Tests  3 passed (3)",
+      "Duration  2.54s (transform 889ms, setup 0ms, import 908ms, tests 905ms, environment 598ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "consumer-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/ui/tests/ReviewSourceQualification.test.tsx src/ui/tests/ScheduleReviewPanel.test.tsx src/ui/tests/plannerReviewPresentation.test.ts src/ui/tests/scheduleReviewReadiness.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/ui/tests/ReviewSourceQualification.test.tsx > real protected authority invalidates Ready synchronously and shares source/reason with the public command",
+      "Test Files  1 failed | 3 passed (4)",
+      "Tests  1 failed | 24 passed (25)",
+      "Duration  10.54s (transform 2.42s, setup 0ms, import 2.92s, tests 3.49s, environment 3.17s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "diff-check-delivery-RESULT.log",
+    "commandOrInitialOutput": [],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "diff-check-final-RESULT.log",
+    "commandOrInitialOutput": [],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "existing-row-retry-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  1 passed (1)",
+      "Tests  11 passed (11)",
+      "Duration  4.37s (transform 1.51s, setup 0ms, import 1.33s, tests 2.85s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "expanded-matrix-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts src/ui/tests/ReviewSourceQualification.test.tsx --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/state/publicationSourceAdmission.test.ts > existing-row fast path checks the original source witness after physical readback",
+      "Test Files  1 failed | 2 passed (3)",
+      "Tests  1 failed | 38 passed (39)",
+      "Duration  11.17s (transform 1.67s, setup 0ms, import 1.66s, tests 8.65s, environment 523ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-acceptance-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --check .",
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-acceptance-source-RESULT.log",
+    "commandOrInitialOutput": [],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-check-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --check .",
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --check .",
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-delivery-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --check .",
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-family-feedback-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --write src/ui/ScheduleReviewPanel.tsx src/ui/plannerReviewPresentation.ts src/ui/tests/ReviewSourceQualification.test.tsx",
+      "src/ui/ScheduleReviewPanel.tsx 168ms",
+      "src/ui/plannerReviewPresentation.ts 71ms",
+      "src/ui/tests/ReviewSourceQualification.test.tsx 51ms"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-final-source-RESULT.log",
+    "commandOrInitialOutput": [],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-implementation-RESULT.log",
+    "commandOrInitialOutput": [],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-protected-feedback-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --write src/ui/scheduleReviewReadiness.ts src/ui/ScheduleReviewPanel.tsx src/ui/tests/ReviewSourceQualification.test.tsx",
+      "src/ui/scheduleReviewReadiness.ts 67ms",
+      "src/ui/ScheduleReviewPanel.tsx 98ms",
+      "src/ui/tests/ReviewSourceQualification.test.tsx 30ms"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-reports-RESULT.log",
+    "commandOrInitialOutput": [
+      "docs/implementation/phase-9/TASK_9.29.6_CANONICAL_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_ADMISSION_REPAIR_V1_RESULT.md 59ms",
+      "docs/implementation/phase-9/evidence/task-9.29.6/IMPLEMENTATION_AND_REGRESSION_MAP_RESULT.md 31ms"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-transitive-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --write src/state/reviewSourceQualification.ts src/state/publicationSourceQualification.test.ts",
+      "src/state/reviewSourceQualification.ts 174ms",
+      "src/state/publicationSourceQualification.test.ts 199ms"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "format-verified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'prettier' --check .",
+      "Checking formatting...",
+      "All matched files use Prettier code style!"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "full-failure-followup-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/tests/dayFrameStore.test.ts src/ui/tests/GoalStructureAuthoring.test.tsx src/ui/tests/GoalInspectionNavigation.test.tsx --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  3 passed (3)",
+      "Tests  190 passed (190)",
+      "Duration  18.98s (transform 2.74s, setup 0ms, import 2.57s, tests 14.91s, environment 1.12s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "full-tests-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 test",
+      "npm notice run vitest run --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/ui/tests/GoalStructureAuthoring.test.tsx > related navigation retains Structure, Goal and Requested Time drafts; rejected V14 import retains them and successful restore displaces them",
+      "Test Files  1 failed | 175 passed (176)",
+      "Tests  1 failed | 1820 passed (1821)",
+      "Duration  202.87s (transform 5.74s, setup 0ms, import 20.15s, tests 141.31s, environment 21.39s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "full-tests-first-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 test",
+      "npm notice run vitest run --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/ui/tests/GoalInspectionNavigation.test.tsx > real G2 \u2192 Daily Planner \u2192 report \u2192 Back refreshes outcomes while retaining Requested Time and Goal drafts",
+      "FAIL  src/ui/tests/GoalStructureAuthoring.test.tsx > related navigation retains Structure, Goal and Requested Time drafts; rejected V14 import retains them and successful restore displaces them",
+      "FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store mutation persistence results > preserves serialization failure through an authored mutation result",
+      "FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store-owned durability retry > blocks retry from serialization failure without a storage operation",
+      "FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store-owned durability retry > retains a serialization failure produced during eligible snapshot retry",
+      "FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > retained store durability status > retains unavailable and serialization-failure active outcomes",
+      "Test Files  3 failed | 173 passed (176)",
+      "Tests  6 failed | 1806 passed (1812)",
+      "Duration  201.07s (transform 5.79s, setup 0ms, import 19.60s, tests 140.64s, environment 21.47s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "full-tests-isolated-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 test",
+      "npm notice run vitest run --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  176 passed (176)",
+      "Tests  1821 passed (1821)",
+      "Duration  174.31s (transform 4.63s, setup 0ms, import 17.75s, tests 119.45s, environment 20.26s)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "implementation-build-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 build",
+      "npm notice run tsc --noEmit && vite build",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 227 modules transformed."
+    ],
+    "observedSummaries": [
+      "dist/assets/DurationFields-L6sAQna_.js                         0.72 kB \u2502 gzip:   0.39 kB"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "implementation-bundle-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 check:bundle",
+      "npm notice run node scripts/check-bundle.mjs",
+      "{",
+      "  \"initialFiles\": [",
+      "    \"assets/index-DAzAnxHG.js\","
+    ],
+    "observedSummaries": [
+      "\"assets/DurationFields-L6sAQna_.js\","
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "implementation-typecheck-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 typecheck",
+      "npm notice run tsc --noEmit"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-acceptance-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-isolated-after-suite-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-pre-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint .",
+      "",
+      "/home/sid/Penn Digital Services/DayFrame/code/src/state/publicationSourceAdmission.test.ts",
+      "  77:7  error  'proposal' is never reassigned. Use 'const' instead  prefer-const"
+    ],
+    "observedSummaries": [
+      "77:7  error  'proposal' is never reassigned. Use 'const' instead  prefer-const",
+      "205:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "lint-verified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 lint",
+      "npm notice run eslint ."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "matrix-final-pass-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceQualification.test.ts src/state/publicationSourceAdmission.test.ts src/ui/tests/ReviewSourceQualification.test.tsx --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  3 passed (3)",
+      "Tests  46 passed (46)",
+      "Duration  9.74s (transform 2.32s, setup 0ms, import 2.19s, tests 6.41s, environment 673ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "owner-regression-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationReplacementIsolation.test.ts src/state/sleepPublicationExecution.test.ts src/state/sleepPublicationStorage.test.ts src/state/historicalPlanSurface.test.ts src/state/acceptanceLifecycle.test.ts src/state/realizationSurface.test.ts src/state/proposalSurface.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/state/historicalPlanSurface.test.ts > HistoricalPlan IndexedDB authority > publishes only after explicit authorization of a fresh reviewed Preview",
+      "Test Files  1 failed | 5 passed (6)",
+      "Tests  1 failed | 72 passed (73)",
+      "Duration  11.26s (transform 1.88s, setup 0ms, import 2.34s, tests 8.14s, environment 1ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "precedence-owner-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceQualification.test.ts src/state/publicationSourceAdmission.test.ts src/state/publicationReplacementIsolation.test.ts src/state/historicalPlanSurface.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  4 passed (4)",
+      "Tests  73 passed (73)",
+      "Duration  7.83s (transform 1.41s, setup 0ms, import 1.68s, tests 5.61s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "preview-destination-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 preview",
+      "npm notice run vite preview --host 127.0.0.1 --port 4977 --strictPort",
+      "  \u279c  Local:   http://127.0.0.1:4977/"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "preview-source-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 preview",
+      "npm notice run vite preview --host 127.0.0.1 --port 4976 --strictPort",
+      "  \u279c  Local:   http://127.0.0.1:4976/"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "seed-build-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vite' build --config ../docs/implementation/phase-9/evidence/task-9.29.6/seed-build-config-RESULT.mjs",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 158 modules transformed."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "seed-build-acceptance-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vite' build --config ../docs/implementation/phase-9/evidence/task-9.29.6/seed-build-config-RESULT.mjs",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 158 modules transformed."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "seed-build-current-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vite' build --config ../docs/implementation/phase-9/evidence/task-9.29.6/seed-build-config-RESULT.mjs",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 158 modules transformed."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "seed-build-qualified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vite' build --config ../docs/implementation/phase-9/evidence/task-9.29.6/seed-build-config-RESULT.mjs",
+      "vite v8.0.10 building client environment for production...",
+      "\u001b[2K",
+      "transforming...\u2713 158 modules transformed."
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "source-admission-matrix-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts src/state/historicalPlanSurface.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory",
+      "Test Files  2 passed (3)",
+      "Tests  38 passed (47)",
+      "Duration  36.08s (transform 1.25s, setup 0ms, import 1.36s, tests 1.93s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "source-admission-matrix-retry-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts src/state/historicalPlanSurface.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  3 passed (3)",
+      "Tests  47 passed (47)",
+      "Duration  3.41s (transform 860ms, setup 0ms, import 885ms, tests 2.21s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "source-controls-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/state/publicationSourceQualification.test.ts > Goal runtime accepted-pending remains qualified and dry/actual materialization uses identical metadata",
+      "Test Files  1 failed | 1 passed (2)",
+      "Tests  1 failed | 33 passed (34)",
+      "Duration  7.96s (transform 796ms, setup 0ms, import 676ms, tests 7.12s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "source-controls-retry-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  2 passed (2)",
+      "Tests  34 passed (34)",
+      "Duration  3.00s (transform 717ms, setup 0ms, import 645ms, tests 2.19s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "source-matrix-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceQualification.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/state/publicationSourceQualification.test.ts > source mutation during awaited collection read returns explicitly stale Review, then a fresh query qualifies",
+      "Test Files  1 failed (1)",
+      "Tests  1 failed | 19 passed (20)",
+      "Duration  1.84s (transform 844ms, setup 0ms, import 680ms, tests 1.06s, environment 0ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "targeted-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceCommitFaults.test.ts src/state/planningScopeQuery.test.ts src/state/schedulePublication.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx src/ui/tests/PlanningReviewPanel.test.tsx src/ui/tests/scheduleReviewReadiness.test.ts src/ui/tests/plannerReviewPresentation.test.ts --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "FAIL  src/state/publicationSourceCommitFaults.test.ts > publication protection boundary: knownAbort",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > ScheduleReviewPanel > explains blockers and exposes governed existing actions",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports verificationFailedAfterCommit without falsely claiming unchanged history",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports commitStateUncertain without falsely claiming unchanged history",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports writeFailedBeforeCommit without falsely claiming unchanged history",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains contextReplaced without claiming durable publication",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains publicationBusy without claiming durable publication",
+      "FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains pendingPublication without claiming durable publication",
+      "Test Files  2 failed | 5 passed (7)",
+      "Tests  8 failed | 41 passed (49)",
+      "Duration  11.81s (transform 976ms, setup 0ms, import 1.34s, tests 8.80s, environment 949ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "targeted-retry-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 npx",
+      "npm notice run 'vitest' run src/state/publicationSourceCommitFaults.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx --maxWorkers=1",
+      "",
+      " RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code",
+      ""
+    ],
+    "observedSummaries": [
+      "Test Files  2 passed (2)",
+      "Tests  21 passed (21)",
+      "Duration  4.74s (transform 1.20s, setup 0ms, import 1.23s, tests 2.71s, environment 506ms)"
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "typecheck-delivery-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 typecheck",
+      "npm notice run tsc --noEmit"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "typecheck-final-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 typecheck",
+      "npm notice run tsc --noEmit"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  },
+  {
+    "file": "typecheck-pre-native-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 typecheck",
+      "npm notice run tsc --noEmit",
+      "src/state/publicationSourceAdmission.test.ts(294,33): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'unique symbol'."
+    ],
+    "observedSummaries": [
+      "src/state/publicationSourceAdmission.test.ts(294,33): error TS2345: Argument of type 'symbol' is not assignable to parameter of type 'unique symbol'."
+    ],
+    "completeLogRetained": true
+  },
+  {
+    "file": "typecheck-verified-RESULT.log",
+    "commandOrInitialOutput": [
+      "npm notice run dayframe@0.1.0 typecheck",
+      "npm notice run tsc --noEmit"
+    ],
+    "observedSummaries": [],
+    "completeLogRetained": true
+  }
+]

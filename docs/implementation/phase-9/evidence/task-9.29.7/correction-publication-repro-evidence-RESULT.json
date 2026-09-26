@@ -1,0 +1,213 @@
+{
+  "before": {
+    "epistemicClass": "historical",
+    "availability": {
+      "status": "available"
+    },
+    "materialization": {
+      "status": "eligible"
+    },
+    "coverage": "none",
+    "publishedUserDays": [],
+    "missingUserDays": [
+      "2026-09-17"
+    ]
+  },
+  "accepted": {
+    "status": "accepted",
+    "decision": {
+      "kind": "omitOccurrence",
+      "target": {
+        "version": 1,
+        "sourceKind": "template",
+        "template": {
+          "id": "routine",
+          "incarnationId": "29ef4e14-df70-44f9-a513-a688f844c93f"
+        },
+        "recurrence": {
+          "id": "daily",
+          "incarnationId": "7a78d930-466d-4c62-9b97-c9776e2b0b49"
+        },
+        "coordinate": {
+          "frequency": "daily",
+          "scopeKind": "userDay",
+          "userDayDate": "2026-09-17",
+          "slot": 0
+        }
+      },
+      "payload": {},
+      "provenance": {
+        "source": "suggestedFix",
+        "suggestedAction": "skipBlock"
+      },
+      "version": 1,
+      "id": "fe479f07-e107-49bd-a284-e26d0f631161",
+      "acceptedAt": "2026-09-16T12:00:00.000Z"
+    },
+    "decisions": [
+      {
+        "kind": "omitOccurrence",
+        "target": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "29ef4e14-df70-44f9-a513-a688f844c93f"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "7a78d930-466d-4c62-9b97-c9776e2b0b49"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-17",
+            "slot": 0
+          }
+        },
+        "payload": {},
+        "provenance": {
+          "source": "suggestedFix",
+          "suggestedAction": "skipBlock"
+        },
+        "version": 1,
+        "id": "fe479f07-e107-49bd-a284-e26d0f631161",
+        "acceptedAt": "2026-09-16T12:00:00.000Z"
+      }
+    ],
+    "persistence": {
+      "status": "persisted"
+    }
+  },
+  "preview": {
+    "stale": false,
+    "foundation": "allocatable",
+    "friction": [],
+    "decisions": [
+      {
+        "decisionId": "fe479f07-e107-49bd-a284-e26d0f631161",
+        "kind": "omitOccurrence",
+        "target": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "29ef4e14-df70-44f9-a513-a688f844c93f"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "7a78d930-466d-4c62-9b97-c9776e2b0b49"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-17",
+            "slot": 0
+          }
+        },
+        "status": "applied"
+      }
+    ]
+  },
+  "qualification": {
+    "proposal": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    },
+    "realization": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    },
+    "activeSetup": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "planDecision": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "composition": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "goal": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "sleepFoundation": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "historicalPlan": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    }
+  },
+  "publication": {
+    "epistemicClass": "historical",
+    "availability": {
+      "status": "available"
+    },
+    "materialization": {
+      "status": "blocked",
+      "reason": "inconsistentPlanContext"
+    },
+    "coverage": "none",
+    "publishedUserDays": [],
+    "missingUserDays": [
+      "2026-09-17"
+    ]
+  },
+  "materialized": {
+    "status": "inconsistentPlanContext",
+    "detail": "planDecision:insufficientHistoricalContext"
+  },
+  "published": {
+    "status": "rejected",
+    "reason": "materializationFailure"
+  },
+  "counts": {
+    "attempts": 0,
+    "transactions": 0
+  }
+}

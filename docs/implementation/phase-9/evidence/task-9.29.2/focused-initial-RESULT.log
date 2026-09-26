@@ -1,0 +1,44 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/historicalPlanSurface.test.ts src/state/schedulePublication.test.ts src/state/dayFrameAuthorityTransaction.test.ts src/state/dayFrameRestoreComposition.test.ts src/state/dayFrameBackupV14Restore.test.ts src/infrastructure/storage/indexedDbCollectionStorage.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/historicalPlanSurface.test.ts (18 tests | 4 failed) 228ms
+     × protects a complete commit after indexedRead without blind retry 8ms
+     × protects a complete commit after metadataRead without blind retry 2ms
+     × protects a complete commit after missingMetadata without blind retry 2ms
+     × protects a complete commit after throwAfterCommit without blind retry 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/historicalPlanSurface.test.ts > Task 9.9 commit certainty > protects a complete commit after indexedRead without blind retry
+ FAIL  src/state/historicalPlanSurface.test.ts > Task 9.9 commit certainty > protects a complete commit after metadataRead without blind retry
+ FAIL  src/state/historicalPlanSurface.test.ts > Task 9.9 commit certainty > protects a complete commit after missingMetadata without blind retry
+ FAIL  src/state/historicalPlanSurface.test.ts > Task 9.9 commit certainty > protects a complete commit after throwAfterCommit without blind retry
+AssertionError: expected { status: 'rejected', …(2) } to match object { Object (status) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "publicationBlockedProtected",
++   "status": "rejected",
+  }
+
+ ❯ src/state/historicalPlanSurface.test.ts:488:56
+    486|       });
+    487|       expect(surface.getStatus()).toMatchObject({ status: "protected" …
+    488|       expect(await surface.publishAtomically(batch())).toMatchObject({
+       |                                                        ^
+    489|         status: "publicationBlockedProtected",
+    490|       });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  4 failed | 64 passed (68)
+   Start at  09:49:38
+   Duration  9.42s (transform 1.66s, setup 0ms, import 1.96s, tests 5.66s, environment 1.10s)
+

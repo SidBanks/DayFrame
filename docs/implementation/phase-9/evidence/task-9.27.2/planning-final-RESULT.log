@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=2 src/state/goalStructurePlanningSafety.test.ts
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:21:50
+   Duration  6.56s (transform 1.18s, setup 0ms, import 1.07s, tests 4.70s, environment 649ms)
+

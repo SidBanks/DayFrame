@@ -1,0 +1,437 @@
+{
+  "app": "DayFrame",
+  "surface": "backup",
+  "version": 14,
+  "exportedAt": "2026-09-24T15:26:17.283Z",
+  "data": {
+    "active": {
+      "surfaceVersion": 3,
+      "data": {
+        "sleepRequirements": [
+          {
+            "enabled": true,
+            "effectiveFrom": "2026-09-01",
+            "weekdays": "all",
+            "durationMinutes": 120,
+            "bufferBeforeMinutes": 30,
+            "bufferAfterMinutes": 30,
+            "window": {
+              "kind": "clock",
+              "startClock": "00:00",
+              "endClock": "08:00"
+            },
+            "version": 1,
+            "id": "sleep",
+            "incarnationId": "f93d2079-a14c-4b97-a36e-b35a9cb0c9d5",
+            "revision": 1,
+            "createdAt": "2026-09-01T00:00:00.000Z",
+            "updatedAt": "2026-09-01T00:00:00.000Z"
+          }
+        ],
+        "schedulingPreferences": {
+          "dayBoundaryStartTime": "00:00",
+          "weekStartsOn": "monday"
+        },
+        "previewRange": {
+          "source": "custom",
+          "preset": "custom",
+          "startDate": "2026-09-17",
+          "endDate": "2026-09-17"
+        },
+        "shiftDefinitions": [
+          {
+            "id": "day",
+            "userId": "u",
+            "name": "Native publication source",
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "workDays": [
+              "thursday"
+            ],
+            "crossesMidnight": false,
+            "createdAt": "2026-09-01T00:00:00.000Z",
+            "updatedAt": "2026-09-01T00:00:00.000Z",
+            "incarnationId": "08081ab7-75dd-455c-8196-32e2450dff50"
+          }
+        ],
+        "shiftCycles": [
+          {
+            "id": "cycle",
+            "userId": "u",
+            "name": "Cycle",
+            "type": "fixedSegments",
+            "startsOnDate": "2026-09-01",
+            "endsOnDate": "2027-01-01",
+            "segments": [
+              {
+                "id": "segment",
+                "shiftCycleId": "cycle",
+                "shiftDefinitionId": "day",
+                "startsOnDate": "2026-09-01",
+                "endsOnDate": "2027-01-01",
+                "incarnationId": "dd21fc0c-d5ff-467d-802a-b261787c7046"
+              }
+            ],
+            "createdAt": "2026-09-01T00:00:00.000Z",
+            "updatedAt": "2026-09-01T00:00:00.000Z",
+            "incarnationId": "6fd51864-8edc-4748-939c-776f2ee2e4ea",
+            "sequence": []
+          }
+        ],
+        "blockTemplates": [
+          {
+            "id": "routine",
+            "userId": "u",
+            "title": "Routine",
+            "category": "maintenance",
+            "placementType": "fixed",
+            "fixedStartTime": "18:00",
+            "durationMinutes": 30,
+            "priority": 2,
+            "preferredWindow": "anyAvailable",
+            "rescheduleBehavior": "askUser",
+            "requiresResource": false,
+            "externalResources": [],
+            "enabled": true,
+            "createdAt": "2026-09-01T00:00:00.000Z",
+            "updatedAt": "2026-09-01T00:00:00.000Z",
+            "incarnationId": "49b0f7cd-f123-4534-bc32-48113f4f0846"
+          }
+        ],
+        "blockRecurrences": [
+          {
+            "id": "daily",
+            "blockTemplateId": "routine",
+            "frequency": "daily",
+            "incarnationId": "db56f725-a21f-4169-bfdf-cfbb05955e57"
+          }
+        ],
+        "manualEvents": []
+      }
+    },
+    "profiles": {
+      "surfaceVersion": 3,
+      "profiles": [],
+      "quarantinedProfiles": []
+    },
+    "planDecisions": {
+      "surfaceVersion": 1,
+      "decisions": [],
+      "quarantinedDecisions": []
+    },
+    "executionHistory": {
+      "app": "DayFrame",
+      "surface": "executionHistory",
+      "version": 1,
+      "records": [],
+      "quarantinedComponents": []
+    },
+    "historicalPlan": {
+      "surfaceVersion": 1,
+      "batches": [
+        {
+          "surfaceVersion": 1,
+          "version": 1,
+          "id": "dbd0e5cc-3aca-44a1-8b27-403a9316250b",
+          "publishedAt": "2026-09-24T15:26:15.161Z",
+          "range": {
+            "startUserDayDate": "2026-09-17",
+            "endUserDayDate": "2026-09-17"
+          },
+          "days": [
+            {
+              "version": 2,
+              "sleepCoverage": "satisfied",
+              "userDayDate": "2026-09-17",
+              "dayBoundaryStartTime": "00:00",
+              "weekStartsOn": "monday",
+              "utcOffsetMinutes": -300,
+              "occurrences": [
+                {
+                  "version": 2,
+                  "reference": {
+                    "version": 1,
+                    "sourceKind": "template",
+                    "template": {
+                      "id": "routine",
+                      "incarnationId": "49b0f7cd-f123-4534-bc32-48113f4f0846"
+                    },
+                    "recurrence": {
+                      "id": "daily",
+                      "incarnationId": "db56f725-a21f-4169-bfdf-cfbb05955e57"
+                    },
+                    "coordinate": {
+                      "frequency": "daily",
+                      "scopeKind": "userDay",
+                      "userDayDate": "2026-09-17",
+                      "slot": 0
+                    }
+                  },
+                  "sourceFamily": "template",
+                  "title": "Routine",
+                  "category": "maintenance",
+                  "plan": {
+                    "state": "scheduled",
+                    "startsAt": "2026-09-17T23:00:00.000Z",
+                    "endsAt": "2026-09-17T23:30:00.000Z"
+                  },
+                  "timing": {
+                    "kind": "timed"
+                  },
+                  "goals": []
+                },
+                {
+                  "version": 2,
+                  "reference": {
+                    "version": 1,
+                    "sourceKind": "work",
+                    "cycle": {
+                      "id": "cycle",
+                      "incarnationId": "6fd51864-8edc-4748-939c-776f2ee2e4ea"
+                    },
+                    "entry": {
+                      "id": "segment",
+                      "incarnationId": "dd21fc0c-d5ff-467d-802a-b261787c7046",
+                      "kind": "segment"
+                    },
+                    "shiftDefinition": {
+                      "id": "day",
+                      "incarnationId": "08081ab7-75dd-455c-8196-32e2450dff50"
+                    },
+                    "coordinate": {
+                      "localStartDate": "2026-09-17",
+                      "slot": 0
+                    }
+                  },
+                  "sourceFamily": "work",
+                  "title": "Native publication source",
+                  "category": "work",
+                  "plan": {
+                    "state": "scheduled",
+                    "startsAt": "2026-09-17T17:00:00.000Z",
+                    "endsAt": "2026-09-17T18:00:00.000Z"
+                  },
+                  "timing": {
+                    "kind": "timed"
+                  },
+                  "goals": [
+                    {
+                      "version": 1,
+                      "goalId": "8e5e4c20-9b54-476e-bd25-8192659e05a4",
+                      "goalRevision": 2,
+                      "title": "Native publication source Goal",
+                      "status": "active"
+                    }
+                  ]
+                },
+                {
+                  "version": 4,
+                  "sourceFamily": "sleepRequirement",
+                  "reference": {
+                    "version": 1,
+                    "sourceKind": "sleepRequirement",
+                    "requirement": {
+                      "id": "sleep",
+                      "incarnationId": "f93d2079-a14c-4b97-a36e-b35a9cb0c9d5"
+                    },
+                    "coordinate": {
+                      "scopeKind": "userDay",
+                      "userDayDate": "2026-09-17",
+                      "slot": 0
+                    }
+                  },
+                  "title": "Sleep",
+                  "category": "sleep",
+                  "timing": {
+                    "kind": "timed"
+                  },
+                  "plan": {
+                    "state": "scheduled",
+                    "startsAt": "2026-09-17T05:30:00.000Z",
+                    "endsAt": "2026-09-17T07:30:00.000Z"
+                  },
+                  "sleep": {
+                    "publicationBatchId": "dbd0e5cc-3aca-44a1-8b27-403a9316250b",
+                    "publicationRange": {
+                      "startUserDayDate": "2026-09-17",
+                      "endUserDayDate": "2026-09-17"
+                    },
+                    "requirement": {
+                      "enabled": true,
+                      "effectiveFrom": "2026-09-01",
+                      "weekdays": "all",
+                      "durationMinutes": 120,
+                      "bufferBeforeMinutes": 30,
+                      "bufferAfterMinutes": 30,
+                      "window": {
+                        "kind": "clock",
+                        "startClock": "00:00",
+                        "endClock": "08:00"
+                      },
+                      "version": 1,
+                      "id": "sleep",
+                      "incarnationId": "f93d2079-a14c-4b97-a36e-b35a9cb0c9d5",
+                      "revision": 1,
+                      "createdAt": "2026-09-01T00:00:00.000Z",
+                      "updatedAt": "2026-09-01T00:00:00.000Z"
+                    },
+                    "occurrence": {
+                      "version": 1,
+                      "reference": {
+                        "version": 1,
+                        "sourceKind": "sleepRequirement",
+                        "requirement": {
+                          "id": "sleep",
+                          "incarnationId": "f93d2079-a14c-4b97-a36e-b35a9cb0c9d5"
+                        },
+                        "coordinate": {
+                          "scopeKind": "userDay",
+                          "userDayDate": "2026-09-17",
+                          "slot": 0
+                        }
+                      },
+                      "ownerDay": "2026-09-17",
+                      "membership": "requested",
+                      "requirementRevision": 1,
+                      "durationMinutes": 120,
+                      "bufferBeforeMinutes": 30,
+                      "bufferAfterMinutes": 30,
+                      "windowIntent": {
+                        "kind": "clock",
+                        "startClock": "00:00",
+                        "endClock": "08:00"
+                      },
+                      "derivationContext": {
+                        "version": 1,
+                        "ownerWindow": {
+                          "startsAt": "2026-09-17T05:00:00.000Z",
+                          "endsAt": "2026-09-18T05:00:00.000Z"
+                        },
+                        "dayBoundaryStartTime": "00:00",
+                        "nextDayBoundaryStartTime": "00:00",
+                        "weekStartsOn": "monday",
+                        "work": [
+                          {
+                            "reference": {
+                              "version": 1,
+                              "sourceKind": "work",
+                              "cycle": {
+                                "id": "cycle",
+                                "incarnationId": "6fd51864-8edc-4748-939c-776f2ee2e4ea"
+                              },
+                              "entry": {
+                                "id": "segment",
+                                "incarnationId": "dd21fc0c-d5ff-467d-802a-b261787c7046",
+                                "kind": "segment"
+                              },
+                              "shiftDefinition": {
+                                "id": "day",
+                                "incarnationId": "08081ab7-75dd-455c-8196-32e2450dff50"
+                              },
+                              "coordinate": {
+                                "localStartDate": "2026-09-17",
+                                "slot": 0
+                              }
+                            },
+                            "interval": {
+                              "startsAt": "2026-09-17T17:00:00.000Z",
+                              "endsAt": "2026-09-17T18:00:00.000Z"
+                            }
+                          }
+                        ],
+                        "offDay": false,
+                        "windowProvenance": "clock",
+                        "physicalWindow": {
+                          "startsAt": "2026-09-17T05:00:00.000Z",
+                          "endsAt": "2026-09-17T13:00:00.000Z"
+                        },
+                        "preferredSleepStart": "2026-09-17T05:30:00.000Z",
+                        "timezone": "America/Chicago",
+                        "offsetMinutes": [
+                          300,
+                          300
+                        ],
+                        "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+                      },
+                      "sleepStart": "2026-09-17T05:30:00.000Z",
+                      "sleepEnd": "2026-09-17T07:30:00.000Z",
+                      "footprintStart": "2026-09-17T05:00:00.000Z",
+                      "footprintEnd": "2026-09-17T08:00:00.000Z",
+                      "provenance": {
+                        "policy": "sleep-minute-joint-v1",
+                        "dependencyFingerprint": "b707829798d85808"
+                      }
+                    },
+                    "acceptedPlacement": null,
+                    "version": 1,
+                    "snapshotId": "d702ccd7ed314d7f",
+                    "ownerUtcOffsetMinutes": -300
+                  },
+                  "goals": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "goals": {
+      "version": 1,
+      "goals": [
+        {
+          "version": 1,
+          "id": "8e5e4c20-9b54-476e-bd25-8192659e05a4",
+          "revision": 2,
+          "title": "Native publication source Goal",
+          "status": "active",
+          "createdAt": "2026-09-24T15:26:14.635Z",
+          "updatedAt": "2026-09-24T15:26:14.636Z",
+          "links": [
+            {
+              "sourceKind": "shiftDefinition",
+              "id": "day",
+              "incarnationId": "08081ab7-75dd-455c-8196-32e2450dff50"
+            }
+          ]
+        }
+      ]
+    },
+    "measurementDefinitions": {
+      "version": 1,
+      "definitions": []
+    },
+    "progressObservations": {
+      "version": 1,
+      "observations": []
+    },
+    "goalStructure": {
+      "version": 1,
+      "relationships": [],
+      "milestones": []
+    },
+    "goalPlanning": {
+      "version": 2,
+      "demands": [],
+      "priorities": [],
+      "footprintSpecifications": [],
+      "footprintAssociations": []
+    },
+    "composition": {
+      "version": 1,
+      "relationships": [],
+      "decisions": []
+    },
+    "proposals": {
+      "version": 1,
+      "proposals": [],
+      "candidates": [],
+      "decisions": [],
+      "acceptedAllocations": []
+    },
+    "realizations": {
+      "version": 1,
+      "realizations": [],
+      "facts": []
+    }
+  }
+}

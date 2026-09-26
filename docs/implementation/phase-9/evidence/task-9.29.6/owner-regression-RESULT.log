@@ -1,0 +1,38 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationReplacementIsolation.test.ts src/state/sleepPublicationExecution.test.ts src/state/sleepPublicationStorage.test.ts src/state/historicalPlanSurface.test.ts src/state/acceptanceLifecycle.test.ts src/state/realizationSurface.test.ts src/state/proposalSurface.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/historicalPlanSurface.test.ts (18 tests | 1 failed) 154ms
+     × publishes only after explicit authorization of a fresh reviewed Preview 56ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/historicalPlanSurface.test.ts > HistoricalPlan IndexedDB authority > publishes only after explicit authorization of a fresh reviewed Preview
+AssertionError: expected { status: 'rejected', …(3) } to match object { status: 'published' }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "published",
++   "status": "rejected",
+  }
+
+ ❯ src/state/historicalPlanSurface.test.ts:166:55
+    164|       publishedAt: "2026-05-04T13:00:00.000Z",
+    165|     };
+    166|     expect(await store.publishScheduleRange(command)).toMatchObject({ …
+       |                                                       ^
+    167|     expect(await store.publishScheduleRange(command)).toEqual({ status…
+    168|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 72 passed (73)
+   Start at  11:33:59
+   Duration  11.26s (transform 1.88s, setup 0ms, import 2.34s, tests 8.14s, environment 1ms)
+

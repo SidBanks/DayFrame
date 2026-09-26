@@ -1,0 +1,62 @@
+{
+  "320": {
+    "exportSha256": "c25096845380d368dd1871433053e99011745ab25f96a8310d17b35623e69b4b",
+    "exactAuthoredSleepRequirement": true,
+    "exactSleepAndFootprintGeometry": true,
+    "exactRealizedFactsAndLineage": true,
+    "roles": [
+      "bufferProtection",
+      "productiveGoalWork",
+      "supportActivity"
+    ],
+    "historicalBatches": 1,
+    "occurrences": 7,
+    "actualRecords": 1,
+    "progressObservations": 1
+  },
+  "390": {
+    "exportSha256": "79bb86d7cf50f2801b883969c903bd9c8cafdbe16ea64959043035817086026b",
+    "exactAuthoredSleepRequirement": true,
+    "exactSleepAndFootprintGeometry": true,
+    "exactRealizedFactsAndLineage": true,
+    "roles": [
+      "bufferProtection",
+      "productiveGoalWork",
+      "supportActivity"
+    ],
+    "historicalBatches": 1,
+    "occurrences": 7,
+    "actualRecords": 1,
+    "progressObservations": 1
+  },
+  "768": {
+    "exportSha256": "930b4deca1a747ca33f4ea2ca21e3237c6428eb8c6608e45ed675155f1fa2991",
+    "exactAuthoredSleepRequirement": true,
+    "exactSleepAndFootprintGeometry": true,
+    "exactRealizedFactsAndLineage": true,
+    "roles": [
+      "bufferProtection",
+      "productiveGoalWork",
+      "supportActivity"
+    ],
+    "historicalBatches": 1,
+    "occurrences": 7,
+    "actualRecords": 1,
+    "progressObservations": 1
+  },
+  "1280": {
+    "exportSha256": "6d54e1cd2b278745a5b0aa0b04d6c63da86dde0ec6bc9464795722633829bfa2",
+    "exactAuthoredSleepRequirement": true,
+    "exactSleepAndFootprintGeometry": true,
+    "exactRealizedFactsAndLineage": true,
+    "roles": [
+      "bufferProtection",
+      "productiveGoalWork",
+      "supportActivity"
+    ],
+    "historicalBatches": 1,
+    "occurrences": 7,
+    "actualRecords": 1,
+    "progressObservations": 1
+  }
+}

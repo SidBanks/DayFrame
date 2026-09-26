@@ -1,0 +1,27 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/omissionPublication.test.ts (21 tests | 1 failed) 8412ms
+   × keeps the qualification physical admission guard on omitted publication 5010ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/omissionPublication.test.ts > keeps the qualification physical admission guard on omitted publication
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/state/omissionPublication.test.ts:157:60
+    155| });
+    156|
+    157| it.each(["authored", "decision", "qualification"] as const)("keeps the…
+       |                                                            ^
+    158|   const {deferred}=await import("./acceptanceLifecycleTestFixtures.js"…
+    159|   const f=await omitted(change==="qualification"),command=await f.comm…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  21:59:17
+   Duration  9.40s (transform 967ms, setup 0ms, import 881ms, tests 8.41s, environment 0ms)
+

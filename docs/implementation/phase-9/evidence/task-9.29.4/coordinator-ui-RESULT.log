@@ -1,0 +1,32 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/acceptanceCoordinator.test.ts src/ui/tests/ConstructivePlanningWorkflow.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/acceptanceCoordinator.test.ts (4 tests | 1 failed) 369ms
+   × all four real registered owners must settle before before-snapshot replacement 298ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/acceptanceCoordinator.test.ts > all four real registered owners must settle before before-snapshot replacement
+AssertionError: expected 'rejected' to be 'accepted' // Object.is equality
+
+Expected: "accepted"
+Received: "rejected"
+
+ ❯ src/state/acceptanceCoordinator.test.ts:12:60
+     10|   const db = createDayFrameDurableDb(), proposals = createProposalSurf…
+     11|   const { store, input } = await prepared(true, { restoreIndexedDb: db…
+     12|   expect((await store.acceptProposalOption(input)).status).toBe("accep…
+       |                                                            ^
+     13|   const accepted = store.exportProposalAuthority().acceptedAllocations…
+     14|   const gates = Object.fromEntries(["realizationAuthority", "proposalA…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 16 passed (17)
+   Start at  08:44:46
+   Duration  7.54s (transform 1.96s, setup 0ms, import 1.73s, tests 5.15s, environment 470ms)
+

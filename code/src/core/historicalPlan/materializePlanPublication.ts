@@ -1,3 +1,7 @@
+import { queryEffectiveSleepRequirement } from "../sleep/sleepRequirement.js";
+import { createPublishedSleepSnapshot } from "../sleep/publishedSleep.js";
+import { deriveFoundationalSchedule } from "../planning/deriveFoundationalSchedule.js";
+import type { SleepFoundationAuthority } from "../sleep/sleepFoundationalOccupancy.js";
 import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../cycles/resolveEffectiveSchedulePreferences.js";
 import {
   materializeHistoricalExecutionTarget,
@@ -11,6 +15,8 @@ import {
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION,
   createHistoricalRealizedScheduleSnapshot,
   createPlanPublicationBatch,
+  createPlanPublicationBatchId,
+  isPlanPublicationBatchId,
   type HistoricalPlanConstructionProviders,
   type HistoricalPlanDayPublicationV1,
   type HistoricalOccurrenceTimingV2,
@@ -35,12 +41,13 @@ export type MaterializePlanPublicationResult =
 
 export function materializePlanPublication(input: {
   authoredSetup: DayFrameAuthoredSetup;
+  sleepAuthority?: SleepFoundationAuthority;
   preview?: DayFramePreview | null;
   providers?: HistoricalPlanConstructionProviders;
   goals?: readonly GoalV1[];
   publicationRange?: PublicationRangeV1;
 }): MaterializePlanPublicationResult {
-  const preview = input.preview;
+  let preview = input.preview;
   if (!preview) return { status: "noPreview" };
   if (preview.isStale) return { status: "stalePreview" };
   if (preview.revisedAt !== undefined) return { status: "tryPreview" };
@@ -61,6 +68,38 @@ export function materializePlanPublication(input: {
   const publicationEndInclusive = addUserDayLabels(publicationRange.endUserDayDateExclusive, -1);
   const dates = enumerateDates(publicationRange.startUserDayDate, publicationEndInclusive);
   if (!dates) return { status: "invalidCandidate", detail: "requested range is invalid" };
+  const hasSleep =
+    (input.authoredSetup.sleepRequirements?.length ?? 0) > 0 ||
+    input.sleepAuthority?.planDecisions.some((d) => d.kind === "placeSleepOccurrence") ||
+    !!preview.result.foundation;
+  if (hasSleep) {
+    if (!input.sleepAuthority)
+      return { status: "inconsistentPlanContext", detail: "Current Sleep authority is required" };
+    const fresh = deriveFoundationalSchedule({
+      authoredState:
+        input.authoredSetup as import("../../state/types.js").ActiveDayFrameAuthoredSetup,
+      authority: input.sleepAuthority,
+      ownerRange: {
+        startUserDayDate: previewRange.startUserDayDate,
+        endUserDayDateExclusive: previewRange.endUserDayDateExclusive,
+      },
+      generatedAt: preview.generatedAt,
+    });
+    if (fresh.foundation.status !== "allocatable")
+      return {
+        status: "inconsistentPlanContext",
+        detail: "Sleep foundation is not publication eligible",
+      };
+    preview = { ...preview, result: fresh.schedule };
+  }
+  let batchId: import("./historicalPlan.js").PlanPublicationBatchId;
+  try {
+    batchId = (input.providers?.allocateBatchId ?? createPlanPublicationBatchId)();
+  } catch {
+    return { status: "invalidCandidate", detail: "Publication identity allocation failed" };
+  }
+  if (!isPlanPublicationBatchId(batchId))
+    return { status: "invalidCandidate", detail: "Publication identity is invalid" };
   const days = new Map<string, HistoricalPlanDayPublicationV1>();
   for (const userDayDate of dates) {
     const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
@@ -69,7 +108,25 @@ export function materializePlanPublication(input: {
       userDayDate,
     });
     days.set(userDayDate, {
-      version: HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
+      version:
+        preview.result.foundation || input.sleepAuthority?.status === "complete"
+          ? 2
+          : HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
+      ...(preview.result.foundation || input.sleepAuthority?.status === "complete"
+        ? {
+            sleepCoverage: (() => {
+              const status = queryEffectiveSleepRequirement(
+                input.authoredSetup.sleepRequirements ?? [],
+                userDayDate,
+              ).status;
+              return status === "effective"
+                ? ("satisfied" as const)
+                : status === "notConfigured"
+                  ? ("notConfigured" as const)
+                  : ("notApplicable" as const);
+            })(),
+          }
+        : {}),
       userDayDate,
       dayBoundaryStartTime: preferences.dayBoundaryStartTime,
       weekStartsOn: preferences.weekStartsOn,
@@ -119,6 +176,13 @@ export function materializePlanPublication(input: {
     if (result.status !== "materialized")
       return { status: "inconsistentPlanContext", detail: `${selection.kind}:${result.status}` };
     const containingDay = days.get(result.target.snapshot.userDay.date);
+    // Resolve omission evidence before range filtering; missing context must still fail closed.
+    if (
+      !containingDay &&
+      selection.kind === "planDecision" &&
+      result.target.snapshot.plan.state === "omitted"
+    )
+      continue;
     if (!containingDay)
       return {
         status: "inconsistentPlanContext",
@@ -199,6 +263,42 @@ export function materializePlanPublication(input: {
       }),
     );
   }
+  const sleep = preview.result.foundation?.sleep;
+  if (sleep?.status === "satisfied")
+    for (const occurrence of sleep.occurrences) {
+      const day = days.get(occurrence.ownerDay);
+      if (!day) continue;
+      const requirement = input.authoredSetup.sleepRequirements?.find(
+        (r) =>
+          r.id === occurrence.reference.requirement.id &&
+          r.incarnationId === occurrence.reference.requirement.incarnationId &&
+          r.revision === occurrence.requirementRevision,
+      );
+      if (!requirement)
+        return {
+          status: "inconsistentPlanContext",
+          detail: "Missing frozen Sleep requirement revision",
+        };
+      const acceptedPlacement =
+        input.sleepAuthority?.planDecisions.find(
+          (d): d is Extract<typeof d, { kind: "placeSleepOccurrence" }> =>
+            d.kind === "placeSleepOccurrence" &&
+            d.payload.revokedAt === null &&
+            durableOccurrenceReferencesEqual(d.target, occurrence.reference),
+        ) ?? null;
+      day.occurrences.push(
+        createPublishedSleepSnapshot({
+          publicationBatchId: batchId,
+          publicationRange: {
+            startUserDayDate: publicationRange.startUserDayDate,
+            endUserDayDate: publicationEndInclusive,
+          },
+          requirement,
+          occurrence,
+          acceptedPlacement,
+        }),
+      );
+    }
   const construction = createPlanPublicationBatch(
     {
       range: {
@@ -207,7 +307,7 @@ export function materializePlanPublication(input: {
       },
       days: [...days.values()],
     },
-    input.providers,
+    { ...input.providers, allocateBatchId: () => batchId },
   );
   return construction.status === "created"
     ? { status: "materialized", batch: construction.batch }
@@ -240,7 +340,8 @@ function matchesReference(
   link: GoalCommitmentLinkV1,
   reference: import("../occurrences/durableOccurrenceReference.js").DurableOccurrenceReference,
 ) {
-  if (reference.sourceKind === "acceptedAllocation") return false;
+  if (reference.sourceKind === "acceptedAllocation" || reference.sourceKind === "sleepRequirement")
+    return false;
   const lifetimes =
     reference.sourceKind === "template"
       ? [

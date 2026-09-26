@@ -56,7 +56,7 @@ describe("Active V1 to V2 migration", () => {
     expect(store.getActiveLocalIngressStatus().status).toBe("accepted");
     expect(store.getDurabilityStatus().activeState).toBe("durable");
     expect(store.getState().schedulingPreferences.dayBoundaryStartTime).toBe("04:00");
-    expect(persisted).toMatchObject({ app: "DayFrame", surface: "active", version: 2 });
+    expect(persisted).toMatchObject({ app: "DayFrame", surface: "active", version: 3 });
     expect(localStorage.getItem(DAYFRAME_STORAGE_KEY)).not.toBeNull();
     expect(localStorage.getItem(DAYFRAME_ACTIVE_V2_ESTABLISHED_KEY)).toBe("1");
   });

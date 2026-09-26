@@ -1,0 +1,13 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ConstructivePlanningWorkflow.test.tsx src/ui/tests/ScheduleReviewWorkspace.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  20:56:58
+   Duration  21.31s (transform 3.40s, setup 0ms, import 3.19s, tests 15.80s, environment 1.96s)
+

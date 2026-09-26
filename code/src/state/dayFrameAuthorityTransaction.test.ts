@@ -68,3 +68,28 @@ describe("observable authority transaction", () => {
     expect(transaction.begin("restore")).toEqual({ status: "busy" });
   });
 });
+
+it("closes admission and advances epoch before snapshot callbacks; failed capture never revives origin", () => {
+  let observed = "";
+  let observedEpoch = 0;
+  const transaction = createDayFrameAuthorityTransaction({
+    scheduler: createDayFrameNotificationScheduler(),
+    participants: [
+      {
+        id: "probe",
+        capture: () => {
+          observed = transaction.getState().status;
+          observedEpoch = transaction.getEpoch();
+          expect(transaction.begin()).toEqual({ status: "busy" });
+          throw Error("snapshot failure");
+        },
+        installExact: () => {},
+      },
+    ],
+  });
+  expect(transaction.begin()).toEqual({ status: "snapshotFailed" });
+  expect(observed).toBe("active");
+  expect(observedEpoch).toBe(1);
+  expect(transaction.getState()).toEqual({ status: "inactive" });
+  expect(transaction.getEpoch()).toBe(1);
+});

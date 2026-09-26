@@ -1,3 +1,5 @@
+import { useGoalPresentationState } from "./useGoalPresentationState.js";
+import type { GoalEditingContext } from "./goalEditingContext.js";
 import { useEffect, useId, useRef, useState, type ReactElement, type RefObject } from "react";
 import type { GoalV1 } from "../core/goals/goal.js";
 import {
@@ -29,23 +31,60 @@ type Editing =
 export function GoalProgressReportingSection({
   goal,
   store,
+  context,
 }: {
   goal: GoalV1;
   store: Store;
+  context?: GoalEditingContext;
 }): ReactElement {
   const [history, setHistory] = useState<GoalProgressObservationHistoryResult>(() =>
     store.queryGoalProgressObservationHistory(goal.id),
   );
-  const [editing, setEditing] = useState<Editing>(null);
-  const [draft, setDraft] = useState<Draft>({
-    value: "",
-    observedLocal: localDateTime(new Date()),
-  });
-  const [remove, setRemove] = useState<GoalProgressObservationV1 | null>(null);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [valueError, setValueError] = useState(""),
-    [timeError, setTimeError] = useState("");
+  const [editing, setEditing] = useGoalPresentationState<Editing>(
+    context,
+    store,
+    `observation:${goal.id}:editing`,
+    null,
+  );
+  const [draft, setDraft] = useGoalPresentationState<Draft>(
+    context,
+    store,
+    `observation:${goal.id}:draft`,
+    {
+      value: "",
+      observedLocal: localDateTime(new Date()),
+    },
+  );
+  const [remove, setRemove] = useGoalPresentationState<GoalProgressObservationV1 | null>(
+    context,
+    store,
+    `observation:${goal.id}:remove`,
+    null,
+  );
+  const [error, setError] = useGoalPresentationState(
+    context,
+    store,
+    `observation:${goal.id}:error`,
+    "",
+  );
+  const [message, setMessage] = useGoalPresentationState(
+    context,
+    store,
+    `observation:${goal.id}:message`,
+    "",
+  );
+  const [valueError, setValueError] = useGoalPresentationState(
+      context,
+      store,
+      `observation:${goal.id}:valueError`,
+      "",
+    ),
+    [timeError, setTimeError] = useGoalPresentationState(
+      context,
+      store,
+      `observation:${goal.id}:timeError`,
+      "",
+    );
   const headingRef = useRef<HTMLHeadingElement>(null),
     valueRef = useRef<HTMLInputElement>(null),
     timeRef = useRef<HTMLInputElement>(null),
@@ -56,10 +95,6 @@ export function GoalProgressReportingSection({
   const durability = store.getProgressObservationDurabilityStatus();
   useEffect(() => {
     setHistory(store.queryGoalProgressObservationHistory(goal.id));
-    setEditing(null);
-    setRemove(null);
-    setError("");
-    setMessage("");
   }, [goal.id, store]);
   useEffect(() => {
     const refresh = () => setHistory(store.queryGoalProgressObservationHistory(goal.id));

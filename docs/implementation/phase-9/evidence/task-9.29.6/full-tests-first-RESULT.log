@@ -1,0 +1,460 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/GoalStructureAuthoring.test.tsx (27 tests | 1 failed) 18539ms
+   × related navigation retains Structure, Goal and Requested Time drafts; rejected V14 import retains them and successful restore displaces them 2665ms
+ ❯ src/ui/tests/GoalInspectionNavigation.test.tsx (4 tests | 1 failed) 4595ms
+   × real G2 → Daily Planner → report → Back refreshes outcomes while retaining Requested Time and Goal drafts 1741ms
+ ❯ src/state/tests/dayFrameStore.test.ts (159 tests | 4 failed) 307ms
+       × preserves serialization failure through an authored mutation result 13ms
+       × blocks retry from serialization failure without a storage operation 1ms
+       × retains a serialization failure produced during eligible snapshot retry 1ms
+       × retains unavailable and serialization-failure active outcomes 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/GoalInspectionNavigation.test.tsx > real G2 → Daily Planner → report → Back refreshes outcomes while retaining Requested Time and Goal drafts
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <h3
+  id="_r_h_-heading"
+  tabindex="-1"
+>
+  Accepted planning and scheduled work
+</h3>
+Received element with focus:
+  <h3
+  id="selected-goal-heading"
+  tabindex="-1"
+>
+  Network+ renamed
+</h3>
+ ❯ src/ui/tests/GoalInspectionNavigation.test.tsx:85:5
+     83|   expect(
+     84|     screen.getByRole("heading", { name: "Accepted planning and schedul…
+     85|   ).toHaveFocus();
+       |     ^
+     86|   expect(screen.getByText(/Goal name at publication: Network\+ origina…
+     87|   fireEvent.click(screen.getByRole("button", { name: "Edit Goal" }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/ui/tests/GoalStructureAuthoring.test.tsx > related navigation retains Structure, Goal and Requested Time drafts; rejected V14 import retains them and successful restore displaces them
+TestingLibraryElementError: Unable to find an element with the text: /Complete backup restored across setup/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-app"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-shell"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"df-foundation-header"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0mDayFrame[0m
+          [36m</strong>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"App Sections"[39m
+            [33mclass[39m=[32m"df-foundation-primary"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"true"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mPlanner[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"false"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mSummary[0m
+            [36m</button>[39m
+          [36m</nav>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-location"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"df-foundation-location-title"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mPlanner / Goals[0m
+            [36m</h2>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mBack[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-foundation-support"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-support-content"[39m
+          [36m>[39m
+            [36m<details[39m
+              [33mclass[39m=[32m"df-foundation-utilities"[39m
+            [36m>[39m
+              [36m<summary>[39m
+                [0mSettings and data[0m
+              [36m</summary>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"df-confirmation df-workflow-block df-workflow-block--profiles"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-form-stack"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-header"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"df-panel-title"[39m
+                    [36m>[39m
+                      [0mSaved Setup Profiles[0m
+                    [36m</h2>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-support"[39m
+                    [36m>[39m
+                      [0mSave named local setups, then load one later to replace the current active setup.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-field"[39m
+                  [36m>[39m
+                    [36m<label[39m
+                      [33mfor[39m=[32m"dayframe-profile-name"[39m
+                    [36m>[39m
+                      [0mProfile Name[0m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mid[39m=[32m"dayframe-profile-name"[39m
+                      [33mplaceholder[39m=[32m"Profile name"[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-actions"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mSave Current Setup as Profile[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                  [36m<ul[39m
+                    [33mclass[39m=[32m"df-plain-list"[39m
+                  [36m>[39m
+                    [36m<li>[39m
+                      [36m<div>[39m
+                        [36m<strong>[39m
+                          [0mSource A saved setup[0m
+                        [36m</strong>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"df-muted"[39m
+                        [36m>[39m
+                          [0m Saved [0m
+                          [0m2026-09-24T12:00:00.000Z[0m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"df-screen-actions"[39m
+                      [36m>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mLoad Profile[0m
+                        [36m</button>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mDelete Profile[0m
+                        [36m</button>[39m
+                      [36m</div>[39m
+                    [36m</li>[39m
+                  [36m</ul>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-screen-actions"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mPreparing Backup…[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-describedby[39m=[32m"backup-import-feedback"[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mImport Setup Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mClear Local Data[0m
+    ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-app"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-shell"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"df-foundation-header"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0mDayFrame[0m
+          [36m</strong>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"App Sections"[39m
+            [33mclass[39m=[32m"df-foundation-primary"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"true"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mPlanner[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"false"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mSummary[0m
+            [36m</button>[39m
+          [36m</nav>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-location"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"df-foundation-location-title"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mPlanner / Goals[0m
+            [36m</h2>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mBack[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-foundation-support"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-support-content"[39m
+          [36m>[39m
+            [36m<details[39m
+              [33mclass[39m=[32m"df-foundation-utilities"[39m
+            [36m>[39m
+              [36m<summary>[39m
+                [0mSettings and data[0m
+              [36m</summary>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"df-confirmation df-workflow-block df-workflow-block--profiles"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-form-stack"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-header"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"df-panel-title"[39m
+                    [36m>[39m
+                      [0mSaved Setup Profiles[0m
+                    [36m</h2>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-support"[39m
+                    [36m>[39m
+                      [0mSave named local setups, then load one later to replace the current active setup.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-field"[39m
+                  [36m>[39m
+                    [36m<label[39m
+                      [33mfor[39m=[32m"dayframe-profile-name"[39m
+                    [36m>[39m
+                      [0mProfile Name[0m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mid[39m=[32m"dayframe-profile-name"[39m
+                      [33mplaceholder[39m=[32m"Profile name"[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-actions"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mSave Current Setup as Profile[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                  [36m<ul[39m
+                    [33mclass[39m=[32m"df-plain-list"[39m
+                  [36m>[39m
+                    [36m<li>[39m
+                      [36m<div>[39m
+                        [36m<strong>[39m
+                          [0mSource A saved setup[0m
+                        [36m</strong>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"df-muted"[39m
+                        [36m>[39m
+                          [0m Saved [0m
+                          [0m2026-09-24T12:00:00.000Z[0m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"df-screen-actions"[39m
+                      [36m>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mLoad Profile[0m
+                        [36m</button>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mDelete Profile[0m
+                        [36m</button>[39m
+                      [36m</div>[39m
+                    [36m</li>[39m
+                  [36m</ul>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-screen-actions"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mPreparing Backup…[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33maria-describedby[39m=[32m"backup-import-feedback"[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mImport Setup Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mdisabled[39m=[32m""[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mClear Local Data[0m
+    ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/GoalStructureAuthoring.test.tsx:400:16
+    398|   expect(screen.getByLabelText("Milestone title")).toHaveValue("Struct…
+    399|   upload(JSON.stringify(f.backup));
+    400|   await screen.findByText(/Complete backup restored across setup/);
+       |                ^
+    401|   click("Goals");
+    402|   click(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store mutation persistence results > preserves serialization failure through an authored mutation result
+TypeError: Do not know how to serialize a BigInt
+ ❯ notify src/state/dayFrameStore.ts:3159:26
+    3157|
+    3158|   function notify(): DayFrameState {
+    3159|     const content = JSON.stringify({ setup: getActiveSetup(state), pre…
+       |                          ^
+    3160|     if (content !== activeReviewContent) {
+    3161|       activeReviewContent = content;
+ ❯ setSchedulingPreferences src/state/dayFrameStore.ts:1889:40
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3484:19
+ ❯ src/state/tests/dayFrameStore.test.ts:1631:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store-owned durability retry > blocks retry from serialization failure without a storage operation
+TypeError: Do not know how to serialize a BigInt
+ ❯ notify src/state/dayFrameStore.ts:3159:26
+    3157|
+    3158|   function notify(): DayFrameState {
+    3159|     const content = JSON.stringify({ setup: getActiveSetup(state), pre…
+       |                          ^
+    3160|     if (content !== activeReviewContent) {
+    3161|       activeReviewContent = content;
+ ❯ setSchedulingPreferences src/state/dayFrameStore.ts:1889:40
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3484:19
+ ❯ src/state/tests/dayFrameStore.test.ts:2264:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > store-owned durability retry > retains a serialization failure produced during eligible snapshot retry
+TypeError: Do not know how to serialize a BigInt
+ ❯ notify src/state/dayFrameStore.ts:3159:26
+    3157|
+    3158|   function notify(): DayFrameState {
+    3159|     const content = JSON.stringify({ setup: getActiveSetup(state), pre…
+       |                          ^
+    3160|     if (content !== activeReviewContent) {
+    3161|       activeReviewContent = content;
+ ❯ setSchedulingPreferences src/state/dayFrameStore.ts:1889:40
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3484:19
+ ❯ src/state/tests/dayFrameStore.test.ts:2279:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/state/tests/dayFrameStore.test.ts > dayFrameStore > retained store durability status > retains unavailable and serialization-failure active outcomes
+TypeError: Do not know how to serialize a BigInt
+ ❯ notify src/state/dayFrameStore.ts:3159:26
+    3157|
+    3158|   function notify(): DayFrameState {
+    3159|     const content = JSON.stringify({ setup: getActiveSetup(state), pre…
+       |                          ^
+    3160|     if (content !== activeReviewContent) {
+    3161|       activeReviewContent = content;
+ ❯ setSchedulingPreferences src/state/dayFrameStore.ts:1889:40
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3484:19
+ ❯ src/state/tests/dayFrameStore.test.ts:2738:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed | 173 passed (176)
+      Tests  6 failed | 1806 passed (1812)
+   Start at  11:49:38
+   Duration  201.07s (transform 5.79s, setup 0ms, import 19.60s, tests 140.64s, environment 21.47s)
+

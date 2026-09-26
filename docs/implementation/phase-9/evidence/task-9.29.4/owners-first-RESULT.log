@@ -1,0 +1,71 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/proposalSurface.test.ts src/state/realizationSurface.test.ts src/state/sleepPlanningIntegration.test.ts src/state/goalStructurePlanningSafety.test.ts src/state/dayFrameBackupV14Restore.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/dayFrameBackupV14Restore.test.ts (0 test)
+ ❯ src/state/goalStructurePlanningSafety.test.ts (0 test)
+ ❯ src/state/sleepPlanningIntegration.test.ts (0 test)
+ ❯ src/state/proposalSurface.test.ts (0 test)
+ ❯ src/state/realizationSurface.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/dayFrameBackupV14Restore.test.ts [ src/state/dayFrameBackupV14Restore.test.ts ]
+ FAIL  src/state/sleepPlanningIntegration.test.ts [ src/state/sleepPlanningIntegration.test.ts ]
+Error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] Error:[0m Identifier `lifecycle` has already been declared
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/state/proposalSurface.ts:68:9 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m 68 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0mlifecycle[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0m[38;5;249mo[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m.[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m?[0m[38;5;249m?[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mA[0m[38;5;249mc[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m([0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m    │[0m         ────┬────  
+ [38;5;240m    │[0m             ╰────── `lifecycle` has already been declared here
+ [38;5;240m    │[0m 
+ [38;5;246m164 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249my[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249m [0mlifecycle[38;5;249m([0m
+ [38;5;240m    │[0m                  ────┬────  
+ [38;5;240m    │[0m                      ╰────── It can not be redeclared here
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /home/sid/Penn Digital Services/DayFrame/code/src/state/proposalSurface.ts
+ ❯ transformWithOxc ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3343:19
+ ❯ TransformPluginContext.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3411:26
+ ❯ EnvironmentPluginContainer.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:30164:51
+ ❯ loadAndTransform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:24512:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/state/goalStructurePlanningSafety.test.ts [ src/state/goalStructurePlanningSafety.test.ts ]
+ FAIL  src/state/proposalSurface.test.ts [ src/state/proposalSurface.test.ts ]
+ FAIL  src/state/realizationSurface.test.ts [ src/state/realizationSurface.test.ts ]
+Error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] Error:[0m Identifier `lifecycle` has already been declared
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/state/proposalSurface.ts:68:9 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m 68 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0mlifecycle[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0m[38;5;249mo[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m.[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m [0m[38;5;249m?[0m[38;5;249m?[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249mA[0m[38;5;249mc[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mp[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249me[0m[38;5;249mL[0m[38;5;249mi[0m[38;5;249mf[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249my[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249m([0m[38;5;249m)[0m[38;5;249m;[0m
+ [38;5;240m    │[0m         ────┬────  
+ [38;5;240m    │[0m             ╰────── `lifecycle` has already been declared here
+ [38;5;240m    │[0m 
+ [38;5;246m164 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249my[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mu[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249m [0mlifecycle[38;5;249m([0m
+ [38;5;240m    │[0m                  ────┬────  
+ [38;5;240m    │[0m                      ╰────── It can not be redeclared here
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /home/sid/Penn Digital Services/DayFrame/code/src/state/proposalSurface.ts
+ ❯ transformWithOxc ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3343:19
+ ❯ TransformPluginContext.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3411:26
+ ❯ EnvironmentPluginContainer.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:30164:51
+ ❯ loadAndTransform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:24512:26
+ ❯ fetchModule ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:23103:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  5 failed (5)
+      Tests  no tests
+   Start at  08:12:28
+   Duration  3.29s (transform 1.11s, setup 0ms, import 0ms, tests 0ms, environment 1.08s)
+

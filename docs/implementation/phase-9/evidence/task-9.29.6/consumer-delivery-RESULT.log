@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/ui/tests/ReviewSourceQualification.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  12:22:31
+   Duration  2.54s (transform 889ms, setup 0ms, import 908ms, tests 905ms, environment 598ms)
+

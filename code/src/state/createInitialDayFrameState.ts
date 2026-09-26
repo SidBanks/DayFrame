@@ -13,6 +13,7 @@ import { createSourceIncarnationId } from "../core/authored/sourceIncarnation.js
 
 export type PersistedDayFrameState = Pick<
   DayFrameAuthoredPattern,
+  | "sleepRequirements"
   | "schedulingPreferences"
   | "previewRange"
   | "shiftDefinitions"
@@ -53,6 +54,9 @@ export function normalizePersistedDayFramePattern(
   });
 
   return {
+    ...(persistedState?.sleepRequirements !== undefined
+      ? { sleepRequirements: structuredClone(persistedState.sleepRequirements) }
+      : {}),
     schedulingPreferences: {
       dayBoundaryStartTime: "03:00",
       weekStartsOn: "saturday",

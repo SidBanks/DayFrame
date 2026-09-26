@@ -1,0 +1,23 @@
+code/src/core/planning/acceptedAllocationRealization.ts 102ms (unchanged)
+code/src/core/planning/deriveFoundationalSchedule.ts 46ms (unchanged)
+code/src/state/acceptanceCoordinator.test.ts 24ms
+code/src/state/acceptanceLifecycle.ts 19ms (unchanged)
+code/src/state/acceptanceLifecycleTestFixtures.ts 19ms
+code/src/state/acceptanceOwnerLifecycle.test.ts 36ms
+code/src/state/acceptancePersistence.ts 14ms
+code/src/state/acceptanceReplacementIsolation.test.ts 27ms (unchanged)
+code/src/state/acceptanceSourceWitness.test.ts 12ms
+code/src/state/dayFrameStore.ts 328ms
+code/src/state/goalStructurePlanningSafety.test.ts 25ms (unchanged)
+code/src/state/lazyProposalSurface.ts 25ms
+code/src/state/lazyRealizationSurface.ts 11ms
+code/src/state/proposalSurface.ts 52ms
+code/src/state/proposalWriteLifecycle.test.ts 20ms (unchanged)
+code/src/state/realizationConcurrency.test.ts 16ms
+code/src/state/realizationSurface.ts 35ms
+code/src/state/types.ts 50ms
+code/src/ui/GoalPlanningSection.tsx 156ms (unchanged)
+code/src/ui/ScheduleReviewPanel.tsx 42ms (unchanged)
+code/src/ui/planningResultCopy.ts 5ms (unchanged)
+code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx 76ms (unchanged)
+code/src/ui/tests/ScheduleReviewPanel.test.tsx 23ms

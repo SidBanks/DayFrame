@@ -1,3 +1,4 @@
+import { reviewModelFixture } from "../../state/reviewSourceTestFixtures.js";
 /* @vitest-environment jsdom */
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
@@ -7,32 +8,30 @@ import { PlanningReviewPanel } from "../PlanningReviewPanel.js";
 
 describe("PlanningReviewPanel", () => {
   it("exposes bounded loading and unknown-coverage states accessibly", async () => {
-    const query = vi.fn(
-      async () =>
-        ({
-          version: 1,
-          reviewScope: createReviewScope({
-            kind: "day",
-            anchorUserDayDate: "2026-09-05",
-            weekStartsOn: "monday",
-          }),
-          planningDataCoverage: "unknown",
-          preview: {
-            availability: "unavailable",
-            coverage: "doesNotCover",
-            freshness: "unavailable",
-          },
-          scheduledReality: [],
-          derivedSchedule: [],
-          acceptedLiabilities: [],
-          proposals: [],
-          publication: {
-            epistemicClass: "historical",
-            coverage: "unknown",
-            publishedUserDays: [],
-            missingUserDays: [],
-          },
-        }) as never,
+    const query = vi.fn(async () =>
+      reviewModelFixture({
+        reviewScope: createReviewScope({
+          kind: "day",
+          anchorUserDayDate: "2026-09-05",
+          weekStartsOn: "monday",
+        }),
+        planningDataCoverage: "unknown",
+        preview: {
+          availability: "unavailable",
+          coverage: "doesNotCover",
+          freshness: "unavailable",
+        },
+        scheduledReality: [],
+        derivedSchedule: [],
+        acceptedLiabilities: [],
+        proposals: [],
+        publication: {
+          epistemicClass: "historical",
+          coverage: "unknown",
+          publishedUserDays: [],
+          missingUserDays: [],
+        },
+      }),
     );
     const reviewScope = createReviewScope({
       kind: "day",

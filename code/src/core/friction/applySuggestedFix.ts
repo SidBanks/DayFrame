@@ -1,3 +1,8 @@
+import {
+  getOccupiedWindowsForRange,
+  getOpenWindowsWithinSearchWindow,
+  realizedFactOccupancy,
+} from "../time/physicalOccupancy.js";
 import { parseTimeString } from "../time/userDay.js";
 import type { BlockCandidate, DraftScheduledBlock } from "../blocks/types.js";
 import type { GeneratedWorkBlock } from "../shifts/types.js";
@@ -32,6 +37,20 @@ export function applySuggestedFix(input: ApplySuggestedFixInput): ApplySuggested
     );
   }
 
+  if (
+    selectedFrictionPoint.sleepEvidence ||
+    (selectedSuggestedFix.action === "acceptConflict" && !selectedFrictionPoint.canIgnore)
+  )
+    return {
+      frictionPoints: structuredClone(input.frictionPoints),
+      scheduledBlocks: input.scheduledBlocks.map(cloneScheduledBlock),
+      unplacedCandidates: input.unplacedCandidates.map(cloneBlockCandidate),
+      didRevise: false,
+      actionFeedback: {
+        tone: "warning",
+        message: "Required Sleep needs a freshly validated placement or explicit revocation.",
+      },
+    };
   let scheduledBlocks = input.scheduledBlocks.map(cloneScheduledBlock);
   let unplacedCandidates = input.unplacedCandidates.map(cloneBlockCandidate);
   let didApplyChange = selectedSuggestedFix.action === "acceptConflict";
@@ -317,6 +336,7 @@ function applyMoveBlock(
       input.generatedWorkBlocks,
       input.dayBoundaryStartTime,
       input.getUserDayWindowForUserDayDate,
+      input.realizedScheduleFacts,
     );
 
     scheduledBlocks[scheduledBlockIndex] = movedBlock;
@@ -348,6 +368,7 @@ function applyMoveBlock(
       input.generatedWorkBlocks,
       input.dayBoundaryStartTime,
       input.getUserDayWindowForUserDayDate,
+      input.realizedScheduleFacts,
     );
 
     if (scheduledBlock) {
@@ -370,6 +391,7 @@ function moveScheduledBlockWithinUserDay(
   generatedWorkBlocks: GeneratedWorkBlock[],
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"],
   getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"],
+  realizedScheduleFacts?: ApplySuggestedFixInput["realizedScheduleFacts"],
 ): DraftScheduledBlock {
   const durationMinutes = getDurationMinutes(scheduledBlock.startsAt, scheduledBlock.endsAt);
   const targetStart = findFirstAvailableGapStart({
@@ -379,6 +401,7 @@ function moveScheduledBlockWithinUserDay(
     bufferAfterMinutes: scheduledBlock.bufferAfterMinutes ?? 0,
     scheduledBlocks: scheduledBlocks.filter((block) => block.id !== scheduledBlock.id),
     generatedWorkBlocks,
+    realizedScheduleFacts,
     dayBoundaryStartTime,
     getUserDayWindowForUserDayDate,
     searchStartAt: addMinutes(scheduledBlock.endsAt, scheduledBlock.bufferAfterMinutes ?? 0),
@@ -402,6 +425,7 @@ function placeCandidateInFirstAvailableGap(
   generatedWorkBlocks: GeneratedWorkBlock[],
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"],
   getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"],
+  realizedScheduleFacts?: ApplySuggestedFixInput["realizedScheduleFacts"],
 ): DraftScheduledBlock | null {
   const targetStart = findFirstAvailableGapStart({
     userDayDate: candidate.userDayDate,
@@ -410,6 +434,7 @@ function placeCandidateInFirstAvailableGap(
     bufferAfterMinutes: candidate.bufferAfterMinutes ?? 0,
     scheduledBlocks,
     generatedWorkBlocks,
+    realizedScheduleFacts,
     dayBoundaryStartTime,
     getUserDayWindowForUserDayDate,
   });
@@ -456,6 +481,7 @@ type FindGapInput = {
   dayBoundaryStartTime: ApplySuggestedFixInput["dayBoundaryStartTime"];
   getUserDayWindowForUserDayDate?: ApplySuggestedFixInput["getUserDayWindowForUserDayDate"];
   searchStartAt?: Date;
+  realizedScheduleFacts?: ApplySuggestedFixInput["realizedScheduleFacts"];
 };
 
 function findFirstAvailableGapStart(input: FindGapInput): Date | null {
@@ -464,39 +490,25 @@ function findFirstAvailableGapStart(input: FindGapInput): Date | null {
     canonicalWindow?.start ??
     getUserDayStartFromLocalDateString(input.userDayDate, input.dayBoundaryStartTime);
   const userDayEnd = canonicalWindow?.end ?? addMinutes(userDayStart, 24 * 60);
-  const occupiedBlocks = [
-    ...input.generatedWorkBlocks.filter((workBlock) => workBlock.userDayDate === input.userDayDate),
-    ...input.scheduledBlocks.filter(
-      (scheduledBlock) => scheduledBlock.userDayDate === input.userDayDate,
-    ),
-  ].sort((left, right) => getOccupiedStart(left).getTime() - getOccupiedStart(right).getTime());
-  const minimumGapDurationMs =
+  const windowStart = new Date(
+    Math.max(userDayStart.getTime(), input.searchStartAt?.getTime() ?? -Infinity),
+  );
+  const occupied = getOccupiedWindowsForRange(
+    [
+      ...input.generatedWorkBlocks,
+      ...input.scheduledBlocks.filter((block) => block.status !== "skipped"),
+      ...realizedFactOccupancy(input.realizedScheduleFacts),
+    ],
+    windowStart,
+    userDayEnd,
+  );
+  const requiredMs =
     (input.bufferBeforeMinutes + input.durationMinutes + input.bufferAfterMinutes) * 60_000;
-  let cursor =
-    input.searchStartAt && input.searchStartAt.getTime() > userDayStart.getTime()
-      ? new Date(input.searchStartAt)
-      : userDayStart;
-
-  for (const occupiedBlock of occupiedBlocks) {
-    const occupiedBlockStart = getOccupiedStart(occupiedBlock);
-    const occupiedBlockEnd = getOccupiedEnd(occupiedBlock);
-
-    if (occupiedBlockEnd.getTime() <= cursor.getTime()) {
-      continue;
-    }
-
-    if (occupiedBlockStart.getTime() - cursor.getTime() >= minimumGapDurationMs) {
-      return addMinutes(cursor, input.bufferBeforeMinutes);
-    }
-
-    if (occupiedBlockStart.getTime() <= cursor.getTime()) {
-      cursor = new Date(Math.max(cursor.getTime(), occupiedBlockEnd.getTime()));
-    }
-  }
-
-  if (userDayEnd.getTime() - cursor.getTime() >= minimumGapDurationMs) {
-    return addMinutes(cursor, input.bufferBeforeMinutes);
-  }
+  const opening = getOpenWindowsWithinSearchWindow(occupied, {
+    windowStart,
+    windowEnd: userDayEnd,
+  }).find((window) => window.windowEnd.getTime() - window.windowStart.getTime() >= requiredMs);
+  if (opening) return addMinutes(opening.windowStart, input.bufferBeforeMinutes);
 
   return null;
 }
@@ -595,24 +607,6 @@ function cloneBlockCandidate(blockCandidate: BlockCandidate): BlockCandidate {
       : {}),
     externalResources: [...blockCandidate.externalResources],
   };
-}
-
-function getOccupiedStart(
-  block: Pick<DraftScheduledBlock, "startsAt" | "bufferBeforeMinutes"> | GeneratedWorkBlock,
-): Date {
-  return addMinutes(
-    block.startsAt,
-    -("bufferBeforeMinutes" in block ? (block.bufferBeforeMinutes ?? 0) : 0),
-  );
-}
-
-function getOccupiedEnd(
-  block: Pick<DraftScheduledBlock, "endsAt" | "bufferAfterMinutes"> | GeneratedWorkBlock,
-): Date {
-  return addMinutes(
-    block.endsAt,
-    "bufferAfterMinutes" in block ? (block.bufferAfterMinutes ?? 0) : 0,
-  );
 }
 
 function compareScheduledBlocks(left: DraftScheduledBlock, right: DraftScheduledBlock): number {

@@ -8,11 +8,19 @@ import type { DurableOccurrenceReference } from "../occurrences/durableOccurrenc
 import type { CanonicalUserDayWindow } from "../time/canonicalUserDay.js";
 
 export type TodayExecutionState =
-  | { coverage: "available"; status: "notReported" }
+  | {
+      coverage: "available";
+      status: "notReported";
+      retracted?: {
+        subjectId: import("../execution/executionRecord.js").ExecutionSubjectId;
+        currentRecordId: import("../execution/executionRecord.js").ExecutionRecordId;
+      };
+    }
   | {
       coverage: "available";
       status: "completed" | "partial" | "skipped";
       record: ExecutionAssertionRecordV1;
+      corrected?: true;
     }
   | { coverage: "unavailableProtected" }
   | { coverage: "unavailable" };
@@ -103,8 +111,11 @@ export function buildTodayReadModel(input: BuildTodayReadModelInput): TodayAvail
     const projected: TodayOccurrence = {
       occurrence,
       execution: cloneExecutionState(
-        executionByReference.get(referenceKey(occurrence.reference)) ??
-          unavailableOrNotReported(input.execution.coverage),
+        executionByReference.get(
+          occurrence.version === 4
+            ? `${occurrence.sleep.publicationBatchId}|${occurrence.sleep.snapshotId}`
+            : referenceKey(occurrence.reference),
+        ) ?? unavailableOrNotReported(input.execution.coverage),
       ),
     };
     const timing = source.timing;
@@ -180,16 +191,28 @@ function buildExecutionByReference(
   const result = new Map<string, TodayExecutionState>();
   if (execution.coverage !== "available") return result;
   for (const item of execution.items) {
-    if (item.subject.kind !== "planned") continue;
-    const key = referenceKey(item.subject.reference);
+    if (item.subject.kind !== "planned" && item.subject.kind !== "publishedSleep") continue;
+    const key =
+      item.subject.kind === "publishedSleep"
+        ? `${item.subject.publicationBatchId}|${item.subject.snapshotId}`
+        : referenceKey(item.subject.reference);
     result.set(
       key,
       item.currentOutcome.status === "unknown"
-        ? { coverage: "available", status: "notReported" }
+        ? {
+            coverage: "available",
+            status: "notReported",
+            ...(item.subject.kind === "publishedSleep" && item.currentRecord.kind === "retraction"
+              ? { retracted: { subjectId: item.subjectId, currentRecordId: item.currentRecord.id } }
+              : {}),
+          }
         : {
             coverage: "available",
             status: item.currentOutcome.status,
             record: structuredClone(item.currentOutcome.record),
+            ...(item.subject.kind === "publishedSleep" && item.revisions.length > 1
+              ? { corrected: true as const }
+              : {}),
           },
     );
   }
@@ -235,6 +258,8 @@ function compareSnapshot(
 
 function referenceKey(reference: DurableOccurrenceReference): string {
   const value = reference;
+  if (value.sourceKind === "sleepRequirement")
+    return `sleepRequirement|${value.requirement.id}|${value.requirement.incarnationId}|${value.coordinate.userDayDate}`;
   if (value.sourceKind === "acceptedAllocation")
     return `acceptedAllocation|${value.realizationId}|${value.acceptedClaimId}|${value.scheduledSubjectId}`;
   if (value.sourceKind === "manualEvent")

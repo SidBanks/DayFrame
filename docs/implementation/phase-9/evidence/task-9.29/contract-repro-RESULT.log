@@ -1,0 +1,24 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --config ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-config-RESULT.mjs --maxWorkers=1
+failed to load config from /home/sid/Penn Digital Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29/contract-repro-config-RESULT.mjs
+
+⎯⎯⎯⎯⎯⎯⎯ Startup Error ⎯⎯⎯⎯⎯⎯⎯⎯
+Error: ENOENT: no such file or directory, mkdir '/home/sid/node_modules/.vite-temp'
+    at async Object.mkdir (node:internal/fs/promises:858:10)
+    at async loadConfigFromBundledFile (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:34762:4)
+    at async bundleAndLoadConfigFile (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:34632:17)
+    at async loadConfigFromFile (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:34599:42)
+    at async resolveConfig (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:34223:22)
+    at async _createServer (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:26029:65)
+    at async createViteServer (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:8818:17)
+    at async createVitest (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:14205:18)
+    at async prepareVitest (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:14572:14)
+    at async startVitest (file:///home/sid/Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:14515:14) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'mkdir',
+  path: '/home/sid/node_modules/.vite-temp'
+}
+
+
+

@@ -1,0 +1,69 @@
+{
+  "format": "passed",
+  "lint": "passed",
+  "typecheck": "passed",
+  "build": "passed",
+  "bundleHardGates": "passed",
+  "diffCheck": "passed",
+  "isolatedSuite": {
+    "files": 180,
+    "tests": 1854,
+    "durationSeconds": 187.0,
+    "reportedUnhandledErrors": 0
+  },
+  "native": {
+    "widths": [
+      320,
+      390,
+      768,
+      1280
+    ],
+    "status": "NATIVE_9297_PASS",
+    "reducedHeight": [
+      320,
+      420
+    ],
+    "nativeExceptions": 0,
+    "minMeasuredPrimaryHeight": 44
+  },
+  "preservation": {
+    "governing-source-hashes-RESULT.json": {
+      "checked": 677,
+      "mismatches": []
+    },
+    "prior-evidence-hashes-RESULT.json": {
+      "checked": 825,
+      "mismatches": []
+    },
+    "retained-continuation-3-hashes-RESULT.json": {
+      "checked": 93,
+      "mismatches": []
+    },
+    "baselineChanged": [
+      "code/src/state/dayFrameStore.ts",
+      "code/src/core/engine/generatePlanningSchedule.ts",
+      "code/src/core/historicalPlan/materializePlanPublication.ts",
+      "code/src/core/decisions/replayPlanDecisions.ts",
+      "code/src/core/execution/historicalExecutionTarget.ts"
+    ],
+    "newCodeFiles": [
+      "code/src/state/omissionPublicationTestFixtures.ts",
+      "code/src/state/omissionPublication.test.ts",
+      "code/src/ui/tests/OmissionPublicationWorkflow.test.tsx"
+    ]
+  },
+  "nativeFinalBuildIdentical": true,
+  "baselineBundle": {
+    "raw": 641793,
+    "gzip": 169064,
+    "lazy": 62700,
+    "total": 1330178
+  },
+  "finalBundle": {
+    "raw": 642319,
+    "gzip": 169162,
+    "lazy": 62700,
+    "total": 1331809,
+    "gzipHeadroom": 838
+  }
+}

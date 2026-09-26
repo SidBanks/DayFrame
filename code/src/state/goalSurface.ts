@@ -1,3 +1,4 @@
+import { createSourceObservation } from "./sourceObservation.js";
 import {
   canonicalGoal,
   createGoalId,
@@ -58,6 +59,7 @@ export function createGoalSurface(
     isLinkAvailable?: (link: GoalCommitmentLinkV1) => boolean;
   } = {},
 ) {
+  const reviewObservation = createSourceObservation();
   const storage = options.storage ?? createDayFrameDurableDb();
   const allocate = options.allocateGoalId ?? createGoalId;
   const now = options.now ?? (() => new Date().toISOString());
@@ -82,12 +84,14 @@ export function createGoalSurface(
     if (result.status === "failure") {
       ingress = { status: "protected", reason: "readFailure" };
       durability = "storageFailure";
+      reviewObservation.changed();
       return { status: "protected" as const };
     }
     const checked = validateGoalAuthority({ version: 1, goals: result.value });
     if (checked.status === "invalid") {
       ingress = { status: "protected", reason: "invalidAuthority" };
       durability = "storageFailure";
+      reviewObservation.changed();
       return { status: "protected" as const };
     }
     authority = checked.authority;
@@ -262,6 +266,7 @@ export function createGoalSurface(
     const unresolvedEmpty = ingress.status === "initializing" && authority.goals.length === 0;
     authority = { version: 1, goals: [] };
     desired = structuredClone(authority);
+    reviewObservation.changed();
     const result = await storage.clear(GOAL_AUTHORITY_STORE);
     durability = result.status === "success" ? "durable" : "storageFailure";
     scheduleNotify();
@@ -288,6 +293,7 @@ export function createGoalSurface(
     };
   }
   function scheduleNotify() {
+    reviewObservation.changed();
     options.notificationScheduler?.notify("goals", () => {
       for (const listener of listeners) listener(listGoals());
     });
@@ -307,6 +313,7 @@ export function createGoalSurface(
     unlinkCommitment,
     retryGoalPersistence,
     clearGoals,
+    getGoalReviewObservation: () => reviewObservation,
     getGoalIngressStatus: () => structuredClone(ingress),
     getGoalDurabilityStatus: () => durability,
     exportAuthority: () => structuredClone(authority),

@@ -1,10 +1,14 @@
 import { cloneExecutionRecord } from "../core/execution/executionRecord.js";
-import { createActiveV2, validateActiveV2, type DayFrameActiveV2 } from "./activeV2.js";
 import {
-  createDayFrameProfilesStorageV2,
-  validateDayFrameProfilesStorageV2,
-  type DayFrameProfilesStorageV2,
-} from "./dayFrameProfiles.js";
+  createCurrentActive as createActiveV3,
+  readCurrentActive as readActiveV3,
+  type CurrentActiveEnvelope as DayFrameActiveV3,
+} from "./activeV4.js";
+import {
+  createDayFrameProfilesStorageV3,
+  readProfilesV3,
+  type DayFrameProfilesStorageV3,
+} from "./dayFrameProfilesV3.js";
 import {
   buildPlanDecisionRuntimeTarget,
   type PlanDecisionEnvelopeV1,
@@ -91,8 +95,8 @@ export type HistoricalPlanDurableRestorePayload = {
   days: PhysicalHistoricalPlanDayRecord[];
 };
 export type RestoreDurablePayloadMap = {
-  active: DayFrameActiveV2;
-  profiles: DayFrameProfilesStorageV2;
+  active: DayFrameActiveV3;
+  profiles: DayFrameProfilesStorageV3;
   planDecisions: PlanDecisionEnvelopeV1;
   executionHistory: ExecutionHistoryDurableRestorePayload;
   historicalPlan: HistoricalPlanDurableRestorePayload;
@@ -141,7 +145,7 @@ export type RestoreRuntimeTargetMap = {
 
 export function translateActiveRestorePayload(value: unknown) {
   try {
-    const durable = validateActiveV2(value);
+    const durable = readActiveV3(value);
     const activeState: DayFrameState = {
       ...structuredClone(durable.data),
       savedProfiles: [],
@@ -155,7 +159,7 @@ export function translateActiveRestorePayload(value: unknown) {
     };
     return {
       status: "valid" as const,
-      durable: createActiveV2(structuredClone(durable.data)),
+      durable: createActiveV3(structuredClone(durable.data)),
       target,
     };
   } catch {
@@ -165,7 +169,7 @@ export function translateActiveRestorePayload(value: unknown) {
 
 export function translateProfilesRestorePayload(value: unknown) {
   try {
-    const durable = validateDayFrameProfilesStorageV2(value);
+    const durable = readProfilesV3(value);
     const target: ProfilesRestoreRuntimeTarget = {
       profiles: structuredClone(durable.profiles),
       quarantinedProfiles: structuredClone(durable.quarantinedProfiles),
@@ -178,7 +182,7 @@ export function translateProfilesRestorePayload(value: unknown) {
     };
     return {
       status: "valid" as const,
-      durable: createDayFrameProfilesStorageV2(durable.profiles, durable.quarantinedProfiles),
+      durable: createDayFrameProfilesStorageV3(durable.profiles, durable.quarantinedProfiles),
       target,
     };
   } catch {

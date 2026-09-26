@@ -26,6 +26,7 @@ export type FeasibilityReasonV1 = {
     | "incompleteCapacityCoverage"
     | "unresolvedCapacityLiability"
     | "capacityUnavailable"
+    | "sleepFoundationNonAllocatable"
     | "demandInapplicable"
     | "footprintUnspecified"
     | "footprintAssociationAmbiguous"
@@ -91,7 +92,10 @@ export function evaluateGoalFeasibility(input: {
     capacity = input.capacity,
     reason: FeasibilityReasonV1[] = [];
   let terminal: GoalFeasibilityResultV1["classification"] | undefined;
-  if (
+  if (capacity.foundation?.status === "nonAllocatable") {
+    terminal = "unknown";
+    reason.push({ code: "sleepFoundationNonAllocatable" });
+  } else if (
     demand.coverage.startUserDayDate !== capacity.query.startUserDayDate ||
     demand.coverage.endUserDayDateExclusive !== capacity.query.endUserDayDateExclusive ||
     demand.coverage.startsAt !== capacity.query.requestedStartsAt ||

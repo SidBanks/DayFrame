@@ -1,3 +1,9 @@
+import {
+  createSleepOccurrenceReference,
+  isSleepOccurrenceReference,
+  resolveSleepOccurrenceReference,
+  type SleepOccurrenceReferenceV1,
+} from "./sleepOccurrenceReference.js";
 import { isSourceIncarnationId, type SourceIncarnationId } from "../authored/sourceIncarnation.js";
 import { generateBlockCandidates } from "../blocks/generateBlockCandidates.js";
 import { generateCycleWorkBlocks } from "../cycles/generateCycleWorkBlocks.js";
@@ -55,6 +61,7 @@ export type DurableManualEventOccurrenceReference = {
 };
 
 export type DurableOccurrenceReference =
+  | SleepOccurrenceReferenceV1
   | DurableTemplateOccurrenceReference
   | DurableWorkOccurrenceReference
   | DurableManualEventOccurrenceReference
@@ -71,6 +78,7 @@ export type DurableOccurrenceReferenceConstruction =
   | { status: "missingSourceLineage"; component: DurableOccurrenceLineageComponent };
 
 export type DurableOccurrenceLineageComponent =
+  | "sleepRequirement"
   | "template"
   | "recurrence"
   | "cycle"
@@ -95,6 +103,16 @@ export function createDurableOccurrenceReference(
   state: DayFrameAuthoredSetup,
 ): DurableOccurrenceReferenceConstruction {
   switch (identity.sourceKind) {
+    case "sleepRequirement": {
+      const source = state.sleepRequirements?.find(
+        (revision) => revision.id === identity.requirementId,
+      );
+      if (!source) return { status: "missingSourceLineage", component: "sleepRequirement" };
+      return {
+        status: "created",
+        reference: createSleepOccurrenceReference(source, identity.userDayDate),
+      };
+    }
     case "template":
       return createDurableTemplateOccurrenceReference(identity, state);
     case "work":
@@ -199,7 +217,9 @@ export function validateDurableOccurrenceReference(
       : { status: "invalid", issues: ["version must be 1"] };
   }
   const issues: string[] = [];
-  if (value.sourceKind === "template") validateTemplate(value, issues);
+  if (value.sourceKind === "sleepRequirement") {
+    if (!isSleepOccurrenceReference(value)) issues.push("Invalid Sleep occurrence reference");
+  } else if (value.sourceKind === "template") validateTemplate(value, issues);
   else if (value.sourceKind === "work") validateWork(value, issues);
   else if (value.sourceKind === "manualEvent") validateManual(value, issues);
   else if (value.sourceKind === "acceptedAllocation") {
@@ -217,6 +237,7 @@ export function validateDurableOccurrenceReference(
 export function cloneDurableOccurrenceReference(
   reference: DurableOccurrenceReference,
 ): DurableOccurrenceReference {
+  if (reference.sourceKind === "sleepRequirement") return structuredClone(reference);
   if (reference.sourceKind === "template")
     return {
       ...reference,
@@ -242,6 +263,12 @@ export function durableOccurrenceReferencesEqual(
   right: DurableOccurrenceReference,
 ): boolean {
   if (left.version !== right.version || left.sourceKind !== right.sourceKind) return false;
+  if (left.sourceKind === "sleepRequirement" && right.sourceKind === "sleepRequirement")
+    return (
+      lifetimesEqual(left.requirement, right.requirement) &&
+      left.coordinate.userDayDate === right.coordinate.userDayDate &&
+      left.coordinate.slot === right.coordinate.slot
+    );
   if (left.sourceKind === "manualEvent" && right.sourceKind === "manualEvent") {
     return lifetimesEqual(left.manualEvent, right.manualEvent);
   }
@@ -293,6 +320,8 @@ export function resolveDurableOccurrenceReference(
     return { status: "invalidReference", issues: validation.issues };
   if (validation.status === "unsupportedVersion") return validation;
   const reference = validation.reference;
+  if (reference.sourceKind === "sleepRequirement")
+    return resolveSleepOccurrenceReference(reference, state.sleepRequirements ?? []);
   if (reference.sourceKind === "manualEvent") {
     const event = state.manualEvents.find((source) => source.id === reference.manualEvent.id);
     const failure = compareLifetime(event, reference.manualEvent, "manualEvent");
@@ -540,4 +569,14 @@ function dateOffset(value: LocalDateString, days: number): Date {
   const result = new Date(`${value}T00:00:00`);
   result.setDate(result.getDate() + days);
   return result;
+}
+
+/** Foundation-only identities are not yet accepted by publication/execution schemas. */
+export function validateScheduledOccurrenceReference(
+  value: unknown,
+): DurableOccurrenceReferenceValidation {
+  const checked = validateDurableOccurrenceReference(value);
+  return checked.status === "valid" && checked.reference.sourceKind === "sleepRequirement"
+    ? { status: "invalid", issues: ["First-Class Sleep scheduling is not implemented."] }
+    : checked;
 }

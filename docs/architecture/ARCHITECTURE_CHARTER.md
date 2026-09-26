@@ -14,7 +14,9 @@ This charter establishes the architectural governance of the DayFrame project.
 
 The normative description of the DayFrame architecture is contained in:
 
-> **DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md (Version 1.0.0)**
+> **DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md (Version 1.0.1)**
+
+The canonical file retains its historical path `DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION_v1.0.0.md`; revision 1.0.1 is recorded in its revision history.
 
 This charter defines how that architecture is governed, interpreted, and evolved throughout the lifetime of the project.
 

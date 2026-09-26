@@ -1,0 +1,3 @@
+src/ui/GoalAcceptedPlanningSection.tsx 192ms (unchanged)
+src/ui/tests/GoalAcceptedPlanning.test.tsx 142ms
+src/ui/HistoricalIntelligenceSummary.tsx 112ms (unchanged)

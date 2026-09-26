@@ -1,0 +1,5553 @@
+[
+  {
+    "label": "320-canonical-period",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-canonical-identity",
+    "owner": "Open Daily Planner for 2026-09-04",
+    "references": [
+      "53bbde95522dd06d",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "092d98254c2fb041",
+      "18e41e73-973d-4a7c-b1f6-83413dcc42e5 / 1",
+      "Productive work",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "dee3c97b-7c25-45f6-b489-1eb90f61637e (available)",
+      "a3fe878f5e3e674c / 1 (available)",
+      "generated",
+      "092d98254c2fb041"
+    ]
+  },
+  {
+    "label": "320-canonical-inspection",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-canonical-day",
+    "expectedOwner": "2026-09-04",
+    "text": "PAST DAY\n\nFriday, September 4, 2026\nRefresh day\n\nCurrent schedule evidence unavailable — no generated schedule. Other readable activity remains available.\n\nDay agenda\n\nPublished schedule · outcomes shown separately.\n\n3:00 AM–4:00 AM\n\nNetwork+ original\n\nGoal work · Network+ original\n\nOutcome not recorded\n\nDetails\n: Network+ original\n\n4:00 AM–4:30 AM\n\nGoal support\n\nPreparation / support · Network+ original\n\nSupports Network+ original\n\nOutcome not recorded\n\nDetails\n: Goal support\n\n4:30 AM–4:45 AM\n\nProtected time\n\nProtected time · Network+ original\n\nProtects Goal support\n\nProtected time · not an activity\n\nDetails\n: Protected time\n\n9:00 AM–5:00 PM\n\nDay Work\n\nWork\n\nOutcome not recorded\n\nDetails\n: Day Work\n\n6:00 PM–6:30 PM\n\nRoutine\n\nCommitment\n\nOutcome not recorded\n\nDetails\n: Routine\nAdditional / manual activity\nAdd Event\nSchedule & outcome details"
+  },
+  {
+    "label": "320-canonical-return",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Accepted planning and scheduled work",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-canonical-period",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-canonical-identity",
+    "owner": "Open Daily Planner for 2026-09-04",
+    "references": [
+      "53bbde95522dd06d",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "092d98254c2fb041",
+      "18e41e73-973d-4a7c-b1f6-83413dcc42e5 / 1",
+      "Productive work",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "dee3c97b-7c25-45f6-b489-1eb90f61637e (available)",
+      "a3fe878f5e3e674c / 1 (available)",
+      "generated",
+      "092d98254c2fb041"
+    ]
+  },
+  {
+    "label": "390-canonical-inspection",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-canonical-day",
+    "expectedOwner": "2026-09-04",
+    "text": "PAST DAY\n\nFriday, September 4, 2026\nRefresh day\n\nCurrent schedule evidence unavailable — no generated schedule. Other readable activity remains available.\n\nDay agenda\n\nPublished schedule · outcomes shown separately.\n\n3:00 AM–4:00 AM\n\nNetwork+ original\n\nGoal work · Network+ original\n\nOutcome not recorded\n\nDetails\n: Network+ original\n\n4:00 AM–4:30 AM\n\nGoal support\n\nPreparation / support · Network+ original\n\nSupports Network+ original\n\nOutcome not recorded\n\nDetails\n: Goal support\n\n4:30 AM–4:45 AM\n\nProtected time\n\nProtected time · Network+ original\n\nProtects Goal support\n\nProtected time · not an activity\n\nDetails\n: Protected time\n\n9:00 AM–5:00 PM\n\nDay Work\n\nWork\n\nOutcome not recorded\n\nDetails\n: Day Work\n\n6:00 PM–6:30 PM\n\nRoutine\n\nCommitment\n\nOutcome not recorded\n\nDetails\n: Routine\nAdditional / manual activity\nAdd Event\nSchedule & outcome details"
+  },
+  {
+    "label": "390-canonical-return",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Accepted planning and scheduled work",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-canonical-period",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-canonical-identity",
+    "owner": "Open Daily Planner for 2026-09-04",
+    "references": [
+      "53bbde95522dd06d",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "092d98254c2fb041",
+      "18e41e73-973d-4a7c-b1f6-83413dcc42e5 / 1",
+      "Productive work",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "dee3c97b-7c25-45f6-b489-1eb90f61637e (available)",
+      "a3fe878f5e3e674c / 1 (available)",
+      "generated",
+      "092d98254c2fb041"
+    ]
+  },
+  {
+    "label": "768-canonical-inspection",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-canonical-day",
+    "expectedOwner": "2026-09-04",
+    "text": "PAST DAY\n\nFriday, September 4, 2026\nRefresh day\n\nCurrent schedule evidence unavailable — no generated schedule. Other readable activity remains available.\n\nDay agenda\n\nPublished schedule · outcomes shown separately.\n\n3:00 AM–4:00 AM\n\nNetwork+ original\n\nGoal work · Network+ original\n\nOutcome not recorded\n\nDetails\n: Network+ original\n\n4:00 AM–4:30 AM\n\nGoal support\n\nPreparation / support · Network+ original\n\nSupports Network+ original\n\nOutcome not recorded\n\nDetails\n: Goal support\n\n4:30 AM–4:45 AM\n\nProtected time\n\nProtected time · Network+ original\n\nProtects Goal support\n\nProtected time · not an activity\n\nDetails\n: Protected time\n\n9:00 AM–5:00 PM\n\nDay Work\n\nWork\n\nOutcome not recorded\n\nDetails\n: Day Work\n\n6:00 PM–6:30 PM\n\nRoutine\n\nCommitment\n\nOutcome not recorded\n\nDetails\n: Routine\nAdditional / manual activity\nAdd Event\nSchedule & outcome details"
+  },
+  {
+    "label": "768-canonical-return",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Accepted planning and scheduled work",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-canonical-period",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-canonical-identity",
+    "owner": "Open Daily Planner for 2026-09-04",
+    "references": [
+      "53bbde95522dd06d",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "092d98254c2fb041",
+      "18e41e73-973d-4a7c-b1f6-83413dcc42e5 / 1",
+      "Productive work",
+      "1d2d6e18-845f-4178-a2b0-df9195cdea9a / 1",
+      "dee3c97b-7c25-45f6-b489-1eb90f61637e (available)",
+      "a3fe878f5e3e674c / 1 (available)",
+      "generated",
+      "092d98254c2fb041"
+    ]
+  },
+  {
+    "label": "1280-canonical-inspection",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-canonical-day",
+    "expectedOwner": "2026-09-04",
+    "text": "PAST DAY\n\nFriday, September 4, 2026\nRefresh day\n\nCurrent schedule evidence unavailable — no generated schedule. Other readable activity remains available.\n\nDay agenda\n\nPublished schedule · outcomes shown separately.\n\n3:00 AM–4:00 AM\n\nNetwork+ original\n\nGoal work · Network+ original\n\nOutcome not recorded\n\nDetails\n: Network+ original\n\n4:00 AM–4:30 AM\n\nGoal support\n\nPreparation / support · Network+ original\n\nSupports Network+ original\n\nOutcome not recorded\n\nDetails\n: Goal support\n\n4:30 AM–4:45 AM\n\nProtected time\n\nProtected time · Network+ original\n\nProtects Goal support\n\nProtected time · not an activity\n\nDetails\n: Protected time\n\n9:00 AM–5:00 PM\n\nDay Work\n\nWork\n\nOutcome not recorded\n\nDetails\n: Day Work\n\n6:00 PM–6:30 PM\n\nRoutine\n\nCommitment\n\nOutcome not recorded\n\nDetails\n: Routine\nAdditional / manual activity\nAdd Event\nSchedule & outcome details"
+  },
+  {
+    "label": "1280-canonical-return",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Accepted planning and scheduled work",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 15:39:21 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "canonical-read-only",
+    "before": "6f8650e99b50aee48015c36255d0849d6d4f157e5f9d88950406ce289840977a",
+    "after": "6f8650e99b50aee48015c36255d0849d6d4f157e5f9d88950406ce289840977a",
+    "stores": [
+      "compositionAuthority",
+      "executionHistoryMetadata",
+      "executionHistoryQuarantine",
+      "executionHistoryRecords",
+      "goalPlanning",
+      "goalStructure",
+      "goals",
+      "historicalPlanBatches",
+      "historicalPlanDays",
+      "measurementDefinitions",
+      "progressObservations",
+      "proposalAuthority",
+      "realizationAuthority"
+    ],
+    "fixture": "canonical-fixture-RESULT.json"
+  },
+  {
+    "label": "320-SIMULATED-partial",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 6,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 255.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 255.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 255.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 255.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 255.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 255.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-unknown",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-empty",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-failure",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-density",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-reveal",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-expanded",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 243.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-SIMULATED-invalid",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 223.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 243.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 277.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 277.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-partial",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 6,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 325.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-unknown",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-empty",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-failure",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-density",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-reveal",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-expanded",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 313.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-SIMULATED-invalid",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 58,
+        "width": 293.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 313.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-partial",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 6,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-unknown",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-empty",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-failure",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-density",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-reveal",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-expanded",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 683.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-SIMULATED-invalid",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 229
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 683.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 711
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 711
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-partial",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 6,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-unknown",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 3,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-empty",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-failure",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-density",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-reveal",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-expanded",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1110.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-SIMULATED-invalid",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "Task 9.25 defensive presentation QASIMULATED QUERY RESPONSES. Density is synthetic: 60 iterations and 360 facts, not persisted aut",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "iterations": 20,
+    "facts": 9,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 371.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 371.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 360.875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1110.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 11",
+        "height": 44,
+        "width": 233.40625
+      },
+      {
+        "name": "Inspect accepted iteration 12",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 13",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 14",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 15",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 16",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 17",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 18",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 19",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Inspect accepted iteration 20",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 1138
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1138
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "true",
+        "describedBy": "_r_0_-error"
+      }
+    ]
+  },
+  {
+    "label": "SIMULATED-reduced-height-keyboard",
+    "viewport": {
+      "width": 390,
+      "height": 420,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal inspection end date",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 44,
+        "width": 234.59375
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 44,
+        "width": 347.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 347.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "SIMULATED-css-zoom-approximation",
+    "viewport": {
+      "width": 640,
+      "height": 800,
+      "client": 625,
+      "scroll": 625
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal inspection end date",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "iterations": 10,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Close accepted planning",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Inspect accepted iteration 1",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 4",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 5",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 6",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 7",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 8",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 9",
+        "height": 88,
+        "width": 451.359375
+      },
+      {
+        "name": "Inspect accepted iteration 10",
+        "height": 88,
+        "width": 469.15625
+      },
+      {
+        "name": "Show more accepted iterations",
+        "height": 88,
+        "width": 557
+      },
+      {
+        "name": "Review Schedule",
+        "height": 88,
+        "width": 557
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  }
+]

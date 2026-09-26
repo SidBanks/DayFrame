@@ -13,6 +13,8 @@ export type RuntimeAuthorityParticipant<T = unknown> = {
 
 export function createDayFrameAuthorityTransaction(options: {
   scheduler: DayFrameNotificationScheduler;
+  canBegin?: () => boolean;
+  protectedParticipant?: () => string | undefined;
   participants: readonly RuntimeAuthorityParticipant[];
 }) {
   let epoch = 0;
@@ -20,8 +22,13 @@ export function createDayFrameAuthorityTransaction(options: {
   let snapshot: Map<string, unknown> | undefined;
 
   function begin(kind: AuthorityTransactionKind = "internalReplacement") {
-    if (state.status !== "inactive" || !options.scheduler.begin())
+    if (state.status !== "inactive" || options.canBegin?.() === false)
       return { status: "busy" as const };
+    const participantId = options.protectedParticipant?.();
+    if (participantId) return { status: "protected" as const, participantId };
+    if (!options.scheduler.begin()) return { status: "busy" as const };
+    // Close ordinary admission before participant callbacks can reenter the store.
+    state = { status: "active", kind, epoch: ++epoch };
     const captured = new Map<string, unknown>();
     try {
       for (const participant of options.participants) {
@@ -29,10 +36,10 @@ export function createDayFrameAuthorityTransaction(options: {
       }
     } catch {
       options.scheduler.abort();
+      state = { status: "inactive" };
       return { status: "snapshotFailed" as const };
     }
     snapshot = captured;
-    state = { status: "active", kind, epoch: ++epoch };
     return { status: "begun" as const, epoch };
   }
   function commit() {
@@ -86,5 +93,5 @@ export function createDayFrameAuthorityTransaction(options: {
       ]),
     );
   }
-  return { begin, install, commit, abort, getState, captureAll };
+  return { begin, install, commit, abort, getState, captureAll, getEpoch: () => epoch };
 }

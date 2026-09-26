@@ -1,0 +1,2124 @@
+[
+  {
+    "label": "320-native-automatic-success",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-native-automatic-success",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-native-automatic-success",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-native-automatic-success",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-abort-retained-acceptance",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Acceptance is saved, but scheduling has not completed. Scheduling could not be saved. Check local storage and retry."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 58,
+        "width": 243,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-abort-retained-acceptance",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Acceptance is saved, but scheduling has not completed. Scheduling could not be saved. Check local storage and retry."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-abort-retained-acceptance",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Acceptance is saved, but scheduling has not completed. Scheduling could not be saved. Check local storage and retry."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-abort-retained-acceptance",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Acceptance is saved, but scheduling has not completed. Scheduling could not be saved. Check local storage and retry."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-native-explicit-retry-success",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-native-explicit-retry-success",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-native-explicit-retry-success",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-native-explicit-retry-success",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-proposalAuthority-busy-clear",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-proposalAuthority-busy-clear",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-proposalAuthority-busy-clear",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-proposalAuthority-busy-clear",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-proposalAuthority-busy-restore",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-proposalAuthority-busy-restore",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-proposalAuthority-busy-restore",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-proposalAuthority-busy-restore",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-realizationAuthority-busy-clear",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-realizationAuthority-busy-clear",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-realizationAuthority-busy-clear",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-realizationAuthority-busy-clear",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-realizationAuthority-busy-restore",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-realizationAuthority-busy-restore",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-realizationAuthority-busy-restore",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-realizationAuthority-busy-restore",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Publication or another authority operation is still finishing. Backup restore was not started. Wait for settlement, then explicitly try again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-proposalAuthority-unconfirmed",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-proposalAuthority-unconfirmed",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-proposalAuthority-unconfirmed",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-proposalAuthority-unconfirmed",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-proposalAuthority-protected-clear",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-proposalAuthority-protected-clear",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-proposalAuthority-protected-clear",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-proposalAuthority-protected-clear",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-realizationAuthority-unconfirmed",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 58,
+        "width": 243,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-realizationAuthority-unconfirmed",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-realizationAuthority-unconfirmed",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-realizationAuthority-unconfirmed",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Plan",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-controlled-native-realizationAuthority-protected-clear",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 58,
+        "width": 243,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-controlled-native-realizationAuthority-protected-clear",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-controlled-native-realizationAuthority-protected-clear",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-controlled-native-realizationAuthority-protected-clear",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Clear Local Data",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Protected history or local authority blocks clear. Clear was not started. Use the existing supported recovery path.",
+      "Decision recorded. Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 44,
+        "width": 413.359375,
+        "disabled": true
+      },
+      {
+        "text": "Retry scheduling accepted work",
+        "height": 44,
+        "width": 256.78125,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-reduced-height-keyboard",
+    "width": 320,
+    "height": 420,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Reject Proposal",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Generate Schedule",
+        "height": 44,
+        "width": 167.875,
+        "disabled": false
+      },
+      {
+        "text": "Publish schedule: 2026-09-26–2026-09-27 (exclusive)",
+        "height": 58,
+        "width": 243,
+        "disabled": true
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,136 @@
+{
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/153.0.8010.52",
+    "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "jsVersion": "15.3.76.13"
+  },
+  "fixture": "../task-9.25/canonical-fixture-RESULT.json",
+  "exceptions": [
+    {
+      "description": "TypeError: Illegal invocation\n    at c (http://127.0.0.1:4936/assets/dayFrameRestoreComposition-DCVivhut.js:2:11395)\n    at Object.i [as restore] (http://127.0.0.1:4936/assets/dayFrameRestoreComposition-DCVivhut.js:2:7103)\n    at dn (http://127.0.0.1:4936/assets/index-Lo-nHQ1t.js:2:309706)\n    at async Gm (http://127.0.0.1:4936/assets/index-Lo-nHQ1t.js:2:405838)\n    at async onChange (http://127.0.0.1:4936/assets/index-Lo-nHQ1t.js:2:382975)",
+      "frames": [
+        {
+          "function": "c",
+          "url": "http://127.0.0.1:4936/assets/dayFrameRestoreComposition-DCVivhut.js",
+          "location": {
+            "scriptId": "20",
+            "lineNumber": 1,
+            "columnNumber": 11394
+          },
+          "original": {
+            "generatedLine": 1,
+            "generatedColumn": 11394,
+            "originalSource": "../../../home/sid/Penn Digital Services/DayFrame/code/src/infrastructure/restore/restoreCoordinator.ts",
+            "originalLine": 360,
+            "originalColumn": 43
+          }
+        },
+        {
+          "function": "i",
+          "url": "http://127.0.0.1:4936/assets/dayFrameRestoreComposition-DCVivhut.js",
+          "location": {
+            "scriptId": "20",
+            "lineNumber": 1,
+            "columnNumber": 7102
+          },
+          "original": {
+            "generatedLine": 1,
+            "generatedColumn": 7102,
+            "originalSource": "../../../home/sid/Penn Digital Services/DayFrame/code/src/infrastructure/restore/restoreCoordinator.ts",
+            "originalLine": 137,
+            "originalColumn": 19
+          }
+        },
+        {
+          "function": "dn",
+          "url": "http://127.0.0.1:4936/assets/index-Lo-nHQ1t.js",
+          "location": {
+            "scriptId": "7",
+            "lineNumber": 1,
+            "columnNumber": 309705
+          },
+          "original": {
+            "generatedLine": 1,
+            "generatedColumn": 309705,
+            "originalSource": "../../../home/sid/Penn Digital Services/DayFrame/code/src/state/dayFrameStore.ts",
+            "originalLine": 2645,
+            "originalColumn": 56
+          }
+        }
+      ],
+      "locals": {
+        "result": {
+          "type": "object",
+          "value": []
+        }
+      }
+    }
+  ],
+  "before": {
+    "local": {
+      "dayframe-execution-history-idb-established": "1"
+    },
+    "durable": {
+      "compositionAuthority": [],
+      "executionHistoryMetadata": [
+        {
+          "surface": "executionHistory",
+          "version": 1,
+          "authorityState": "established",
+          "legacyFingerprint": "b6f40207",
+          "recordCount": 0,
+          "quarantineCount": 0
+        }
+      ],
+      "executionHistoryQuarantine": [],
+      "executionHistoryRecords": [],
+      "goalPlanning": [],
+      "goalStructure": [],
+      "goals": [],
+      "historicalPlanBatches": [],
+      "historicalPlanDays": [],
+      "measurementDefinitions": [],
+      "progressObservations": [],
+      "proposalAuthority": [],
+      "realizationAuthority": [],
+      "restoreMetadata": [],
+      "restorePayloads": []
+    }
+  },
+  "after": {
+    "local": {
+      "dayframe-execution-history-idb-established": "1"
+    },
+    "durable": {
+      "compositionAuthority": [],
+      "executionHistoryMetadata": [
+        {
+          "surface": "executionHistory",
+          "version": 1,
+          "authorityState": "established",
+          "legacyFingerprint": "b6f40207",
+          "recordCount": 0,
+          "quarantineCount": 0
+        }
+      ],
+      "executionHistoryQuarantine": [],
+      "executionHistoryRecords": [],
+      "goalPlanning": [],
+      "goalStructure": [],
+      "goals": [],
+      "historicalPlanBatches": [],
+      "historicalPlanDays": [],
+      "measurementDefinitions": [],
+      "progressObservations": [],
+      "proposalAuthority": [],
+      "realizationAuthority": [],
+      "restoreMetadata": [],
+      "restorePayloads": []
+    }
+  },
+  "exactDurableAndLocalEqual": true,
+  "text": "DayFrame\nPlanner\nSummary\nCalendar\nSettings and data\nSaved Setup Profiles\n\nSave named local setups, then load one later to replace the current active setup.\n\nProfile Name\nSave Current Setup as Profile\n\nNo saved profiles yet.\n\nExport Complete Backup\nImport Setup Backup\nClear Local Data\n\nIllegal invocation\n\nPlanner\nCalendar\nMy Schedule\nGoals\nReview Plan\nSelected day: 2026-09-23\nToday\n\nMONTHLY PLANNER\n\nSeptember 2026\n\nSelect a date to review its canonical DayFrame day.\n\nAdd Commitment\nWork Pattern\nCommitment Library\nPrevious\nCurrent DayFrame day\nNext\n\nThis month is not generated.\n\nPlan has unsaved changes. Save Setup before refreshing the schedule.\n\nPlanning range: May 4, 2026–May 6, 2026. Month navigation does not change it.\n\nOpen Review Plan\nGenerate Schedule\nSAT\nSATURDAY\nSUN\nSUNDAY\nMON\nMONDAY\nTUE\nTUESDAY\nWED\nWEDNESDAY\nTHU\nTHURSDAY\nFRI\nFRIDAY\n29\nNot generated\n30\nNot generated\n31\nNot generated\n1\nNot generated\n2\nNot generated\n3\nNot generated\n4\nNot generated\n5\nNot generated\n6\nNot generated\n7\nNot generated\n8\nNot generated\n9\nNot generated\n10\nNot generated\n11\nNot generated\n12\nNot generated\n13\nNot generated\n14\nNot generated\n15\nNot generated\n16\nNot generated\n17\nNot generated\n18\nNot generated\n19\nNot generated\n20\nNot generated\n21\nNot generated\n22\nNot generated\n23\nNot generated\n24\nNot generated\n25\nNot generated\n26\nNot generated\n27\nNot generated\n28\nNot generated\n29\nNot generated\n30\nNot generated\n1\nNot generated\n2\nNot generated\nOpen selected dayCalendar editing tools\n\nCANONICAL PLANNING REVIEW\n\nSelected-day planning truth\n\n2026-09-01 through 2026-10-01 (exclusive)\n\nPlanning-data coverage is unknown. Missing facts are not treated as an empty schedule.\n\nNo generated Preview is available for this period.\n\nNo publication exists for this period.\n\nNo known items intersect the selected day. Coverage status above still applies.",
+  "build": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>DayFrame</title>\n    <script type=\"module\" crossorigin src=\"/assets/index-Lo-nHQ1t.js\"></script>\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/rolldown-runtime-9SAPJn0b.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/vendor-react-BiBT4RTg.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/sleepRequirement-BF3kSIge.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/capacityFingerprint-D6Kh-Up0.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/userDay-BjAk0cL3.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/dayFrameDurableDb-Dn_VrBM0.js\">\n    <link rel=\"modulepreload\" crossorigin href=\"/assets/dayFrameRuntimeAuthority-xpXPkD2o.js\">\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/index-DMLBriUq.css\">\n  </head>\n  <body>\n    <div id=\"root\"></div>\n  </body>\n</html>\n"
+}

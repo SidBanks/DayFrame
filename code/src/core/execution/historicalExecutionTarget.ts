@@ -1,4 +1,5 @@
 import type { BlockCandidate, DraftScheduledBlock } from "../blocks/types.js";
+import { resolveUserWeekStartDateForLabel } from "../time/canonicalUserDay.js";
 import {
   createDurableOccurrenceReference,
   durableOccurrenceReferencesEqual,
@@ -125,6 +126,7 @@ export function materializeHistoricalExecutionTarget(input: {
         preview.result.planDecisionResults,
         preview.result.blockCandidates,
         input.authoredSetup,
+        preview,
       );
   }
 }
@@ -134,6 +136,7 @@ function fromDecision(
   replayResults: readonly PlanDecisionReplayResult[],
   candidates: readonly BlockCandidate[],
   authoredSetup: DayFrameAuthoredSetup,
+  preview: DayFramePreview,
 ): HistoricalExecutionTargetMaterialization {
   const replay = replayResults.find((current) => current.decisionId === decisionId);
   if (!replay) return { status: "notReportable" };
@@ -144,7 +147,44 @@ function fromDecision(
         ? ("blocked" as const)
         : undefined;
   if (!state) return { status: "notReportable" };
-  const candidate = candidateForReference(candidates, replay.target, authoredSetup);
+  let candidate:
+    | Pick<BlockCandidate, "occurrenceIdentity" | "userDayDate" | "title" | "category">
+    | undefined;
+  const evidence = preview.result.omissionEvidence;
+  if (state === "omitted" && evidence) {
+    if (replay.target.sourceKind !== "template") return { status: "unsupportedFamily" };
+    const resolution = resolveDurableOccurrenceReference(replay.target, authoredSetup);
+    if (resolution.status !== "resolved") return resolutionFailure(replay.target, authoredSetup);
+    if (
+      evidence.generatedAt !== preview.generatedAt ||
+      evidence.planningWindowStart !== preview.planningWindowStart.toISOString() ||
+      evidence.planningWindowEnd !== preview.planningWindowEnd.toISOString()
+    )
+      return { status: "insufficientHistoricalContext" };
+    const matches = evidence.occurrences.filter((entry) => entry.decisionId === decisionId);
+    if (matches.length !== 1) return { status: "insufficientHistoricalContext" };
+    const entry = matches[0]!;
+    if (
+      !durableOccurrenceReferencesEqual(entry.target, replay.target) ||
+      entry.occurrenceIdentity.sourceKind !== "template" ||
+      (entry.occurrenceIdentity.scopeKind === "userDay"
+        ? entry.occurrenceIdentity.userDayDate !== entry.userDayDate
+        : entry.occurrenceIdentity.userWeekStartDate !==
+          resolveUserWeekStartDateForLabel({
+            shiftCycles: authoredSetup.shiftCycles,
+            defaultSchedulingPreferences: authoredSetup.schedulingPreferences,
+            userDayDate: entry.userDayDate,
+          }))
+    )
+      return { status: "insufficientHistoricalContext" };
+    const reference = createDurableOccurrenceReference(entry.occurrenceIdentity, authoredSetup);
+    if (
+      reference.status !== "created" ||
+      !durableOccurrenceReferencesEqual(reference.reference, replay.target)
+    )
+      return { status: "insufficientHistoricalContext" };
+    candidate = entry;
+  } else candidate = candidateForReference(candidates, replay.target, authoredSetup);
   if (!candidate?.occurrenceIdentity) return resolutionFailure(replay.target, authoredSetup);
   return fromOccurrence(candidate.occurrenceIdentity, authoredSetup, {
     plan: { state },
@@ -180,9 +220,10 @@ function fromOccurrence(
     plan: ExecutionHistoricalSnapshot["plan"];
     userDayDate: string;
     placementInstant: Date;
-    previewCandidate?: BlockCandidate;
+    previewCandidate?: Pick<BlockCandidate, "title" | "category">;
   },
 ): HistoricalExecutionTargetMaterialization {
+  if (identity.sourceKind === "sleepRequirement") return { status: "sourceMissing" };
   const construction = createDurableOccurrenceReference(identity, authoredSetup);
   if (construction.status !== "created") return constructionFailure(construction.status);
   const referenceValidation = validateDurableOccurrenceReference(construction.reference);
@@ -227,7 +268,7 @@ function fromOccurrence(
 function sourceContext(
   identity: OccurrenceIdentity,
   state: DayFrameAuthoredSetup,
-  candidate?: BlockCandidate,
+  candidate?: Pick<BlockCandidate, "title" | "category">,
 ): { title: string; category: ExecutionHistoricalSnapshot["category"] } | undefined {
   if (identity.sourceKind === "template") {
     const template = state.blockTemplates.find((current) => current.id === identity.templateId);
@@ -244,6 +285,7 @@ function sourceContext(
     );
     return shift ? { title: shift.name, category: "work" } : undefined;
   }
+  if (identity.sourceKind === "sleepRequirement") return undefined;
   const event = state.manualEvents.find((current) => current.id === identity.manualEventId);
   return event ? { title: event.title, category: "optional" } : undefined;
 }

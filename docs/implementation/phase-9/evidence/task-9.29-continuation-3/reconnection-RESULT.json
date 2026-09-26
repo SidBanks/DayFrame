@@ -1,0 +1,15 @@
+{
+  "capturedAt": "2026-09-26T00:41:35.154588+00:00",
+  "head": "c0cc9ae2ae68af626e64747539a417f10df1cf3a",
+  "statusEntryCount": 300,
+  "baselineFiles": 1801,
+  "changedSinceRecoveredBaseline": [
+    "code/src/ui/GoalAcceptedPlanningSection.tsx",
+    "code/src/ui/HistoricalIntelligenceSummary.tsx",
+    "code/src/ui/tests/GoalAcceptedPlanning.test.tsx"
+  ],
+  "missingBaselineFiles": [],
+  "priorFilesMatchedBeforeChanges": true,
+  "applicableInstructions": "No AGENTS.md found in repository; ancestor instructions checked separately.",
+  "baselineSuite": "baseline-tests-RESULT.log: 1820 passing, one Goal return-focus failure, one HistoricalIntelligenceSummary unhandled error; preserved unchanged."
+}

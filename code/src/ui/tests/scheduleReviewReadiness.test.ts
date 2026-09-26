@@ -1,24 +1,8 @@
+import { reviewModelFixture } from "../../state/reviewSourceTestFixtures.js";
 import { describe, expect, it } from "vitest";
 import { deriveScheduleReviewReadiness } from "../scheduleReviewReadiness.js";
 
-function model(overrides: Record<string, unknown> = {}) {
-  return {
-    version: 1,
-    planningDataCoverage: "complete",
-    preview: { availability: "available", coverage: "covers", freshness: "current" },
-    scheduledReality: [],
-    derivedSchedule: [],
-    acceptedLiabilities: [],
-    proposals: [],
-    publication: {
-      epistemicClass: "historical",
-      coverage: "none",
-      publishedUserDays: [],
-      missingUserDays: [],
-    },
-    ...overrides,
-  } as never;
-}
+const model = reviewModelFixture;
 
 describe("schedule review readiness", () => {
   it("derives ready separately from publication history", () => {
@@ -64,5 +48,32 @@ describe("schedule review readiness", () => {
       publicationReady: true,
       warnings: [{ code: "proposalDecisionPending", blocksPublication: false }],
     });
+  });
+});
+
+describe("Task 9.9 publication blockers", () => {
+  it.each([
+    {
+      publication: {
+        coverage: "unknown",
+        availability: { status: "protected", reason: "physicalMismatch" },
+      },
+    },
+    {
+      preview: {
+        availability: "available",
+        coverage: "covers",
+        freshness: "current",
+        revision: "try",
+      },
+    },
+  ])("does not advertise ready for %s", (override) => {
+    expect(
+      deriveScheduleReviewReadiness({
+        model: model(override),
+        unresolvedFrictionCount: 0,
+        publicationRangeValid: true,
+      }).publicationReady,
+    ).toBe(false);
   });
 });

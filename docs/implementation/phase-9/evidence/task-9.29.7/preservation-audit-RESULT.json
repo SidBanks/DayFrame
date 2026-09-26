@@ -1,0 +1,26 @@
+{
+  "governing-source-hashes-RESULT.json": {
+    "checked": 677,
+    "mismatches": []
+  },
+  "prior-evidence-hashes-RESULT.json": {
+    "checked": 825,
+    "mismatches": []
+  },
+  "retained-continuation-3-hashes-RESULT.json": {
+    "checked": 93,
+    "mismatches": []
+  },
+  "baselineChanged": [
+    "code/src/state/dayFrameStore.ts",
+    "code/src/core/engine/generatePlanningSchedule.ts",
+    "code/src/core/historicalPlan/materializePlanPublication.ts",
+    "code/src/core/decisions/replayPlanDecisions.ts",
+    "code/src/core/execution/historicalExecutionTarget.ts"
+  ],
+  "newCodeFiles": [
+    "code/src/state/omissionPublicationTestFixtures.ts",
+    "code/src/state/omissionPublication.test.ts",
+    "code/src/ui/tests/OmissionPublicationWorkflow.test.tsx"
+  ]
+}

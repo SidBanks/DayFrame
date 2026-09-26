@@ -1,0 +1,55 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts src/state/historicalPlanSurface.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+<--- Last few GCs --->
+
+[80:0x5605961e1000]    20381 ms: Mark-Compact 4063.9 (4137.2) -> 4061.5 (4142.7) MB, pooled: 0 MB, 1060.78 / 0.00 ms  (average mu = 0.189, current mu = 0.042) allocation failure; scavenge might not succeed
+[80:0x5605961e1000]    22338 ms: Mark-Compact 4069.9 (4143.2) -> 4067.0 (4164.2) MB, pooled: 0 MB, 1940.81 / 0.00 ms  (average mu = 0.087, current mu = 0.008) allocation failure; scavenge might not succeed
+
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x56057f13e105 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/usr/bin/node]
+ 2: 0x56057f5fa1b4 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/usr/bin/node]
+ 3: 0x56057f5fa4b4 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/usr/bin/node]
+ 4: 0x56057f82dc1c  [/usr/bin/node]
+ 5: 0x56057f84cc52 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/usr/bin/node]
+ 6: 0x56057f81db0e v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/bin/node]
+ 7: 0x56057f81e59c v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/usr/bin/node]
+ 8: 0x56057f7fe07d v8::internal::Factory::NewFillerObject(int, v8::internal::AllocationAlignment, v8::internal::AllocationType, v8::internal::AllocationOrigin) [/usr/bin/node]
+ 9: 0x56057fc4bfc9 v8::internal::Runtime_AllocateInYoungGeneration(int, unsigned long*, v8::internal::Isolate*) [/usr/bin/node]
+10: 0x56052016caf6 
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Worker forks emitted error.
+ ❯ EventEmitter.<anonymous> ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:3445:22
+ ❯ EventEmitter.emit node:events:519:28
+ ❯ ChildProcess.emitUnexpectedExit ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:3012:22
+ ❯ ChildProcess.emit node:events:519:28
+ ❯ Process.ChildProcess._handle.onexit node:internal/child_process:293:12
+
+Caused by: Error: Worker exited unexpectedly
+ ❯ ChildProcess.emitUnexpectedExit ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vitest/dist/chunks/cli-api.Cjt90eJu.js:3011:33
+ ❯ ChildProcess.emit node:events:519:28
+ ❯ Process.ChildProcess._handle.onexit node:internal/child_process:293:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 passed (3)
+      Tests  38 passed (47)
+     Errors  1 error
+   Start at  11:38:58
+   Duration  36.08s (transform 1.25s, setup 0ms, import 1.36s, tests 1.93s, environment 0ms)
+
+[vitest-pool]: Timeout terminating forks worker for test files /home/sid/Penn Digital Services/DayFrame/code/src/state/publicationSourceAdmission.test.ts.

@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=2 src/ui/tests/GoalStructureAuthoring.test.tsx
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  16:30:46
+   Duration  9.69s (transform 1.58s, setup 0ms, import 1.46s, tests 7.61s, environment 512ms)
+

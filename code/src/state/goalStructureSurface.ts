@@ -1,3 +1,14 @@
+import {
+  evaluateGoalStructure,
+  qualifyGoalStructure,
+  structureCommandTime,
+  structureEligibilityV1,
+  type StructureEvaluationInput,
+} from "../core/planning/goalStructureTemporal.js";
+import {
+  DayFrameMutationAdmissionError,
+  type DayFrameMutationAdmission,
+} from "./dayFrameMutationAdmission.js";
 import type { GoalId, GoalV1 } from "../core/goals/goal.js";
 import { semanticFingerprint } from "../infrastructure/restore/restoreStaging.js";
 import {
@@ -10,7 +21,6 @@ import {
   currentMilestonesForGoal,
   currentRelationshipsForGoal,
   emptyGoalStructureAuthority,
-  queryStructuralEligibility,
   resolveMilestoneRevision,
   resolveRelationshipRevision,
   validateGoalStructureAuthority,
@@ -43,6 +53,7 @@ export type GoalStructureCommandResult<T> =
   | { status: "accepted"; value: T; persistence: "durable" | "pending"; changed: boolean }
   | {
       status: "rejected";
+      detail?: string;
       reason:
         | "initializing"
         | "protected"
@@ -62,7 +73,9 @@ export function createGoalStructureSurface(options: {
   allocateId?: () => PlanningFactId;
   now?: () => string;
   notificationScheduler?: DayFrameNotificationScheduler;
-  canMutate?: () => boolean;
+  canMutate?: () => boolean | DayFrameMutationAdmission;
+  getEpoch?: () => number;
+  getTransactionState?: () => { status: string; epoch?: number };
 }) {
   const storage = options.storage ?? createDayFrameDurableDb();
   const allocateId = options.allocateId ?? createPlanningFactId;
@@ -71,11 +84,17 @@ export function createGoalStructureSurface(options: {
   let desired = structuredClone(authority);
   let ingress: GoalStructureIngressStatus = { status: "initializing" };
   let durability: GoalStructureDurabilityStatus = "unknown";
+  let generation = 0,
+    desiredVersion = 0,
+    leased = false;
+  const epoch = () => options.getEpoch?.() ?? 0;
   const listeners = new Set<() => void>();
   const runtime: RuntimeAuthorityAdapter<GoalStructureRuntimeSnapshot> = {
     id: "goalStructure",
     captureRuntimeSnapshot: () => structuredClone({ authority, desired, ingress, durability }),
     installRuntimeExact: (target) => {
+      generation++;
+      desiredVersion++;
       authority = structuredClone(target.authority);
       desired = structuredClone(target.desired);
       ingress = structuredClone(target.ingress);
@@ -84,7 +103,14 @@ export function createGoalStructureSurface(options: {
     },
   };
   async function initializeGoalStructure() {
+    if (ingress.status !== "initializing")
+      return {
+        status: ingress.status === "accepted" ? ("ready" as const) : ("protected" as const),
+      };
+    const token = generation,
+      capturedEpoch = epoch();
     const result = await storage.getAll<unknown>(GOAL_STRUCTURE_STORE);
+    if (token !== generation || capturedEpoch !== epoch()) return { status: "protected" as const };
     if (result.status === "failure") return protect("readFailure");
     const relationships = result.value.filter(
       (item): item is GoalStructureRelationshipV1 =>
@@ -134,13 +160,16 @@ export function createGoalStructureSurface(options: {
   ) {
     const blocked = mutationBlocked();
     if (blocked) return blocked;
+    const at = now();
+    const invalidTime = structureCommandTime(authority, at);
+    if (invalidTime)
+      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
     let id: PlanningFactId;
     try {
       id = allocateId();
     } catch {
       return { status: "rejected" as const, reason: "allocationFailure" as const };
     }
-    const at = now();
     const candidate: GoalStructureRelationshipV1 = {
       ...structuredClone(input),
       recordType: "relationship",
@@ -166,6 +195,8 @@ export function createGoalStructureSurface(options: {
       Pick<GoalStructureRelationshipV1, "kind" | "sourceGoalId" | "target" | "semantics">
     >,
   ) {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
     const found = currentRelationship(id, expectedRevision);
     if ("status" in found) return found;
     const semantic = {
@@ -189,11 +220,15 @@ export function createGoalStructureSurface(options: {
         persistence: durability === "durable" ? ("durable" as const) : ("pending" as const),
         changed: false,
       };
+    const at = now();
+    const invalidTime = structureCommandTime(authority, at, undefined);
+    if (invalidTime)
+      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
     const candidate: GoalStructureRelationshipV1 = {
       ...found.value,
       ...structuredClone(semantic),
       revision: planningRevision(found.value.revision + 1),
-      updatedAt: now(),
+      updatedAt: at,
     } as GoalStructureRelationshipV1;
     return accept(
       { ...authority, relationships: [...authority.relationships, candidate] },
@@ -202,6 +237,8 @@ export function createGoalStructureSurface(options: {
     );
   }
   async function retireRelationship(id: PlanningFactId, expectedRevision: number) {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
     const found = currentRelationship(id, expectedRevision);
     if ("status" in found) return found;
     if (found.value.status === "retired")
@@ -212,6 +249,9 @@ export function createGoalStructureSurface(options: {
         changed: false,
       };
     const at = now();
+    const invalidTime = structureCommandTime(authority, at, found.value.effectiveFrom);
+    if (invalidTime)
+      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
     const candidate: GoalStructureRelationshipV1 = {
       ...found.value,
       revision: planningRevision(found.value.revision + 1),
@@ -232,13 +272,16 @@ export function createGoalStructureSurface(options: {
   }) {
     const blocked = mutationBlocked();
     if (blocked) return blocked;
+    const at = now();
+    const invalidTime = structureCommandTime(authority, at);
+    if (invalidTime)
+      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
     let id: PlanningFactId;
     try {
       id = allocateId();
     } catch {
       return { status: "rejected" as const, reason: "allocationFailure" as const };
     }
-    const at = now();
     const candidate: GoalStructureMilestoneV1 = {
       recordType: "milestone",
       version: 1,
@@ -268,10 +311,11 @@ export function createGoalStructureSurface(options: {
       state?: "active" | "satisfied" | "retired";
     },
   ) {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
     const found = currentMilestone(id, expectedRevision);
     if ("status" in found) return found;
     const state = patch.state ?? found.value.state;
-    const at = now();
     const semantic = {
       ownerGoalId: found.value.ownerGoalId,
       title: (patch.title ?? found.value.title).trim(),
@@ -296,6 +340,10 @@ export function createGoalStructureSurface(options: {
         persistence: durability === "durable" ? ("durable" as const) : ("pending" as const),
         changed: false,
       };
+    const at = now();
+    const invalidTime = structureCommandTime(authority, at);
+    if (invalidTime)
+      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
     const candidate: GoalStructureMilestoneV1 = {
       ...found.value,
       title: semantic.title,
@@ -306,10 +354,12 @@ export function createGoalStructureSurface(options: {
     };
     delete candidate.targetDate;
     if (semantic.targetDate) candidate.targetDate = semantic.targetDate;
-    delete candidate.satisfiedAt;
-    delete candidate.retiredAt;
-    if (state === "satisfied") candidate.satisfiedAt = at;
-    if (state === "retired") candidate.retiredAt = at;
+    if (state !== found.value.state) {
+      delete candidate.satisfiedAt;
+      delete candidate.retiredAt;
+      if (state === "satisfied") candidate.satisfiedAt = at;
+      if (state === "retired") candidate.retiredAt = at;
+    }
     return accept(
       { ...authority, milestones: [...authority.milestones, candidate] },
       candidate,
@@ -321,6 +371,8 @@ export function createGoalStructureSurface(options: {
     value: T,
     changed: boolean,
   ): Promise<GoalStructureCommandResult<T>> {
+    const blocked = mutationBlocked();
+    if (blocked) return blocked;
     const checked = validateGoalStructureAuthority(next, options.listGoals());
     if (checked.status === "invalid")
       return {
@@ -331,10 +383,11 @@ export function createGoalStructureSurface(options: {
       };
     authority = checked.authority;
     desired = structuredClone(authority);
+    desiredVersion++;
     durability = "pending";
+    const pending = persistOrdinary(authority);
     notify();
-    const persisted = await replaceDurable(authority);
-    durability = persisted ? "durable" : "storageFailure";
+    const persisted = await pending;
     notify();
     return {
       status: "accepted",
@@ -343,16 +396,19 @@ export function createGoalStructureSurface(options: {
       changed,
     };
   }
-  async function replaceDurable(value: GoalStructureAuthorityV1) {
+  async function replaceDurable(value: GoalStructureAuthorityV1, admit?: () => boolean) {
     const records = [...value.relationships, ...value.milestones];
-    const result = await storage.mutate([
-      { type: "clear", store: GOAL_STRUCTURE_STORE },
-      ...records.map((record) => ({
-        type: "put" as const,
-        store: GOAL_STRUCTURE_STORE,
-        value: record,
-      })),
-    ]);
+    const result = await storage.mutate(
+      [
+        { type: "clear", store: GOAL_STRUCTURE_STORE },
+        ...records.map((record) => ({
+          type: "put" as const,
+          store: GOAL_STRUCTURE_STORE,
+          value: record,
+        })),
+      ],
+      admit,
+    );
     return result.status === "success";
   }
   function currentRelationship(id: PlanningFactId, expectedRevision: number) {
@@ -375,16 +431,54 @@ export function createGoalStructureSurface(options: {
       ? { value: structuredClone(value) }
       : { status: "rejected" as const, reason: "staleRevision" as const };
   }
-  function mutationBlocked() {
-    if (options.canMutate?.() === false)
+  function mutationBlocked(ignoreLease = false) {
+    const allowed = options.canMutate?.();
+    if (allowed === false)
       return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
-    return ingress.status === "accepted"
-      ? undefined
-      : {
-          status: "rejected" as const,
-          reason:
-            ingress.status === "protected" ? ("protected" as const) : ("initializing" as const),
-        };
+    if (allowed && typeof allowed === "object" && !allowed.allowed)
+      return { status: "rejected" as const, reason: allowed.reason };
+    if (leased && !ignoreLease)
+      return {
+        status: "rejected" as const,
+        reason: "authorityTransactionActive" as const,
+        detail: "ownerPersistenceBusy",
+      };
+    if (ingress.status !== "accepted")
+      return {
+        status: "rejected" as const,
+        reason: ingress.status === "protected" ? ("protected" as const) : ("initializing" as const),
+      };
+    if (qualifyGoalStructure(authority).status === "protected")
+      return {
+        status: "rejected" as const,
+        reason: "protected" as const,
+        detail: "temporalQualificationRequired",
+      };
+  }
+  async function persistOrdinary(value: GoalStructureAuthorityV1, retainLease = false) {
+    leased = true;
+    const g = generation,
+      e = epoch(),
+      v = desiredVersion;
+    const matches = () => g === generation && e === epoch() && v === desiredVersion;
+    try {
+      const persisted = await replaceDurable(value, () => matches() && !mutationBlocked(true));
+      if (!matches()) {
+        protect("invalidAuthority");
+        return false;
+      }
+      durability = persisted ? "durable" : "storageFailure";
+      return persisted;
+    } catch {
+      if (matches()) durability = "storageFailure";
+      else protect("invalidAuthority");
+      return false;
+    } finally {
+      if (!retainLease) leased = false;
+    }
+  }
+  function queryGoalStructure(input: StructureEvaluationInput) {
+    return evaluateGoalStructure(input, authority, options.listGoals(), ingress.status);
   }
   function notify() {
     options.notificationScheduler?.notify("goalStructure", () =>
@@ -401,8 +495,17 @@ export function createGoalStructureSurface(options: {
     listGoalStructureRelationships: (goalId: GoalId) =>
       currentRelationshipsForGoal(authority, goalId),
     listGoalStructureMilestones: (goalId: GoalId) => currentMilestonesForGoal(authority, goalId),
+    queryGoalStructure,
+    getGoalStructureQualification: () =>
+      ingress.status === "accepted"
+        ? qualifyGoalStructure(authority)
+        : { status: "unavailable" as const, issues: [] },
+    isGoalStructureQuiescent: () => !leased,
     getStructuralEligibility: (goalId: GoalId) =>
-      queryStructuralEligibility({ goalId, goals: options.listGoals(), authority }),
+      structureEligibilityV1(
+        queryGoalStructure({ goalId, evaluationInstant: now(), basis: "currentAuthority" }),
+        goalId,
+      ),
     getGoalStructureRelationshipRevision: (id: PlanningFactId, revision: number) =>
       resolveRelationshipRevision(authority, id, planningRevision(revision)),
     getGoalStructureMilestoneRevision: (id: PlanningFactId, revision: number) =>
@@ -411,34 +514,78 @@ export function createGoalStructureSurface(options: {
     getGoalStructureIngressStatus: () => structuredClone(ingress),
     getGoalStructureDurabilityStatus: () => durability,
     replaceGoalStructureAuthority: async (value: GoalStructureAuthorityV1) => {
+      const blocked = mutationBlocked();
+      if (blocked) return blocked;
       const checked = validateGoalStructureAuthority(value, options.listGoals());
       if (checked.status === "invalid") return { status: "invalid" as const };
-      const persisted = await replaceDurable(checked.authority);
-      if (!persisted) return { status: "failure" as const };
-      authority = checked.authority;
-      desired = structuredClone(authority);
-      ingress = { status: "accepted" };
-      durability = "durable";
-      notify();
-      return { status: "accepted" as const };
+      if (qualifyGoalStructure(checked.authority).status === "protected")
+        return { status: "rejected" as const, reason: "protected" as const };
+      const e = epoch(),
+        g = generation;
+      try {
+        if (!(await persistOrdinary(checked.authority, true)))
+          return { status: "failure" as const };
+        if (e !== epoch() || g !== generation)
+          return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
+        generation++;
+        desiredVersion++;
+        authority = checked.authority;
+        desired = structuredClone(authority);
+        notify();
+        return { status: "accepted" as const };
+      } finally {
+        leased = false;
+      }
     },
     retryGoalStructurePersistence: async () => {
-      const persisted = await replaceDurable(desired);
-      durability = persisted ? "durable" : "storageFailure";
+      const blocked = mutationBlocked();
+      if (blocked) return blocked;
+      const persisted = await persistOrdinary(structuredClone(desired));
       notify();
       return persisted ? { status: "durable" as const } : { status: "storageFailure" as const };
     },
     clearGoalStructure: async () => {
+      const blocked = mutationBlocked();
+      if (blocked) return blocked;
       const empty = emptyGoalStructureAuthority();
-      const persisted = await replaceDurable(empty);
-      if (persisted) {
+      const e = epoch(),
+        g = generation;
+      try {
+        if (!(await persistOrdinary(empty, true))) return { status: "storageFailure" as const };
+        if (e !== epoch() || g !== generation)
+          return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
+        generation++;
+        desiredVersion++;
         authority = empty;
         desired = structuredClone(empty);
-        ingress = { status: "accepted" };
-        durability = "durable";
         notify();
+        return { status: "removed" as const };
+      } finally {
+        leased = false;
       }
-      return persisted ? { status: "removed" as const } : { status: "storageFailure" as const };
+    },
+    clearGoalStructureForCoordinator: async (capability: symbol, expectedEpoch: number) => {
+      const admitted = () =>
+        capability === DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY &&
+        epoch() === expectedEpoch &&
+        options.getTransactionState?.().status === "active";
+      if (!admitted() || leased)
+        throw new DayFrameMutationAdmissionError("authorityTransactionActive");
+      generation++;
+      desiredVersion++;
+      const empty = emptyGoalStructureAuthority();
+      try {
+        if (!(await replaceDurable(empty, admitted))) return { status: "storageFailure" as const };
+      } catch {
+        return { status: "storageFailure" as const };
+      }
+      if (!admitted()) throw new DayFrameMutationAdmissionError("authorityTransactionActive");
+      authority = empty;
+      desired = structuredClone(empty);
+      ingress = { status: "accepted" };
+      durability = "durable";
+      notify();
+      return { status: "removed" as const };
     },
     subscribeGoalStructure: (listener: () => void) => {
       listeners.add(listener);

@@ -1,0 +1,431 @@
+[
+  {
+    "label": "320-try",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Apply Planning Change",
+        "height": 44,
+        "width": 146,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "320-published",
+    "width": 320,
+    "height": 568,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Schedule published. This immutable historical record does not lock future schedule changes.",
+      "Accepted and saved. The choice is active in the regenerated schedule."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "320-reduced-height-focus",
+    "width": 320,
+    "height": 420,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Generation range and setup",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Schedule published. This immutable historical record does not lock future schedule changes.",
+      "Accepted and saved. The choice is active in the regenerated schedule."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-try",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Apply Planning Change",
+        "height": 44,
+        "width": 211,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-published",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Schedule published. This immutable historical record does not lock future schedule changes.",
+      "Accepted and saved. The choice is active in the regenerated schedule."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-removed",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Review Schedule",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "This exact publication was already recorded.",
+      "Accepted choice removed and saved."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Try: Move block",
+        "height": 44,
+        "width": 142.328125,
+        "disabled": false
+      },
+      {
+        "text": "Try: Skip block",
+        "height": 44,
+        "width": 134.328125,
+        "disabled": false
+      },
+      {
+        "text": "Try: Accept conflict",
+        "height": 44,
+        "width": 163.671875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-try",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Apply Planning Change",
+        "height": 44,
+        "width": 537,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-published",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Schedule published. This immutable historical record does not lock future schedule changes.",
+      "Accepted and saved. The choice is active in the regenerated schedule."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-try",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Apply Planning Change",
+        "height": 44,
+        "width": 1012,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-published",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Complete DayFrame backup downloaded.",
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.",
+      "Schedule published. This immutable historical record does not lock future schedule changes.",
+      "Accepted and saved. The choice is active in the regenerated schedule."
+    ],
+    "controls": [
+      {
+        "text": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375,
+        "disabled": false
+      },
+      {
+        "text": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875,
+        "disabled": false
+      },
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  }
+]

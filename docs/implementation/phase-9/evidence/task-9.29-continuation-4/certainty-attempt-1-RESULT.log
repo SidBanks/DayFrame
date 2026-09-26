@@ -1,0 +1,948 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ReviewCertaintyWorkflow.test.tsx (11 tests | 8 failed) 3080ms
+   × retained workspace preserves original results and physical truth for proposalAuthority/abort 678ms
+   × retained workspace preserves original results and physical truth for proposalAuthority/lostAck 142ms
+   × retained workspace preserves original results and physical truth for proposalAuthority/verification 119ms
+   × retained workspace preserves original results and physical truth for realizationAuthority/abort 110ms
+   × retained workspace preserves original results and physical truth for realizationAuthority/lostAck 143ms
+   × retained workspace preserves original results and physical truth for realizationAuthority/verification 123ms
+   × a thrown proposal delivery requires explicit read-only inspection without automatic retry 111ms
+   × scope change retains the originating real acceptance and nested receipt without refreshing the new period 1055ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for proposalAuthority/abort
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for proposalAuthority/lostAck
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for proposalAuthority/verification
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for realizationAuthority/abort
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for realizationAuthority/lostAck
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > retained workspace preserves original results and physical truth for realizationAuthority/verification
+TestingLibraryElementError: Found multiple elements with the role "button" and name "Accept preferred option"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-screen df-workflow-block df-workflow-block--preview"[39m
+    [36m>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"df-panel"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"df-screen-title"[39m
+          [33mid[39m=[32m"review-schedule-heading"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+        [36m>[39m
+          [0mReview Schedule[0m
+        [36m</h2>[39m
+        [36m<p>[39m
+          [0mReviewing [0m
+          [0m2026-09-17[0m
+          [0m through [0m
+          [0m2026-09-17[0m
+          [0m, including both dates.[0m
+        [36m</p>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"df-history-range"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview start date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-start"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview end date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-end"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mtype[39m=[32m"submit"[39m
+          [36m>[39m
+            [0mApply review period[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<p>[39m
+          [0mDecisions and Build use saved planning information. Unrelated editor drafts are not saved by this review.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-actions"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-action-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mRefresh Schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mdata-review-return[39m=[32m"generation-setup"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mGeneration range and setup[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mGeneration uses the saved generation range; changing the review period only changes what you inspect and build.[0m
+        [36m</p>[39m
+      [36m</section>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+        [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-header"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+          [36m>[39m
+            [0mReview workflow[0m
+          [36m</p>[39m
+          [36m<h3[39m
+            [33mid[39m=[32m"review-readiness-heading"[39m
+          [36m>[39m
+            [0mReview readiness[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0m2026-09-17[0m
+            [0m through[0m
+            [0m [0m
+            [0m2026-09-17[0m
+            [0m (inclusive)[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-secondary-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRefresh review[0m
+        [36m</button>[39m
+        [36m<dl[39m
+          [33mclass[39m=[32m"df-summary-grid"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPlanning data[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcomplete[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview coverage[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcovers[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview freshness[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcurrent[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mSchedule conflicts[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mAccepted awaiting realization[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mProposals[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m2[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+        [36m</dl>[39m
+        [36m<div[39m
+          [33maria-live[39m=[32m"polite"[39m
+        [36m>[39m
+          [36m<h4>[39m
+            [0mReady to publish[0m
+          [36m</h4>[39m
+          [36m<p>[39m
+            [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-warning-message"[39m
+          [36m>[39m
+            [0m2 constructive Proposals are awaiting a decision.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-support"[39m
+          [36m>[39m
+            [0mNo publication exists for this period.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section>[39m
+          [36m<h4>[39m
+            [0mConstructive Proposals[0m
+          [36m</h4>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"df-plain-list"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"df-list-card"[39m
+            [36m>[39m
+              [36m<strong>[39m
+                [0mProposal for [0m
+                [0m2026-09-17[0m
+                [0m–[0m
+                [0m2026-09-17[0m
+                [0m [0m
+                [0m(inclusive)[0m
+              [36m</strong>[39m
+              [36m<details>[39m
+                [36m<summary>[39m
+                  [0mDecision identity and scope[0m
+                [36m...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/tests/ReviewCertaintyWorkflow.test.tsx:44:25
+     42|  const history=owner==="historicalPlanBatches";
+     43|  const action=history?f.publish:f.accept;
+     44|  fireEvent.click(screen.getByRole("button",{name:history?/Build this S…
+       |                         ^
+     45|  await waitFor(()=>expect(action).toHaveBeenCalledOnce());
+     46|  const original=await action.mock.results[0]!.value;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > a thrown proposal delivery requires explicit read-only inspection without automatic retry
+TestingLibraryElementError: Found multiple elements with the role "button" and name "Accept preferred option"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-screen df-workflow-block df-workflow-block--preview"[39m
+    [36m>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"df-panel"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"df-screen-title"[39m
+          [33mid[39m=[32m"review-schedule-heading"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+        [36m>[39m
+          [0mReview Schedule[0m
+        [36m</h2>[39m
+        [36m<p>[39m
+          [0mReviewing [0m
+          [0m2026-09-17[0m
+          [0m through [0m
+          [0m2026-09-17[0m
+          [0m, including both dates.[0m
+        [36m</p>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"df-history-range"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview start date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-start"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview end date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-end"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mtype[39m=[32m"submit"[39m
+          [36m>[39m
+            [0mApply review period[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<p>[39m
+          [0mDecisions and Build use saved planning information. Unrelated editor drafts are not saved by this review.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-actions"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-action-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mRefresh Schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mdata-review-return[39m=[32m"generation-setup"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mGeneration range and setup[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mGeneration uses the saved generation range; changing the review period only changes what you inspect and build.[0m
+        [36m</p>[39m
+      [36m</section>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+        [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-header"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+          [36m>[39m
+            [0mReview workflow[0m
+          [36m</p>[39m
+          [36m<h3[39m
+            [33mid[39m=[32m"review-readiness-heading"[39m
+          [36m>[39m
+            [0mReview readiness[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0m2026-09-17[0m
+            [0m through[0m
+            [0m [0m
+            [0m2026-09-17[0m
+            [0m (inclusive)[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-secondary-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRefresh review[0m
+        [36m</button>[39m
+        [36m<dl[39m
+          [33mclass[39m=[32m"df-summary-grid"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPlanning data[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcomplete[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview coverage[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcovers[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview freshness[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcurrent[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mSchedule conflicts[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mAccepted awaiting realization[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mProposals[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m2[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+        [36m</dl>[39m
+        [36m<div[39m
+          [33maria-live[39m=[32m"polite"[39m
+        [36m>[39m
+          [36m<h4>[39m
+            [0mReady to publish[0m
+          [36m</h4>[39m
+          [36m<p>[39m
+            [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-warning-message"[39m
+          [36m>[39m
+            [0m2 constructive Proposals are awaiting a decision.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-support"[39m
+          [36m>[39m
+            [0mNo publication exists for this period.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section>[39m
+          [36m<h4>[39m
+            [0mConstructive Proposals[0m
+          [36m</h4>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"df-plain-list"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"df-list-card"[39m
+            [36m>[39m
+              [36m<strong>[39m
+                [0mProposal for [0m
+                [0m2026-09-17[0m
+                [0m–[0m
+                [0m2026-09-17[0m
+                [0m [0m
+                [0m(inclusive)[0m
+              [36m</strong>[39m
+              [36m<details>[39m
+                [36m<summary>[39m
+                  [0mDecision identity and scope[0m
+                [36m...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/tests/ReviewCertaintyWorkflow.test.tsx:80:25
+     78|  if(owner==="proposal")f.accept.mockRejectedValueOnce(Error("controlle…
+     79|  render(<ScheduleReviewWorkspace {...f.props}/>);await screen.findByRo…
+     80|  fireEvent.click(screen.getByRole("button",{name:owner==="proposal"?"A…
+       |                         ^
+     81|  await screen.findByText(/operation outcome is unconfirmed/);
+     82|  expect(screen.getByRole("button",{name:/Build this Schedule:/})).toBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/ui/tests/ReviewCertaintyWorkflow.test.tsx > scope change retains the originating real acceptance and nested receipt without refreshing the new period
+TestingLibraryElementError: Found multiple elements with the role "button" and name "Accept preferred option"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-screen df-workflow-block df-workflow-block--preview"[39m
+    [36m>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"df-panel"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"df-screen-title"[39m
+          [33mid[39m=[32m"review-schedule-heading"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+        [36m>[39m
+          [0mReview Schedule[0m
+        [36m</h2>[39m
+        [36m<p>[39m
+          [0mReviewing [0m
+          [0m2026-09-17[0m
+          [0m through [0m
+          [0m2026-09-17[0m
+          [0m, including both dates.[0m
+        [36m</p>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"df-history-range"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview start date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-start"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview end date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-end"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mtype[39m=[32m"submit"[39m
+          [36m>[39m
+            [0mApply review period[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<p>[39m
+          [0mDecisions and Build use saved planning information. Unrelated editor drafts are not saved by this review.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-actions"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-action-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mRefresh Schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mdata-review-return[39m=[32m"generation-setup"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mGeneration range and setup[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mGeneration uses the saved generation range; changing the review period only changes what you inspect and build.[0m
+        [36m</p>[39m
+      [36m</section>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+        [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-header"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+          [36m>[39m
+            [0mReview workflow[0m
+          [36m</p>[39m
+          [36m<h3[39m
+            [33mid[39m=[32m"review-readiness-heading"[39m
+          [36m>[39m
+            [0mReview readiness[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0m2026-09-17[0m
+            [0m through[0m
+            [0m [0m
+            [0m2026-09-17[0m
+            [0m (inclusive)[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-secondary-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRefresh review[0m
+        [36m</button>[39m
+        [36m<dl[39m
+          [33mclass[39m=[32m"df-summary-grid"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPlanning data[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcomplete[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview coverage[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcovers[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview freshness[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcurrent[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mSchedule conflicts[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mAccepted awaiting realization[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mProposals[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m2[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+        [36m</dl>[39m
+        [36m<div[39m
+          [33maria-live[39m=[32m"polite"[39m
+        [36m>[39m
+          [36m<h4>[39m
+            [0mReady to publish[0m
+          [36m</h4>[39m
+          [36m<p>[39m
+            [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-warning-message"[39m
+          [36m>[39m
+            [0m2 constructive Proposals are awaiting a decision.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-support"[39m
+          [36m>[39m
+            [0mNo publication exists for this period.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section>[39m
+          [36m<h4>[39m
+            [0mConstructive Proposals[0m
+          [36m</h4>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"df-plain-list"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"df-list-card"[39m
+            [36m>[39m
+              [36m<strong>[39m
+                [0mProposal for [0m
+                [0m2026-09-17[0m
+                [0m–[0m
+                [0m2026-09-17[0m
+                [0m [0m
+                [0m(inclusive)[0m
+              [36m</strong>[39m
+              [36m<details>[39m
+                [36m<summary>[39m
+                  [0mDecision identity and scope[0m
+                [36m...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-screen df-workflow-block df-workflow-block--preview"[39m
+    [36m>[39m
+      [36m<section[39m
+        [33mclass[39m=[32m"df-panel"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"df-screen-title"[39m
+          [33mid[39m=[32m"review-schedule-heading"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+        [36m>[39m
+          [0mReview Schedule[0m
+        [36m</h2>[39m
+        [36m<p>[39m
+          [0mReviewing [0m
+          [0m2026-09-17[0m
+          [0m through [0m
+          [0m2026-09-17[0m
+          [0m, including both dates.[0m
+        [36m</p>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"df-history-range"[39m
+        [36m>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview start date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-start"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"df-field"[39m
+          [36m>[39m
+            [0mReview end date[0m
+            [36m<input[39m
+              [33maria-invalid[39m=[32m"false"[39m
+              [33mdata-review-return[39m=[32m"range-end"[39m
+              [33mtype[39m=[32m"date"[39m
+              [33mvalue[39m=[32m"2026-09-17"[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mtype[39m=[32m"submit"[39m
+          [36m>[39m
+            [0mApply review period[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<p>[39m
+          [0mDecisions and Build use saved planning information. Unrelated editor drafts are not saved by this review.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-actions"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-action-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mRefresh Schedule[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"df-secondary-button"[39m
+            [33mdata-review-return[39m=[32m"generation-setup"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mGeneration range and setup[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mGeneration uses the saved generation range; changing the review period only changes what you inspect and build.[0m
+        [36m</p>[39m
+      [36m</section>[39m
+      [36m<section[39m
+        [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+        [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-screen-header"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+          [36m>[39m
+            [0mReview workflow[0m
+          [36m</p>[39m
+          [36m<h3[39m
+            [33mid[39m=[32m"review-readiness-heading"[39m
+          [36m>[39m
+            [0mReview readiness[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0m2026-09-17[0m
+            [0m through[0m
+            [0m [0m
+            [0m2026-09-17[0m
+            [0m (inclusive)[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-secondary-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRefresh review[0m
+        [36m</button>[39m
+        [36m<dl[39m
+          [33mclass[39m=[32m"df-summary-grid"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPlanning data[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcomplete[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview coverage[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcovers[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mPreview freshness[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0mcurrent[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mSchedule conflicts[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mAccepted awaiting realization[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m0[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<dt>[39m
+              [0mProposals[0m
+            [36m</dt>[39m
+            [36m<dd>[39m
+              [0m2[0m
+            [36m</dd>[39m
+          [36m</div>[39m
+        [36m</dl>[39m
+        [36m<div[39m
+          [33maria-live[39m=[32m"polite"[39m
+        [36m>[39m
+          [36m<h4>[39m
+            [0mReady to publish[0m
+          [36m</h4>[39m
+          [36m<p>[39m
+            [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-warning-message"[39m
+          [36m>[39m
+            [0m2 constructive Proposals are awaiting a decision.[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"df-support"[39m
+          [36m>[39m
+            [0mNo publication exists for this period.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section>[39m
+          [36m<h4>[39m
+            [0mConstructive Proposals[0m
+          [36m</h4>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"df-plain-list"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"df-list-card"[39m
+            [36m>[39m
+              [36m<strong>[39m
+                [0mProposal for [0m
+                [0m2026-09-17[0m
+                [0m–[0m
+                [0m2026-09-17[0m
+                [0m [0m
+                [0m(inclusive)[0m
+              [36m</strong>[39m
+              [36m<details>[39m
+                [36m<summary>[39m
+                  [0mDecision identity and scope[0m
+                [36m...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ReviewCertaintyWorkflow.test.tsx:91:93
+     89|  let original:Awaited<ReturnType<typeof accept>>|undefined;
+     90|  f.accept.mockImplementation(async input=>{original=await accept(input…
+     91|  const mounted=render(<ScheduleReviewWorkspace {...f.props}/>);fireEve…
+       |                                                                                             ^
+     92|  fireEvent.change(screen.getByLabelText("Review end date"),{target:{va…
+     93|  await screen.findByText("Reviewing 2026-09-17 through 2026-09-18, inc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 3 passed (11)
+   Start at  13:03:53
+   Duration  4.74s (transform 906ms, setup 0ms, import 920ms, tests 3.08s, environment 625ms)
+

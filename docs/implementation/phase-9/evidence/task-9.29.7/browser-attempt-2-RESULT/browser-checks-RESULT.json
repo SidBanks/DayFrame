@@ -1,0 +1,248 @@
+{
+  "320": {
+    "identity": {
+      "goalId": "ba7d1339-e0c2-4a09-b120-69044c40c8bd",
+      "demandId": "a46c9d94-d0c2-48d2-b1d4-90a1f4f4c4b6",
+      "proposalId": "355ea43e02ebe6b9",
+      "range": {
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27"
+      },
+      "seeded": "Canonical authored sources, independent Actual/Progress, and undecided Proposal. Acceptance, publication, export, import and clear exercised separately."
+    },
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 1
+    },
+    "draftRetained": true,
+    "tryDiscardAccept": true,
+    "automaticFreshGeneration": true,
+    "omission": [
+      {
+        "version": 2,
+        "reference": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "e3f57a32-712e-4943-9232-4a546c12dff4"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "584c0c06-fd55-4edc-9ee7-b7cd9af49a1a"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-26",
+            "slot": 0
+          }
+        },
+        "sourceFamily": "template",
+        "title": "Routine",
+        "category": "maintenance",
+        "plan": {
+          "state": "omitted"
+        },
+        "timing": {
+          "kind": "timed"
+        },
+        "goals": []
+      }
+    ],
+    "returnFocus": {
+      "text": "Review Schedule",
+      "tag": "H2"
+    }
+  },
+  "390": {
+    "identity": {
+      "goalId": "d00c3bda-c458-4319-896a-5de32a0e7bb0",
+      "demandId": "37dc4568-39a1-4762-b750-7f36fd4b8e5d",
+      "proposalId": "2b5bda633c5c562f",
+      "range": {
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27"
+      },
+      "seeded": "Canonical authored sources, independent Actual/Progress, and undecided Proposal. Acceptance, publication, export, import and clear exercised separately."
+    },
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 1
+    },
+    "draftRetained": true,
+    "tryDiscardAccept": true,
+    "automaticFreshGeneration": true,
+    "omission": [
+      {
+        "version": 2,
+        "reference": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "8343b49d-1864-46b6-b32f-d3f00b08c2f0"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "11fb3cd3-4d31-493c-9eb6-e503c10f7c13"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-26",
+            "slot": 0
+          }
+        },
+        "sourceFamily": "template",
+        "title": "Routine",
+        "category": "maintenance",
+        "plan": {
+          "state": "omitted"
+        },
+        "timing": {
+          "kind": "timed"
+        },
+        "goals": []
+      }
+    ],
+    "returnFocus": {
+      "text": "Review Schedule",
+      "tag": "H2"
+    }
+  },
+  "768": {
+    "identity": {
+      "goalId": "4918bc8f-0982-4a09-aee3-40d38af8ffac",
+      "demandId": "d303fb9d-176f-4679-a81d-4cff89e0b1ac",
+      "proposalId": "9b5a10ab49685fda",
+      "range": {
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27"
+      },
+      "seeded": "Canonical authored sources, independent Actual/Progress, and undecided Proposal. Acceptance, publication, export, import and clear exercised separately."
+    },
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 1
+    },
+    "draftRetained": true,
+    "tryDiscardAccept": true,
+    "automaticFreshGeneration": true,
+    "omission": [
+      {
+        "version": 2,
+        "reference": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "85080dd6-65bb-4a04-9e08-d4440e93b2d0"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "d8002266-0f96-4952-9248-bdc0791c7c0f"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-26",
+            "slot": 0
+          }
+        },
+        "sourceFamily": "template",
+        "title": "Routine",
+        "category": "maintenance",
+        "plan": {
+          "state": "omitted"
+        },
+        "timing": {
+          "kind": "timed"
+        },
+        "goals": []
+      }
+    ],
+    "returnFocus": {
+      "text": "Review Schedule",
+      "tag": "H2"
+    }
+  },
+  "1280": {
+    "identity": {
+      "goalId": "767b18a8-11d9-4d42-9bb3-c05c6f020b4c",
+      "demandId": "60699b57-feb7-4cc9-b1a7-d321f4d2cfcd",
+      "proposalId": "935057c7a87e22eb",
+      "range": {
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27"
+      },
+      "seeded": "Canonical authored sources, independent Actual/Progress, and undecided Proposal. Acceptance, publication, export, import and clear exercised separately."
+    },
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 1
+    },
+    "draftRetained": true,
+    "tryDiscardAccept": true,
+    "automaticFreshGeneration": true,
+    "omission": [
+      {
+        "version": 2,
+        "reference": {
+          "version": 1,
+          "sourceKind": "template",
+          "template": {
+            "id": "routine",
+            "incarnationId": "cb81850c-823c-4cec-b9a7-f902cca0eb17"
+          },
+          "recurrence": {
+            "id": "daily",
+            "incarnationId": "6609fcec-fd43-478e-bba1-1173c9ae04e1"
+          },
+          "coordinate": {
+            "frequency": "daily",
+            "scopeKind": "userDay",
+            "userDayDate": "2026-09-26",
+            "slot": 0
+          }
+        },
+        "sourceFamily": "template",
+        "title": "Routine",
+        "category": "maintenance",
+        "plan": {
+          "state": "omitted"
+        },
+        "timing": {
+          "kind": "timed"
+        },
+        "goals": []
+      }
+    ],
+    "returnFocus": {
+      "text": "Review Schedule",
+      "tag": "H2"
+    }
+  },
+  "roundTrip": {
+    "distinctDestination": {
+      "goalId": "e73420ff-26b7-4e1e-b2c7-148109e609c1",
+      "demandId": "81267522-863d-42ac-b2cc-fc73ea9199eb",
+      "proposalId": "7c07ff6b0217ecb7",
+      "range": {
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27"
+      },
+      "seeded": "Canonical authored sources, independent Actual/Progress, and undecided Proposal. Acceptance, publication, export, import and clear exercised separately."
+    },
+    "exactAuthority": true,
+    "noPreviewAfterReload": true,
+    "freshRegeneration": true,
+    "noOpHistoryTransactions": 0,
+    "removalPreservesHistoricalActualProgress": true
+  },
+  "nativeErrors": []
+}

@@ -1,0 +1,36 @@
+{
+  "clear": {
+    "observationSha256": "4fe68121e047df1a58cd652bcf3071266e6b43cc6d7f62a9e793deed3f66b90d",
+    "replacementStatus": "cleared",
+    "epochBefore": 0,
+    "epochAfter": 1,
+    "physicalAdmissionSupplied": false,
+    "preReleaseBatches": 0,
+    "outcome": {
+      "status": "published",
+      "batchId": "8c125ce3-8e56-4a90-b051-ed06e248bb94",
+      "publishedAt": "2026-09-17T23:59:00.000Z"
+    },
+    "postReleaseBatches": 1,
+    "restartExactlyMatchesPostRelease": true
+  },
+  "restore": {
+    "observationSha256": "55a0fe8f19915f74b92958311db177dc256f538034b302e20b865566d2a5e0ca",
+    "replacementStatus": "restoredV14",
+    "epochBefore": 0,
+    "epochAfter": 1,
+    "physicalAdmissionSupplied": false,
+    "preReleaseBatches": 0,
+    "outcome": {
+      "status": "published",
+      "batchId": "bfd9d25b-af6a-446d-ac79-aeaa4c276f48",
+      "publishedAt": "2026-09-17T23:59:00.000Z"
+    },
+    "postReleaseBatches": 1,
+    "restartExactlyMatchesPostRelease": true
+  },
+  "copiedDiagnosticBytesEqualOriginal": {
+    "contract-repro-RESULT.test.ts": true,
+    "contract-repro-config-RESULT.mjs": true
+  }
+}

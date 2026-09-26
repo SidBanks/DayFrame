@@ -1,0 +1,24 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts src/state/publicationSourceQualification.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/publicationSourceQualification.test.ts (24 tests | 1 failed) 6273ms
+   × Goal runtime accepted-pending remains qualified and dry/actual materialization uses identical metadata 5010ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/publicationSourceQualification.test.ts > Goal runtime accepted-pending remains qualified and dry/actual materialization uses identical metadata
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/state/publicationSourceQualification.test.ts:134:1
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 33 passed (34)
+   Start at  11:42:14
+   Duration  7.96s (transform 796ms, setup 0ms, import 676ms, tests 7.12s, environment 0ms)
+

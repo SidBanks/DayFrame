@@ -1,0 +1,1625 @@
+{
+  "decisions": [
+    {
+      "kind": "omitOccurrence",
+      "target": {
+        "version": 1,
+        "sourceKind": "template",
+        "template": {
+          "id": "routine",
+          "incarnationId": "8343b49d-1864-46b6-b32f-d3f00b08c2f0"
+        },
+        "recurrence": {
+          "id": "daily",
+          "incarnationId": "11fb3cd3-4d31-493c-9eb6-e503c10f7c13"
+        },
+        "coordinate": {
+          "frequency": "daily",
+          "scopeKind": "userDay",
+          "userDayDate": "2026-09-26",
+          "slot": 0
+        }
+      },
+      "payload": {},
+      "provenance": {
+        "source": "suggestedFix",
+        "suggestedAction": "skipBlock"
+      },
+      "version": 1,
+      "id": "51f141ca-cfd2-4d5f-a866-072b9affaae9",
+      "acceptedAt": "2026-09-26T02:57:02.262Z"
+    }
+  ],
+  "preview": {
+    "result": {
+      "omissionEvidence": {
+        "generatedAt": "2026-09-26T02:57:02.263Z",
+        "planningWindowStart": "2026-09-26T05:00:00.000Z",
+        "planningWindowEnd": "2026-09-27T05:00:00.000Z",
+        "occurrences": [
+          {
+            "decisionId": "51f141ca-cfd2-4d5f-a866-072b9affaae9",
+            "target": {
+              "version": 1,
+              "sourceKind": "template",
+              "template": {
+                "id": "routine",
+                "incarnationId": "8343b49d-1864-46b6-b32f-d3f00b08c2f0"
+              },
+              "recurrence": {
+                "id": "daily",
+                "incarnationId": "11fb3cd3-4d31-493c-9eb6-e503c10f7c13"
+              },
+              "coordinate": {
+                "frequency": "daily",
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-26",
+                "slot": 0
+              }
+            },
+            "occurrenceIdentity": {
+              "version": 1,
+              "sourceKind": "template",
+              "frequency": "daily",
+              "templateId": "routine",
+              "recurrenceId": "daily",
+              "scopeKind": "userDay",
+              "userDayDate": "2026-09-26",
+              "slot": 0
+            },
+            "userDayDate": "2026-09-26",
+            "title": "Routine",
+            "category": "maintenance"
+          }
+        ]
+      },
+      "foundation": {
+        "status": "allocatable",
+        "sleep": {
+          "version": 1,
+          "ownerRange": {
+            "startUserDayDate": "2026-09-22",
+            "endUserDayDateExclusive": "2026-10-01"
+          },
+          "requiredOccurrences": [
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-22",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-22",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-22T05:00:00.000Z",
+                  "endsAt": "2026-09-23T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-22T05:00:00.000Z",
+                  "endsAt": "2026-09-22T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-22T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-23",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-23",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-23T05:00:00.000Z",
+                  "endsAt": "2026-09-24T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-23T05:00:00.000Z",
+                  "endsAt": "2026-09-23T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-23T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-24",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-24",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-24T05:00:00.000Z",
+                  "endsAt": "2026-09-25T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-24T05:00:00.000Z",
+                  "endsAt": "2026-09-24T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-24T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-25",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-25",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-25T05:00:00.000Z",
+                  "endsAt": "2026-09-26T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-25T05:00:00.000Z",
+                  "endsAt": "2026-09-25T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-25T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-26",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-26",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-26T05:00:00.000Z",
+                  "endsAt": "2026-09-27T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [
+                  {
+                    "reference": {
+                      "version": 1,
+                      "sourceKind": "work",
+                      "cycle": {
+                        "id": "cycle",
+                        "incarnationId": "fb40f0a6-a57b-4322-a3a5-961cb43909e4"
+                      },
+                      "entry": {
+                        "id": "segment",
+                        "incarnationId": "5e6baeb6-d5c6-4291-9857-ca051f8ae408",
+                        "kind": "segment"
+                      },
+                      "shiftDefinition": {
+                        "id": "day",
+                        "incarnationId": "dabfcf8e-a80b-404d-a6f1-30fbf9a5dd93"
+                      },
+                      "coordinate": {
+                        "localStartDate": "2026-09-26",
+                        "slot": 0
+                      }
+                    },
+                    "interval": {
+                      "startsAt": "2026-09-26T17:00:00.000Z",
+                      "endsAt": "2026-09-26T18:00:00.000Z"
+                    }
+                  }
+                ],
+                "offDay": false,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-26T05:00:00.000Z",
+                  "endsAt": "2026-09-26T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-26T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-27",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-27",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-27T05:00:00.000Z",
+                  "endsAt": "2026-09-28T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-27T05:00:00.000Z",
+                  "endsAt": "2026-09-27T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-27T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-28",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-28",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-28T05:00:00.000Z",
+                  "endsAt": "2026-09-29T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-28T05:00:00.000Z",
+                  "endsAt": "2026-09-28T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-28T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-29",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-29",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-29T05:00:00.000Z",
+                  "endsAt": "2026-09-30T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-29T05:00:00.000Z",
+                  "endsAt": "2026-09-29T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-29T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-30",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-30",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-30T05:00:00.000Z",
+                  "endsAt": "2026-10-01T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-30T05:00:00.000Z",
+                  "endsAt": "2026-09-30T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-30T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              }
+            }
+          ],
+          "dependencyFingerprint": "b12aa61f1894e024",
+          "physicalContext": {
+            "startsAt": "2026-09-22T05:00:00.000Z",
+            "endsAt": "2026-10-01T05:00:00.000Z"
+          },
+          "search": {
+            "budgetLimit": 1000000,
+            "budgetConsumed": 18,
+            "candidateStartsExamined": 9,
+            "candidateCount": 9,
+            "searchNodes": 9,
+            "requiredOccurrenceCount": 9,
+            "phase": "complete"
+          },
+          "status": "satisfied",
+          "occurrences": [
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-22",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-22",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-22T05:00:00.000Z",
+                  "endsAt": "2026-09-23T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-22T05:00:00.000Z",
+                  "endsAt": "2026-09-22T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-22T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-22T05:00:00.000Z",
+              "sleepEnd": "2026-09-22T07:00:00.000Z",
+              "footprintStart": "2026-09-22T05:00:00.000Z",
+              "footprintEnd": "2026-09-22T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-23",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-23",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-23T05:00:00.000Z",
+                  "endsAt": "2026-09-24T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-23T05:00:00.000Z",
+                  "endsAt": "2026-09-23T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-23T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-23T05:00:00.000Z",
+              "sleepEnd": "2026-09-23T07:00:00.000Z",
+              "footprintStart": "2026-09-23T05:00:00.000Z",
+              "footprintEnd": "2026-09-23T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-24",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-24",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-24T05:00:00.000Z",
+                  "endsAt": "2026-09-25T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-24T05:00:00.000Z",
+                  "endsAt": "2026-09-24T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-24T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-24T05:00:00.000Z",
+              "sleepEnd": "2026-09-24T07:00:00.000Z",
+              "footprintStart": "2026-09-24T05:00:00.000Z",
+              "footprintEnd": "2026-09-24T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-25",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-25",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-25T05:00:00.000Z",
+                  "endsAt": "2026-09-26T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-25T05:00:00.000Z",
+                  "endsAt": "2026-09-25T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-25T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-25T05:00:00.000Z",
+              "sleepEnd": "2026-09-25T07:00:00.000Z",
+              "footprintStart": "2026-09-25T05:00:00.000Z",
+              "footprintEnd": "2026-09-25T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-26",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-26",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-26T05:00:00.000Z",
+                  "endsAt": "2026-09-27T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [
+                  {
+                    "reference": {
+                      "version": 1,
+                      "sourceKind": "work",
+                      "cycle": {
+                        "id": "cycle",
+                        "incarnationId": "fb40f0a6-a57b-4322-a3a5-961cb43909e4"
+                      },
+                      "entry": {
+                        "id": "segment",
+                        "incarnationId": "5e6baeb6-d5c6-4291-9857-ca051f8ae408",
+                        "kind": "segment"
+                      },
+                      "shiftDefinition": {
+                        "id": "day",
+                        "incarnationId": "dabfcf8e-a80b-404d-a6f1-30fbf9a5dd93"
+                      },
+                      "coordinate": {
+                        "localStartDate": "2026-09-26",
+                        "slot": 0
+                      }
+                    },
+                    "interval": {
+                      "startsAt": "2026-09-26T17:00:00.000Z",
+                      "endsAt": "2026-09-26T18:00:00.000Z"
+                    }
+                  }
+                ],
+                "offDay": false,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-26T05:00:00.000Z",
+                  "endsAt": "2026-09-26T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-26T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-26T05:00:00.000Z",
+              "sleepEnd": "2026-09-26T07:00:00.000Z",
+              "footprintStart": "2026-09-26T05:00:00.000Z",
+              "footprintEnd": "2026-09-26T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-27",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-27",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-27T05:00:00.000Z",
+                  "endsAt": "2026-09-28T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-27T05:00:00.000Z",
+                  "endsAt": "2026-09-27T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-27T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-27T05:00:00.000Z",
+              "sleepEnd": "2026-09-27T07:00:00.000Z",
+              "footprintStart": "2026-09-27T05:00:00.000Z",
+              "footprintEnd": "2026-09-27T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-28",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-28",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-28T05:00:00.000Z",
+                  "endsAt": "2026-09-29T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-28T05:00:00.000Z",
+                  "endsAt": "2026-09-28T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-28T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-28T05:00:00.000Z",
+              "sleepEnd": "2026-09-28T07:00:00.000Z",
+              "footprintStart": "2026-09-28T05:00:00.000Z",
+              "footprintEnd": "2026-09-28T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-29",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-29",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-29T05:00:00.000Z",
+                  "endsAt": "2026-09-30T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-29T05:00:00.000Z",
+                  "endsAt": "2026-09-29T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-29T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-29T05:00:00.000Z",
+              "sleepEnd": "2026-09-29T07:00:00.000Z",
+              "footprintStart": "2026-09-29T05:00:00.000Z",
+              "footprintEnd": "2026-09-29T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            },
+            {
+              "version": 1,
+              "reference": {
+                "version": 1,
+                "sourceKind": "sleepRequirement",
+                "requirement": {
+                  "id": "sleep",
+                  "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+                },
+                "coordinate": {
+                  "scopeKind": "userDay",
+                  "userDayDate": "2026-09-30",
+                  "slot": 0
+                }
+              },
+              "ownerDay": "2026-09-30",
+              "membership": "requested",
+              "requirementRevision": 1,
+              "durationMinutes": 120,
+              "bufferBeforeMinutes": 0,
+              "bufferAfterMinutes": 0,
+              "windowIntent": {
+                "kind": "clock",
+                "startClock": "00:00",
+                "endClock": "02:00"
+              },
+              "derivationContext": {
+                "version": 1,
+                "ownerWindow": {
+                  "startsAt": "2026-09-30T05:00:00.000Z",
+                  "endsAt": "2026-10-01T05:00:00.000Z"
+                },
+                "dayBoundaryStartTime": "00:00",
+                "nextDayBoundaryStartTime": "00:00",
+                "weekStartsOn": "monday",
+                "work": [],
+                "offDay": true,
+                "windowProvenance": "clock",
+                "physicalWindow": {
+                  "startsAt": "2026-09-30T05:00:00.000Z",
+                  "endsAt": "2026-09-30T07:00:00.000Z"
+                },
+                "preferredSleepStart": "2026-09-30T05:00:00.000Z",
+                "timezone": "America/Chicago",
+                "offsetMinutes": [
+                  300,
+                  300
+                ],
+                "clockPolicy": "localDate-compatible-earlier-fold-forward-gap"
+              },
+              "sleepStart": "2026-09-30T05:00:00.000Z",
+              "sleepEnd": "2026-09-30T07:00:00.000Z",
+              "footprintStart": "2026-09-30T05:00:00.000Z",
+              "footprintEnd": "2026-09-30T07:00:00.000Z",
+              "provenance": {
+                "policy": "sleep-minute-joint-v1",
+                "dependencyFingerprint": "b12aa61f1894e024"
+              }
+            }
+          ],
+          "placementReviews": []
+        },
+        "protection": [
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-22\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-22T05:00:00.000Z",
+            "endsAt": "2026-09-22T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-22",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-23\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-23T05:00:00.000Z",
+            "endsAt": "2026-09-23T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-23",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-24\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-24T05:00:00.000Z",
+            "endsAt": "2026-09-24T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-24",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-25\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-25T05:00:00.000Z",
+            "endsAt": "2026-09-25T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-25",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-26\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-26T05:00:00.000Z",
+            "endsAt": "2026-09-26T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-26",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-27\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-27T05:00:00.000Z",
+            "endsAt": "2026-09-27T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-27",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-28\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-28T05:00:00.000Z",
+            "endsAt": "2026-09-28T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-28",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-29\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-29T05:00:00.000Z",
+            "endsAt": "2026-09-29T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-29",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          },
+          {
+            "id": "requiredSleep:{\"version\":1,\"sourceKind\":\"sleepRequirement\",\"requirement\":{\"id\":\"sleep\",\"incarnationId\":\"475cb537-d9a7-4e29-be96-0f69d90d2081\"},\"coordinate\":{\"scopeKind\":\"userDay\",\"userDayDate\":\"2026-09-30\",\"slot\":0}}:activity",
+            "sourceFamily": "requiredSleep",
+            "part": "activity",
+            "kind": "occupied",
+            "startsAt": "2026-09-30T05:00:00.000Z",
+            "endsAt": "2026-09-30T07:00:00.000Z",
+            "reference": {
+              "version": 1,
+              "sourceKind": "sleepRequirement",
+              "requirement": {
+                "id": "sleep",
+                "incarnationId": "475cb537-d9a7-4e29-be96-0f69d90d2081"
+              },
+              "coordinate": {
+                "scopeKind": "userDay",
+                "userDayDate": "2026-09-30",
+                "slot": 0
+              }
+            },
+            "dependencyFingerprint": "b12aa61f1894e024"
+          }
+        ]
+      },
+      "generatedWorkBlocks": [
+        {
+          "id": "work_day_2026-09-26",
+          "shiftDefinitionId": "day",
+          "userId": "u",
+          "title": "Day",
+          "anchorType": "work",
+          "startsAt": {},
+          "endsAt": {},
+          "startDate": "2026-09-26",
+          "endDate": "2026-09-26",
+          "userDayDate": "2026-09-26",
+          "crossesMidnight": false,
+          "shiftCycleId": "cycle",
+          "shiftSegmentId": "segment",
+          "occurrenceIdentity": {
+            "version": 1,
+            "sourceKind": "work",
+            "shiftDefinitionId": "day",
+            "shiftCycleId": "cycle",
+            "shiftSegmentId": "segment",
+            "localStartDate": "2026-09-26",
+            "slot": 0
+          }
+        }
+      ],
+      "blockCandidates": [],
+      "scheduledBlocks": [
+        {
+          "id": "correction-premise",
+          "occurrenceIdentity": {
+            "version": 1,
+            "sourceKind": "manualEvent",
+            "manualEventId": "correction-premise"
+          },
+          "userId": "user_001",
+          "source": "manual",
+          "isAllDay": false,
+          "title": "Fixed appointment",
+          "category": "optional",
+          "anchorType": "manual",
+          "placementType": "fixed",
+          "startsAt": {},
+          "endsAt": {},
+          "userDayDate": "2026-09-26",
+          "userWeekStartDate": "2026-09-21",
+          "priority": 2,
+          "status": "planned",
+          "externalResources": []
+        }
+      ],
+      "unplacedCandidates": [],
+      "frictionPoints": [],
+      "planDecisionResults": [
+        {
+          "decisionId": "51f141ca-cfd2-4d5f-a866-072b9affaae9",
+          "kind": "omitOccurrence",
+          "target": {
+            "version": 1,
+            "sourceKind": "template",
+            "template": {
+              "id": "routine",
+              "incarnationId": "8343b49d-1864-46b6-b32f-d3f00b08c2f0"
+            },
+            "recurrence": {
+              "id": "daily",
+              "incarnationId": "11fb3cd3-4d31-493c-9eb6-e503c10f7c13"
+            },
+            "coordinate": {
+              "frequency": "daily",
+              "scopeKind": "userDay",
+              "userDayDate": "2026-09-26",
+              "slot": 0
+            }
+          },
+          "status": "applied"
+        }
+      ],
+      "realizedScheduleFacts": [
+        {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "0d19cce63adb3a4b",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "productiveGoalWork",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "a20b8037e099c50f",
+            "acceptedAllocationId": "6c16d122-2a75-4c93-a99f-ddfbaf0073ad",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "0e99031e8b25c05f",
+            "proposalDecisionId": "14370551-d3f5-47b8-a056-7a188ef24846",
+            "proposalId": "2b5bda633c5c562f",
+            "proposalRevision": 1,
+            "proposalOptionId": "bb61e4b1a03e72e7"
+          },
+          "startsAt": "2026-09-26T20:15:00.000Z",
+          "endsAt": "2026-09-26T21:15:00.000Z",
+          "durationMinutes": 60,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "25bcd15daf3bbfb0",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "4dcf3b19ba0196e6",
+            "goalId": "d00c3bda-c458-4319-896a-5de32a0e7bb0",
+            "demandId": "37dc4568-39a1-4762-b750-7f36fd4b8e5d",
+            "demandRevision": 1,
+            "demandProjectionId": "bd2846a74510cbac",
+            "productiveOpportunityId": "2b8a4c7425cb7ec9",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "productiveRoot"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "8d9c4f54-02b0-44af-85cb-691f59b8c156",
+            "specificationRevision": 1,
+            "associationId": "01646715-c181-49f6-8702-788dc8e1f713",
+            "associationRevision": 1,
+            "variantId": "study"
+          },
+          "timeSemantics": "activity",
+          "executionEligibility": "eligible"
+        },
+        {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "ef574c6cd0f38d90",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "supportActivity",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "a20b8037e099c50f",
+            "acceptedAllocationId": "6c16d122-2a75-4c93-a99f-ddfbaf0073ad",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "e14dbe154ebafefa",
+            "proposalDecisionId": "14370551-d3f5-47b8-a056-7a188ef24846",
+            "proposalId": "2b5bda633c5c562f",
+            "proposalRevision": 1,
+            "proposalOptionId": "bb61e4b1a03e72e7"
+          },
+          "startsAt": "2026-09-26T21:15:00.000Z",
+          "endsAt": "2026-09-26T21:45:00.000Z",
+          "durationMinutes": 30,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "25bcd15daf3bbfb0",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "4dcf3b19ba0196e6",
+            "goalId": "d00c3bda-c458-4319-896a-5de32a0e7bb0",
+            "demandId": "37dc4568-39a1-4762-b750-7f36fd4b8e5d",
+            "demandRevision": 1,
+            "demandProjectionId": "bd2846a74510cbac",
+            "productiveOpportunityId": "2b8a4c7425cb7ec9",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "supportsProductive",
+              "productiveClaimId": "0e99031e8b25c05f"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "8d9c4f54-02b0-44af-85cb-691f59b8c156",
+            "specificationRevision": 1,
+            "associationId": "01646715-c181-49f6-8702-788dc8e1f713",
+            "associationRevision": 1,
+            "variantId": "study",
+            "componentId": "notes"
+          },
+          "timeSemantics": "activity",
+          "executionEligibility": "eligible"
+        },
+        {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "d8ab4e62ed81bd7a",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "bufferProtection",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "a20b8037e099c50f",
+            "acceptedAllocationId": "6c16d122-2a75-4c93-a99f-ddfbaf0073ad",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "9febee08e143c0df",
+            "proposalDecisionId": "14370551-d3f5-47b8-a056-7a188ef24846",
+            "proposalId": "2b5bda633c5c562f",
+            "proposalRevision": 1,
+            "proposalOptionId": "bb61e4b1a03e72e7"
+          },
+          "startsAt": "2026-09-26T21:45:00.000Z",
+          "endsAt": "2026-09-26T22:00:00.000Z",
+          "durationMinutes": 15,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "25bcd15daf3bbfb0",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "4dcf3b19ba0196e6",
+            "goalId": "d00c3bda-c458-4319-896a-5de32a0e7bb0",
+            "demandId": "37dc4568-39a1-4762-b750-7f36fd4b8e5d",
+            "demandRevision": 1,
+            "demandProjectionId": "bd2846a74510cbac",
+            "productiveOpportunityId": "2b8a4c7425cb7ec9",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "protectsSupport",
+              "supportClaimId": "e14dbe154ebafefa",
+              "supportComponentId": "notes"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "8d9c4f54-02b0-44af-85cb-691f59b8c156",
+            "specificationRevision": 1,
+            "associationId": "01646715-c181-49f6-8702-788dc8e1f713",
+            "associationRevision": 1,
+            "variantId": "study",
+            "componentId": "buffer"
+          },
+          "timeSemantics": "protection",
+          "executionEligibility": "prohibited"
+        }
+      ]
+    },
+    "rangeStartDate": "2026-09-26",
+    "rangeEndDate": "2026-09-26",
+    "planningWindowStart": {},
+    "planningWindowEnd": {},
+    "generatedAt": "2026-09-26T02:57:02.263Z",
+    "isStale": false,
+    "scopeMetadata": {
+      "requestedPreviewRange": {
+        "version": 1,
+        "startUserDayDate": "2026-09-26",
+        "endUserDayDateExclusive": "2026-09-27",
+        "scopeType": "previewRange",
+        "provenance": {
+          "source": "legacyPreviewRange"
+        }
+      },
+      "effectivePlanningDataHorizon": {
+        "version": 1,
+        "operation": "previewGeneration",
+        "requested": {
+          "version": 1,
+          "startUserDayDate": "2026-09-26",
+          "endUserDayDateExclusive": "2026-09-27",
+          "scopeType": "planningDataHorizon"
+        },
+        "effective": {
+          "version": 1,
+          "startUserDayDate": "2026-09-25",
+          "endUserDayDateExclusive": "2026-09-28",
+          "scopeType": "planningDataHorizon"
+        },
+        "expansionReasons": [
+          "canonicalUserDayBoundary"
+        ],
+        "coverageRequirement": "complete"
+      },
+      "canonicalRangePolicy": {
+        "id": "canonical-user-day-range",
+        "version": 1,
+        "convention": "halfOpen"
+      }
+    }
+  }
+}

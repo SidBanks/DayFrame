@@ -1,0 +1,30 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ScheduleReviewWorkspace.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx (5 tests | 1 failed) 1741ms
+   × bounds more than ten canonically generated offers without deciding 352ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ScheduleReviewWorkspace.test.tsx > bounds more than ten canonically generated offers without deciding
+AssertionError: expected 0 to be greater than 10
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx:31:52
+     29|   const evaluation = await f.store.evaluateCompetingAllocation({ ...ho…
+     30|   if (evaluation.status !== "evaluated") throw Error(JSON.stringify(ev…
+     31|   expect(evaluation.allocation.allocations.length).toBeGreaterThan(10);
+       |                                                    ^
+     32|   for (const allocation of evaluation.allocation.allocations) {
+     33|     const proposal = await f.store.deriveProposal({ allocation, horizo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  20:48:14
+   Duration  3.43s (transform 1.21s, setup 0ms, import 1.17s, tests 1.74s, environment 439ms)
+

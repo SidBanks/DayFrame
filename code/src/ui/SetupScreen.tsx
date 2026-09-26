@@ -1,3 +1,8 @@
+import type { CommitmentRelationshipStore } from "./CommitmentRelationshipContext.js";
+import {
+  LegacySleepConversionSection,
+  type LegacySleepConversionStore,
+} from "./LegacySleepConversionSection.js";
 import type {
   BlockCategory,
   BlockRecurrence,
@@ -107,11 +112,15 @@ export type SetupDraftLifecycleProvenance = {
 };
 
 export type SetupScreenProps = {
+  conversionStore?: LegacySleepConversionStore;
+  compositionStore?: CommitmentRelationshipStore;
+  onDiscardDraft?: () => void;
   draft: SetupDraft;
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   onSave: () => void;
   onGeneratePreview?: () => void;
   saveMessage: string;
+  saveIssues?: string[];
   saveMessageTone?: "success" | "failure";
   isDirty?: boolean;
   focusedTemplateField?: {
@@ -130,11 +139,15 @@ export type SetupScreenProps = {
 };
 
 export function SetupScreen({
+  conversionStore,
+  compositionStore,
+  onDiscardDraft,
   draft,
   setDraft,
   onSave,
   onGeneratePreview,
   saveMessage,
+  saveIssues = [],
   saveMessageTone = "success",
   isDirty = false,
   focusedTemplateField = null,
@@ -157,6 +170,10 @@ export function SetupScreen({
   const [isSchedulePreferencesOpen, setIsSchedulePreferencesOpen] = useState(true);
   const [isShiftsOpen, setIsShiftsOpen] = useState(true);
   const [isCyclesOpen, setIsCyclesOpen] = useState(false);
+  const [editingCommitment, setEditingCommitment] = useState(false);
+  const [selectedAdvanced, setSelectedAdvanced] = useState(
+    focusedTemplateField?.templateId ?? draft.templateEntries[0]?.template.id ?? "",
+  );
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isPreviewRangeOpen, setIsPreviewRangeOpen] = useState(false);
   const fixedStartTimeInputRefs = useRef(new Map<string, HTMLInputElement>());
@@ -179,7 +196,7 @@ export function SetupScreen({
       block: "center",
       behavior: "smooth",
     });
-  }, [focusedTemplateField]);
+  }, [focusedTemplateField, selectedAdvanced, isTemplatesOpen]);
 
   useEffect(() => {
     if (!requestedWorkEditor) return;
@@ -204,9 +221,17 @@ export function SetupScreen({
       ?.focus();
   }, [focusedTemplateField, requestedCommitmentEditorTarget, scope]);
 
+  useEffect(() => {
+    if (focusedTemplateField) {
+      setSelectedAdvanced(focusedTemplateField.templateId);
+      setIsTemplatesOpen(true);
+    }
+  }, [focusedTemplateField]);
   const Root = embedded ? "div" : "main";
   return (
-    <Root className="df-screen">
+    <Root
+      className={`df-screen ${scope === "workPattern" || scope === "commitmentLibrary" ? "df-my-schedule" : ""}`}
+    >
       <header className="df-panel df-screen-header">
         <h2
           className="df-screen-title"
@@ -239,15 +264,48 @@ export function SetupScreen({
                 : "Define your commitments and the preferences DayFrame uses to build your schedule."}
         </p>
         <p className="df-support">
-          Goals save independently. Planning changes remain one setup draft until you save.
+          Work and Commitments share one setup draft until Save Setup. Sleep and Goals save
+          independently.
         </p>
       </header>
 
+      {scope === "workPattern" && (
+        <section className="df-panel">
+          <h3>Your Work Pattern</h3>
+          <p>
+            Day starts at {draft.schedulingPreferences.dayBoundaryStartTime}; week starts on{" "}
+            {draft.schedulingPreferences.weekStartsOn} by default. Dated-period overrides below
+            remain separate.
+          </p>
+          <p>
+            {draft.shiftCycles
+              .map(
+                (c) =>
+                  `${c.name}: ${c.mode === "repeatingSequence" ? "Repeating rotation" : "Dated periods"}`,
+              )
+              .join(" · ")}
+          </p>
+          <p>
+            Planning Range below controls schedule generation only; it does not change Work
+            recurrence. This view includes unsaved draft values.
+          </p>
+        </section>
+      )}
       <div className="df-panel df-setup-action-bar" role="toolbar" aria-label="Setup actions">
         <div className="df-screen-actions">
           <button className="df-action-button" onClick={onSave} type="button">
             Save Setup
           </button>
+          {onDiscardDraft && (
+            <button
+              className="df-secondary-button"
+              type="button"
+              disabled={!isDirty}
+              onClick={onDiscardDraft}
+            >
+              Discard unsaved setup changes
+            </button>
+          )}
           {onGeneratePreview ? (
             <button className="df-action-button" onClick={onGeneratePreview} type="button">
               Generate Schedule
@@ -301,11 +359,23 @@ export function SetupScreen({
         >
           {setupStatusMessage}
         </p>
+        {saveIssues.length > 0 && (
+          <ul aria-label="Setup corrections" role="alert">
+            {saveIssues.map((issue, index) => (
+              <li key={index}>{issue}</li>
+            ))}
+          </ul>
+        )}
       </div>
 
+      {conversionStore && (scope === "full" || scope === "commitmentLibrary") && (
+        <LegacySleepConversionSection store={conversionStore} disabled={isDirty} />
+      )}
       {scope === "full" || scope === "commitmentLibrary" ? (
         <CommitmentSection
           draft={draft}
+          onEditingChange={setEditingCommitment}
+          {...(compositionStore ? { compositionStore } : {})}
           requestedAddEditor={requestedAddCommitmentEditor}
           requestedEditorTarget={requestedCommitmentEditorTarget}
           setDraft={setDraft}
@@ -321,7 +391,7 @@ export function SetupScreen({
         />
       ) : null}
 
-      {scope === "full" || scope === "planningSettings" ? (
+      {scope === "full" || scope === "planningSettings" || scope === "workPattern" ? (
         <>
           <CollapsibleSetupSection
             helperText="Controls how DayFrame interprets days, weeks, and schedule boundaries."
@@ -596,234 +666,247 @@ export function SetupScreen({
                   <ul className="df-list">
                     {draft.shiftDefinitions.map((shiftDefinition, index) => (
                       <li className="df-list-card" key={shiftDefinition.id}>
-                        <div className="df-screen-actions">
-                          <h3 className="df-item-title">
-                            {shiftDefinition.name || `Shift ${index + 1}`}
-                          </h3>
-                          <button
-                            className="df-secondary-button"
-                            onClick={() => {
-                              setConfirmingDeleteShiftIndex(index);
-                            }}
-                            type="button"
-                          >
-                            Delete Shift Definition
-                          </button>
-                        </div>
+                        <WorkItemDisclosure
+                          active={scope === "workPattern"}
+                          initiallyOpen={requestedWorkEditor}
+                          label={shiftDefinition.name || `Shift ${index + 1}`}
+                        >
+                          <div className="df-screen-actions">
+                            <h3 className="df-item-title">
+                              {shiftDefinition.name || `Shift ${index + 1}`}
+                            </h3>
+                            <button
+                              className="df-secondary-button"
+                              onClick={() => {
+                                setConfirmingDeleteShiftIndex(index);
+                              }}
+                              type="button"
+                            >
+                              Delete Shift Definition
+                            </button>
+                          </div>
 
-                        {confirmingDeleteShiftIndex === index ? (
-                          <div className="df-confirmation">
-                            <p className="df-danger-message">
-                              Delete this shift definition from the current setup draft?
-                            </p>
-                            <div className="df-confirmation-actions">
-                              <button
-                                className="df-danger-button"
-                                onClick={() => {
-                                  setDraft((currentDraft) =>
-                                    recordDraftDeletion(
-                                      {
-                                        ...currentDraft,
-                                        shiftDefinitions: currentDraft.shiftDefinitions.filter(
-                                          (_, currentIndex) => currentIndex !== index,
-                                        ),
-                                        shiftCycles: currentDraft.shiftCycles.map((shiftCycle) => ({
-                                          ...shiftCycle,
-                                          segments: shiftCycle.segments.map((segment) =>
-                                            segment.shiftDefinitionId === shiftDefinition.id
-                                              ? {
-                                                  ...segment,
-                                                  shiftDefinitionId:
-                                                    currentDraft.shiftDefinitions.find(
-                                                      (candidateShift) =>
-                                                        candidateShift.id !== shiftDefinition.id,
-                                                    )?.id ?? "",
-                                                }
-                                              : segment,
+                          {confirmingDeleteShiftIndex === index ? (
+                            <div className="df-confirmation">
+                              <p className="df-danger-message">
+                                Delete this shift definition from the current setup draft?
+                              </p>
+                              <div className="df-confirmation-actions">
+                                <button
+                                  className="df-danger-button"
+                                  onClick={() => {
+                                    setDraft((currentDraft) =>
+                                      recordDraftDeletion(
+                                        {
+                                          ...currentDraft,
+                                          shiftDefinitions: currentDraft.shiftDefinitions.filter(
+                                            (_, currentIndex) => currentIndex !== index,
                                           ),
-                                          sequence: (shiftCycle.sequence ?? []).map(
-                                            (sequenceDay) =>
-                                              sequenceDay.shiftDefinitionId === shiftDefinition.id
-                                                ? {
-                                                    ...sequenceDay,
-                                                    shiftDefinitionId:
-                                                      currentDraft.shiftDefinitions.find(
-                                                        (candidateShift) =>
-                                                          candidateShift.id !== shiftDefinition.id,
-                                                      )?.id ?? null,
-                                                  }
-                                                : sequenceDay,
+                                          shiftCycles: currentDraft.shiftCycles.map(
+                                            (shiftCycle) => ({
+                                              ...shiftCycle,
+                                              segments: shiftCycle.segments.map((segment) =>
+                                                segment.shiftDefinitionId === shiftDefinition.id
+                                                  ? {
+                                                      ...segment,
+                                                      shiftDefinitionId:
+                                                        currentDraft.shiftDefinitions.find(
+                                                          (candidateShift) =>
+                                                            candidateShift.id !==
+                                                            shiftDefinition.id,
+                                                        )?.id ?? "",
+                                                    }
+                                                  : segment,
+                                              ),
+                                              sequence: (shiftCycle.sequence ?? []).map(
+                                                (sequenceDay) =>
+                                                  sequenceDay.shiftDefinitionId ===
+                                                  shiftDefinition.id
+                                                    ? {
+                                                        ...sequenceDay,
+                                                        shiftDefinitionId:
+                                                          currentDraft.shiftDefinitions.find(
+                                                            (candidateShift) =>
+                                                              candidateShift.id !==
+                                                              shiftDefinition.id,
+                                                          )?.id ?? null,
+                                                      }
+                                                    : sequenceDay,
+                                              ),
+                                            }),
                                           ),
-                                        })),
-                                      },
-                                      sourceReference("shiftDefinition", shiftDefinition.id),
-                                    ),
-                                  );
-                                  setConfirmingDeleteShiftIndex(null);
-                                }}
-                                type="button"
-                              >
-                                Confirm Delete Shift Definition
-                              </button>
-                              <button
-                                className="df-secondary-button"
-                                onClick={() => {
-                                  setConfirmingDeleteShiftIndex(null);
-                                }}
-                                type="button"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : null}
-
-                        <div className="df-grid">
-                          <div className="df-field">
-                            <label>Name</label>
-                            <input
-                              aria-label="Name"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  shiftDefinitions: currentDraft.shiftDefinitions.map(
-                                    (currentShiftDefinition, currentIndex) =>
-                                      currentIndex === index
-                                        ? {
-                                            ...currentShiftDefinition,
-                                            name: nextValue,
-                                          }
-                                        : currentShiftDefinition,
-                                  ),
-                                }));
-                              }}
-                              type="text"
-                              value={shiftDefinition.name}
-                            />
-                          </div>
-
-                          <div className="df-field">
-                            <label>Start Time</label>
-                            <input
-                              aria-label="Start Time"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  shiftDefinitions: currentDraft.shiftDefinitions.map(
-                                    (currentShiftDefinition, currentIndex) => {
-                                      if (currentIndex !== index) {
-                                        return currentShiftDefinition;
-                                      }
-
-                                      const nextShiftDefinition = {
-                                        ...currentShiftDefinition,
-                                        startTime: nextValue as ShiftDefinition["startTime"],
-                                      };
-
-                                      return {
-                                        ...nextShiftDefinition,
-                                        crossesMidnight: deriveCrossesMidnight(nextShiftDefinition),
-                                      };
-                                    },
-                                  ),
-                                }));
-                              }}
-                              type="time"
-                              value={shiftDefinition.startTime}
-                            />
-                          </div>
-
-                          <div className="df-field">
-                            <label>End Time</label>
-                            <input
-                              aria-label="End Time"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  shiftDefinitions: currentDraft.shiftDefinitions.map(
-                                    (currentShiftDefinition, currentIndex) => {
-                                      if (currentIndex !== index) {
-                                        return currentShiftDefinition;
-                                      }
-
-                                      const nextShiftDefinition = {
-                                        ...currentShiftDefinition,
-                                        endTime: nextValue as ShiftDefinition["endTime"],
-                                      };
-
-                                      return {
-                                        ...nextShiftDefinition,
-                                        crossesMidnight: deriveCrossesMidnight(nextShiftDefinition),
-                                      };
-                                    },
-                                  ),
-                                }));
-                              }}
-                              type="time"
-                              value={shiftDefinition.endTime}
-                            />
-                          </div>
-
-                          <label className="df-checkbox">
-                            <input
-                              aria-label="Crosses Midnight"
-                              checked={shiftDefinition.crossesMidnight}
-                              disabled
-                              onChange={() => undefined}
-                              type="checkbox"
-                            />
-                            Crosses Midnight
-                          </label>
-                        </div>
-
-                        <p className="df-support">
-                          Shift hours:{" "}
-                          {formatHumanTimeRange(
-                            createDateForTime(shiftDefinition.startTime),
-                            createDateForTime(
-                              shiftDefinition.endTime,
-                              shiftDefinition.crossesMidnight,
-                            ),
-                          )}
-                        </p>
-
-                        <fieldset className="df-fieldset">
-                          <legend>Work Days</legend>
-                          <div className="df-checkbox-grid">
-                            {weekdays.map((weekday) => (
-                              <label className="df-checkbox" key={weekday}>
-                                <input
-                                  checked={shiftDefinition.workDays.includes(weekday)}
-                                  onChange={() => {
-                                    setDraft((currentDraft) => ({
-                                      ...currentDraft,
-                                      shiftDefinitions: currentDraft.shiftDefinitions.map(
-                                        (currentShiftDefinition, currentIndex) =>
-                                          currentIndex === index
-                                            ? {
-                                                ...currentShiftDefinition,
-                                                workDays: toggleWeekday(
-                                                  currentShiftDefinition.workDays,
-                                                  weekday,
-                                                ),
-                                              }
-                                            : currentShiftDefinition,
+                                        },
+                                        sourceReference("shiftDefinition", shiftDefinition.id),
                                       ),
-                                    }));
+                                    );
+                                    setConfirmingDeleteShiftIndex(null);
                                   }}
-                                  type="checkbox"
-                                />
-                                {formatWeekdayLabel(weekday)}
-                              </label>
-                            ))}
+                                  type="button"
+                                >
+                                  Confirm Delete Shift Definition
+                                </button>
+                                <button
+                                  className="df-secondary-button"
+                                  onClick={() => {
+                                    setConfirmingDeleteShiftIndex(null);
+                                  }}
+                                  type="button"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="df-grid">
+                            <div className="df-field">
+                              <label>Name</label>
+                              <input
+                                aria-label="Name"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    shiftDefinitions: currentDraft.shiftDefinitions.map(
+                                      (currentShiftDefinition, currentIndex) =>
+                                        currentIndex === index
+                                          ? {
+                                              ...currentShiftDefinition,
+                                              name: nextValue,
+                                            }
+                                          : currentShiftDefinition,
+                                    ),
+                                  }));
+                                }}
+                                type="text"
+                                value={shiftDefinition.name}
+                              />
+                            </div>
+
+                            <div className="df-field">
+                              <label>Start Time</label>
+                              <input
+                                aria-label="Start Time"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    shiftDefinitions: currentDraft.shiftDefinitions.map(
+                                      (currentShiftDefinition, currentIndex) => {
+                                        if (currentIndex !== index) {
+                                          return currentShiftDefinition;
+                                        }
+
+                                        const nextShiftDefinition = {
+                                          ...currentShiftDefinition,
+                                          startTime: nextValue as ShiftDefinition["startTime"],
+                                        };
+
+                                        return {
+                                          ...nextShiftDefinition,
+                                          crossesMidnight:
+                                            deriveCrossesMidnight(nextShiftDefinition),
+                                        };
+                                      },
+                                    ),
+                                  }));
+                                }}
+                                type="time"
+                                value={shiftDefinition.startTime}
+                              />
+                            </div>
+
+                            <div className="df-field">
+                              <label>End Time</label>
+                              <input
+                                aria-label="End Time"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    shiftDefinitions: currentDraft.shiftDefinitions.map(
+                                      (currentShiftDefinition, currentIndex) => {
+                                        if (currentIndex !== index) {
+                                          return currentShiftDefinition;
+                                        }
+
+                                        const nextShiftDefinition = {
+                                          ...currentShiftDefinition,
+                                          endTime: nextValue as ShiftDefinition["endTime"],
+                                        };
+
+                                        return {
+                                          ...nextShiftDefinition,
+                                          crossesMidnight:
+                                            deriveCrossesMidnight(nextShiftDefinition),
+                                        };
+                                      },
+                                    ),
+                                  }));
+                                }}
+                                type="time"
+                                value={shiftDefinition.endTime}
+                              />
+                            </div>
+
+                            <label className="df-checkbox">
+                              <input
+                                aria-label="Crosses Midnight"
+                                checked={shiftDefinition.crossesMidnight}
+                                disabled
+                                onChange={() => undefined}
+                                type="checkbox"
+                              />
+                              Crosses Midnight
+                            </label>
                           </div>
-                        </fieldset>
+
+                          <p className="df-support">
+                            Shift hours:{" "}
+                            {formatHumanTimeRange(
+                              createDateForTime(shiftDefinition.startTime),
+                              createDateForTime(
+                                shiftDefinition.endTime,
+                                shiftDefinition.crossesMidnight,
+                              ),
+                            )}
+                          </p>
+
+                          <fieldset className="df-fieldset">
+                            <legend>Work Days</legend>
+                            <div className="df-checkbox-grid">
+                              {weekdays.map((weekday) => (
+                                <label className="df-checkbox" key={weekday}>
+                                  <input
+                                    checked={shiftDefinition.workDays.includes(weekday)}
+                                    onChange={() => {
+                                      setDraft((currentDraft) => ({
+                                        ...currentDraft,
+                                        shiftDefinitions: currentDraft.shiftDefinitions.map(
+                                          (currentShiftDefinition, currentIndex) =>
+                                            currentIndex === index
+                                              ? {
+                                                  ...currentShiftDefinition,
+                                                  workDays: toggleWeekday(
+                                                    currentShiftDefinition.workDays,
+                                                    weekday,
+                                                  ),
+                                                }
+                                              : currentShiftDefinition,
+                                        ),
+                                      }));
+                                    }}
+                                    type="checkbox"
+                                  />
+                                  {formatWeekdayLabel(weekday)}
+                                </label>
+                              ))}
+                            </div>
+                          </fieldset>
+                        </WorkItemDisclosure>
                       </li>
                     ))}
                   </ul>
@@ -888,611 +971,376 @@ export function SetupScreen({
                   <ul className="df-list">
                     {draft.shiftCycles.map((shiftCycle, cycleIndex) => (
                       <li className="df-list-card" key={shiftCycle.id}>
-                        <div className="df-screen-actions">
-                          <h3 className="df-item-title">
-                            {shiftCycle.name || `Cycle ${cycleIndex + 1}`}
-                          </h3>
-                          <button
-                            className="df-secondary-button"
-                            onClick={() => {
-                              setConfirmingDeleteCycleIndex(cycleIndex);
-                            }}
-                            type="button"
-                          >
-                            Delete Shift Cycle
-                          </button>
-                        </div>
-
-                        {confirmingDeleteCycleIndex === cycleIndex ? (
-                          <div className="df-confirmation">
-                            <p className="df-danger-message">
-                              Delete this shift cycle from the current setup draft?
-                            </p>
-                            <div className="df-confirmation-actions">
-                              <button
-                                className="df-danger-button"
-                                onClick={() => {
-                                  setDraft((currentDraft) => {
-                                    const nextShiftCycles = currentDraft.shiftCycles.filter(
-                                      (_, currentIndex) => currentIndex !== cycleIndex,
-                                    );
-
-                                    return recordDraftDeletions(
-                                      {
-                                        ...currentDraft,
-                                        shiftCycles: nextShiftCycles,
-                                        previewRange:
-                                          getPreviewRangeSource(currentDraft.previewRange) ===
-                                          "cycle"
-                                            ? buildCyclePreviewRange({
-                                                ...currentDraft,
-                                                shiftCycles: nextShiftCycles,
-                                              })
-                                            : currentDraft.previewRange,
-                                      },
-                                      getCycleSourceReferences(shiftCycle),
-                                    );
-                                  });
-                                  setConfirmingDeleteCycleIndex(null);
-                                }}
-                                type="button"
-                              >
-                                Confirm Delete Shift Cycle
-                              </button>
-                              <button
-                                className="df-secondary-button"
-                                onClick={() => {
-                                  setConfirmingDeleteCycleIndex(null);
-                                }}
-                                type="button"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : null}
-
-                        <div className="df-grid">
-                          <div className="df-field">
-                            <label>Cycle Type</label>
-                            <select
-                              aria-label="Cycle Type"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: ShiftCycleMode }).value;
-
-                                setDraft((currentDraft) => {
-                                  const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
-                                  const createdSequence =
-                                    currentCycle.sequence && currentCycle.sequence.length > 0
-                                      ? []
-                                      : createDefaultSequenceDays(currentDraft.shiftDefinitions);
-                                  const nextDraft = {
-                                    ...currentDraft,
-                                    shiftCycles: currentDraft.shiftCycles.map(
-                                      (cycle, currentIndex) =>
-                                        currentIndex === cycleIndex
-                                          ? {
-                                              ...cycle,
-                                              mode: nextValue,
-                                              sequenceAnchorDate:
-                                                cycle.sequenceAnchorDate ?? cycle.startsOnDate,
-                                              sequence:
-                                                createdSequence.length > 0
-                                                  ? createdSequence
-                                                  : (cycle.sequence ?? []),
-                                            }
-                                          : cycle,
-                                    ),
-                                  };
-                                  return recordDraftCreations(
-                                    nextDraft,
-                                    createdSequence.map((entry) =>
-                                      sourceReference(
-                                        "shiftSequenceEntry",
-                                        entry.id,
-                                        currentCycle.id,
-                                      ),
-                                    ),
-                                  );
-                                });
+                        <WorkItemDisclosure
+                          active={scope === "workPattern"}
+                          initiallyOpen={requestedWorkEditor}
+                          label={shiftCycle.name || `Cycle ${cycleIndex + 1}`}
+                        >
+                          <div className="df-screen-actions">
+                            <h3 className="df-item-title">
+                              {shiftCycle.name || `Cycle ${cycleIndex + 1}`}
+                            </h3>
+                            <button
+                              className="df-secondary-button"
+                              onClick={() => {
+                                setConfirmingDeleteCycleIndex(cycleIndex);
                               }}
-                              value={shiftCycle.mode ?? "manualSegments"}
+                              type="button"
                             >
-                              <option value="manualSegments">Manual date ranges</option>
-                              <option value="repeatingSequence">Repeating sequence</option>
-                            </select>
+                              Delete Shift Cycle
+                            </button>
                           </div>
 
-                          <div className="df-field">
-                            <label>Cycle Name</label>
-                            <input
-                              aria-label="Cycle Name"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
+                          {confirmingDeleteCycleIndex === cycleIndex ? (
+                            <div className="df-confirmation">
+                              <p className="df-danger-message">
+                                Delete this shift cycle from the current setup draft?
+                              </p>
+                              <div className="df-confirmation-actions">
+                                <button
+                                  className="df-danger-button"
+                                  onClick={() => {
+                                    setDraft((currentDraft) => {
+                                      const nextShiftCycles = currentDraft.shiftCycles.filter(
+                                        (_, currentIndex) => currentIndex !== cycleIndex,
+                                      );
 
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  shiftCycles: currentDraft.shiftCycles.map(
-                                    (currentCycle, currentIndex) =>
-                                      currentIndex === cycleIndex
-                                        ? {
-                                            ...currentCycle,
-                                            name: nextValue,
-                                          }
-                                        : currentCycle,
-                                  ),
-                                }));
-                              }}
-                              type="text"
-                              value={shiftCycle.name}
-                            />
-                          </div>
+                                      return recordDraftDeletions(
+                                        {
+                                          ...currentDraft,
+                                          shiftCycles: nextShiftCycles,
+                                          previewRange:
+                                            getPreviewRangeSource(currentDraft.previewRange) ===
+                                            "cycle"
+                                              ? buildCyclePreviewRange({
+                                                  ...currentDraft,
+                                                  shiftCycles: nextShiftCycles,
+                                                })
+                                              : currentDraft.previewRange,
+                                        },
+                                        getCycleSourceReferences(shiftCycle),
+                                      );
+                                    });
+                                    setConfirmingDeleteCycleIndex(null);
+                                  }}
+                                  type="button"
+                                >
+                                  Confirm Delete Shift Cycle
+                                </button>
+                                <button
+                                  className="df-secondary-button"
+                                  onClick={() => {
+                                    setConfirmingDeleteCycleIndex(null);
+                                  }}
+                                  type="button"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
 
-                          <div className="df-field">
-                            <label>Cycle Start Date</label>
-                            <input
-                              aria-label="Cycle Start Date"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string })
-                                  .value as LocalDateString;
+                          <div className="df-grid">
+                            <div className="df-field">
+                              <label>Cycle Type</label>
+                              <select
+                                aria-label="Cycle Type"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: ShiftCycleMode })
+                                    .value;
 
-                                setDraft((currentDraft) => {
-                                  const nextShiftCycles = currentDraft.shiftCycles.map(
-                                    (currentCycle, currentIndex) => {
-                                      if (currentIndex !== cycleIndex) {
-                                        return currentCycle;
-                                      }
-
-                                      return {
-                                        ...currentCycle,
-                                        startsOnDate: nextValue,
-                                        sequenceAnchorDate:
-                                          !currentCycle.sequenceAnchorDate ||
-                                          currentCycle.sequenceAnchorDate ===
-                                            currentCycle.startsOnDate
-                                            ? nextValue
-                                            : currentCycle.sequenceAnchorDate,
-                                      };
-                                    },
-                                  );
-
-                                  return {
-                                    ...currentDraft,
-                                    shiftCycles: nextShiftCycles,
-                                    previewRange:
-                                      getPreviewRangeSource(currentDraft.previewRange) === "cycle"
-                                        ? buildCyclePreviewRange({
-                                            ...currentDraft,
-                                            shiftCycles: nextShiftCycles,
-                                          })
-                                        : currentDraft.previewRange,
-                                  };
-                                });
-                              }}
-                              type="date"
-                              value={shiftCycle.startsOnDate}
-                            />
-                          </div>
-
-                          <div className="df-field">
-                            <label>Cycle End Date</label>
-                            <input
-                              aria-label="Cycle End Date"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => {
-                                  const nextShiftCycles = currentDraft.shiftCycles.map(
-                                    (currentCycle, currentIndex) => {
-                                      if (currentIndex !== cycleIndex) {
-                                        return currentCycle;
-                                      }
-
-                                      const nextCycle = {
-                                        ...currentCycle,
-                                      };
-
-                                      delete nextCycle.endsOnDate;
-
-                                      return nextValue
-                                        ? {
-                                            ...nextCycle,
-                                            endsOnDate: nextValue as LocalDateString,
-                                          }
-                                        : nextCycle;
-                                    },
-                                  );
-
-                                  return {
-                                    ...currentDraft,
-                                    shiftCycles: nextShiftCycles,
-                                    previewRange:
-                                      getPreviewRangeSource(currentDraft.previewRange) === "cycle"
-                                        ? buildCyclePreviewRange({
-                                            ...currentDraft,
-                                            shiftCycles: nextShiftCycles,
-                                          })
-                                        : currentDraft.previewRange,
-                                  };
-                                });
-                              }}
-                              type="date"
-                              value={shiftCycle.endsOnDate ?? ""}
-                            />
-                          </div>
-                        </div>
-
-                        {(shiftCycle.mode ?? "manualSegments") === "manualSegments" ? (
-                          <>
-                            <div className="df-screen-actions">
-                              <button
-                                className="df-secondary-button"
-                                onClick={() => {
                                   setDraft((currentDraft) => {
                                     const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
-                                    const created = createDraftSegment(
-                                      currentCycle,
-                                      currentDraft.shiftDefinitions,
-                                      currentCycle.segments.length + 1,
-                                    );
-                                    return recordDraftCreation(
-                                      {
-                                        ...currentDraft,
-                                        shiftCycles: currentDraft.shiftCycles.map(
-                                          (cycle, currentIndex) =>
-                                            currentIndex === cycleIndex
-                                              ? { ...cycle, segments: [...cycle.segments, created] }
-                                              : cycle,
+                                    const createdSequence =
+                                      currentCycle.sequence && currentCycle.sequence.length > 0
+                                        ? []
+                                        : createDefaultSequenceDays(currentDraft.shiftDefinitions);
+                                    const nextDraft = {
+                                      ...currentDraft,
+                                      shiftCycles: currentDraft.shiftCycles.map(
+                                        (cycle, currentIndex) =>
+                                          currentIndex === cycleIndex
+                                            ? {
+                                                ...cycle,
+                                                mode: nextValue,
+                                                sequenceAnchorDate:
+                                                  cycle.sequenceAnchorDate ?? cycle.startsOnDate,
+                                                sequence:
+                                                  createdSequence.length > 0
+                                                    ? createdSequence
+                                                    : (cycle.sequence ?? []),
+                                              }
+                                            : cycle,
+                                      ),
+                                    };
+                                    return recordDraftCreations(
+                                      nextDraft,
+                                      createdSequence.map((entry) =>
+                                        sourceReference(
+                                          "shiftSequenceEntry",
+                                          entry.id,
+                                          currentCycle.id,
                                         ),
-                                      },
-                                      sourceReference("shiftSegment", created.id, currentCycle.id),
+                                      ),
                                     );
                                   });
                                 }}
-                                type="button"
+                                value={shiftCycle.mode ?? "manualSegments"}
                               >
-                                Add Cycle Segment
-                              </button>
+                                <option value="manualSegments">Manual date ranges</option>
+                                <option value="repeatingSequence">Repeating sequence</option>
+                              </select>
                             </div>
 
-                            {shiftCycle.segments.length === 0 ? (
-                              <p className="df-empty">No segments yet for this cycle.</p>
-                            ) : (
-                              <ul className="df-list">
-                                {shiftCycle.segments.map((segment, segmentIndex) => (
-                                  <li className="df-list-card" key={segment.id}>
-                                    <div className="df-screen-actions">
-                                      <h4 className="df-item-title">
-                                        Cycle Segment {segmentIndex + 1}
-                                      </h4>
-                                      <button
-                                        className="df-secondary-button"
-                                        onClick={() => {
-                                          setConfirmingDeleteSegment({
-                                            cycleIndex,
-                                            segmentIndex,
-                                          });
-                                        }}
-                                        type="button"
-                                      >
-                                        Delete Cycle Segment
-                                      </button>
-                                    </div>
+                            <div className="df-field">
+                              <label>Cycle Name</label>
+                              <input
+                                aria-label="Cycle Name"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
 
-                                    {confirmingDeleteSegment?.cycleIndex === cycleIndex &&
-                                    confirmingDeleteSegment.segmentIndex === segmentIndex ? (
-                                      <div className="df-confirmation">
-                                        <p className="df-danger-message">
-                                          Delete this cycle segment from the current setup draft?
-                                        </p>
-                                        <div className="df-confirmation-actions">
-                                          <button
-                                            className="df-danger-button"
-                                            onClick={() => {
-                                              setDraft((currentDraft) =>
-                                                recordDraftDeletion(
-                                                  {
-                                                    ...currentDraft,
-                                                    shiftCycles: currentDraft.shiftCycles.map(
-                                                      (currentCycle, currentIndex) =>
-                                                        currentIndex === cycleIndex
-                                                          ? {
-                                                              ...currentCycle,
-                                                              segments:
-                                                                currentCycle.segments.filter(
-                                                                  (_, currentSegmentIndex) =>
-                                                                    currentSegmentIndex !==
-                                                                    segmentIndex,
-                                                                ),
-                                                            }
-                                                          : currentCycle,
-                                                    ),
-                                                  },
-                                                  sourceReference(
-                                                    "shiftSegment",
-                                                    segment.id,
-                                                    shiftCycle.id,
-                                                  ),
-                                                ),
-                                              );
-                                              setConfirmingDeleteSegment(null);
-                                            }}
-                                            type="button"
-                                          >
-                                            Confirm Delete Cycle Segment
-                                          </button>
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    shiftCycles: currentDraft.shiftCycles.map(
+                                      (currentCycle, currentIndex) =>
+                                        currentIndex === cycleIndex
+                                          ? {
+                                              ...currentCycle,
+                                              name: nextValue,
+                                            }
+                                          : currentCycle,
+                                    ),
+                                  }));
+                                }}
+                                type="text"
+                                value={shiftCycle.name}
+                              />
+                            </div>
+
+                            <div className="df-field">
+                              <label>Cycle Start Date</label>
+                              <input
+                                aria-label="Cycle Start Date"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string })
+                                    .value as LocalDateString;
+
+                                  setDraft((currentDraft) => {
+                                    const nextShiftCycles = currentDraft.shiftCycles.map(
+                                      (currentCycle, currentIndex) => {
+                                        if (currentIndex !== cycleIndex) {
+                                          return currentCycle;
+                                        }
+
+                                        return {
+                                          ...currentCycle,
+                                          startsOnDate: nextValue,
+                                          sequenceAnchorDate:
+                                            !currentCycle.sequenceAnchorDate ||
+                                            currentCycle.sequenceAnchorDate ===
+                                              currentCycle.startsOnDate
+                                              ? nextValue
+                                              : currentCycle.sequenceAnchorDate,
+                                        };
+                                      },
+                                    );
+
+                                    return {
+                                      ...currentDraft,
+                                      shiftCycles: nextShiftCycles,
+                                      previewRange:
+                                        getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                                          ? buildCyclePreviewRange({
+                                              ...currentDraft,
+                                              shiftCycles: nextShiftCycles,
+                                            })
+                                          : currentDraft.previewRange,
+                                    };
+                                  });
+                                }}
+                                type="date"
+                                value={shiftCycle.startsOnDate}
+                              />
+                            </div>
+
+                            <div className="df-field">
+                              <label>Cycle End Date</label>
+                              <input
+                                aria-label="Cycle End Date"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => {
+                                    const nextShiftCycles = currentDraft.shiftCycles.map(
+                                      (currentCycle, currentIndex) => {
+                                        if (currentIndex !== cycleIndex) {
+                                          return currentCycle;
+                                        }
+
+                                        const nextCycle = {
+                                          ...currentCycle,
+                                        };
+
+                                        delete nextCycle.endsOnDate;
+
+                                        return nextValue
+                                          ? {
+                                              ...nextCycle,
+                                              endsOnDate: nextValue as LocalDateString,
+                                            }
+                                          : nextCycle;
+                                      },
+                                    );
+
+                                    return {
+                                      ...currentDraft,
+                                      shiftCycles: nextShiftCycles,
+                                      previewRange:
+                                        getPreviewRangeSource(currentDraft.previewRange) === "cycle"
+                                          ? buildCyclePreviewRange({
+                                              ...currentDraft,
+                                              shiftCycles: nextShiftCycles,
+                                            })
+                                          : currentDraft.previewRange,
+                                    };
+                                  });
+                                }}
+                                type="date"
+                                value={shiftCycle.endsOnDate ?? ""}
+                              />
+                            </div>
+                          </div>
+
+                          {(shiftCycle.mode ?? "manualSegments") === "manualSegments" ? (
+                            <>
+                              <div className="df-screen-actions">
+                                <button
+                                  className="df-secondary-button"
+                                  onClick={() => {
+                                    setDraft((currentDraft) => {
+                                      const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                                      const created = createDraftSegment(
+                                        currentCycle,
+                                        currentDraft.shiftDefinitions,
+                                        currentCycle.segments.length + 1,
+                                      );
+                                      return recordDraftCreation(
+                                        {
+                                          ...currentDraft,
+                                          shiftCycles: currentDraft.shiftCycles.map(
+                                            (cycle, currentIndex) =>
+                                              currentIndex === cycleIndex
+                                                ? {
+                                                    ...cycle,
+                                                    segments: [...cycle.segments, created],
+                                                  }
+                                                : cycle,
+                                          ),
+                                        },
+                                        sourceReference(
+                                          "shiftSegment",
+                                          created.id,
+                                          currentCycle.id,
+                                        ),
+                                      );
+                                    });
+                                  }}
+                                  type="button"
+                                >
+                                  Add Cycle Segment
+                                </button>
+                              </div>
+
+                              {shiftCycle.segments.length === 0 ? (
+                                <p className="df-empty">No segments yet for this cycle.</p>
+                              ) : (
+                                <ul className="df-list">
+                                  {shiftCycle.segments.map((segment, segmentIndex) => (
+                                    <li className="df-list-card" key={segment.id}>
+                                      <WorkItemDisclosure
+                                        active={scope === "workPattern"}
+                                        initiallyOpen={requestedWorkEditor}
+                                        label={`Dated period ${segmentIndex + 1}: ${segment.startsOnDate}–${segment.endsOnDate}`}
+                                      >
+                                        <div className="df-screen-actions">
+                                          <h4 className="df-item-title">
+                                            Cycle Segment {segmentIndex + 1}
+                                          </h4>
                                           <button
                                             className="df-secondary-button"
                                             onClick={() => {
-                                              setConfirmingDeleteSegment(null);
+                                              setConfirmingDeleteSegment({
+                                                cycleIndex,
+                                                segmentIndex,
+                                              });
                                             }}
                                             type="button"
                                           >
-                                            Cancel
+                                            Delete Cycle Segment
                                           </button>
                                         </div>
-                                      </div>
-                                    ) : null}
 
-                                    <div className="df-grid">
-                                      <div className="df-field">
-                                        <label>Shift Definition</label>
-                                        <select
-                                          aria-label="Shift Definition"
-                                          onChange={(event) => {
-                                            const nextValue = (event.target as { value: string })
-                                              .value;
-
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        segments: currentCycle.segments.map(
-                                                          (currentSegment, currentSegmentIndex) =>
-                                                            currentSegmentIndex === segmentIndex
+                                        {confirmingDeleteSegment?.cycleIndex === cycleIndex &&
+                                        confirmingDeleteSegment.segmentIndex === segmentIndex ? (
+                                          <div className="df-confirmation">
+                                            <p className="df-danger-message">
+                                              Delete this cycle segment from the current setup
+                                              draft?
+                                            </p>
+                                            <div className="df-confirmation-actions">
+                                              <button
+                                                className="df-danger-button"
+                                                onClick={() => {
+                                                  setDraft((currentDraft) =>
+                                                    recordDraftDeletion(
+                                                      {
+                                                        ...currentDraft,
+                                                        shiftCycles: currentDraft.shiftCycles.map(
+                                                          (currentCycle, currentIndex) =>
+                                                            currentIndex === cycleIndex
                                                               ? {
-                                                                  ...currentSegment,
-                                                                  shiftDefinitionId: nextValue,
+                                                                  ...currentCycle,
+                                                                  segments:
+                                                                    currentCycle.segments.filter(
+                                                                      (_, currentSegmentIndex) =>
+                                                                        currentSegmentIndex !==
+                                                                        segmentIndex,
+                                                                    ),
                                                                 }
-                                                              : currentSegment,
+                                                              : currentCycle,
                                                         ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          value={segment.shiftDefinitionId}
-                                        >
-                                          {draft.shiftDefinitions.length === 0 ? (
-                                            <option value="">No shifts available</option>
-                                          ) : null}
-                                          {draft.shiftDefinitions.map((shiftDefinition) => (
-                                            <option
-                                              key={shiftDefinition.id}
-                                              value={shiftDefinition.id}
-                                            >
-                                              {shiftDefinition.name}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-
-                                      <div className="df-field">
-                                        <label>Segment Start Date</label>
-                                        <input
-                                          aria-label="Segment Start Date"
-                                          onChange={(event) => {
-                                            const nextValue = (event.target as { value: string })
-                                              .value;
-
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        segments: currentCycle.segments.map(
-                                                          (currentSegment, currentSegmentIndex) =>
-                                                            currentSegmentIndex === segmentIndex
-                                                              ? {
-                                                                  ...currentSegment,
-                                                                  startsOnDate:
-                                                                    nextValue as LocalDateString,
-                                                                }
-                                                              : currentSegment,
-                                                        ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          type="date"
-                                          value={segment.startsOnDate}
-                                        />
-                                      </div>
-
-                                      <div className="df-field">
-                                        <label>Segment End Date</label>
-                                        <input
-                                          aria-label="Segment End Date"
-                                          onChange={(event) => {
-                                            const nextValue = (event.target as { value: string })
-                                              .value;
-
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        segments: currentCycle.segments.map(
-                                                          (currentSegment, currentSegmentIndex) =>
-                                                            currentSegmentIndex === segmentIndex
-                                                              ? {
-                                                                  ...currentSegment,
-                                                                  endsOnDate:
-                                                                    nextValue as LocalDateString,
-                                                                }
-                                                              : currentSegment,
-                                                        ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          type="date"
-                                          value={segment.endsOnDate}
-                                        />
-                                      </div>
-
-                                      <div className="df-field">
-                                        <label>Notes</label>
-                                        <input
-                                          aria-label="Notes"
-                                          onChange={(event) => {
-                                            const nextValue = (event.target as { value: string })
-                                              .value;
-
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        segments: currentCycle.segments.map(
-                                                          (currentSegment, currentSegmentIndex) =>
-                                                            currentSegmentIndex === segmentIndex
-                                                              ? updateOptionalSegmentField(
-                                                                  currentSegment,
-                                                                  "notes",
-                                                                  nextValue,
-                                                                )
-                                                              : currentSegment,
-                                                        ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          type="text"
-                                          value={segment.notes ?? ""}
-                                        />
-                                      </div>
-
-                                      <label className="df-checkbox">
-                                        <input
-                                          aria-label="Override global schedule preferences"
-                                          checked={segment.schedulePreferences !== undefined}
-                                          onChange={(event) => {
-                                            const nextChecked = (
-                                              event.target as { checked: boolean }
-                                            ).checked;
-
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        segments: currentCycle.segments.map(
-                                                          (currentSegment, currentSegmentIndex) => {
-                                                            if (
-                                                              currentSegmentIndex !== segmentIndex
-                                                            ) {
-                                                              return currentSegment;
-                                                            }
-
-                                                            if (!nextChecked) {
-                                                              const nextSegment = {
-                                                                ...currentSegment,
-                                                              };
-
-                                                              delete nextSegment.schedulePreferences;
-                                                              return nextSegment;
-                                                            }
-
-                                                            return {
-                                                              ...currentSegment,
-                                                              schedulePreferences: {
-                                                                dayBoundaryStartTime:
-                                                                  currentDraft.schedulingPreferences
-                                                                    .dayBoundaryStartTime,
-                                                                weekStartsOn:
-                                                                  currentDraft.schedulingPreferences
-                                                                    .weekStartsOn,
-                                                              },
-                                                            };
-                                                          },
-                                                        ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          type="checkbox"
-                                        />
-                                        Override global schedule preferences
-                                      </label>
-
-                                      {segment.schedulePreferences ? (
-                                        <>
-                                          <div className="df-field">
-                                            <label>Segment Day Boundary</label>
-                                            <input
-                                              aria-label="Segment Day Boundary"
-                                              onChange={(event) => {
-                                                const nextValue = (
-                                                  event.target as { value: string }
-                                                ).value;
-
-                                                setDraft((currentDraft) => ({
-                                                  ...currentDraft,
-                                                  shiftCycles: currentDraft.shiftCycles.map(
-                                                    (currentCycle, currentIndex) =>
-                                                      currentIndex === cycleIndex
-                                                        ? {
-                                                            ...currentCycle,
-                                                            segments: currentCycle.segments.map(
-                                                              (
-                                                                currentSegment,
-                                                                currentSegmentIndex,
-                                                              ) =>
-                                                                currentSegmentIndex === segmentIndex
-                                                                  ? updateSegmentSchedulePreferences(
-                                                                      currentSegment,
-                                                                      {
-                                                                        dayBoundaryStartTime:
-                                                                          nextValue
-                                                                            ? (nextValue as TimeString)
-                                                                            : null,
-                                                                      },
-                                                                    )
-                                                                  : currentSegment,
-                                                            ),
-                                                          }
-                                                        : currentCycle,
-                                                  ),
-                                                }));
-                                              }}
-                                              type="time"
-                                              value={
-                                                segment.schedulePreferences.dayBoundaryStartTime ??
-                                                ""
-                                              }
-                                            />
+                                                      },
+                                                      sourceReference(
+                                                        "shiftSegment",
+                                                        segment.id,
+                                                        shiftCycle.id,
+                                                      ),
+                                                    ),
+                                                  );
+                                                  setConfirmingDeleteSegment(null);
+                                                }}
+                                                type="button"
+                                              >
+                                                Confirm Delete Cycle Segment
+                                              </button>
+                                              <button
+                                                className="df-secondary-button"
+                                                onClick={() => {
+                                                  setConfirmingDeleteSegment(null);
+                                                }}
+                                                type="button"
+                                              >
+                                                Cancel
+                                              </button>
+                                            </div>
                                           </div>
+                                        ) : null}
 
+                                        <div className="df-grid">
                                           <div className="df-field">
-                                            <label>Segment Week Starts On</label>
+                                            <label>Shift Definition</label>
                                             <select
-                                              aria-label="Segment Week Starts On"
+                                              aria-label="Shift Definition"
                                               onChange={(event) => {
                                                 const nextValue = (
                                                   event.target as { value: string }
@@ -1511,14 +1359,10 @@ export function SetupScreen({
                                                                 currentSegmentIndex,
                                                               ) =>
                                                                 currentSegmentIndex === segmentIndex
-                                                                  ? updateSegmentSchedulePreferences(
-                                                                      currentSegment,
-                                                                      {
-                                                                        weekStartsOn: nextValue
-                                                                          ? (nextValue as Weekday)
-                                                                          : null,
-                                                                      },
-                                                                    )
+                                                                  ? {
+                                                                      ...currentSegment,
+                                                                      shiftDefinitionId: nextValue,
+                                                                    }
                                                                   : currentSegment,
                                                             ),
                                                           }
@@ -1526,193 +1370,481 @@ export function SetupScreen({
                                                   ),
                                                 }));
                                               }}
-                                              value={segment.schedulePreferences.weekStartsOn ?? ""}
+                                              value={segment.shiftDefinitionId}
                                             >
-                                              <option value="">Use global</option>
-                                              {weekdays.map((weekday) => (
-                                                <option key={weekday} value={weekday}>
-                                                  {formatWeekdayLabel(weekday)}
+                                              {draft.shiftDefinitions.length === 0 ? (
+                                                <option value="">No shifts available</option>
+                                              ) : null}
+                                              {draft.shiftDefinitions.map((shiftDefinition) => (
+                                                <option
+                                                  key={shiftDefinition.id}
+                                                  value={shiftDefinition.id}
+                                                >
+                                                  {shiftDefinition.name}
                                                 </option>
                                               ))}
                                             </select>
                                           </div>
-                                        </>
-                                      ) : null}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <div className="df-grid">
-                              <div className="df-field">
-                                <label>Sequence Anchor Date</label>
-                                <input
-                                  aria-label="Sequence Anchor Date"
-                                  onChange={(event) => {
-                                    const nextValue = (event.target as { value: string }).value;
 
-                                    setDraft((currentDraft) => ({
-                                      ...currentDraft,
-                                      shiftCycles: currentDraft.shiftCycles.map(
-                                        (currentCycle, currentIndex) =>
-                                          currentIndex === cycleIndex
-                                            ? {
-                                                ...currentCycle,
-                                                sequenceAnchorDate: nextValue as LocalDateString,
-                                              }
-                                            : currentCycle,
-                                      ),
-                                    }));
-                                  }}
-                                  type="date"
-                                  value={shiftCycle.sequenceAnchorDate ?? shiftCycle.startsOnDate}
-                                />
-                              </div>
-                            </div>
+                                          <div className="df-field">
+                                            <label>Segment Start Date</label>
+                                            <input
+                                              aria-label="Segment Start Date"
+                                              onChange={(event) => {
+                                                const nextValue = (
+                                                  event.target as { value: string }
+                                                ).value;
 
-                            <div className="df-screen-actions">
-                              <button
-                                className="df-secondary-button"
-                                onClick={() => {
-                                  setDraft((currentDraft) => {
-                                    const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
-                                    const created = createDraftSequenceDay(
-                                      currentCycle,
-                                      currentDraft.shiftDefinitions,
-                                    );
-                                    return recordDraftCreation(
-                                      {
-                                        ...currentDraft,
-                                        shiftCycles: currentDraft.shiftCycles.map(
-                                          (cycle, currentIndex) =>
-                                            currentIndex === cycleIndex
-                                              ? {
-                                                  ...cycle,
-                                                  sequence: [...(cycle.sequence ?? []), created],
-                                                }
-                                              : cycle,
-                                        ),
-                                      },
-                                      sourceReference(
-                                        "shiftSequenceEntry",
-                                        created.id,
-                                        currentCycle.id,
-                                      ),
-                                    );
-                                  });
-                                }}
-                                type="button"
-                              >
-                                Add Sequence Day
-                              </button>
-                              <button
-                                className="df-secondary-button"
-                                disabled={(shiftCycle.sequence?.length ?? 0) <= 1}
-                                onClick={() => {
-                                  setDraft((currentDraft) => {
-                                    const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
-                                    const deleted = (currentCycle.sequence ?? []).at(-1)!;
-                                    return recordDraftDeletion(
-                                      {
-                                        ...currentDraft,
-                                        shiftCycles: currentDraft.shiftCycles.map(
-                                          (cycle, currentIndex) =>
-                                            currentIndex === cycleIndex
-                                              ? {
-                                                  ...cycle,
-                                                  sequence: (cycle.sequence ?? []).slice(0, -1),
-                                                }
-                                              : cycle,
-                                        ),
-                                      },
-                                      sourceReference(
-                                        "shiftSequenceEntry",
-                                        deleted.id,
-                                        currentCycle.id,
-                                      ),
-                                    );
-                                  });
-                                }}
-                                type="button"
-                              >
-                                Remove Last Day
-                              </button>
-                            </div>
+                                                setDraft((currentDraft) => ({
+                                                  ...currentDraft,
+                                                  shiftCycles: currentDraft.shiftCycles.map(
+                                                    (currentCycle, currentIndex) =>
+                                                      currentIndex === cycleIndex
+                                                        ? {
+                                                            ...currentCycle,
+                                                            segments: currentCycle.segments.map(
+                                                              (
+                                                                currentSegment,
+                                                                currentSegmentIndex,
+                                                              ) =>
+                                                                currentSegmentIndex === segmentIndex
+                                                                  ? {
+                                                                      ...currentSegment,
+                                                                      startsOnDate:
+                                                                        nextValue as LocalDateString,
+                                                                    }
+                                                                  : currentSegment,
+                                                            ),
+                                                          }
+                                                        : currentCycle,
+                                                  ),
+                                                }));
+                                              }}
+                                              type="date"
+                                              value={segment.startsOnDate}
+                                            />
+                                          </div>
 
-                            {(shiftCycle.sequence?.length ?? 0) === 0 ? (
-                              <p className="df-empty">No sequence days yet for this cycle.</p>
-                            ) : (
-                              <ul className="df-list">
-                                {(shiftCycle.sequence ?? []).map((sequenceDay, sequenceIndex) => (
-                                  <li className="df-list-card" key={sequenceDay.id}>
-                                    <div className="df-grid">
-                                      <div className="df-field">
-                                        <label>{`Day ${sequenceDay.dayOffset + 1}`}</label>
-                                        <select
-                                          aria-label={`Sequence Day ${sequenceIndex + 1} Shift`}
-                                          onChange={(event) => {
-                                            const nextValue = (event.target as { value: string })
-                                              .value;
+                                          <div className="df-field">
+                                            <label>Segment End Date</label>
+                                            <input
+                                              aria-label="Segment End Date"
+                                              onChange={(event) => {
+                                                const nextValue = (
+                                                  event.target as { value: string }
+                                                ).value;
 
-                                            setDraft((currentDraft) => ({
-                                              ...currentDraft,
-                                              shiftCycles: currentDraft.shiftCycles.map(
-                                                (currentCycle, currentIndex) =>
-                                                  currentIndex === cycleIndex
-                                                    ? {
-                                                        ...currentCycle,
-                                                        sequence: (currentCycle.sequence ?? []).map(
-                                                          (
-                                                            currentSequenceDay,
-                                                            currentSequenceIndex,
-                                                          ) =>
-                                                            currentSequenceIndex === sequenceIndex
-                                                              ? {
-                                                                  ...currentSequenceDay,
-                                                                  shiftDefinitionId:
-                                                                    nextValue === "off"
-                                                                      ? null
-                                                                      : nextValue,
+                                                setDraft((currentDraft) => ({
+                                                  ...currentDraft,
+                                                  shiftCycles: currentDraft.shiftCycles.map(
+                                                    (currentCycle, currentIndex) =>
+                                                      currentIndex === cycleIndex
+                                                        ? {
+                                                            ...currentCycle,
+                                                            segments: currentCycle.segments.map(
+                                                              (
+                                                                currentSegment,
+                                                                currentSegmentIndex,
+                                                              ) =>
+                                                                currentSegmentIndex === segmentIndex
+                                                                  ? {
+                                                                      ...currentSegment,
+                                                                      endsOnDate:
+                                                                        nextValue as LocalDateString,
+                                                                    }
+                                                                  : currentSegment,
+                                                            ),
+                                                          }
+                                                        : currentCycle,
+                                                  ),
+                                                }));
+                                              }}
+                                              type="date"
+                                              value={segment.endsOnDate}
+                                            />
+                                          </div>
+
+                                          <div className="df-field">
+                                            <label>Notes</label>
+                                            <input
+                                              aria-label="Notes"
+                                              onChange={(event) => {
+                                                const nextValue = (
+                                                  event.target as { value: string }
+                                                ).value;
+
+                                                setDraft((currentDraft) => ({
+                                                  ...currentDraft,
+                                                  shiftCycles: currentDraft.shiftCycles.map(
+                                                    (currentCycle, currentIndex) =>
+                                                      currentIndex === cycleIndex
+                                                        ? {
+                                                            ...currentCycle,
+                                                            segments: currentCycle.segments.map(
+                                                              (
+                                                                currentSegment,
+                                                                currentSegmentIndex,
+                                                              ) =>
+                                                                currentSegmentIndex === segmentIndex
+                                                                  ? updateOptionalSegmentField(
+                                                                      currentSegment,
+                                                                      "notes",
+                                                                      nextValue,
+                                                                    )
+                                                                  : currentSegment,
+                                                            ),
+                                                          }
+                                                        : currentCycle,
+                                                  ),
+                                                }));
+                                              }}
+                                              type="text"
+                                              value={segment.notes ?? ""}
+                                            />
+                                          </div>
+
+                                          <label className="df-checkbox">
+                                            <input
+                                              aria-label="Override global schedule preferences"
+                                              checked={segment.schedulePreferences !== undefined}
+                                              onChange={(event) => {
+                                                const nextChecked = (
+                                                  event.target as { checked: boolean }
+                                                ).checked;
+
+                                                setDraft((currentDraft) => ({
+                                                  ...currentDraft,
+                                                  shiftCycles: currentDraft.shiftCycles.map(
+                                                    (currentCycle, currentIndex) =>
+                                                      currentIndex === cycleIndex
+                                                        ? {
+                                                            ...currentCycle,
+                                                            segments: currentCycle.segments.map(
+                                                              (
+                                                                currentSegment,
+                                                                currentSegmentIndex,
+                                                              ) => {
+                                                                if (
+                                                                  currentSegmentIndex !==
+                                                                  segmentIndex
+                                                                ) {
+                                                                  return currentSegment;
                                                                 }
-                                                              : currentSequenceDay,
-                                                        ),
-                                                      }
-                                                    : currentCycle,
-                                              ),
-                                            }));
-                                          }}
-                                          value={sequenceDay.shiftDefinitionId ?? "off"}
-                                        >
-                                          <option value="off">Off</option>
-                                          {draft.shiftDefinitions.map((shiftDefinition) => (
-                                            <option
-                                              key={shiftDefinition.id}
-                                              value={shiftDefinition.id}
-                                            >
-                                              {shiftDefinition.name}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
 
-                            {(shiftCycle.sequence ?? []).every(
-                              (sequenceDay) => sequenceDay.shiftDefinitionId === null,
-                            ) ? (
-                              <p className="df-support">
-                                This repeating cycle is currently all off days. Preview can still
-                                place downtime templates.
-                              </p>
-                            ) : null}
-                          </>
-                        )}
+                                                                if (!nextChecked) {
+                                                                  const nextSegment = {
+                                                                    ...currentSegment,
+                                                                  };
+
+                                                                  delete nextSegment.schedulePreferences;
+                                                                  return nextSegment;
+                                                                }
+
+                                                                return {
+                                                                  ...currentSegment,
+                                                                  schedulePreferences: {
+                                                                    dayBoundaryStartTime:
+                                                                      currentDraft
+                                                                        .schedulingPreferences
+                                                                        .dayBoundaryStartTime,
+                                                                    weekStartsOn:
+                                                                      currentDraft
+                                                                        .schedulingPreferences
+                                                                        .weekStartsOn,
+                                                                  },
+                                                                };
+                                                              },
+                                                            ),
+                                                          }
+                                                        : currentCycle,
+                                                  ),
+                                                }));
+                                              }}
+                                              type="checkbox"
+                                            />
+                                            Override global schedule preferences
+                                          </label>
+
+                                          {segment.schedulePreferences ? (
+                                            <>
+                                              <div className="df-field">
+                                                <label>Segment Day Boundary</label>
+                                                <input
+                                                  aria-label="Segment Day Boundary"
+                                                  onChange={(event) => {
+                                                    const nextValue = (
+                                                      event.target as { value: string }
+                                                    ).value;
+
+                                                    setDraft((currentDraft) => ({
+                                                      ...currentDraft,
+                                                      shiftCycles: currentDraft.shiftCycles.map(
+                                                        (currentCycle, currentIndex) =>
+                                                          currentIndex === cycleIndex
+                                                            ? {
+                                                                ...currentCycle,
+                                                                segments: currentCycle.segments.map(
+                                                                  (
+                                                                    currentSegment,
+                                                                    currentSegmentIndex,
+                                                                  ) =>
+                                                                    currentSegmentIndex ===
+                                                                    segmentIndex
+                                                                      ? updateSegmentSchedulePreferences(
+                                                                          currentSegment,
+                                                                          {
+                                                                            dayBoundaryStartTime:
+                                                                              nextValue
+                                                                                ? (nextValue as TimeString)
+                                                                                : null,
+                                                                          },
+                                                                        )
+                                                                      : currentSegment,
+                                                                ),
+                                                              }
+                                                            : currentCycle,
+                                                      ),
+                                                    }));
+                                                  }}
+                                                  type="time"
+                                                  value={
+                                                    segment.schedulePreferences
+                                                      .dayBoundaryStartTime ?? ""
+                                                  }
+                                                />
+                                              </div>
+
+                                              <div className="df-field">
+                                                <label>Segment Week Starts On</label>
+                                                <select
+                                                  aria-label="Segment Week Starts On"
+                                                  onChange={(event) => {
+                                                    const nextValue = (
+                                                      event.target as { value: string }
+                                                    ).value;
+
+                                                    setDraft((currentDraft) => ({
+                                                      ...currentDraft,
+                                                      shiftCycles: currentDraft.shiftCycles.map(
+                                                        (currentCycle, currentIndex) =>
+                                                          currentIndex === cycleIndex
+                                                            ? {
+                                                                ...currentCycle,
+                                                                segments: currentCycle.segments.map(
+                                                                  (
+                                                                    currentSegment,
+                                                                    currentSegmentIndex,
+                                                                  ) =>
+                                                                    currentSegmentIndex ===
+                                                                    segmentIndex
+                                                                      ? updateSegmentSchedulePreferences(
+                                                                          currentSegment,
+                                                                          {
+                                                                            weekStartsOn: nextValue
+                                                                              ? (nextValue as Weekday)
+                                                                              : null,
+                                                                          },
+                                                                        )
+                                                                      : currentSegment,
+                                                                ),
+                                                              }
+                                                            : currentCycle,
+                                                      ),
+                                                    }));
+                                                  }}
+                                                  value={
+                                                    segment.schedulePreferences.weekStartsOn ?? ""
+                                                  }
+                                                >
+                                                  <option value="">Use global</option>
+                                                  {weekdays.map((weekday) => (
+                                                    <option key={weekday} value={weekday}>
+                                                      {formatWeekdayLabel(weekday)}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                              </div>
+                                            </>
+                                          ) : null}
+                                        </div>
+                                      </WorkItemDisclosure>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <div className="df-grid">
+                                <div className="df-field">
+                                  <label>Sequence Anchor Date</label>
+                                  <input
+                                    aria-label="Sequence Anchor Date"
+                                    onChange={(event) => {
+                                      const nextValue = (event.target as { value: string }).value;
+
+                                      setDraft((currentDraft) => ({
+                                        ...currentDraft,
+                                        shiftCycles: currentDraft.shiftCycles.map(
+                                          (currentCycle, currentIndex) =>
+                                            currentIndex === cycleIndex
+                                              ? {
+                                                  ...currentCycle,
+                                                  sequenceAnchorDate: nextValue as LocalDateString,
+                                                }
+                                              : currentCycle,
+                                        ),
+                                      }));
+                                    }}
+                                    type="date"
+                                    value={shiftCycle.sequenceAnchorDate ?? shiftCycle.startsOnDate}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="df-screen-actions">
+                                <button
+                                  className="df-secondary-button"
+                                  onClick={() => {
+                                    setDraft((currentDraft) => {
+                                      const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                                      const created = createDraftSequenceDay(
+                                        currentCycle,
+                                        currentDraft.shiftDefinitions,
+                                      );
+                                      return recordDraftCreation(
+                                        {
+                                          ...currentDraft,
+                                          shiftCycles: currentDraft.shiftCycles.map(
+                                            (cycle, currentIndex) =>
+                                              currentIndex === cycleIndex
+                                                ? {
+                                                    ...cycle,
+                                                    sequence: [...(cycle.sequence ?? []), created],
+                                                  }
+                                                : cycle,
+                                          ),
+                                        },
+                                        sourceReference(
+                                          "shiftSequenceEntry",
+                                          created.id,
+                                          currentCycle.id,
+                                        ),
+                                      );
+                                    });
+                                  }}
+                                  type="button"
+                                >
+                                  Add Sequence Day
+                                </button>
+                                <button
+                                  className="df-secondary-button"
+                                  disabled={(shiftCycle.sequence?.length ?? 0) <= 1}
+                                  onClick={() => {
+                                    setDraft((currentDraft) => {
+                                      const currentCycle = currentDraft.shiftCycles[cycleIndex]!;
+                                      const deleted = (currentCycle.sequence ?? []).at(-1)!;
+                                      return recordDraftDeletion(
+                                        {
+                                          ...currentDraft,
+                                          shiftCycles: currentDraft.shiftCycles.map(
+                                            (cycle, currentIndex) =>
+                                              currentIndex === cycleIndex
+                                                ? {
+                                                    ...cycle,
+                                                    sequence: (cycle.sequence ?? []).slice(0, -1),
+                                                  }
+                                                : cycle,
+                                          ),
+                                        },
+                                        sourceReference(
+                                          "shiftSequenceEntry",
+                                          deleted.id,
+                                          currentCycle.id,
+                                        ),
+                                      );
+                                    });
+                                  }}
+                                  type="button"
+                                >
+                                  Remove Last Day
+                                </button>
+                              </div>
+
+                              {(shiftCycle.sequence?.length ?? 0) === 0 ? (
+                                <p className="df-empty">No sequence days yet for this cycle.</p>
+                              ) : (
+                                <ul className="df-list">
+                                  {(shiftCycle.sequence ?? []).map((sequenceDay, sequenceIndex) => (
+                                    <li className="df-list-card" key={sequenceDay.id}>
+                                      <div className="df-grid">
+                                        <div className="df-field">
+                                          <label>{`Day ${sequenceDay.dayOffset + 1}`}</label>
+                                          <select
+                                            aria-label={`Sequence Day ${sequenceIndex + 1} Shift`}
+                                            onChange={(event) => {
+                                              const nextValue = (event.target as { value: string })
+                                                .value;
+
+                                              setDraft((currentDraft) => ({
+                                                ...currentDraft,
+                                                shiftCycles: currentDraft.shiftCycles.map(
+                                                  (currentCycle, currentIndex) =>
+                                                    currentIndex === cycleIndex
+                                                      ? {
+                                                          ...currentCycle,
+                                                          sequence: (
+                                                            currentCycle.sequence ?? []
+                                                          ).map(
+                                                            (
+                                                              currentSequenceDay,
+                                                              currentSequenceIndex,
+                                                            ) =>
+                                                              currentSequenceIndex === sequenceIndex
+                                                                ? {
+                                                                    ...currentSequenceDay,
+                                                                    shiftDefinitionId:
+                                                                      nextValue === "off"
+                                                                        ? null
+                                                                        : nextValue,
+                                                                  }
+                                                                : currentSequenceDay,
+                                                          ),
+                                                        }
+                                                      : currentCycle,
+                                                ),
+                                              }));
+                                            }}
+                                            value={sequenceDay.shiftDefinitionId ?? "off"}
+                                          >
+                                            <option value="off">Off</option>
+                                            {draft.shiftDefinitions.map((shiftDefinition) => (
+                                              <option
+                                                key={shiftDefinition.id}
+                                                value={shiftDefinition.id}
+                                              >
+                                                {shiftDefinition.name}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {(shiftCycle.sequence ?? []).every(
+                                (sequenceDay) => sequenceDay.shiftDefinitionId === null,
+                              ) ? (
+                                <p className="df-support">
+                                  This repeating cycle is currently all off days. Preview can still
+                                  place downtime templates.
+                                </p>
+                              ) : null}
+                            </>
+                          )}
+                        </WorkItemDisclosure>
                       </li>
                     ))}
                   </ul>
@@ -1721,7 +1853,7 @@ export function SetupScreen({
             </>
           ) : null}
 
-          {scope === "full" || scope === "commitmentLibrary" ? (
+          {(scope === "full" || scope === "commitmentLibrary") && !editingCommitment ? (
             <CollapsibleSetupSection
               helperText="Source-specific fields not yet available in the bounded Commitment editor."
               isOpen={isTemplatesOpen}
@@ -1740,6 +1872,22 @@ export function SetupScreen({
                   the underlying commitment identity.
                 </p>
               </div>
+              {scope === "commitmentLibrary" && (
+                <label className="df-field">
+                  Detailed Commitment editor
+                  <select
+                    value={selectedAdvanced}
+                    onChange={(e) => setSelectedAdvanced(e.target.value)}
+                  >
+                    <option value="">Choose one Commitment</option>
+                    {draft.templateEntries.map((e) => (
+                      <option key={e.template.id} value={e.template.id}>
+                        Edit: {e.template.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {draft.templateEntries.length === 0 ? (
                 <div>
                   <p className="df-empty">
@@ -1749,668 +1897,340 @@ export function SetupScreen({
                 </div>
               ) : (
                 <ul className="df-list">
-                  {draft.templateEntries.map((entry, index) => (
-                    <li className="df-list-card" key={entry.template.id}>
-                      <div className="df-screen-actions">
-                        <div className="df-form-stack">
-                          <h3 className="df-item-title">
-                            {entry.template.title || `Commitment ${index + 1}`}
-                          </h3>
-                          <div className="df-screen-actions">
-                            <label className="df-checkbox">
-                              <input
-                                aria-label="Include in Schedule"
-                                checked={entry.template.enabled}
-                                onChange={(event) => {
-                                  const nextChecked = (event.target as { checked: boolean })
-                                    .checked;
+                  {draft.templateEntries.map((entry, index) =>
+                    scope === "commitmentLibrary" &&
+                    selectedAdvanced !== entry.template.id ? null : (
+                      <li className="df-list-card" key={entry.template.id}>
+                        <div className="df-screen-actions">
+                          <div className="df-form-stack">
+                            <h3 className="df-item-title">
+                              {entry.template.title || `Commitment ${index + 1}`}
+                            </h3>
+                            <div className="df-screen-actions">
+                              <label className="df-checkbox">
+                                <input
+                                  aria-label="Include in Schedule"
+                                  checked={entry.template.enabled}
+                                  onChange={(event) => {
+                                    const nextChecked = (event.target as { checked: boolean })
+                                      .checked;
 
-                                  setDraft((currentDraft) => ({
-                                    ...currentDraft,
-                                    templateEntries: currentDraft.templateEntries.map(
-                                      (currentEntry, currentIndex) =>
-                                        currentIndex === index
-                                          ? {
-                                              ...currentEntry,
-                                              template: {
-                                                ...currentEntry.template,
-                                                enabled: nextChecked,
-                                              },
-                                            }
-                                          : currentEntry,
-                                    ),
-                                  }));
-                                }}
-                                type="checkbox"
-                              />
-                              Include in Schedule
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      {!entry.template.enabled ? (
-                        <p className="df-muted">Not included when generating the schedule.</p>
-                      ) : null}
-
-                      <div className="df-grid">
-                        <div className="df-field">
-                          <label>Title</label>
-                          <input
-                            aria-label="Title"
-                            onChange={(event) => {
-                              const nextValue = (event.target as { value: string }).value;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            title: nextValue,
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            type="text"
-                            value={entry.template.title}
-                          />
-                        </div>
-
-                        <div className="df-field">
-                          <label>Category</label>
-                          <select
-                            aria-label="Category"
-                            onChange={(event) => {
-                              const nextValue = (event.target as { value: string }).value;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            category: nextValue as BlockTemplate["category"],
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            value={entry.template.category}
-                          >
-                            {blockCategories.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="df-field">
-                          <label>Placement Type</label>
-                          <select
-                            aria-label="Placement Type"
-                            onChange={(event) => {
-                              const nextValue = (event.target as { value: string }).value;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            placementType:
-                                              nextValue as BlockTemplate["placementType"],
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            value={entry.template.placementType}
-                          >
-                            <option value="flexible">flexible</option>
-                            <option value="fixed">fixed</option>
-                          </select>
-                        </div>
-
-                        <div className="df-field">
-                          <div className="df-checkbox-card">
-                            <label className="df-checkbox-card-label">
-                              <input
-                                aria-label="Requires Work Shift"
-                                checked={entry.template.requiresWorkAnchor ?? false}
-                                onChange={(event) => {
-                                  const nextChecked = (event.target as { checked: boolean })
-                                    .checked;
-
-                                  setDraft((currentDraft) => ({
-                                    ...currentDraft,
-                                    templateEntries: currentDraft.templateEntries.map(
-                                      (currentEntry, currentIndex) =>
-                                        currentIndex === index
-                                          ? {
-                                              ...currentEntry,
-                                              template: {
-                                                ...currentEntry.template,
-                                                requiresWorkAnchor: nextChecked,
-                                              },
-                                            }
-                                          : currentEntry,
-                                    ),
-                                  }));
-                                }}
-                                type="checkbox"
-                              />
-                              <span>Requires Work Shift</span>
-                            </label>
-                            <p className="df-support">
-                              Only schedule this activity on days that contain a work shift.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="df-field">
-                          <label>Duration Hours</label>
-                          <input
-                            aria-label="Duration Hours"
-                            min="0"
-                            onChange={(event) => {
-                              const nextValue = Number((event.target as { value: string }).value);
-                              const safeValue = Number.isFinite(nextValue)
-                                ? Math.max(0, nextValue)
-                                : 0;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) => {
-                                    if (currentIndex !== index) {
-                                      return currentEntry;
-                                    }
-
-                                    const currentMinutes =
-                                      currentEntry.template.durationMinutes % 60;
-
-                                    return {
-                                      ...currentEntry,
-                                      template: {
-                                        ...currentEntry.template,
-                                        durationMinutes: safeValue * 60 + currentMinutes,
-                                      },
-                                    };
-                                  },
-                                ),
-                              }));
-                            }}
-                            type="number"
-                            value={Math.floor(entry.template.durationMinutes / 60)}
-                          />
-                        </div>
-
-                        <div className="df-field">
-                          <label>Duration Minutes</label>
-                          <input
-                            aria-label="Duration Minutes"
-                            max="59"
-                            min="0"
-                            onChange={(event) => {
-                              const nextValue = Number((event.target as { value: string }).value);
-                              const safeValue = Number.isFinite(nextValue)
-                                ? Math.max(0, Math.min(59, nextValue))
-                                : 0;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) => {
-                                    if (currentIndex !== index) {
-                                      return currentEntry;
-                                    }
-
-                                    const currentHours = Math.floor(
-                                      currentEntry.template.durationMinutes / 60,
-                                    );
-
-                                    return {
-                                      ...currentEntry,
-                                      template: {
-                                        ...currentEntry.template,
-                                        durationMinutes: currentHours * 60 + safeValue,
-                                      },
-                                    };
-                                  },
-                                ),
-                              }));
-                            }}
-                            type="number"
-                            value={entry.template.durationMinutes % 60}
-                          />
-                        </div>
-
-                        <div className="df-field">
-                          <p className="df-support">
-                            Buffers reserve transition time around this block, such as travel,
-                            meals, showering, or winding down.
-                          </p>
-                        </div>
-
-                        <div className="df-field">
-                          <label>Buffer Before (minutes)</label>
-                          <input
-                            aria-label="Buffer Before (minutes)"
-                            min="0"
-                            onChange={(event) => {
-                              const rawValue = (event.target as { value: string }).value.trim();
-                              const nextValue =
-                                rawValue === ""
-                                  ? undefined
-                                  : Math.max(0, Number.parseInt(rawValue, 10) || 0);
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: updateTemplateOptionalNumberField(
-                                            currentEntry.template,
-                                            "bufferBeforeMinutes",
-                                            nextValue,
-                                          ),
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            placeholder="0"
-                            type="number"
-                            value={entry.template.bufferBeforeMinutes ?? ""}
-                          />
-                        </div>
-
-                        <div className="df-field">
-                          <label>Buffer After (minutes)</label>
-                          <input
-                            aria-label="Buffer After (minutes)"
-                            min="0"
-                            onChange={(event) => {
-                              const rawValue = (event.target as { value: string }).value.trim();
-                              const nextValue =
-                                rawValue === ""
-                                  ? undefined
-                                  : Math.max(0, Number.parseInt(rawValue, 10) || 0);
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: updateTemplateOptionalNumberField(
-                                            currentEntry.template,
-                                            "bufferAfterMinutes",
-                                            nextValue,
-                                          ),
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            placeholder="0"
-                            type="number"
-                            value={entry.template.bufferAfterMinutes ?? ""}
-                          />
-                        </div>
-
-                        <div className="df-field">
-                          <label>Priority</label>
-                          <select
-                            aria-label="Priority"
-                            onChange={(event) => {
-                              const nextValue = Number((event.target as { value: string }).value);
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            priority: nextValue as BlockTemplate["priority"],
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            value={entry.template.priority}
-                          >
-                            {[1, 2, 3, 4, 5].map((priority) => (
-                              <option key={priority} value={priority}>
-                                {priority}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {entry.template.placementType === "flexible" ? (
-                          <>
-                            <div className="df-field">
-                              <label>Preferred Window</label>
-                              <select
-                                aria-label="Preferred Window"
-                                onChange={(event) => {
-                                  const nextValue = (event.target as { value: string }).value;
-
-                                  setDraft((currentDraft) => ({
-                                    ...currentDraft,
-                                    templateEntries: currentDraft.templateEntries.map(
-                                      (currentEntry, currentIndex) =>
-                                        currentIndex === index
-                                          ? {
-                                              ...currentEntry,
-                                              template: {
-                                                ...currentEntry.template,
-                                                preferredWindow:
-                                                  nextValue as BlockTemplate["preferredWindow"],
-                                              },
-                                            }
-                                          : currentEntry,
-                                    ),
-                                  }));
-                                }}
-                                value={entry.template.preferredWindow}
-                              >
-                                {preferredWindows.map((preferredWindow) => (
-                                  <option key={preferredWindow} value={preferredWindow}>
-                                    {formatPreferredWindowLabel(preferredWindow)}
-                                  </option>
-                                ))}
-                              </select>
+                                    setDraft((currentDraft) => ({
+                                      ...currentDraft,
+                                      templateEntries: currentDraft.templateEntries.map(
+                                        (currentEntry, currentIndex) =>
+                                          currentIndex === index
+                                            ? {
+                                                ...currentEntry,
+                                                template: {
+                                                  ...currentEntry.template,
+                                                  enabled: nextChecked,
+                                                },
+                                              }
+                                            : currentEntry,
+                                      ),
+                                    }));
+                                  }}
+                                  type="checkbox"
+                                />
+                                Include in Schedule
+                              </label>
                             </div>
-                          </>
-                        ) : (
-                          <div
-                            className={
-                              focusedTemplateField?.templateId === entry.template.id &&
-                              focusedTemplateField.field === "fixedStartTime"
-                                ? "df-field is-highlighted"
-                                : "df-field"
-                            }
-                          >
-                            <label>Fixed Start Time</label>
-                            <input
-                              aria-label="Fixed Start Time"
-                              ref={(node) => {
-                                if (node) {
-                                  fixedStartTimeInputRefs.current.set(entry.template.id, node);
-                                  return;
-                                }
-
-                                fixedStartTimeInputRefs.current.delete(entry.template.id);
-                              }}
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  templateEntries: currentDraft.templateEntries.map(
-                                    (currentEntry, currentIndex) =>
-                                      currentIndex === index
-                                        ? {
-                                            ...currentEntry,
-                                            template: updateTemplateOptionalTimeField(
-                                              currentEntry.template,
-                                              "fixedStartTime",
-                                              nextValue ? (nextValue as TimeString) : null,
-                                            ),
-                                          }
-                                        : currentEntry,
-                                  ),
-                                }));
-                              }}
-                              type="time"
-                              value={entry.template.fixedStartTime ?? ""}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {entry.template.placementType === "flexible" &&
-                      entry.template.preferredWindow === "custom" ? (
-                        <div className="df-grid">
-                          <div className="df-field">
-                            <label>Custom Window Start</label>
-                            <input
-                              aria-label="Custom Window Start"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  templateEntries: currentDraft.templateEntries.map(
-                                    (currentEntry, currentIndex) =>
-                                      currentIndex === index
-                                        ? {
-                                            ...currentEntry,
-                                            template: updateTemplateOptionalTimeField(
-                                              currentEntry.template,
-                                              "customWindowStartTime",
-                                              nextValue ? (nextValue as TimeString) : null,
-                                            ),
-                                          }
-                                        : currentEntry,
-                                  ),
-                                }));
-                              }}
-                              type="time"
-                              value={entry.template.customWindowStartTime ?? ""}
-                            />
-                          </div>
-                          <div className="df-field">
-                            <label>Custom Window End</label>
-                            <input
-                              aria-label="Custom Window End"
-                              onChange={(event) => {
-                                const nextValue = (event.target as { value: string }).value;
-
-                                setDraft((currentDraft) => ({
-                                  ...currentDraft,
-                                  templateEntries: currentDraft.templateEntries.map(
-                                    (currentEntry, currentIndex) =>
-                                      currentIndex === index
-                                        ? {
-                                            ...currentEntry,
-                                            template: updateTemplateOptionalTimeField(
-                                              currentEntry.template,
-                                              "customWindowEndTime",
-                                              nextValue ? (nextValue as TimeString) : null,
-                                            ),
-                                          }
-                                        : currentEntry,
-                                  ),
-                                }));
-                              }}
-                              type="time"
-                              value={entry.template.customWindowEndTime ?? ""}
-                            />
                           </div>
                         </div>
-                      ) : null}
 
-                      <div className="df-grid">
-                        <div className="df-field">
-                          <label>Reschedule Behavior</label>
-                          <select
-                            aria-label="Reschedule Behavior"
-                            onChange={(event) => {
-                              const nextValue = (event.target as { value: string }).value;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            rescheduleBehavior:
-                                              nextValue as BlockTemplate["rescheduleBehavior"],
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            value={entry.template.rescheduleBehavior}
-                          >
-                            {rescheduleBehaviors.map((rescheduleBehavior) => (
-                              <option key={rescheduleBehavior} value={rescheduleBehavior}>
-                                {formatRescheduleBehaviorLabel(rescheduleBehavior)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <label className="df-checkbox">
-                          <input
-                            aria-label="Requires Resource"
-                            checked={entry.template.requiresResource}
-                            onChange={(event) => {
-                              const nextChecked = (event.target as { checked: boolean }).checked;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          template: {
-                                            ...currentEntry.template,
-                                            requiresResource: nextChecked,
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            type="checkbox"
-                          />
-                          Requires Resource
-                        </label>
-                      </div>
-
-                      <fieldset className="df-fieldset">
-                        <legend>Recurrence</legend>
-
-                        <div className="df-field">
-                          <label>Frequency</label>
-                          <select
-                            aria-label="Frequency"
-                            onChange={(event) => {
-                              const nextValue = (event.target as { value: string })
-                                .value as RecurrenceFrequency;
-
-                              setDraft((currentDraft) => ({
-                                ...currentDraft,
-                                templateEntries: currentDraft.templateEntries.map(
-                                  (currentEntry, currentIndex) =>
-                                    currentIndex === index
-                                      ? {
-                                          ...currentEntry,
-                                          recurrence: {
-                                            ...currentEntry.recurrence,
-                                            frequency: nextValue,
-                                            ...(nextValue === "specificWeekdays"
-                                              ? {
-                                                  weekdays: currentEntry.recurrence.weekdays ?? [
-                                                    "monday",
-                                                  ],
-                                                }
-                                              : {}),
-                                            ...(nextValue === "timesPerUserWeek"
-                                              ? {
-                                                  timesPerUserWeek:
-                                                    currentEntry.recurrence.timesPerUserWeek ?? 1,
-                                                }
-                                              : {}),
-                                          },
-                                        }
-                                      : currentEntry,
-                                ),
-                              }));
-                            }}
-                            value={entry.recurrence.frequency}
-                          >
-                            {recurrenceFrequencies.map((frequency) => (
-                              <option key={frequency} value={frequency}>
-                                {formatRecurrenceFrequencyLabel(frequency)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {entry.recurrence.frequency === "specificWeekdays" ? (
-                          <fieldset className="df-fieldset">
-                            <legend>Weekdays</legend>
-                            <div className="df-checkbox-grid">
-                              {weekdays.map((weekday) => (
-                                <label className="df-checkbox" key={weekday}>
-                                  <input
-                                    checked={entry.recurrence.weekdays?.includes(weekday) ?? false}
-                                    onChange={() => {
-                                      setDraft((currentDraft) => ({
-                                        ...currentDraft,
-                                        templateEntries: currentDraft.templateEntries.map(
-                                          (currentEntry, currentIndex) =>
-                                            currentIndex === index
-                                              ? {
-                                                  ...currentEntry,
-                                                  recurrence: normalizeRecurrence({
-                                                    ...currentEntry.recurrence,
-                                                    weekdays: toggleWeekday(
-                                                      currentEntry.recurrence.weekdays ?? [],
-                                                      weekday,
-                                                    ),
-                                                  }),
-                                                }
-                                              : currentEntry,
-                                        ),
-                                      }));
-                                    }}
-                                    type="checkbox"
-                                  />
-                                  {formatWeekdayLabel(weekday)}
-                                </label>
-                              ))}
-                            </div>
-                          </fieldset>
+                        {!entry.template.enabled ? (
+                          <p className="df-muted">Not included when generating the schedule.</p>
                         ) : null}
 
-                        {entry.recurrence.frequency === "timesPerUserWeek" ? (
+                        <div className="df-grid">
                           <div className="df-field">
-                            <label>Times Per User Week</label>
+                            <label>Title</label>
                             <input
-                              aria-label="Times Per User Week"
+                              aria-label="Title"
+                              onChange={(event) => {
+                                const nextValue = (event.target as { value: string }).value;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: {
+                                              ...currentEntry.template,
+                                              title: nextValue,
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              type="text"
+                              value={entry.template.title}
+                            />
+                          </div>
+
+                          <div className="df-field">
+                            <label>Category</label>
+                            <select
+                              aria-label="Category"
+                              onChange={(event) => {
+                                const nextValue = (event.target as { value: string }).value;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: {
+                                              ...currentEntry.template,
+                                              category: nextValue as BlockTemplate["category"],
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              value={entry.template.category}
+                            >
+                              {blockCategories.map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="df-field">
+                            <label>Placement Type</label>
+                            <select
+                              aria-label="Placement Type"
+                              onChange={(event) => {
+                                const nextValue = (event.target as { value: string }).value;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: {
+                                              ...currentEntry.template,
+                                              placementType:
+                                                nextValue as BlockTemplate["placementType"],
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              value={entry.template.placementType}
+                            >
+                              <option value="flexible">flexible</option>
+                              <option value="fixed">fixed</option>
+                            </select>
+                          </div>
+
+                          <div className="df-field">
+                            <div className="df-checkbox-card">
+                              <label className="df-checkbox-card-label">
+                                <input
+                                  aria-label="Requires Work Shift"
+                                  checked={entry.template.requiresWorkAnchor ?? false}
+                                  onChange={(event) => {
+                                    const nextChecked = (event.target as { checked: boolean })
+                                      .checked;
+
+                                    setDraft((currentDraft) => ({
+                                      ...currentDraft,
+                                      templateEntries: currentDraft.templateEntries.map(
+                                        (currentEntry, currentIndex) =>
+                                          currentIndex === index
+                                            ? {
+                                                ...currentEntry,
+                                                template: {
+                                                  ...currentEntry.template,
+                                                  requiresWorkAnchor: nextChecked,
+                                                },
+                                              }
+                                            : currentEntry,
+                                      ),
+                                    }));
+                                  }}
+                                  type="checkbox"
+                                />
+                                <span>Requires Work Shift</span>
+                              </label>
+                              <p className="df-support">
+                                Only schedule this activity on days that contain a work shift.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="df-field">
+                            <label>Duration Hours</label>
+                            <input
+                              aria-label="Duration Hours"
+                              min="0"
+                              onChange={(event) => {
+                                const nextValue = Number((event.target as { value: string }).value);
+                                const safeValue = Number.isFinite(nextValue)
+                                  ? Math.max(0, nextValue)
+                                  : 0;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) => {
+                                      if (currentIndex !== index) {
+                                        return currentEntry;
+                                      }
+
+                                      const currentMinutes =
+                                        currentEntry.template.durationMinutes % 60;
+
+                                      return {
+                                        ...currentEntry,
+                                        template: {
+                                          ...currentEntry.template,
+                                          durationMinutes: safeValue * 60 + currentMinutes,
+                                        },
+                                      };
+                                    },
+                                  ),
+                                }));
+                              }}
+                              type="number"
+                              value={Math.floor(entry.template.durationMinutes / 60)}
+                            />
+                          </div>
+
+                          <div className="df-field">
+                            <label>Duration Minutes</label>
+                            <input
+                              aria-label="Duration Minutes"
+                              max="59"
+                              min="0"
+                              onChange={(event) => {
+                                const nextValue = Number((event.target as { value: string }).value);
+                                const safeValue = Number.isFinite(nextValue)
+                                  ? Math.max(0, Math.min(59, nextValue))
+                                  : 0;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) => {
+                                      if (currentIndex !== index) {
+                                        return currentEntry;
+                                      }
+
+                                      const currentHours = Math.floor(
+                                        currentEntry.template.durationMinutes / 60,
+                                      );
+
+                                      return {
+                                        ...currentEntry,
+                                        template: {
+                                          ...currentEntry.template,
+                                          durationMinutes: currentHours * 60 + safeValue,
+                                        },
+                                      };
+                                    },
+                                  ),
+                                }));
+                              }}
+                              type="number"
+                              value={entry.template.durationMinutes % 60}
+                            />
+                          </div>
+
+                          <div className="df-field">
+                            <p className="df-support">
+                              Buffers reserve transition time around this block, such as travel,
+                              meals, showering, or winding down.
+                            </p>
+                          </div>
+
+                          <div className="df-field">
+                            <label>Buffer Before (minutes)</label>
+                            <input
+                              aria-label="Buffer Before (minutes)"
+                              min="0"
+                              onChange={(event) => {
+                                const rawValue = (event.target as { value: string }).value.trim();
+                                const nextValue =
+                                  rawValue === ""
+                                    ? undefined
+                                    : Math.max(0, Number.parseInt(rawValue, 10) || 0);
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: updateTemplateOptionalNumberField(
+                                              currentEntry.template,
+                                              "bufferBeforeMinutes",
+                                              nextValue,
+                                            ),
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              placeholder="0"
+                              type="number"
+                              value={entry.template.bufferBeforeMinutes ?? ""}
+                            />
+                          </div>
+
+                          <div className="df-field">
+                            <label>Buffer After (minutes)</label>
+                            <input
+                              aria-label="Buffer After (minutes)"
+                              min="0"
+                              onChange={(event) => {
+                                const rawValue = (event.target as { value: string }).value.trim();
+                                const nextValue =
+                                  rawValue === ""
+                                    ? undefined
+                                    : Math.max(0, Number.parseInt(rawValue, 10) || 0);
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: updateTemplateOptionalNumberField(
+                                              currentEntry.template,
+                                              "bufferAfterMinutes",
+                                              nextValue,
+                                            ),
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              placeholder="0"
+                              type="number"
+                              value={entry.template.bufferAfterMinutes ?? ""}
+                            />
+                          </div>
+
+                          <div className="df-field">
+                            <label>Priority</label>
+                            <select
+                              aria-label="Priority"
                               onChange={(event) => {
                                 const nextValue = Number((event.target as { value: string }).value);
 
@@ -2421,23 +2241,358 @@ export function SetupScreen({
                                       currentIndex === index
                                         ? {
                                             ...currentEntry,
-                                            recurrence: {
-                                              ...currentEntry.recurrence,
-                                              timesPerUserWeek: nextValue,
+                                            template: {
+                                              ...currentEntry.template,
+                                              priority: nextValue as BlockTemplate["priority"],
                                             },
                                           }
                                         : currentEntry,
                                   ),
                                 }));
                               }}
-                              type="number"
-                              value={entry.recurrence.timesPerUserWeek ?? 1}
-                            />
+                              value={entry.template.priority}
+                            >
+                              {[1, 2, 3, 4, 5].map((priority) => (
+                                <option key={priority} value={priority}>
+                                  {priority}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {entry.template.placementType === "flexible" ? (
+                            <>
+                              <div className="df-field">
+                                <label>Preferred Window</label>
+                                <select
+                                  aria-label="Preferred Window"
+                                  onChange={(event) => {
+                                    const nextValue = (event.target as { value: string }).value;
+
+                                    setDraft((currentDraft) => ({
+                                      ...currentDraft,
+                                      templateEntries: currentDraft.templateEntries.map(
+                                        (currentEntry, currentIndex) =>
+                                          currentIndex === index
+                                            ? {
+                                                ...currentEntry,
+                                                template: {
+                                                  ...currentEntry.template,
+                                                  preferredWindow:
+                                                    nextValue as BlockTemplate["preferredWindow"],
+                                                },
+                                              }
+                                            : currentEntry,
+                                      ),
+                                    }));
+                                  }}
+                                  value={entry.template.preferredWindow}
+                                >
+                                  {preferredWindows.map((preferredWindow) => (
+                                    <option key={preferredWindow} value={preferredWindow}>
+                                      {formatPreferredWindowLabel(preferredWindow)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </>
+                          ) : (
+                            <div
+                              className={
+                                focusedTemplateField?.templateId === entry.template.id &&
+                                focusedTemplateField.field === "fixedStartTime"
+                                  ? "df-field is-highlighted"
+                                  : "df-field"
+                              }
+                            >
+                              <label>Fixed Start Time</label>
+                              <input
+                                aria-label="Fixed Start Time"
+                                ref={(node) => {
+                                  if (node) {
+                                    fixedStartTimeInputRefs.current.set(entry.template.id, node);
+                                    return;
+                                  }
+
+                                  fixedStartTimeInputRefs.current.delete(entry.template.id);
+                                }}
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    templateEntries: currentDraft.templateEntries.map(
+                                      (currentEntry, currentIndex) =>
+                                        currentIndex === index
+                                          ? {
+                                              ...currentEntry,
+                                              template: updateTemplateOptionalTimeField(
+                                                currentEntry.template,
+                                                "fixedStartTime",
+                                                nextValue ? (nextValue as TimeString) : null,
+                                              ),
+                                            }
+                                          : currentEntry,
+                                    ),
+                                  }));
+                                }}
+                                type="time"
+                                value={entry.template.fixedStartTime ?? ""}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {entry.template.placementType === "flexible" &&
+                        entry.template.preferredWindow === "custom" ? (
+                          <div className="df-grid">
+                            <div className="df-field">
+                              <label>Custom Window Start</label>
+                              <input
+                                aria-label="Custom Window Start"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    templateEntries: currentDraft.templateEntries.map(
+                                      (currentEntry, currentIndex) =>
+                                        currentIndex === index
+                                          ? {
+                                              ...currentEntry,
+                                              template: updateTemplateOptionalTimeField(
+                                                currentEntry.template,
+                                                "customWindowStartTime",
+                                                nextValue ? (nextValue as TimeString) : null,
+                                              ),
+                                            }
+                                          : currentEntry,
+                                    ),
+                                  }));
+                                }}
+                                type="time"
+                                value={entry.template.customWindowStartTime ?? ""}
+                              />
+                            </div>
+                            <div className="df-field">
+                              <label>Custom Window End</label>
+                              <input
+                                aria-label="Custom Window End"
+                                onChange={(event) => {
+                                  const nextValue = (event.target as { value: string }).value;
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    templateEntries: currentDraft.templateEntries.map(
+                                      (currentEntry, currentIndex) =>
+                                        currentIndex === index
+                                          ? {
+                                              ...currentEntry,
+                                              template: updateTemplateOptionalTimeField(
+                                                currentEntry.template,
+                                                "customWindowEndTime",
+                                                nextValue ? (nextValue as TimeString) : null,
+                                              ),
+                                            }
+                                          : currentEntry,
+                                    ),
+                                  }));
+                                }}
+                                type="time"
+                                value={entry.template.customWindowEndTime ?? ""}
+                              />
+                            </div>
                           </div>
                         ) : null}
-                      </fieldset>
-                    </li>
-                  ))}
+
+                        <div className="df-grid">
+                          <div className="df-field">
+                            <label>Reschedule Behavior</label>
+                            <select
+                              aria-label="Reschedule Behavior"
+                              onChange={(event) => {
+                                const nextValue = (event.target as { value: string }).value;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: {
+                                              ...currentEntry.template,
+                                              rescheduleBehavior:
+                                                nextValue as BlockTemplate["rescheduleBehavior"],
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              value={entry.template.rescheduleBehavior}
+                            >
+                              {rescheduleBehaviors.map((rescheduleBehavior) => (
+                                <option key={rescheduleBehavior} value={rescheduleBehavior}>
+                                  {formatRescheduleBehaviorLabel(rescheduleBehavior)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <label className="df-checkbox">
+                            <input
+                              aria-label="Requires Resource"
+                              checked={entry.template.requiresResource}
+                              onChange={(event) => {
+                                const nextChecked = (event.target as { checked: boolean }).checked;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            template: {
+                                              ...currentEntry.template,
+                                              requiresResource: nextChecked,
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              type="checkbox"
+                            />
+                            Requires Resource
+                          </label>
+                        </div>
+
+                        <fieldset className="df-fieldset">
+                          <legend>Recurrence</legend>
+
+                          <div className="df-field">
+                            <label>Frequency</label>
+                            <select
+                              aria-label="Frequency"
+                              onChange={(event) => {
+                                const nextValue = (event.target as { value: string })
+                                  .value as RecurrenceFrequency;
+
+                                setDraft((currentDraft) => ({
+                                  ...currentDraft,
+                                  templateEntries: currentDraft.templateEntries.map(
+                                    (currentEntry, currentIndex) =>
+                                      currentIndex === index
+                                        ? {
+                                            ...currentEntry,
+                                            recurrence: {
+                                              ...currentEntry.recurrence,
+                                              frequency: nextValue,
+                                              ...(nextValue === "specificWeekdays"
+                                                ? {
+                                                    weekdays: currentEntry.recurrence.weekdays ?? [
+                                                      "monday",
+                                                    ],
+                                                  }
+                                                : {}),
+                                              ...(nextValue === "timesPerUserWeek"
+                                                ? {
+                                                    timesPerUserWeek:
+                                                      currentEntry.recurrence.timesPerUserWeek ?? 1,
+                                                  }
+                                                : {}),
+                                            },
+                                          }
+                                        : currentEntry,
+                                  ),
+                                }));
+                              }}
+                              value={entry.recurrence.frequency}
+                            >
+                              {recurrenceFrequencies.map((frequency) => (
+                                <option key={frequency} value={frequency}>
+                                  {formatRecurrenceFrequencyLabel(frequency)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {entry.recurrence.frequency === "specificWeekdays" ? (
+                            <fieldset className="df-fieldset">
+                              <legend>Weekdays</legend>
+                              <div className="df-checkbox-grid">
+                                {weekdays.map((weekday) => (
+                                  <label className="df-checkbox" key={weekday}>
+                                    <input
+                                      checked={
+                                        entry.recurrence.weekdays?.includes(weekday) ?? false
+                                      }
+                                      onChange={() => {
+                                        setDraft((currentDraft) => ({
+                                          ...currentDraft,
+                                          templateEntries: currentDraft.templateEntries.map(
+                                            (currentEntry, currentIndex) =>
+                                              currentIndex === index
+                                                ? {
+                                                    ...currentEntry,
+                                                    recurrence: normalizeRecurrence({
+                                                      ...currentEntry.recurrence,
+                                                      weekdays: toggleWeekday(
+                                                        currentEntry.recurrence.weekdays ?? [],
+                                                        weekday,
+                                                      ),
+                                                    }),
+                                                  }
+                                                : currentEntry,
+                                          ),
+                                        }));
+                                      }}
+                                      type="checkbox"
+                                    />
+                                    {formatWeekdayLabel(weekday)}
+                                  </label>
+                                ))}
+                              </div>
+                            </fieldset>
+                          ) : null}
+
+                          {entry.recurrence.frequency === "timesPerUserWeek" ? (
+                            <div className="df-field">
+                              <label>Times Per User Week</label>
+                              <input
+                                aria-label="Times Per User Week"
+                                onChange={(event) => {
+                                  const nextValue = Number(
+                                    (event.target as { value: string }).value,
+                                  );
+
+                                  setDraft((currentDraft) => ({
+                                    ...currentDraft,
+                                    templateEntries: currentDraft.templateEntries.map(
+                                      (currentEntry, currentIndex) =>
+                                        currentIndex === index
+                                          ? {
+                                              ...currentEntry,
+                                              recurrence: {
+                                                ...currentEntry.recurrence,
+                                                timesPerUserWeek: nextValue,
+                                              },
+                                            }
+                                          : currentEntry,
+                                    ),
+                                  }));
+                                }}
+                                type="number"
+                                value={entry.recurrence.timesPerUserWeek ?? 1}
+                              />
+                            </div>
+                          ) : null}
+                        </fieldset>
+                      </li>
+                    ),
+                  )}
                 </ul>
               )}
             </CollapsibleSetupSection>
@@ -2454,7 +2609,7 @@ type CollapsibleSetupSectionProps = {
   helperText: string;
   isOpen: boolean;
   onToggle: () => void;
-  children: ReactElement | ReactElement[];
+  children: React.ReactNode;
 };
 
 function CollapsibleSetupSection({
@@ -3132,4 +3287,32 @@ function createLocalDateString(date: Date): LocalDateString {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}` as LocalDateString;
+}
+
+function WorkItemDisclosure({
+  active,
+  initiallyOpen = false,
+  label,
+  children,
+}: {
+  active: boolean;
+  initiallyOpen?: boolean;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(initiallyOpen);
+  if (!active) return <>{children}</>;
+  return (
+    <div className="df-work-item">
+      <button
+        className="df-secondary-button"
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {open ? "Close" : "Edit"} {label}
+      </button>
+      {open && <div className="df-form-stack">{children}</div>}
+    </div>
+  );
 }

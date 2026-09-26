@@ -1,0 +1,45 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/GoalAcceptedPlanning.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/GoalAcceptedPlanning.test.tsx (16 tests | 1 failed) 2137ms
+   × keeps return focus pending until navigation has left and the inspector is mounted again 181ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/GoalAcceptedPlanning.test.tsx > keeps return focus pending until navigation has left and the inspector is mounted again
+Error: expect(element).toHaveFocus()
+
+Expected element with focus:
+  <button
+  class="df-secondary-button"
+  type="button"
+>
+  Review Schedule
+</button>
+Received element with focus:
+  <h3
+  id="_r_0_-heading"
+  tabindex="-1"
+>
+  Accepted planning and scheduled work
+</h3>
+ ❯ src/ui/tests/GoalAcceptedPlanning.test.tsx:79:18
+     77|   fireEvent.click(review);
+     78|   expect(p.onReview).toHaveBeenCalledTimes(1);
+     79|   expect(review).toHaveFocus();
+       |                  ^
+     80|   first.unmount();
+     81|   render(<GoalAcceptedPlanningSection {...p} />);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  19:37:53
+   Duration  4.43s (transform 1.64s, setup 0ms, import 1.56s, tests 2.14s, environment 613ms)
+

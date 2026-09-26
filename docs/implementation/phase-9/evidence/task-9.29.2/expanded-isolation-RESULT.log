@@ -1,0 +1,29 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --root code src/state/historicalPlanLifecycle.test.ts src/state/publicationReplacementIsolation.test.ts src/state/dayFrameAuthorityTransaction.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/publicationReplacementIsolation.test.ts (8 tests | 1 failed) 5516ms
+   × Structure and publication both exclude replacement; settling only one is insufficient 5009ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/publicationReplacementIsolation.test.ts > Structure and publication both exclude replacement; settling only one is insufficient
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/state/publicationReplacementIsolation.test.ts:215:1
+    213| });
+    214|
+    215| it("Structure and publication both exclude replacement; settling only …
+       | ^
+    216|   const db = createDayFrameDurableDb(); const owner = createHistorical…
+    217|   const store = await setup(owner, db);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 23 passed (24)
+   Start at  09:58:20
+   Duration  6.80s (transform 763ms, setup 0ms, import 900ms, tests 5.59s, environment 0ms)
+

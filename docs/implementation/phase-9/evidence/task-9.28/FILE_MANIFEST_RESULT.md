@@ -1,0 +1,65 @@
+# Task 9.28 file manifest RESULT
+
+Paths are repository-relative; pre-existing unchanged artifacts are excluded. The immutable task input already existed and remains unchanged.
+
+| Path                                                                                                | Change   | Purpose                                                                                       |
+| --------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `code/src/ui/DayFrameApp.tsx`                                                                       | Modified | Lazy wiring, public reads and independent Summary navigation                                  |
+| `code/src/ui/GoalActivitySummary.tsx`                                                               | Modified | Reuse Activity renderer with optional bounds/day links and Summary context                    |
+| `code/src/ui/GoalMeasurementSection.tsx`                                                            | Modified | Preserve existing Measurement draft/base/feedback                                             |
+| `code/src/ui/GoalProgressReportingSection.tsx`                                                      | Modified | Preserve existing Observation draft/record/revision/feedback                                  |
+| `code/src/ui/GoalProgressSummary.tsx`                                                               | Modified | Reuse formatted canonical Progress and controlled exact provenance                            |
+| `code/src/ui/GoalRecordedInspection.tsx`                                                            | Created  | Lazy read-only host: cutoff, inclusive period, protection, bounds and navigation              |
+| `code/src/ui/GoalSection.tsx`                                                                       | Modified | Inspector slot and retained existing command components                                       |
+| `code/src/ui/HistoricalIntelligenceSummary.tsx`                                                     | Modified | Preserve independent Summary selection, period, cutoff and handoff                            |
+| `code/src/ui/dayFrameUi.css`                                                                        | Modified | Scoped layout, practical targets, focus and associated error presentation                     |
+| `code/src/ui/goalAcceptedPlanningContext.ts`                                                        | Modified | Separate Activity navigation cell beside unchanged G2 navigation                              |
+| `code/src/ui/tests/GoalRecordedInspection.test.tsx`                                                 | Created  | 30 permanent inspection/semantic/reporting/navigation/restore cases                           |
+| `code/src/ui/tests/goalRecordedCanonicalFixture.ts`                                                 | Created  | Canonical base and validated historical publication fixture                                   |
+| `code/src/ui/useGoalPresentationState.ts`                                                           | Created  | Owner-scoped ephemeral context without domain or persistence logic                            |
+| `docs/implementation/phase-9/TASK_9.28_GOAL_RECORDED_PROGRESS_AND_ACTIVITY_INSPECTION_V1_RESULT.md` | Created  | Task 9.28 execution outcome, required evidence matrix and final determination                 |
+| `docs/implementation/phase-9/evidence/task-9.28/1280-import-RESULT.json`                            | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-activity-coverage-RESULT.png`                   | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/320-day-return-RESULT.png`                          | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/320-import-RESULT.json`                             | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-native-authored-export-RESULT.json`             | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-native-import-reload-RESULT.json`               | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-native-imported-RESULT.json`                    | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-native-reload-RESULT.json`                      | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/320-observation-form-RESULT.png`                    | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/320-progress-provenance-RESULT.png`                 | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/320-reflow-RESULT.png`                              | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/320-rejected-import-RESULT.png`                     | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/390-import-RESULT.json`                             | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/390-reduced-height-RESULT.png`                      | Created  | Representative narrow native screenshot (provenance, coverage, form, return, error or reflow) |
+| `docs/implementation/phase-9/evidence/task-9.28/768-import-RESULT.json`                             | Created  | Disposable native V14 export/import/reload authority evidence                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/COMMAND_MAP_RESULT.md`                              | Created  | Preimplementation focused current owner/query check                                           |
+| `docs/implementation/phase-9/evidence/task-9.28/FILE_MANIFEST_RESULT.md`                            | Created  | Every task-created/modified path with purpose                                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/REPRODUCTION_RESULT.md`                             | Created  | Exact commands, provenance, scope limits and failure resolutions                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-build-RESULT.log`                          | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-bundle-RESULT.log`                         | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-hashes-RESULT.json`                        | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-head-RESULT.txt`                           | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-status-RESULT.txt`                         | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/baseline-tests-RESULT.log`                          | Created  | Preimplementation HEAD/status/hash or test/build/bundle baseline                              |
+| `docs/implementation/phase-9/evidence/task-9.28/browser-RESULT.log`                                 | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/browser-driver-RESULT.mjs`                          | Created  | Native CDP production reporting/navigation/backup/mobile reproduction                         |
+| `docs/implementation/phase-9/evidence/task-9.28/browser-measurements-RESULT.json`                   | Created  | 51 native observations: DOM/focus/targets, canonical reporting and backup equality            |
+| `docs/implementation/phase-9/evidence/task-9.28/build-RESULT.log`                                   | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/bundle-RESULT.log`                                  | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/canonical-seed-RESULT.ts`                           | Created  | Disposable supporting native fixture and canonical query-only readback                        |
+| `docs/implementation/phase-9/evidence/task-9.28/diff-check-RESULT.log`                              | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/existing-tests-RESULT.log`                          | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/focused-tests-RESULT.log`                           | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/format-RESULT.log`                                  | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/governing-versions-RESULT.json`                     | Created  | Hashes of reviewed governing repository documents                                             |
+| `docs/implementation/phase-9/evidence/task-9.28/intermediate-full-tests-RESULT.log`                 | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/invalid-import-RESULT.json`                         | Created  | Intentionally malformed native import fixture                                                 |
+| `docs/implementation/phase-9/evidence/task-9.28/lint-RESULT.log`                                    | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/preservation-inventory-RESULT.json`                 | Created  | All baseline comparisons and task-file hashes; self hash excluded                             |
+| `docs/implementation/phase-9/evidence/task-9.28/report-debug-RESULT.log`                            | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/seed-build-RESULT.log`                              | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/seed-build-config-RESULT.mjs`                       | Created  | Separate non-product seed compilation configuration                                           |
+| `docs/implementation/phase-9/evidence/task-9.28/task-relative-RESULT.patch`                         | Created  | Thirteen source/test file changes isolated from prior dirty work                              |
+| `docs/implementation/phase-9/evidence/task-9.28/tests-RESULT.log`                                   | Created  | Material validation/native output or labeled intermediate diagnostic                          |
+| `docs/implementation/phase-9/evidence/task-9.28/typecheck-RESULT.log`                               | Created  | Material validation/native output or labeled intermediate diagnostic                          |

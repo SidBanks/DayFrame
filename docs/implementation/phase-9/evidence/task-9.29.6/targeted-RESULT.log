@@ -1,0 +1,2010 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceCommitFaults.test.ts src/state/planningScopeQuery.test.ts src/state/schedulePublication.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx src/ui/tests/PlanningReviewPanel.test.tsx src/ui/tests/scheduleReviewReadiness.test.ts src/ui/tests/plannerReviewPresentation.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+stderr | src/ui/tests/ScheduleReviewPanel.test.tsx > ScheduleReviewPanel > explains blockers and exposes governed existing actions
+An error occurred in the <ScheduleReviewPanel> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx (15 tests | 7 failed) 7520ms
+     × explains blockers and exposes governed existing actions 1009ms
+     × reports verificationFailedAfterCommit without falsely claiming unchanged history 1015ms
+     × reports commitStateUncertain without falsely claiming unchanged history 1021ms
+     × reports writeFailedBeforeCommit without falsely claiming unchanged history 1025ms
+   × explains contextReplaced without claiming durable publication 1016ms
+   × explains publicationBusy without claiming durable publication 1021ms
+   × explains pendingPublication without claiming durable publication 1020ms
+ ❯ src/state/publicationSourceCommitFaults.test.ts (6 tests | 1 failed) 1117ms
+   × publication protection boundary: knownAbort 100ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/publicationSourceCommitFaults.test.ts > publication protection boundary: knownAbort
+AssertionError: expected 'rejected' to be 'published' // Object.is equality
+
+Expected: "published"
+Received: "rejected"
+
+ ❯ src/state/publicationSourceCommitFaults.test.ts:200:28
+    198|   );
+    199|   expect(readiness.publicationReady).toBe(fault === "knownAbort");
+    200|   expect(published.status).toBe(
+       |                            ^
+    201|     fault === "knownAbort" ? "published" : "rejected",
+    202|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > ScheduleReviewPanel > explains blockers and exposes governed existing actions
+TestingLibraryElementError: Unable to find role="heading" and name "Not ready to publish"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div />[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div />[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:229:25
+    227|       />,
+    228|     );
+    229|     expect(await screen.findByRole("heading", { name: "Not ready to pu…
+       |                         ^
+    230|     fireEvent.click(screen.getByRole("button", { name: "Generate Previ…
+    231|     fireEvent.click(screen.getByRole("button", { name: "Resolve schedu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports verificationFailedAfterCommit without falsely claiming unchanged history
+TestingLibraryElementError: Unable to find an element with the text: /written, but verification failed/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:290:25
+    288|     );
+    289|     fireEvent.click(await screen.findByRole("button", { name: /^Publis…
+    290|     expect(await screen.findByText(message)).toBeVisible();
+       |                         ^
+    291|     expect(screen.queryByText(/without changing schedule history/)).no…
+    292|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports commitStateUncertain without falsely claiming unchanged history
+TestingLibraryElementError: Unable to find an element with the text: /History may have been saved/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:290:25
+    288|     );
+    289|     fireEvent.click(await screen.findByRole("button", { name: /^Publis…
+    290|     expect(await screen.findByText(message)).toBeVisible();
+       |                         ^
+    291|     expect(screen.queryByText(/without changing schedule history/)).no…
+    292|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > Task 9.9 truthful publication state > reports writeFailedBeforeCommit without falsely claiming unchanged history
+TestingLibraryElementError: Unable to find an element with the text: /No new plan was saved/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:290:25
+    288|     );
+    289|     fireEvent.click(await screen.findByRole("button", { name: /^Publis…
+    290|     expect(await screen.findByText(message)).toBeVisible();
+       |                         ^
+    291|     expect(screen.queryByText(/without changing schedule history/)).no…
+    292|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains contextReplaced without claiming durable publication
+TestingLibraryElementError: Unable to find an element with the text: /The schedule context changed/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:317:23
+    315|   );
+    316|   fireEvent.click(await screen.findByRole("button", { name: /Publish s…
+    317|   expect(await screen.findByText(new RegExp(message))).toBeVisible();
+       |                       ^
+    318| });
+    319|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains publicationBusy without claiming durable publication
+TestingLibraryElementError: Unable to find an element with the text: /Publication was not started/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:317:23
+    315|   );
+    316|   fireEvent.click(await screen.findByRole("button", { name: /Publish s…
+    317|   expect(await screen.findByText(new RegExp(message))).toBeVisible();
+       |                       ^
+    318| });
+    319|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  src/ui/tests/ScheduleReviewPanel.test.tsx > explains pendingPublication without claiming durable publication
+TestingLibraryElementError: Unable to find an element with the text: /not durably published/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-05[0m
+          [0m through [0m
+          [0m2026-09-06[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mAccepted awaiting realization[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m1[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mReady to publish[0m
+        [36m</h4>[39m
+        [36m<p>[39m
+          [0mThis period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-warning-message"[39m
+        [36m>[39m
+          [0m1 constructive Proposal is awaiting a decision.[0m
+        [36m</p>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-05–2026-09-06 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mConstructive Proposals[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-05[0m
+              [0m–[0m
+              [0m2026-09-06[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul />[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/tests/ScheduleReviewPanel.test.tsx:317:23
+    315|   );
+    316|   fireEvent.click(await screen.findByRole("button", { name: /Publish s…
+    317|   expect(await screen.findByText(new RegExp(message))).toBeVisible();
+       |                       ^
+    318| });
+    319|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ deriveScheduleReviewReadiness src/ui/scheduleReviewReadiness.ts:170:37
+    168|   if (!input.publicationRangeValid)
+    169|     attention.push(reason("publicationRangeInvalid", "The explicit Pub…
+    170|   if (input.model.proposals.records.length > 0)
+       |                                     ^
+    171|     attention.push({
+    172|       code: "proposalDecisionPending",
+ ❯ ScheduleReviewPanel src/ui/ScheduleReviewPanel.tsx:109:21
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:41
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:11
+
+This error originated in "src/ui/tests/ScheduleReviewPanel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "explains blockers and exposes governed existing actions". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  8 failed | 41 passed (49)
+     Errors  1 error
+   Start at  11:32:35
+   Duration  11.81s (transform 976ms, setup 0ms, import 1.34s, tests 8.80s, environment 949ms)
+

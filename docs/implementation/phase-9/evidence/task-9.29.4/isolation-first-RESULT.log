@@ -1,0 +1,41 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/acceptanceReplacementIsolation.test.ts src/state/proposalSurface.test.ts src/state/realizationSurface.test.ts src/state/goalStructurePlanningSafety.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/acceptanceReplacementIsolation.test.ts (6 tests | 3 failed) 1026ms
+   × automatic × clear/V14 excludes replacement before physical creation 544ms
+   × retry × clear/V14 excludes replacement before physical creation 155ms
+   × proposal × clear/V14 excludes replacement before physical creation 163ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/acceptanceReplacementIsolation.test.ts > automatic × clear/V14 excludes replacement before physical creation
+ FAIL  src/state/acceptanceReplacementIsolation.test.ts > retry × clear/V14 excludes replacement before physical creation
+ FAIL  src/state/acceptanceReplacementIsolation.test.ts > proposal × clear/V14 excludes replacement before physical creation
+AssertionError: expected { status: 'restoreBusy' } to match object { status: 'rejected' }
+
+- Expected
++ Received
+
+  {
+-   "status": "rejected",
++   "status": "restoreBusy",
+  }
+
+ ❯ src/state/acceptanceReplacementIsolation.test.ts:37:61
+     35|     expect(controller.begin()).toEqual({ status: "busy" });
+     36|     if (replacement === "clear") await expect(store.clearLocalData()).…
+     37|     else expect(await store.importBackupV14(backup.backup)).toMatchObj…
+       |                                                             ^
+     38|     expect(controller.getEpoch!()).toBe(epoch);
+     39|     release.resolve();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  3 failed | 33 passed (36)
+   Start at  08:16:50
+   Duration  8.48s (transform 1.62s, setup 0ms, import 1.62s, tests 5.37s, environment 997ms)
+

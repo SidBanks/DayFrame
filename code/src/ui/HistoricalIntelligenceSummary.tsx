@@ -1,3 +1,6 @@
+import type { GoalEditingContext } from "./goalEditingContext.js";
+import { useGoalPresentationState } from "./useGoalPresentationState.js";
+import { SleepHistorySection } from "./SleepHistorySection.js";
 import {
   useEffect,
   useRef,
@@ -39,7 +42,8 @@ export type HistoricalIntelligenceSummaryStore = Pick<
   | "listMeasurementDefinitionHistory"
   | "subscribeMeasurementDefinitions"
   | "subscribeProgressObservations"
->;
+> &
+  Partial<Pick<DayFrameStore, "querySleepHistory" | "recordSleepExecution">>;
 type Completion = Extract<HistoricalCompletionDistributionQueryResultV1, { status: "projected" }>;
 type Realization = Extract<HistoricalSchedulingRealizationQueryResultV1, { status: "projected" }>;
 type Results = {
@@ -65,22 +69,53 @@ export function HistoricalIntelligenceSummary({
   store,
   now = systemNow,
   onOpenPlanner,
+  context,
+  onInspectGoal,
 }: {
   store: HistoricalIntelligenceSummaryStore;
   now?: () => Date;
   onOpenPlanner?: () => void;
+  context?: GoalEditingContext;
+  onInspectGoal?: (id: string, range: { start: string; end: string }) => void;
 }): ReactElement {
   const initial = defaultWindow(now());
-  const [draftStart, setDraftStart] = useState<LocalDateString>(initial.start);
-  const [draftEnd, setDraftEnd] = useState<LocalDateString>(initial.end);
-  const [range, setRange] = useState(initial);
+  const [draftStart, setDraftStart] = useGoalPresentationState<LocalDateString>(
+    context,
+    store,
+    "summary:draftStart",
+    initial.start,
+  );
+  const [draftEnd, setDraftEnd] = useGoalPresentationState<LocalDateString>(
+    context,
+    store,
+    "summary:draftEnd",
+    initial.end,
+  );
+  const [range, setRange] = useGoalPresentationState(context, store, "summary:range", initial);
   const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [revision, setRevision] = useState(0);
-  const [evaluationAsOf, setEvaluationAsOf] = useState(() => now().toISOString());
-  const [selectedPlan, setSelectedPlan] = useState<SchedulingRealizationCategoryV1 | null>(null);
-  const [selectedOutcome, setSelectedOutcome] = useState<CompletionClassificationV1 | null>(null);
+  const [evaluationAsOf, setEvaluationAsOf] = useGoalPresentationState(
+    context,
+    store,
+    "summary:evaluationAsOf",
+    () => now().toISOString(),
+  );
+  const [selectedPlan, setSelectedPlan] =
+    useGoalPresentationState<SchedulingRealizationCategoryV1 | null>(
+      context,
+      store,
+      "summary:selectedPlan",
+      null,
+    );
+  const [selectedOutcome, setSelectedOutcome] =
+    useGoalPresentationState<CompletionClassificationV1 | null>(
+      context,
+      store,
+      "summary:selectedOutcome",
+      null,
+    );
   const request = useRef(0);
   const planDetail = useRef<HTMLDivElement>(null);
   const outcomeDetail = useRef<HTMLDivElement>(null);
@@ -104,8 +139,10 @@ export function HistoricalIntelligenceSummary({
     setLoading(true);
     setError(false);
     setResults(null);
-    setSelectedPlan(null);
-    setSelectedOutcome(null);
+    if (!context) {
+      setSelectedPlan(null);
+      setSelectedOutcome(null);
+    }
     const query: HistoricalCompletionDistributionQueryV1 = {
       policy: HISTORICAL_METRIC_POLICY_V1,
       startUserDayDate: range.start,
@@ -129,6 +166,9 @@ export function HistoricalIntelligenceSummary({
         }
       },
     );
+    return () => {
+      request.current++;
+    };
   }, [evaluationAsOf, range, revision, store]);
   useEffect(() => {
     if (selectedPlan && focusPlan.current) planDetail.current?.focus();
@@ -143,6 +183,8 @@ export function HistoricalIntelligenceSummary({
     if (draftStart <= draftEnd) {
       setEvaluationAsOf(now().toISOString());
       setRange({ start: draftStart, end: draftEnd });
+      setSelectedPlan(null);
+      setSelectedOutcome(null);
     }
   }
 
@@ -211,7 +253,20 @@ export function HistoricalIntelligenceSummary({
       {!loading && coverage ? (
         <div className="df-form-stack">
           <Coverage value={coverage} />
+          {store.querySleepHistory && store.recordSleepExecution ? (
+            <SleepHistorySection
+              store={{
+                querySleepHistory: store.querySleepHistory,
+                recordSleepExecution: store.recordSleepExecution,
+              }}
+              start={range.start}
+              end={range.end}
+              asOf={evaluationAsOf}
+            />
+          ) : null}
           <GoalActivitySummary
+            {...(onInspectGoal ? { onInspectGoal: (id: string) => onInspectGoal(id, range) } : {})}
+            {...(context ? { context } : {})}
             evaluationAsOf={evaluationAsOf}
             {...(onOpenPlanner ? { onOpenPlanner } : {})}
             range={range}
@@ -616,7 +671,9 @@ function exclusionCopy(reason: "excludedUnplaced" | "excludedOmitted" | "exclude
       ? "This occurrence was omitted from the effective historical plan."
       : "This occurrence was blocked from placement.";
 }
-function sourceLabel(value: "template" | "work" | "manualEvent" | "acceptedAllocation") {
+function sourceLabel(
+  value: "template" | "work" | "manualEvent" | "acceptedAllocation" | "sleepRequirement",
+) {
   return value === "manualEvent"
     ? "manual event"
     : value === "acceptedAllocation"

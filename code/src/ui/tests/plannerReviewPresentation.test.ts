@@ -1,24 +1,8 @@
+import { reviewModelFixture } from "../../state/reviewSourceTestFixtures.js";
 import { describe, expect, it } from "vitest";
 import { presentPlanningReview } from "../plannerReviewPresentation.js";
 
-function model(overrides: Record<string, unknown> = {}) {
-  return {
-    version: 1,
-    planningDataCoverage: "complete",
-    preview: { availability: "available", coverage: "covers", freshness: "current" },
-    publication: {
-      epistemicClass: "historical",
-      coverage: "none",
-      publishedUserDays: [],
-      missingUserDays: [],
-    },
-    derivedSchedule: [],
-    scheduledReality: [],
-    acceptedLiabilities: [],
-    proposals: [],
-    ...overrides,
-  } as never;
-}
+const model = reviewModelFixture;
 
 describe("Planner review presentation", () => {
   it("preserves Goal work, support, Buffer, accepted, and Proposal as separate semantic classes", () => {

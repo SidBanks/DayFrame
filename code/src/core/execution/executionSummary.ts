@@ -19,7 +19,10 @@ export type OutcomeCounts = {
   totalSubjects: number;
 };
 export type OutcomeSummary = OutcomeCounts & {
-  bySourceFamily: Record<ExecutionSnapshotFamily, OutcomeCounts>;
+  bySourceFamily: Record<
+    Exclude<ExecutionSnapshotFamily, "sleepRequirement" | "unplannedSleep">,
+    OutcomeCounts
+  >;
 };
 export type OutcomeSummaryResult =
   | { status: "available"; summary: OutcomeSummary }
@@ -52,6 +55,11 @@ export function deriveOutcomeSummary(input: {
   }
   const summary = emptySummary();
   for (const item of buildExecutionHistoryItems(input.records)) {
+    if (
+      item.snapshot.sourceFamily === "sleepRequirement" ||
+      item.snapshot.sourceFamily === "unplannedSleep"
+    )
+      continue;
     const date = item.snapshot.userDay.date;
     if (
       (input.startUserDayDate && date < input.startUserDayDate) ||

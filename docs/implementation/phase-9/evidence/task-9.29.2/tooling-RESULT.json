@@ -1,0 +1,19 @@
+{
+  "node": "v22.23.2",
+  "npm": "12.1.0",
+  "vitest": "4.1.5",
+  "vite": "8.0.10",
+  "typescript": "6.0.3",
+  "prettier": "3.8.3",
+  "eslint": "10.2.1",
+  "fake-indexeddb": "6.2.5",
+  "react": "19.2.5",
+  "jsdom": "29.1.1",
+  "nativeBrowser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/153.0.8010.52",
+    "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "jsVersion": "15.3.76.13"
+  }
+}

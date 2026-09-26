@@ -1,0 +1,38 @@
+import { expect, it } from "vitest";
+import { writeFileSync } from "node:fs";
+import { publicationFixture, at } from "../../../../../code/src/state/publicationSourceTestFixtures.js";
+import { createPlanDecisionAcceptanceCandidate } from "../../../../../code/src/core/decisions/createPlanDecisionAcceptanceCandidate.js";
+import { getReviewSources } from "../../../../../code/src/state/reviewSourceQualification.js";
+import { materializePlanPublication } from "../../../../../code/src/core/historicalPlan/materializePlanPublication.js";
+
+it("isolates accepted omission publication from the new Review UI", async () => {
+  const f = await publicationFixture();
+  f.store.setBlockTemplates([{id:"routine",userId:"u",title:"Routine",category:"maintenance",placementType:"flexible",customWindowStartTime:"14:15",customWindowEndTime:"15:15",durationMinutes:60,priority:2,preferredWindow:"custom",rescheduleBehavior:"askUser",requiresResource:false,externalResources:[],enabled:true,createdAt:at,updatedAt:at}]);
+  f.store.setBlockRecurrences([{id:"daily",blockTemplateId:"routine",frequency:"daily"}]);
+  f.generate();
+  const before = await f.store.queryPlanningReview(f.query);
+  expect(before.publication.materialization.status).toBe("eligible");
+  f.store.setManualEvents([{id:"appointment",title:"Fixed appointment",userDayDate:"2026-09-17",allDay:false,startTime:"14:30",endTime:"15:30",createdAt:at,updatedAt:at}]);
+  f.generate();
+  const original = f.store.getState().preview!;
+  const point = original.result.frictionPoints.find(p=>p.suggestedFixes.some(f=>f.action==="skipBlock"))!;
+  const fix = point.suggestedFixes.find(f=>f.action==="skipBlock")!;
+  const revised = f.store.applySuggestedFixToPreview({selectedFrictionPointId:point.id,selectedSuggestedFixId:fix.id,revisedAt:at}).preview!;
+  const mapped = createPlanDecisionAcceptanceCandidate({suggestedFix:fix,frictionPoint:point,originalPreview:original.result,revisedPreview:revised.result,authoredSetup:f.store.getState()});
+  if(mapped.status!=="supported")throw Error(JSON.stringify(mapped));
+  const accepted=f.store.acceptPlanDecision(mapped.candidate);
+  expect(accepted.status).toBe("accepted");
+  f.generate();
+  const review=await f.store.queryPlanningReview(f.query), snapshot=getReviewSources(review)!;
+  const materialized=materializePlanPublication({authoredSetup:snapshot.setup,preview:snapshot.state.preview,goals:snapshot.goals,sleepAuthority:snapshot.sleep,publicationRange:(await f.command()).publicationRange,providers:{now:()=>at}});
+  const published=await f.store.publishScheduleRange(await f.command());
+  const evidence={before:before.publication,accepted,preview:{stale:snapshot.state.preview!.isStale,revisedAt:snapshot.state.preview!.revisedAt,foundation:snapshot.state.preview!.result.foundation?.status,friction:snapshot.state.preview!.result.frictionPoints,decisions:snapshot.state.preview!.result.planDecisionResults},qualification:review.sourceQualification,publication:review.publication,materialized,published,counts:f.counts()};
+  writeFileSync(new URL('./correction-publication-repro-evidence-RESULT.json',import.meta.url),JSON.stringify(evidence,null,2));
+  console.log(JSON.stringify({materialized,published,counts:f.counts()}));
+  expect(review.queryState).toBe("current");
+  expect(snapshot.state.preview!.revisedAt).toBeUndefined();
+  expect(snapshot.state.preview!.result.frictionPoints.filter(p=>!p.ignored)).toHaveLength(0);
+  expect(materialized.status).toBe("inconsistentPlanContext");
+  expect(published.status).toBe("rejected");
+  expect(f.counts().transactions).toBe(0);
+});

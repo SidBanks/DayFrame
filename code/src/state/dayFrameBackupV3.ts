@@ -1,3 +1,4 @@
+import { validateSleepExecutionPublications } from "../core/sleep/sleepExecution.js";
 import { validateActiveV2, cloneActiveSetup, type DayFrameActiveV2 } from "./activeV2.js";
 import {
   validateDayFrameProfilesStorageV2,
@@ -15,7 +16,10 @@ import {
   clonePlanPublicationBatch,
   type PlanPublicationBatchV1,
 } from "../core/historicalPlan/historicalPlan.js";
-import { validatePlanPublicationBatch } from "../core/historicalPlan/historicalPlanValidation.js";
+import {
+  validateHistoricalPlanCollection,
+  validatePlanPublicationBatch,
+} from "../core/historicalPlan/historicalPlanValidation.js";
 import { semanticFingerprint } from "../infrastructure/restore/restoreStaging.js";
 import type { ActiveDayFrameAuthoredSetup, DayFrameSavedProfile } from "./types.js";
 import type { PlanDecisionV1 } from "../core/decisions/planDecision.js";
@@ -143,6 +147,11 @@ export function validateDayFrameBackupV3(value: unknown): DayFrameBackupV3 {
   const planDecisions = validatePlanDecisionData(data.planDecisions);
   const executionHistory = validateExecutionData(data.executionHistory);
   const historicalPlan = validateHistoricalData(data.historicalPlan);
+  if (!validateSleepExecutionPublications(executionHistory.records, historicalPlan.batches))
+    throw invalid(
+      "executionHistoryValidationFailure",
+      "Sleep execution references missing or inconsistent immutable publication evidence.",
+    );
   return {
     app: "DayFrame",
     surface: "backup",
@@ -272,6 +281,7 @@ function validateHistoricalData(value: unknown): HistoricalPlanV1BackupData {
       }
       batches.push(checked.batch);
     }
+    if (validateHistoricalPlanCollection(batches).status !== "valid") throw new Error();
     return {
       surfaceVersion: 1,
       batches: batches

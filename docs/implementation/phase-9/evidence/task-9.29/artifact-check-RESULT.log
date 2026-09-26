@@ -1,0 +1,4 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --check ../docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_RESULT.md ../docs/implementation/phase-9/evidence/task-9.29/COMMAND_MAP_RESULT.md ../docs/implementation/phase-9/evidence/task-9.29/REPRODUCTION_RESULT.md ../docs/implementation/phase-9/evidence/task-9.29/FILE_MANIFEST_RESULT.md ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-RESULT.test.ts ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-config-RESULT.mjs
+Checking formatting...
+All matched files use Prettier code style!

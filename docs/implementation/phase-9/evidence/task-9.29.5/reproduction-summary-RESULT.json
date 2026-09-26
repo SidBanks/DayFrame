@@ -1,0 +1,162 @@
+[
+  {
+    "case": "healthyUnrealized",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 0,
+    "publicationTransactions": 0,
+    "outcome": "accepted",
+    "reason": null,
+    "proposalIngress": {
+      "status": "accepted"
+    },
+    "blockers": [
+      "acceptedAllocationUnrealized"
+    ],
+    "ready": false,
+    "published": "rejected",
+    "rawAcceptedCount": 1,
+    "runtimeAcceptedCount": 1,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [
+      "acceptedAllocationUnrealized"
+    ],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  },
+  {
+    "case": "knownAbort",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 1,
+    "publicationTransactions": 1,
+    "outcome": "rejected",
+    "reason": "persistenceFailure",
+    "proposalIngress": {
+      "status": "accepted"
+    },
+    "blockers": [],
+    "ready": true,
+    "published": "published",
+    "rawAcceptedCount": 0,
+    "runtimeAcceptedCount": 0,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  },
+  {
+    "case": "lostAck",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 1,
+    "publicationTransactions": 1,
+    "outcome": "unconfirmed",
+    "reason": "commitStateUncertain",
+    "proposalIngress": {
+      "status": "protected",
+      "reason": "readFailure"
+    },
+    "blockers": [],
+    "ready": true,
+    "published": "published",
+    "rawAcceptedCount": 1,
+    "runtimeAcceptedCount": 0,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [
+      "acceptedAllocationUnrealized"
+    ],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  },
+  {
+    "case": "missingAck",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 1,
+    "publicationTransactions": 1,
+    "outcome": "unconfirmed",
+    "reason": "commitStateUncertain",
+    "proposalIngress": {
+      "status": "protected",
+      "reason": "readFailure"
+    },
+    "blockers": [],
+    "ready": true,
+    "published": "published",
+    "rawAcceptedCount": 1,
+    "runtimeAcceptedCount": 0,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [
+      "acceptedAllocationUnrealized"
+    ],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  },
+  {
+    "case": "realizationUncertain",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 0,
+    "publicationTransactions": 0,
+    "outcome": "accepted",
+    "reason": null,
+    "proposalIngress": {
+      "status": "accepted"
+    },
+    "blockers": [
+      "acceptedAllocationUnrealized",
+      "materializationFailure"
+    ],
+    "ready": false,
+    "published": "rejected",
+    "rawAcceptedCount": 1,
+    "runtimeAcceptedCount": 1,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  },
+  {
+    "case": "verification",
+    "acceptanceAttempts": 1,
+    "acceptanceTransactions": 1,
+    "publicationAttempts": 1,
+    "publicationTransactions": 1,
+    "outcome": "unconfirmed",
+    "reason": "verificationFailedAfterCommit",
+    "proposalIngress": {
+      "status": "protected",
+      "reason": "invalidAuthority"
+    },
+    "blockers": [],
+    "ready": true,
+    "published": "published",
+    "rawAcceptedCount": 1,
+    "runtimeAcceptedCount": 0,
+    "rawAcceptedEqualsReopened": true,
+    "historyEqualsReopened": true,
+    "rawProposalPreserved": true,
+    "initialHistoryCount": 0,
+    "restartedBlockers": [
+      "acceptedAllocationUnrealized"
+    ],
+    "acceptanceReceiptCurrent": true,
+    "publicationReceiptCurrent": true
+  }
+]

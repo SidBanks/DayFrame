@@ -1,6 +1,12 @@
+import {
+  hasSleepPublicationSeamConflict,
+  sleepPhysicalIntervalsOverlap,
+} from "../sleep/sleepPublicationSeams.js";
+import { isPublishedSleepSnapshot } from "../sleep/publishedSleep.js";
+import { validateDurableOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
 import type { BlockCategory } from "../blocks/types.js";
 import { isGoalId } from "../goals/goal.js";
-import { validateDurableOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
+import { validateScheduledOccurrenceReference } from "../occurrences/durableOccurrenceReference.js";
 import {
   HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION,
@@ -112,6 +118,18 @@ export function validatePlanPublicationBatch(value: unknown): PlanPublicationBat
       if (Array.isArray(value.days[index].occurrences))
         for (const occurrence of value.days[index].occurrences) {
           if (!record(occurrence)) continue;
+          if (
+            isPublishedSleepSnapshot(occurrence) &&
+            (occurrence.sleep.publicationBatchId !== value.id ||
+              occurrence.sleep.publicationRange.startUserDayDate !== start ||
+              occurrence.sleep.publicationRange.endUserDayDate !== end)
+          )
+            push(
+              issues,
+              "invalidOccurrence",
+              `batch.days[${index}].occurrences`,
+              "Sleep publication context mismatch",
+            );
           const checked = validateDurableOccurrenceReference(occurrence.reference);
           if (checked.status !== "valid") continue;
           const key = durableReferenceKey(checked.reference);
@@ -135,6 +153,18 @@ export function validatePlanPublicationBatch(value: unknown): PlanPublicationBat
     for (const occurrence of day.occurrences)
       occurrence.goals?.sort((a, b) => a.goalId.localeCompare(b.goalId));
   }
+  const snapshots = batch.days.flatMap((day) => day.occurrences);
+  for (let left = 0; left < snapshots.length; left++)
+    for (let right = left + 1; right < snapshots.length; right++)
+      if (
+        (snapshots[left]!.version === 4 || snapshots[right]!.version === 4) &&
+        sleepPhysicalIntervalsOverlap(snapshots[left]!, snapshots[right]!)
+      )
+        return invalid(
+          "invalidOccurrence",
+          "batch.days",
+          "Published Sleep physical protection overlaps another occurrence",
+        );
   return { status: "valid", batch };
 }
 
@@ -175,6 +205,10 @@ export function validateHistoricalPlanCollection(
           push(issues, "ambiguousPublishedAtTie", `batches[${right}]`, day.userDayDate);
         }
     }
+  const ordered = [...batches].sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
+  for (let index = 0; index < ordered.length; index++)
+    if (hasSleepPublicationSeamConflict(ordered[index]!, ordered.slice(0, index)))
+      push(issues, "invalidOccurrence", "batches", "Conflicting Sleep publication seam");
   return issues.length ? { status: "invalid", issues } : { status: "valid", batches };
 }
 
@@ -190,11 +224,12 @@ function validateDay(value: unknown, path: string): HistoricalPlanValidationIssu
       "weekStartsOn",
       "utcOffsetMinutes",
       "occurrences",
+      ...(value.version === 2 ? ["sleepCoverage"] : []),
     ],
     path,
     issues,
   );
-  if (value.version !== HISTORICAL_PLAN_DAY_PUBLICATION_VERSION)
+  if (value.version !== HISTORICAL_PLAN_DAY_PUBLICATION_VERSION && value.version !== 2)
     push(issues, "unsupportedVersion", `${path}.version`);
   if (
     !isLocalDate(value.userDayDate) ||
@@ -210,10 +245,21 @@ function validateDay(value: unknown, path: string): HistoricalPlanValidationIssu
     push(issues, "invalidOccurrence", `${path}.occurrences`);
     return issues;
   }
+  if (
+    value.version === 2 &&
+    !["notConfigured", "notApplicable", "satisfied"].includes(String(value.sleepCoverage))
+  )
+    push(issues, "invalidDayContext", path);
   const references = new Set<string>();
   value.occurrences.forEach((snapshot, index) => {
     const snapshotPath = `${path}.occurrences[${index}]`;
     validateSnapshot(snapshot, snapshotPath, value.userDayDate, issues);
+    if (
+      record(snapshot) &&
+      snapshot.version === 4 &&
+      (value.version !== 2 || value.sleepCoverage !== "satisfied")
+    )
+      push(issues, "invalidDayContext", snapshotPath);
     if (!record(snapshot)) return;
     const checked = validateDurableOccurrenceReference(snapshot.reference);
     if (checked.status !== "valid") return;
@@ -232,6 +278,11 @@ function validateSnapshot(
 ): void {
   if (!record(value)) {
     push(issues, "invalidOccurrence", path);
+    return;
+  }
+  if (value.version === 4) {
+    if (!isPublishedSleepSnapshot(value) || value.reference.coordinate.userDayDate !== day)
+      push(issues, "invalidOccurrence", path);
     return;
   }
   const isV1 = value.version === HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_VERSION;
@@ -291,7 +342,7 @@ function validateSnapshot(
     )
       push(issues, "invalidOccurrence", `${path}.composition`);
   }
-  const reference = validateDurableOccurrenceReference(value.reference);
+  const reference = validateScheduledOccurrenceReference(value.reference);
   if (reference.status !== "valid") push(issues, "invalidOccurrence", `${path}.reference`);
   else {
     if (reference.reference.sourceKind !== value.sourceFamily)

@@ -47,6 +47,7 @@ export function createAllocationSurface(options: {
       startUserDayDate: LocalDateString;
       endUserDayDateExclusive: LocalDateString;
       evaluationCutoff: string;
+      comparisonCutoff?: string;
     }) => {
       const capacityResult = await options.capacity.queryCapacity(query);
       if (capacityResult.status !== "derived") return capacityResult;
@@ -63,12 +64,18 @@ export function createAllocationSurface(options: {
           .sort((a, b) => a.id.localeCompare(b.id));
       const inputs: CompetingDemandInputV1[] = [];
       for (const demand of demands) {
-        const projection = await options.planning.projectGoalDemand(demand.id),
+        const projection = await options.planning.projectGoalDemand(
+            demand.id,
+            undefined,
+            query.evaluationCutoff,
+          ),
           feasibility =
             projection.status === "projected"
               ? await options.capacity.evaluateGoalDemandFeasibility({
                   demandId: demand.id,
                   capacity: capacityResult.capacity,
+                  evaluationInstant: query.evaluationCutoff,
+                  projection: projection.projection,
                 })
               : undefined;
         if (projection.status !== "projected" || feasibility?.status !== "evaluated") continue;
@@ -84,7 +91,7 @@ export function createAllocationSurface(options: {
         competition = deriveCompetingDemandSets({
           capacity: capacityResult.capacity,
           demands: inputs,
-          evaluationCutoff: query.evaluationCutoff,
+          evaluationCutoff: query.comparisonCutoff ?? query.evaluationCutoff,
         }),
         { allocateAllCompetitionSets } = await import("../core/planning/allocation.js");
       return {

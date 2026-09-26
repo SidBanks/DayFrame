@@ -1,3 +1,5 @@
+import { useGoalPresentationState } from "./useGoalPresentationState.js";
+import type { GoalEditingContext } from "./goalEditingContext.js";
 import { useEffect, useId, useRef, useState, type ReactElement, type RefObject } from "react";
 import {
   MANUAL_QUANTITY_TARGET_POLICY_V1,
@@ -37,18 +39,55 @@ const labels: Record<MeasurementUnitId, string> = {
 export function GoalMeasurementSection({
   goal,
   store,
+  context,
 }: {
   goal: GoalV1;
   store: Store;
+  context?: GoalEditingContext;
 }): ReactElement {
   const [history, setHistory] = useState(() => store.listMeasurementDefinitionHistory(goal.id));
-  const [mode, setMode] = useState<Mode>(null);
-  const [draft, setDraft] = useState<Draft>(blank);
-  const [expected, setExpected] = useState<number | null>(null);
-  const [confirmStop, setConfirmStop] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [targetError, setTargetError] = useState("");
+  const [mode, setMode] = useGoalPresentationState<Mode>(
+    context,
+    store,
+    `measurement:${goal.id}:mode`,
+    null,
+  );
+  const [draft, setDraft] = useGoalPresentationState<Draft>(
+    context,
+    store,
+    `measurement:${goal.id}:draft`,
+    blank,
+  );
+  const [expected, setExpected] = useGoalPresentationState<number | null>(
+    context,
+    store,
+    `measurement:${goal.id}:expected`,
+    null,
+  );
+  const [confirmStop, setConfirmStop] = useGoalPresentationState(
+    context,
+    store,
+    `measurement:${goal.id}:confirmStop`,
+    false,
+  );
+  const [error, setError] = useGoalPresentationState(
+    context,
+    store,
+    `measurement:${goal.id}:error`,
+    "",
+  );
+  const [message, setMessage] = useGoalPresentationState(
+    context,
+    store,
+    `measurement:${goal.id}:message`,
+    "",
+  );
+  const [targetError, setTargetError] = useGoalPresentationState(
+    context,
+    store,
+    `measurement:${goal.id}:targetError`,
+    "",
+  );
   const targetRef = useRef<HTMLInputElement>(null),
     headingRef = useRef<HTMLHeadingElement>(null),
     openerRef = useRef<HTMLButtonElement | null>(null),
@@ -59,12 +98,6 @@ export function GoalMeasurementSection({
     durability = store.getMeasurementDefinitionDurabilityStatus();
   useEffect(() => {
     setHistory(store.listMeasurementDefinitionHistory(goal.id));
-    setMode(null);
-    setDraft(blank);
-    setExpected(null);
-    setConfirmStop(false);
-    setError("");
-    setMessage("");
   }, [goal.id, store]);
   useEffect(
     () =>

@@ -1,0 +1,335 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/ui/tests/ReviewSourceQualification.test.tsx src/ui/tests/ScheduleReviewPanel.test.tsx src/ui/tests/plannerReviewPresentation.test.ts src/ui/tests/scheduleReviewReadiness.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ReviewSourceQualification.test.tsx (3 tests | 1 failed) 2321ms
+   × real protected authority invalidates Ready synchronously and shares source/reason with the public command 1524ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ReviewSourceQualification.test.tsx > real protected authority invalidates Ready synchronously and shares source/reason with the public command
+TestingLibraryElementError: Found multiple elements with the role "button" and name "Accept preferred option"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mdisabled[39m=[32m""[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mdisabled[39m=[32m""[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept preferred option[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<input[39m
+      [33maria-label[39m=[32m"Independent draft"[39m
+      [33mvalue[39m=[32m"Retained evidence draft"[39m
+    [36m/>[39m
+    [36m<section[39m
+      [33maria-labelledby[39m=[32m"review-readiness-heading"[39m
+      [33mclass[39m=[32m"df-panel df-schedule-review-summary"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-header"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+        [36m>[39m
+          [0mReview workflow[0m
+        [36m</p>[39m
+        [36m<h3[39m
+          [33mid[39m=[32m"review-readiness-heading"[39m
+        [36m>[39m
+          [0mReview readiness[0m
+        [36m</h3>[39m
+        [36m<p>[39m
+          [0m2026-09-17[0m
+          [0m through [0m
+          [0m2026-09-18[0m
+          [0m (exclusive)[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<dl[39m
+        [33mclass[39m=[32m"df-summary-grid"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPlanning data[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcomplete[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview coverage[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcovers[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mPreview freshness[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mcurrent[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mSchedule conflicts[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0m0[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mReadable accepted claims[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mUnknown total; readable claims shown below[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+        [36m<div>[39m
+          [36m<dt>[39m
+            [0mProposals[0m
+          [36m</dt>[39m
+          [36m<dd>[39m
+            [0mUnknown total[0m
+          [36m</dd>[39m
+        [36m</div>[39m
+      [36m</dl>[39m
+      [36m<div[39m
+        [33maria-live[39m=[32m"polite"[39m
+      [36m>[39m
+        [36m<h4>[39m
+          [0mNot ready to publish[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [0mAccepted proposal authority has an unconfirmed commit (proposal/commitUnconfirmed). Review and publication require complete qualified sources; readable records remain available for inspection.[0m
+          [36m</li>[39m
+          [36m<li>[39m
+            [0mThis schedule cannot be saved as a published plan. Refresh and review the schedule.[0m
+          [36m</li>[39m
+        [36m</ul>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"df-support"[39m
+        [36m>[39m
+          [0mNo publication exists for this period.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-screen-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRefresh Preview[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"df-action-button"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPublish schedule: 2026-09-17–2026-09-18 (exclusive)[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<section>[39m
+        [36m<h4>[39m
+          [0mReadable prior Proposal records[0m
+        [36m</h4>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"df-plain-list"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-17[0m
+              [0m–[0m
+              [0m2026-09-18[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m2[0m
+              [0m bounded option[0m
+              [0ms[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul>[39m
+              [36m<li>[39m
+                [0mGoal[0m
+                [0m effort:[0m
+                [0m [0m
+                [0m1h[0m
+                [0m; unallocated:[0m
+                [0m [0m
+                [0m0m[0m
+                [0m.[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mGoal work[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m1:00 PM[0m
+                [0m–[0m
+                [0m2:00 PM[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mSupport activity[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m2:00 PM[0m
+                [0m–[0m
+                [0m2:30 PM[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mProtected Buffer (not an activity)[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m2:30 PM[0m
+                [0m–[0m
+                [0m2:45 PM[0m
+              [36m</li>[39m
+            [36m</ul>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"df-list-card"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mProposal for [0m
+              [0m2026-09-17[0m
+              [0m–[0m
+              [0m2026-09-18[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m bounded option[0m
+              [0m. A Proposal does not own schedule time.[0m
+            [36m</span>[39m
+            [36m<ul>[39m
+              [36m<li>[39m
+                [0mGoal[0m
+                [0m effort:[0m
+                [0m [0m
+                [0m1h[0m
+                [0m; unallocated:[0m
+                [0m [0m
+                [0m0m[0m
+                [0m.[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mGoal work[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m2:00 AM[0m
+                [0m–[0m
+                [0m3:00 AM[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mSupport activity[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m3:00 AM[0m
+                [0m–[0m
+                [0m3:30 AM[0m
+              [36m</li>[39m
+              [36m<li>[39m
+                [0mProtected Buffer (not an activity)[0m
+                [0m: [0m
+                [0m2026-09-17[0m
+                [0m,[0m
+                [0m [0m
+                [0m3:30 AM[0m
+                [0m–[0m
+                [0m3:45 AM[0m
+              [36m</li>[39m
+            [36m</ul>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"df-screen-actions"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mAccept preferred option[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mReject Proposal[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</section>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/tests/ReviewSourceQualification.test.tsx:57:17
+     55|   expect(await screen.findByText(/proposal\/commitUnconfirmed/)).toBeV…
+     56|   expect(screen.queryByText(/constructive Proposal.*awaiting a decisio…
+     57|   expect(screen.getByRole("button", { name: "Accept preferred option" …
+       |                 ^
+     58|   expect(screen.getByLabelText("Independent draft")).toHaveValue("Reta…
+     59|   const model = await f.store.queryPlanningReview(f.query),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 24 passed (25)
+   Start at  12:18:17
+   Duration  10.54s (transform 2.42s, setup 0ms, import 2.92s, tests 3.49s, environment 3.17s)
+

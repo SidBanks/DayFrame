@@ -1,0 +1,12 @@
+
+> dayframe@0.1.0 typecheck
+> tsc --noEmit
+
+src/ui/ReviewConflicts.tsx(60,150): error TS2339: Property 'coordinate' does not exist on type 'DurableOccurrenceReference'.
+  Property 'coordinate' does not exist on type 'DurableManualEventOccurrenceReference'.
+src/ui/ReviewTrial.tsx(24,41): error TS2339: Property 'coordinate' does not exist on type 'DurableOccurrenceReference'.
+  Property 'coordinate' does not exist on type 'DurableManualEventOccurrenceReference'.
+src/ui/ReviewTrial.tsx(38,157): error TS2339: Property 'requirement' does not exist on type 'DurableOccurrenceReference'.
+  Property 'requirement' does not exist on type 'DurableTemplateOccurrenceReference'.
+src/ui/ReviewTrial.tsx(38,198): error TS2339: Property 'requirement' does not exist on type 'DurableOccurrenceReference'.
+  Property 'requirement' does not exist on type 'DurableTemplateOccurrenceReference'.

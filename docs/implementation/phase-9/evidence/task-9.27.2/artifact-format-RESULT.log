@@ -1,0 +1,4 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --check ../docs/adr/ADR_GOAL_STRUCTURE_TEMPORAL_QUALIFICATION_AND_OWNER_SAFETY_V1_RESULT.md ../docs/implementation/phase-9/TASK_9.27.2_GOAL_STRUCTURE_CANONICAL_OWNER_REPAIR_V1_RESULT.md ../docs/implementation/phase-9/evidence/task-9.27.2/REPRODUCTION_RESULT.md ../docs/implementation/phase-9/evidence/task-9.27.2/browser-driver-RESULT.mjs ../docs/implementation/phase-9/evidence/task-9.27.2/canonical-seed-RESULT.ts ../docs/implementation/phase-9/evidence/task-9.27.2/seed-build-config-RESULT.mjs
+Checking formatting...
+All matched files use Prettier code style!

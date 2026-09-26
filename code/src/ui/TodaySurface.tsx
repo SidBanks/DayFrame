@@ -11,7 +11,8 @@ import type { TodayQueryResult } from "../state/todayQuery.js";
 export type TodayReportingStore = Pick<
   DayFrameStore,
   "recordExecution" | "correctExecutionRecord" | "retractExecutionRecord"
->;
+> &
+  Partial<Pick<DayFrameStore, "recordSleepExecution">>;
 
 export type TodaySurfaceProps = {
   now: () => Date;
@@ -290,8 +291,28 @@ function OccurrenceSection({
               </span>
             ) : null}
             <strong>{item.occurrence.title}</strong>
+            {item.occurrence.version === 4 ? (
+              <p>
+                Owner day {item.occurrence.sleep.occurrence.ownerDay}. Sleep{" "}
+                {item.occurrence.sleep.occurrence.durationMinutes} minutes; protection{" "}
+                {item.occurrence.sleep.occurrence.bufferBeforeMinutes} minutes before and{" "}
+                {item.occurrence.sleep.occurrence.bufferAfterMinutes} minutes after.{" "}
+                {item.occurrence.sleep.acceptedPlacement
+                  ? "Accepted placement."
+                  : "Published derived placement."}
+              </p>
+            ) : null}
             <span className="df-support">{formatCategory(item.occurrence.category)}</span>
             <span className="df-today-outcome">{formatOutcome(item.execution)}</span>
+            {item.occurrence.version === 4 &&
+            item.execution.coverage === "available" &&
+            item.execution.status !== "notReported" &&
+            item.execution.record.actualTime ? (
+              <p>
+                Actual Sleep: {item.execution.record.actualTime.occurredAt};{" "}
+                {item.execution.record.actualTime.durationMinutes} elapsed minutes.
+              </p>
+            ) : null}
             {item.execution.coverage === "available" ? (
               <TodayOutcomeControl
                 item={item}
@@ -323,6 +344,9 @@ function TodayOutcomeControl({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [actualStart, setActualStart] = useState("");
+  const [actualMinutes, setActualMinutes] = useState("");
+  const [actualOffset, setActualOffset] = useState("");
   const actionRef = useRef<HTMLButtonElement | null>(null);
   const mounted = useRef(true);
   useEffect(() => {
@@ -337,12 +361,52 @@ function TodayOutcomeControl({
       ? execution.record
       : undefined;
 
+  const retracted =
+    execution.coverage === "available" && execution.status === "notReported"
+      ? execution.retracted
+      : undefined;
+
   async function report(outcome: ExecutionReportedOutcome) {
     if (pending) return;
     setPending(true);
     setError("");
     await Promise.resolve();
     try {
+      if (item.occurrence.version === 4) {
+        if (!store.recordSleepExecution) {
+          setError("Sleep reporting is unavailable.");
+          return;
+        }
+        const actualTime =
+          outcome === "skipped"
+            ? undefined
+            : {
+                occurredAt: new Date(actualStart + actualOffset).toISOString(),
+                durationMinutes: Number(actualMinutes),
+              };
+        const result = await store.recordSleepExecution(
+          reported || retracted
+            ? {
+                kind: "correct",
+                subjectId: reported?.subjectId ?? retracted!.subjectId,
+                currentRecordId: reported?.id ?? retracted!.currentRecordId,
+                outcome,
+                ...(actualTime ? { actualTime } : {}),
+              }
+            : {
+                kind: "reportPublished",
+                publicationBatchId: item.occurrence.sleep.publicationBatchId,
+                snapshotId: item.occurrence.sleep.snapshotId,
+                outcome,
+                ...(actualTime ? { actualTime } : {}),
+              },
+        );
+        if (result.status === "accepted") {
+          setExpanded(false);
+          if (mounted.current) onWriteAccepted(key);
+        } else setError(writeError(result.reason));
+        return;
+      }
       const input = reported
         ? ({
             snapshot: structuredClone(reported.snapshot),
@@ -387,7 +451,14 @@ function TodayOutcomeControl({
     setError("");
     await Promise.resolve();
     try {
-      const result = store.retractExecutionRecord(reported.subjectId, reported.id);
+      const result =
+        item.occurrence.version === 4 && store.recordSleepExecution
+          ? await store.recordSleepExecution({
+              kind: "retract",
+              subjectId: reported.subjectId,
+              currentRecordId: reported.id,
+            })
+          : store.retractExecutionRecord(reported.subjectId, reported.id);
       if (result.status === "accepted") {
         setConfirmRemove(false);
         if (mounted.current) onWriteAccepted(key);
@@ -441,6 +512,41 @@ function TodayOutcomeControl({
           className="df-today-outcome-choices"
           role="group"
         >
+          {item.occurrence.version === 4 ? (
+            <>
+              <p>
+                Enter actual Sleep independently of the planned interval. Leave these fields empty
+                when skipped.
+              </p>
+              <label>
+                Actual Sleep start
+                <input
+                  type="datetime-local"
+                  value={actualStart}
+                  onChange={(event) => setActualStart(event.target.value)}
+                />
+              </label>
+              <label>
+                UTC offset at actual start (optional)
+                <input
+                  value={actualOffset}
+                  placeholder="-06:00"
+                  pattern="[+-][0-9]{2}:[0-9]{2}"
+                  onChange={(event) => setActualOffset(event.target.value)}
+                />
+              </label>
+              <label>
+                Actual elapsed minutes
+                <input
+                  type="number"
+                  min="1"
+                  max="1440"
+                  value={actualMinutes}
+                  onChange={(event) => setActualMinutes(event.target.value)}
+                />
+              </label>
+            </>
+          ) : null}
           {(["completed", "partial", "skipped"] as const).map((outcome) => (
             <button
               className="df-secondary-button"
@@ -505,8 +611,10 @@ function formatOutcome(execution: TodayOccurrence["execution"]) {
   return execution.coverage !== "available"
     ? "Outcome unavailable"
     : execution.status === "notReported"
-      ? "Not reported"
-      : `Reported ${execution.status}`;
+      ? execution.retracted
+        ? "Report retracted; actual unknown"
+        : "Not reported"
+      : `${execution.corrected ? "Corrected" : "Reported"} ${execution.status}`;
 }
 function formatUserDayDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -543,6 +651,8 @@ function capitalize(value: string) {
   return value[0]!.toUpperCase() + value.slice(1);
 }
 function referenceLabel(reference: TodayOccurrence["occurrence"]["reference"]) {
+  if (reference.sourceKind === "sleepRequirement")
+    return `sleep-${reference.requirement.id}-${reference.requirement.incarnationId}-${reference.coordinate.userDayDate}`;
   if (reference.sourceKind === "acceptedAllocation")
     return `${reference.sourceKind}-${reference.realizationId}-${reference.acceptedClaimId}-${reference.scheduledSubjectId}`;
   if (reference.sourceKind === "manualEvent")

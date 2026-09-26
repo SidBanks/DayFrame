@@ -62,6 +62,8 @@ export function createDayFrameBackupV2(
   authoredSetup: ActiveDayFrameAuthoredSetup,
   exportedAt: string,
 ): DayFrameBackupV2 {
+  if (authoredSetup.sleepRequirements?.length)
+    throw new RangeError("First-Class Sleep requires Backup V13.");
   return {
     app: "DayFrame",
     surface: "backup",
@@ -75,6 +77,8 @@ export function createDayFrameBackupV1(
   authoredSetup: DayFrameAuthoredPattern,
   exportedAt: string,
 ): DayFrameBackupV1 {
+  if (authoredSetup.sleepRequirements?.length)
+    throw new RangeError("Sleep authority requires Backup V13.");
   return {
     app: "DayFrame",
     version: 1,
@@ -146,6 +150,11 @@ export function validateDayFrameBackupV1(value: unknown): DayFrameBackupV1 {
 
   let authoredSetup: DayFrameAuthoredPattern;
   try {
+    if (
+      value.data.sleepRequirements !== undefined &&
+      (!Array.isArray(value.data.sleepRequirements) || value.data.sleepRequirements.length)
+    )
+      throw new RangeError("Sleep authority requires Backup V13.");
     authoredSetup = normalizeAuthoredSetup(value.data);
   } catch {
     throw new DayFrameBackupValidationError(
@@ -180,6 +189,11 @@ export function validateDayFrameBackupV2(value: unknown): DayFrameBackupV2 {
   }
   const data = value.data as unknown as ActiveDayFrameAuthoredSetup;
   try {
+    if (
+      data.sleepRequirements !== undefined &&
+      (!Array.isArray(data.sleepRequirements) || data.sleepRequirements.length)
+    )
+      throw new RangeError("Sleep authority requires Backup V13.");
     validateIncarnationGraph(data);
   } catch {
     throw new DayFrameBackupValidationError(
@@ -215,6 +229,9 @@ export function cloneDayFrameAuthoredSetup(
   authoredSetup: DayFrameAuthoredPattern,
 ): DayFrameAuthoredPattern {
   return {
+    ...(authoredSetup.sleepRequirements !== undefined
+      ? { sleepRequirements: structuredClone(authoredSetup.sleepRequirements) }
+      : {}),
     schedulingPreferences: {
       ...authoredSetup.schedulingPreferences,
     },

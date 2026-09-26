@@ -86,6 +86,8 @@ export type AllocationAlternativeV1 = {
   provenance: PlanningProvenanceV1;
 };
 export type AllocationResultV1 = {
+  qualification?: "nonAllocatable";
+  foundationFingerprint?: string;
   version: 1;
   id: string;
   policy: typeof ALLOCATION_POLICY_V1;
@@ -110,13 +112,19 @@ export function allocateCompetingDemandSet(input: {
   const alternatives: AllocationAlternativeV1[] = [];
   let examined = 0,
     truncated = false;
-  search(0, [], []);
+  if (input.capacity.qualification.allocability !== "nonAllocatable") search(0, [], []);
   const ranked = alternatives
       .sort((a, b) => compareAlternatives(a, b))
       .slice(0, ALLOCATION_POLICY_V1.maximumAlternatives),
     dependencyFingerprint = dependencyFor(input.set, input.capacity, members);
   const base = {
     version: 1 as const,
+    ...(input.capacity.qualification.allocability === "nonAllocatable"
+      ? { qualification: "nonAllocatable" as const }
+      : {}),
+    ...(input.capacity.foundation && "dependencyFingerprint" in input.capacity.foundation.sleep
+      ? { foundationFingerprint: input.capacity.foundation.sleep.dependencyFingerprint }
+      : {}),
     policy: ALLOCATION_POLICY_V1,
     competingSetId: input.set.id,
     capacityFingerprint: input.capacity.fingerprint,
@@ -185,6 +193,9 @@ export function allocateAllCompetitionSets(input: {
       policy: ALLOCATION_POLICY_V1,
       allocations: allocations.map((value) => value.id),
     }),
+    ...(input.capacity.qualification.allocability === "nonAllocatable"
+      ? { qualification: "nonAllocatable" as const }
+      : {}),
     allocations,
     provenance: derived(),
   };

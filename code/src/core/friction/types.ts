@@ -1,3 +1,4 @@
+import type { RealizedScheduleFactV1 } from "../planning/realizedScheduleIdentity.js";
 import type { BlockCandidate, DraftScheduledBlock } from "../blocks/types.js";
 import type { GeneratedWorkBlock } from "../shifts/types.js";
 import type { LocalDateString } from "../shifts/types.js";
@@ -22,6 +23,10 @@ export type SuggestedFix = {
   action: SuggestedFixAction;
   parameters?: Record<string, string | number | boolean>;
   decisionContext?: SuggestedFixDecisionContext;
+  sleepPlacement?: Extract<
+    import("../decisions/planDecision.js").AcceptPlanDecisionInput,
+    { kind: "placeSleepOccurrence" }
+  >;
 };
 
 export type SuggestedFixDecisionContext = {
@@ -39,7 +44,24 @@ export type SuggestedFixFeedback = {
 export type FrictionPoint = {
   id: string;
   userId: string;
-  kind?: "conflict" | "unplaced" | "workRequiredSkip" | "compositionFailure";
+  kind?: "conflict" | "unplaced" | "workRequiredSkip" | "compositionFailure" | "sleep";
+  sleepEvidence?:
+    | {
+        kind: "provenIncompatibility";
+        conflicts: import("../sleep/sleepResolution.js").SleepFeasibilityConflictV1[];
+        occurrences: import("../sleep/sleepResolution.js").SleepOccurrenceV1[];
+        proofScope: import("../sleep/sleepResolution.js").SleepOwnerRange;
+        dependencyFingerprint: string;
+      }
+    | {
+        kind: "acceptedPlacementReview";
+        dependencyFingerprint: string;
+        reviews: import("../sleep/sleepPlacementAuthority.js").SleepPlacementReviewV1[];
+        proofScope: import("../sleep/sleepResolution.js").SleepOwnerRange;
+        underlyingStatus:
+          | import("../sleep/sleepResolution.js").SleepResolutionV1["status"]
+          | undefined;
+      };
   severity: FrictionSeverity;
   title: string;
   message: string;
@@ -80,6 +102,7 @@ export type GenerateSuggestedFixesResult = {
 };
 
 export type ApplySuggestedFixInput = {
+  realizedScheduleFacts?: readonly RealizedScheduleFactV1[];
   frictionPoints: FrictionPoint[];
   generatedWorkBlocks: GeneratedWorkBlock[];
   scheduledBlocks: DraftScheduledBlock[];

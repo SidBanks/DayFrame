@@ -1,0 +1,50 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --config ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-config-RESULT.mjs --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+stdout | ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-RESULT.test.ts > diagnostic: admitted publication continues inside an active replacement transaction
+{
+  "outcome": {
+    "status": "rejected",
+    "reason": "materializationFailure"
+  },
+  "during": {
+    "status": "active",
+    "kind": "restore",
+    "epoch": 1
+  },
+  "history": {
+    "status": "exported",
+    "surfaceVersion": 1,
+    "batches": []
+  }
+}
+
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-RESULT.test.ts (1 test | 1 failed) 363ms
+   × diagnostic: admitted publication continues inside an active replacement transaction 362ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-RESULT.test.ts > diagnostic: admitted publication continues inside an active replacement transaction
+AssertionError: expected 'rejected' to be 'published' // Object.is equality
+
+Expected: "published"
+Received: "rejected"
+
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29/contract-repro-RESULT.test.ts:107:25
+    105|  console.log(JSON.stringify({outcome, during, history, last: store.get…
+    106|  expect(during.status).toBe("active");
+    107|  expect(outcome.status).toBe("published");
+       |                         ^
+    108|  expect(history.status === "exported" && history.batches.length).toBe(…
+    109|  expect(controller.abort().status).toBe("aborted");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  07:17:14
+   Duration  1.26s (transform 817ms, setup 0ms, import 746ms, tests 363ms, environment 0ms)
+

@@ -500,3 +500,72 @@ describe("TodaySurface", () => {
     expect(screen.queryByText("Current user-day")).not.toBeInTheDocument();
   });
 });
+
+it("reports published Sleep through the dedicated command with explicit independent actuals", async () => {
+  const { published } = await import("../../core/sleep/sleepPublicationTestFixtures.js");
+  const snapshot = published().days[0]!.occurrences[0]!;
+  if (snapshot.version !== 4) throw Error();
+  const sleep: TodayTimedOccurrence = {
+    occurrence: snapshot,
+    execution: { coverage: "available", status: "notReported" },
+    temporalPosition: "elapsed",
+  };
+  const input = props(available({ timed: [sleep], elapsed: [sleep] }));
+  const recordSleepExecution = vi.fn(async () => ({
+    status: "rejected" as const,
+    reason: "invalidInput" as const,
+  }));
+  input.reportingStore.recordSleepExecution = recordSleepExecution;
+  render(<TodaySurface {...input} />);
+  await screen.findByRole("button", { name: "Record Outcome" });
+  fireEvent.click(screen.getByRole("button", { name: "Record Outcome" }));
+  expect(screen.getByLabelText("Actual Sleep start")).toHaveValue("");
+  expect(screen.getByLabelText("Actual elapsed minutes")).toHaveValue(null);
+  fireEvent.change(screen.getByLabelText("Actual Sleep start"), {
+    target: { value: "2026-09-17T03:00" },
+  });
+  fireEvent.change(screen.getByLabelText("Actual elapsed minutes"), { target: { value: "90" } });
+  fireEvent.click(screen.getByRole("button", { name: "Completed" }));
+  await waitFor(() =>
+    expect(recordSleepExecution).toHaveBeenCalledWith({
+      kind: "reportPublished",
+      publicationBatchId: snapshot.sleep.publicationBatchId,
+      snapshotId: snapshot.sleep.snapshotId,
+      outcome: "completed",
+      actualTime: { occurredAt: new Date("2026-09-17T03:00").toISOString(), durationMinutes: 90 },
+    }),
+  );
+  expect(input.reportingStore.recordExecution).not.toHaveBeenCalled();
+  expect(snapshot.sleep.occurrence.durationMinutes).toBe(120);
+});
+it("shows a retracted Sleep report as unknown and starts a correction on its existing chain", async () => {
+  const { published } = await import("../../core/sleep/sleepPublicationTestFixtures.js");
+  const snapshot = published().days[0]!.occurrences[0]!;
+  if (snapshot.version !== 4) throw Error();
+  const retracted = {
+    subjectId: "00000000-0000-4000-8000-000000000091" as never,
+    currentRecordId: "00000000-0000-4000-8000-000000000092" as never,
+  };
+  const sleep: TodayTimedOccurrence = {
+    occurrence: snapshot,
+    execution: { coverage: "available", status: "notReported", retracted },
+    temporalPosition: "elapsed",
+  };
+  const input = props(available({ timed: [sleep], elapsed: [sleep] }));
+  const recordSleepExecution = vi.fn(async () => ({
+    status: "rejected" as const,
+    reason: "invalidInput" as const,
+  }));
+  input.reportingStore.recordSleepExecution = recordSleepExecution;
+  render(<TodaySurface {...input} />);
+  await screen.findByText("Report retracted; actual unknown");
+  fireEvent.click(screen.getByRole("button", { name: "Record Outcome" }));
+  fireEvent.click(screen.getByRole("button", { name: "Skipped" }));
+  await waitFor(() =>
+    expect(recordSleepExecution).toHaveBeenCalledWith({
+      kind: "correct",
+      ...retracted,
+      outcome: "skipped",
+    }),
+  );
+});

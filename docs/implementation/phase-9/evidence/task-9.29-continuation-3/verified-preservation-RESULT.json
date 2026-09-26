@@ -1,0 +1,39 @@
+{
+  "capturedAt": "2026-09-26T02:03:10.747414+00:00",
+  "sourceBuildDrift": [],
+  "baselineFiles": 1801,
+  "baselineMissing": [],
+  "baselineChanges": [
+    "code/src/ui/DayFrameApp.tsx",
+    "code/src/ui/GoalAcceptedPlanningSection.tsx",
+    "code/src/ui/HistoricalIntelligenceSummary.tsx",
+    "code/src/ui/MonthlyPlannerSurface.tsx",
+    "code/src/ui/MyScheduleSurface.tsx",
+    "code/src/ui/PlannerSurface.tsx",
+    "code/src/ui/PlanningReviewPanel.tsx",
+    "code/src/ui/ScheduleReviewPanel.tsx",
+    "code/src/ui/ScheduledGoalFacts.tsx",
+    "code/src/ui/SleepRequirementSection.tsx",
+    "code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx",
+    "code/src/ui/tests/DayFrameApp.test.tsx",
+    "code/src/ui/tests/GoalAcceptedPlanning.test.tsx",
+    "code/src/ui/tests/GoalStructureAuthoring.test.tsx",
+    "code/src/ui/tests/GoalsFocusedEditing.test.tsx",
+    "code/src/ui/tests/MonthlyPlannerSurface.test.tsx",
+    "code/src/ui/tests/NavigationFoundation.test.tsx",
+    "code/src/ui/tests/ProductSurfaces.test.tsx",
+    "code/src/ui/tests/ReviewSourceQualification.test.tsx",
+    "code/src/ui/tests/ScheduleReviewPanel.test.tsx"
+  ],
+  "newSource": [
+    "code/src/ui/ScheduleReviewWorkspace.tsx",
+    "code/src/ui/scheduleReviewNavigation.ts",
+    "code/src/ui/ReviewConflicts.tsx",
+    "code/src/ui/ReviewTrial.tsx",
+    "code/src/ui/tests/ScheduleReviewWorkspace.test.tsx",
+    "code/src/ui/tests/ReviewConflicts.test.tsx"
+  ],
+  "governingChanges": [],
+  "allCoreStateInfrastructureUnchanged": true,
+  "allPriorDocumentsUnchanged": true
+}

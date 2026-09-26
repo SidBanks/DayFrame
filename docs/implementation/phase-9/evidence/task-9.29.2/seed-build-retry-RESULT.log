@@ -1,0 +1,13 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vite' build --config docs/implementation/phase-9/evidence/task-9.29.2/seed-build-config-RESULT.mjs --configLoader runner
+vite v8.0.10 building client environment for production...
+[2Ktransforming...✓ 154 modules transformed.
+
+(!) outDir /tmp/dayframe-9292-seed-build-RESULT is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../../../../tmp/dayframe-9292-seed-build-RESULT/canonical-seed-RESULT.js  662.55 kB │ gzip: 155.06 kB
+
+✓ built in 134ms

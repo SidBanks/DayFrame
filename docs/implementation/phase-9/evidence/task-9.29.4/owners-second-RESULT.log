@@ -1,0 +1,108 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/proposalSurface.test.ts src/state/realizationSurface.test.ts src/state/sleepPlanningIntegration.test.ts src/state/goalStructurePlanningSafety.test.ts src/state/dayFrameBackupV14Restore.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/goalStructurePlanningSafety.test.ts (8 tests | 2 failed) 3594ms
+   × time-only advisory membership change stales acceptance even with unchanged requested minutes 287ms
+   × a deferred acceptance cannot resume after exact runtime replacement 249ms
+ ❯ src/state/proposalSurface.test.ts (7 tests | 2 failed) 85ms
+     × atomically records, accepts, freezes authority, and prevents double claims 50ms
+     × durably stales changed input without partially accepting 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/goalStructurePlanningSafety.test.ts > time-only advisory membership change stales acceptance even with unchanged requested minutes
+AssertionError: expected { status: 'rejected', …(1) } to match object { status: 'rejected', reason: 'stale' }
+
+- Expected
++ Received
+
+  {
+-   "reason": "stale",
++   "reason": "persistenceFailure",
+    "status": "rejected",
+  }
+
+ ❯ src/state/goalStructurePlanningSafety.test.ts:136:5
+    134|       optionId: p.preferredOptionId,
+    135|     }),
+    136|   ).toMatchObject({ status: "rejected", reason: "stale" });
+       |     ^
+    137|   expect(f.store.exportProposalAuthority().acceptedAllocations).toEqua…
+    138| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/state/goalStructurePlanningSafety.test.ts > a deferred acceptance cannot resume after exact runtime replacement
+AssertionError: expected { status: 'rejected', …(2) } to match object { status: 'rejected', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "reason": "notActionable",
++   "reason": "contextReplaced",
+    "status": "rejected",
+  }
+
+ ❯ src/state/goalStructurePlanningSafety.test.ts:272:25
+    270|   adapter.installRuntimeExact(before);
+    271|   release();
+    272|   expect(await pending).toMatchObject({ status: "rejected", reason: "n…
+       |                         ^
+    273|   expect(owner.exportProposalAuthority()).toEqual(before.authority);
+    274| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/state/proposalSurface.test.ts > Proposal authority surface > atomically records, accepts, freezes authority, and prevents double claims
+AssertionError: expected { status: 'rejected', …(1) } to match object { status: 'rejected', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "reason": "conflictingClaim",
++   "reason": "persistenceFailure",
+    "status": "rejected",
+  }
+
+ ❯ src/state/proposalSurface.test.ts:63:7
+     61|         current: competing,
+     62|       }),
+     63|     ).toMatchObject({ status: "rejected", reason: "conflictingClaim" }…
+       |       ^
+     64|   });
+     65|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/state/proposalSurface.test.ts > Proposal authority surface > durably stales changed input without partially accepting
+AssertionError: expected { status: 'rejected', …(1) } to match object { status: 'rejected', reason: 'stale' }
+
+- Expected
++ Received
+
+  {
+-   "reason": "stale",
++   "reason": "persistenceFailure",
+    "status": "rejected",
+  }
+
+ ❯ src/state/proposalSurface.test.ts:116:7
+    114|         current: changed,
+    115|       }),
+    116|     ).toMatchObject({ status: "rejected", reason: "stale" });
+       |       ^
+    117|     expect(value.listActionableProposals()).toEqual([]);
+    118|     expect(value.exportProposalAuthority()).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  4 failed | 32 passed (36)
+   Start at  08:13:02
+   Duration  12.69s (transform 1.53s, setup 0ms, import 1.56s, tests 9.62s, environment 1.02s)
+

@@ -1,0 +1,5 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --write src/ui/scheduleReviewReadiness.ts src/ui/ScheduleReviewPanel.tsx src/ui/tests/ReviewSourceQualification.test.tsx
+src/ui/scheduleReviewReadiness.ts 67ms
+src/ui/ScheduleReviewPanel.tsx 98ms
+src/ui/tests/ReviewSourceQualification.test.tsx 30ms

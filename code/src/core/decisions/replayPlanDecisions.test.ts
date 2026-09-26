@@ -249,3 +249,35 @@ describe("PlanDecision deterministic replay", () => {
     ).toEqual({ status: "staleOccurrenceMissing" });
   });
 });
+
+describe("Task 9.9 effective-boundary replay", () => {
+  it("replays accepted time using the segment boundary, not the global clock boundary", () => {
+    const seed = structuredClone(pattern);
+    seed.schedulingPreferences.dayBoundaryStartTime = "12:00";
+    seed.shiftCycles[0]!.segments[0]!.schedulePreferences = {
+      dayBoundaryStartTime: "00:00",
+      weekStartsOn: "tuesday",
+    };
+    const current = store(seed),
+      target = targetForTemplate(current);
+    expect(
+      current.acceptPlanDecision({
+        kind: "placeOccurrence",
+        target,
+        payload: { userDayDate: "2026-08-17", startTime: "06:00" },
+        provenance: { source: "user" },
+      }).status,
+    ).toBe("accepted");
+    const result = current.generatePreview({
+      ...range,
+      planningWindowStart: new Date(2026, 7, 17),
+      planningWindowEnd: new Date(2026, 7, 18),
+    }).preview!.result;
+    expect(result.planDecisionResults).toContainEqual(
+      expect.objectContaining({ status: "applied" }),
+    );
+    expect(result.scheduledBlocks.find((b) => b.templateId === "template")!.startsAt).toEqual(
+      new Date(2026, 7, 17, 6),
+    );
+  });
+});

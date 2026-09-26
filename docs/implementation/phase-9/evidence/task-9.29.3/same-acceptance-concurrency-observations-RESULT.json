@@ -1,0 +1,1453 @@
+{
+  "accepted": {
+    "recordType": "acceptedAllocation",
+    "version": 2,
+    "revision": 1,
+    "id": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+    "decisionId": "cdebe5da-4600-4704-93f8-193f6fdf8e07",
+    "proposalId": "427e829012fb301f",
+    "proposalRevision": 1,
+    "sourceOptionId": "c6686596b29a976d",
+    "acceptedAt": "2026-09-16T12:00:00.000Z",
+    "actor": {
+      "kind": "user"
+    },
+    "scope": {
+      "context": {
+        "kind": "ordinary"
+      },
+      "horizon": {
+        "startUserDayDate": "2026-09-17",
+        "endUserDayDateExclusive": "2026-09-18"
+      },
+      "acceptance": "oneOff",
+      "bundle": "independent",
+      "demandProjectionIds": [
+        "091245c9d388c725"
+      ],
+      "goalIds": [
+        "2594304b-8703-4b6b-8104-f351b1ca30ca"
+      ],
+      "userDayDates": [
+        "2026-09-17"
+      ],
+      "capacityClaims": [
+        {
+          "id": "d405cf578f6735d6",
+          "candidateParentId": "453106f4c9d34fe8",
+          "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+          "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+          "demandRevision": 1,
+          "demandProjectionId": "091245c9d388c725",
+          "productiveOpportunityId": "2b863a03d9ef5947",
+          "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+          "associationRevision": 1,
+          "role": "productive",
+          "interval": [
+            "2026-09-17T07:00:00.000Z",
+            "2026-09-17T08:00:00.000Z"
+          ],
+          "userDayDate": "2026-09-17",
+          "capacityIntervalId": "cb48420800b1b3d3",
+          "requiredness": "required",
+          "source": {
+            "kind": "direct"
+          },
+          "relationship": {
+            "kind": "productiveRoot"
+          },
+          "startsAt": "2026-09-17T07:00:00.000Z",
+          "endsAt": "2026-09-17T08:00:00.000Z",
+          "durationMinutes": 60,
+          "dependencyFingerprint": "fdaad1618d8a135b",
+          "provenance": {
+            "version": 1,
+            "role": "derivedArtifact",
+            "origin": {
+              "kind": "derivedFromDependencies"
+            },
+            "algorithm": {
+              "id": "demand-resource-footprint",
+              "version": 1
+            }
+          }
+        }
+      ]
+    },
+    "productiveMinutes": 60,
+    "supportMinutes": 0,
+    "bufferMinutes": 0,
+    "totalResourceMinutes": 60,
+    "nominalResourceMinutes": 60,
+    "claims": [
+      {
+        "id": "d405cf578f6735d6",
+        "candidateParentId": "453106f4c9d34fe8",
+        "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+        "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+        "demandRevision": 1,
+        "demandProjectionId": "091245c9d388c725",
+        "productiveOpportunityId": "2b863a03d9ef5947",
+        "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+        "associationRevision": 1,
+        "role": "productive",
+        "interval": [
+          "2026-09-17T07:00:00.000Z",
+          "2026-09-17T08:00:00.000Z"
+        ],
+        "userDayDate": "2026-09-17",
+        "capacityIntervalId": "cb48420800b1b3d3",
+        "requiredness": "required",
+        "source": {
+          "kind": "direct"
+        },
+        "relationship": {
+          "kind": "productiveRoot"
+        },
+        "startsAt": "2026-09-17T07:00:00.000Z",
+        "endsAt": "2026-09-17T08:00:00.000Z",
+        "durationMinutes": 60,
+        "dependencyFingerprint": "fdaad1618d8a135b",
+        "provenance": {
+          "version": 1,
+          "role": "derivedArtifact",
+          "origin": {
+            "kind": "derivedFromDependencies"
+          },
+          "algorithm": {
+            "id": "demand-resource-footprint",
+            "version": 1
+          }
+        }
+      }
+    ],
+    "resourceFootprints": [
+      {
+        "version": 1,
+        "id": "b469f2c3e60eb6be",
+        "candidateParentId": "453106f4c9d34fe8",
+        "productiveClaims": [
+          {
+            "id": "d405cf578f6735d6",
+            "candidateParentId": "453106f4c9d34fe8",
+            "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+            "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+            "demandRevision": 1,
+            "demandProjectionId": "091245c9d388c725",
+            "productiveOpportunityId": "2b863a03d9ef5947",
+            "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+            "associationRevision": 1,
+            "role": "productive",
+            "interval": [
+              "2026-09-17T07:00:00.000Z",
+              "2026-09-17T08:00:00.000Z"
+            ],
+            "userDayDate": "2026-09-17",
+            "capacityIntervalId": "cb48420800b1b3d3",
+            "requiredness": "required",
+            "source": {
+              "kind": "direct"
+            },
+            "relationship": {
+              "kind": "productiveRoot"
+            },
+            "startsAt": "2026-09-17T07:00:00.000Z",
+            "endsAt": "2026-09-17T08:00:00.000Z",
+            "durationMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "supportClaims": [],
+        "bufferClaims": [],
+        "omittedOptionalComponentIds": [],
+        "productiveMinutes": 60,
+        "supportMinutes": 0,
+        "bufferMinutes": 0,
+        "nominalResourceMinutes": 60,
+        "unionedResourceMinutes": 60,
+        "dependencyFingerprint": "fdaad1618d8a135b",
+        "provenance": {
+          "version": 1,
+          "role": "derivedArtifact",
+          "origin": {
+            "kind": "derivedFromDependencies"
+          },
+          "algorithm": {
+            "id": "demand-resource-footprint",
+            "version": 1
+          }
+        }
+      }
+    ],
+    "assignments": [
+      {
+        "demandProjectionId": "091245c9d388c725",
+        "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+        "requestedMinutes": 60,
+        "attributedMinutes": 0,
+        "remainingRequestedMinutes": 60,
+        "assignedMinutes": 60,
+        "unmetMinutes": 0,
+        "outcome": "full",
+        "priorityEvidence": [],
+        "partitions": [
+          {
+            "id": "e5bac9c1a865a4b8",
+            "demandProjectionId": "091245c9d388c725",
+            "capacityIntervalId": "cb48420800b1b3d3",
+            "opportunityId": "2b863a03d9ef5947",
+            "startsAt": "2026-09-17T07:00:00.000Z",
+            "endsAt": "2026-09-17T08:00:00.000Z",
+            "durationMinutes": 60,
+            "userDayDate": "2026-09-17",
+            "sessionIndex": 0
+          }
+        ],
+        "resourceFootprints": [
+          {
+            "version": 1,
+            "id": "b469f2c3e60eb6be",
+            "candidateParentId": "453106f4c9d34fe8",
+            "productiveClaims": [
+              {
+                "id": "d405cf578f6735d6",
+                "candidateParentId": "453106f4c9d34fe8",
+                "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                "demandRevision": 1,
+                "demandProjectionId": "091245c9d388c725",
+                "productiveOpportunityId": "2b863a03d9ef5947",
+                "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                "associationRevision": 1,
+                "role": "productive",
+                "interval": [
+                  "2026-09-17T07:00:00.000Z",
+                  "2026-09-17T08:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-17",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "supportClaims": [],
+            "bufferClaims": [],
+            "omittedOptionalComponentIds": [],
+            "productiveMinutes": 60,
+            "supportMinutes": 0,
+            "bufferMinutes": 0,
+            "nominalResourceMinutes": 60,
+            "unionedResourceMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "reasons": [
+          {
+            "code": "fullySatisfied"
+          }
+        ]
+      }
+    ],
+    "decisiveSnapshot": {
+      "proposalInputFingerprint": "6699526a369f573e",
+      "sourceAllocationId": "db4875a087a2b8f8",
+      "sourceAllocationDependencyFingerprint": "904ca9e1278ac4eb",
+      "capacityFingerprint": "5644780099844a96",
+      "option": {
+        "id": "c6686596b29a976d",
+        "sourceAllocationId": "db4875a087a2b8f8",
+        "sourceAlternativeId": "f07db3b8d7347b94",
+        "rank": 0,
+        "preferred": true,
+        "scope": {
+          "context": {
+            "kind": "ordinary"
+          },
+          "horizon": {
+            "startUserDayDate": "2026-09-17",
+            "endUserDayDateExclusive": "2026-09-18"
+          },
+          "acceptance": "oneOff",
+          "bundle": "independent",
+          "demandProjectionIds": [
+            "091245c9d388c725"
+          ],
+          "goalIds": [
+            "2594304b-8703-4b6b-8104-f351b1ca30ca"
+          ],
+          "userDayDates": [
+            "2026-09-17"
+          ],
+          "capacityClaims": [
+            {
+              "id": "d405cf578f6735d6",
+              "candidateParentId": "453106f4c9d34fe8",
+              "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+              "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+              "demandRevision": 1,
+              "demandProjectionId": "091245c9d388c725",
+              "productiveOpportunityId": "2b863a03d9ef5947",
+              "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+              "associationRevision": 1,
+              "role": "productive",
+              "interval": [
+                "2026-09-17T07:00:00.000Z",
+                "2026-09-17T08:00:00.000Z"
+              ],
+              "userDayDate": "2026-09-17",
+              "capacityIntervalId": "cb48420800b1b3d3",
+              "requiredness": "required",
+              "source": {
+                "kind": "direct"
+              },
+              "relationship": {
+                "kind": "productiveRoot"
+              },
+              "startsAt": "2026-09-17T07:00:00.000Z",
+              "endsAt": "2026-09-17T08:00:00.000Z",
+              "durationMinutes": 60,
+              "dependencyFingerprint": "fdaad1618d8a135b",
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "demand-resource-footprint",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "productiveMinutes": 60,
+        "supportMinutes": 0,
+        "bufferMinutes": 0,
+        "nominalResourceMinutes": 60,
+        "totalResourceMinutes": 60,
+        "resourceFootprints": [
+          {
+            "version": 1,
+            "id": "b469f2c3e60eb6be",
+            "candidateParentId": "453106f4c9d34fe8",
+            "productiveClaims": [
+              {
+                "id": "d405cf578f6735d6",
+                "candidateParentId": "453106f4c9d34fe8",
+                "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                "demandRevision": 1,
+                "demandProjectionId": "091245c9d388c725",
+                "productiveOpportunityId": "2b863a03d9ef5947",
+                "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                "associationRevision": 1,
+                "role": "productive",
+                "interval": [
+                  "2026-09-17T07:00:00.000Z",
+                  "2026-09-17T08:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-17",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "supportClaims": [],
+            "bufferClaims": [],
+            "omittedOptionalComponentIds": [],
+            "productiveMinutes": 60,
+            "supportMinutes": 0,
+            "bufferMinutes": 0,
+            "nominalResourceMinutes": 60,
+            "unionedResourceMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "assignments": [
+          {
+            "demandProjectionId": "091245c9d388c725",
+            "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+            "requestedMinutes": 60,
+            "attributedMinutes": 0,
+            "remainingRequestedMinutes": 60,
+            "assignedMinutes": 60,
+            "unmetMinutes": 0,
+            "outcome": "full",
+            "priorityEvidence": [],
+            "partitions": [
+              {
+                "id": "e5bac9c1a865a4b8",
+                "demandProjectionId": "091245c9d388c725",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "opportunityId": "2b863a03d9ef5947",
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "userDayDate": "2026-09-17",
+                "sessionIndex": 0
+              }
+            ],
+            "resourceFootprints": [
+              {
+                "version": 1,
+                "id": "b469f2c3e60eb6be",
+                "candidateParentId": "453106f4c9d34fe8",
+                "productiveClaims": [
+                  {
+                    "id": "d405cf578f6735d6",
+                    "candidateParentId": "453106f4c9d34fe8",
+                    "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                    "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                    "demandRevision": 1,
+                    "demandProjectionId": "091245c9d388c725",
+                    "productiveOpportunityId": "2b863a03d9ef5947",
+                    "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                    "associationRevision": 1,
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-17T07:00:00.000Z",
+                      "2026-09-17T08:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-17",
+                    "capacityIntervalId": "cb48420800b1b3d3",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-17T07:00:00.000Z",
+                    "endsAt": "2026-09-17T08:00:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "fdaad1618d8a135b",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ],
+                "supportClaims": [],
+                "bufferClaims": [],
+                "omittedOptionalComponentIds": [],
+                "productiveMinutes": 60,
+                "supportMinutes": 0,
+                "bufferMinutes": 0,
+                "nominalResourceMinutes": 60,
+                "unionedResourceMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "reasons": [
+              {
+                "code": "fullySatisfied"
+              }
+            ]
+          }
+        ],
+        "claims": [
+          {
+            "id": "d405cf578f6735d6",
+            "candidateParentId": "453106f4c9d34fe8",
+            "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+            "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+            "demandRevision": 1,
+            "demandProjectionId": "091245c9d388c725",
+            "productiveOpportunityId": "2b863a03d9ef5947",
+            "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+            "associationRevision": 1,
+            "role": "productive",
+            "interval": [
+              "2026-09-17T07:00:00.000Z",
+              "2026-09-17T08:00:00.000Z"
+            ],
+            "userDayDate": "2026-09-17",
+            "capacityIntervalId": "cb48420800b1b3d3",
+            "requiredness": "required",
+            "source": {
+              "kind": "direct"
+            },
+            "relationship": {
+              "kind": "productiveRoot"
+            },
+            "startsAt": "2026-09-17T07:00:00.000Z",
+            "endsAt": "2026-09-17T08:00:00.000Z",
+            "durationMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "qualification": "fullyQualified",
+        "reasons": [
+          {
+            "code": "allocationPreferred"
+          }
+        ],
+        "assumptions": [
+          {
+            "code": "supportAndBufferNotRequired"
+          }
+        ],
+        "tradeoffs": [],
+        "exclusions": [
+          {
+            "code": "unallocatedCapacity",
+            "minutes": 1260
+          }
+        ],
+        "rankingEvidence": {
+          "allocationRank": 0,
+          "allocationAlternativeId": "f07db3b8d7347b94"
+        },
+        "provenance": {
+          "version": 1,
+          "role": "derivedArtifact",
+          "origin": {
+            "kind": "derivedFromDependencies"
+          },
+          "algorithm": {
+            "id": "constructive-proposal",
+            "version": 1
+          }
+        }
+      }
+    },
+    "realization": "unrealized",
+    "footprintCompleteness": "complete",
+    "provenance": {
+      "version": 1,
+      "role": "acceptedAuthority",
+      "origin": {
+        "kind": "directAuthoring"
+      }
+    }
+  },
+  "attempts": 2,
+  "transactions": 2,
+  "retry": {
+    "status": "realized",
+    "realizationId": "b455640c383e4817",
+    "acceptedAllocationId": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+    "scheduledGoalWorkIds": [
+      "1b65628030fc67e5"
+    ],
+    "scheduledSupportActivityIds": [],
+    "bufferProtectionIds": [],
+    "conflicts": [],
+    "reasons": [],
+    "previewFreshnessImpact": "stale"
+  },
+  "outer": {
+    "status": "accepted",
+    "value": {
+      "decision": {
+        "recordType": "proposalDecision",
+        "version": 1,
+        "revision": 1,
+        "id": "cdebe5da-4600-4704-93f8-193f6fdf8e07",
+        "proposalId": "427e829012fb301f",
+        "proposalRevision": 1,
+        "optionId": "c6686596b29a976d",
+        "decision": "accept",
+        "decidedAt": "2026-09-16T12:00:00.000Z",
+        "actor": {
+          "kind": "user"
+        },
+        "acceptedScope": {
+          "context": {
+            "kind": "ordinary"
+          },
+          "horizon": {
+            "startUserDayDate": "2026-09-17",
+            "endUserDayDateExclusive": "2026-09-18"
+          },
+          "acceptance": "oneOff",
+          "bundle": "independent",
+          "demandProjectionIds": [
+            "091245c9d388c725"
+          ],
+          "goalIds": [
+            "2594304b-8703-4b6b-8104-f351b1ca30ca"
+          ],
+          "userDayDates": [
+            "2026-09-17"
+          ],
+          "capacityClaims": [
+            {
+              "id": "d405cf578f6735d6",
+              "candidateParentId": "453106f4c9d34fe8",
+              "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+              "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+              "demandRevision": 1,
+              "demandProjectionId": "091245c9d388c725",
+              "productiveOpportunityId": "2b863a03d9ef5947",
+              "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+              "associationRevision": 1,
+              "role": "productive",
+              "interval": [
+                "2026-09-17T07:00:00.000Z",
+                "2026-09-17T08:00:00.000Z"
+              ],
+              "userDayDate": "2026-09-17",
+              "capacityIntervalId": "cb48420800b1b3d3",
+              "requiredness": "required",
+              "source": {
+                "kind": "direct"
+              },
+              "relationship": {
+                "kind": "productiveRoot"
+              },
+              "startsAt": "2026-09-17T07:00:00.000Z",
+              "endsAt": "2026-09-17T08:00:00.000Z",
+              "durationMinutes": 60,
+              "dependencyFingerprint": "fdaad1618d8a135b",
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "demand-resource-footprint",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "decisiveFingerprint": "6699526a369f573e",
+        "provenance": {
+          "version": 1,
+          "role": "acceptedAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      "acceptedAllocation": {
+        "recordType": "acceptedAllocation",
+        "version": 2,
+        "revision": 1,
+        "id": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+        "decisionId": "cdebe5da-4600-4704-93f8-193f6fdf8e07",
+        "proposalId": "427e829012fb301f",
+        "proposalRevision": 1,
+        "sourceOptionId": "c6686596b29a976d",
+        "acceptedAt": "2026-09-16T12:00:00.000Z",
+        "actor": {
+          "kind": "user"
+        },
+        "scope": {
+          "context": {
+            "kind": "ordinary"
+          },
+          "horizon": {
+            "startUserDayDate": "2026-09-17",
+            "endUserDayDateExclusive": "2026-09-18"
+          },
+          "acceptance": "oneOff",
+          "bundle": "independent",
+          "demandProjectionIds": [
+            "091245c9d388c725"
+          ],
+          "goalIds": [
+            "2594304b-8703-4b6b-8104-f351b1ca30ca"
+          ],
+          "userDayDates": [
+            "2026-09-17"
+          ],
+          "capacityClaims": [
+            {
+              "id": "d405cf578f6735d6",
+              "candidateParentId": "453106f4c9d34fe8",
+              "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+              "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+              "demandRevision": 1,
+              "demandProjectionId": "091245c9d388c725",
+              "productiveOpportunityId": "2b863a03d9ef5947",
+              "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+              "associationRevision": 1,
+              "role": "productive",
+              "interval": [
+                "2026-09-17T07:00:00.000Z",
+                "2026-09-17T08:00:00.000Z"
+              ],
+              "userDayDate": "2026-09-17",
+              "capacityIntervalId": "cb48420800b1b3d3",
+              "requiredness": "required",
+              "source": {
+                "kind": "direct"
+              },
+              "relationship": {
+                "kind": "productiveRoot"
+              },
+              "startsAt": "2026-09-17T07:00:00.000Z",
+              "endsAt": "2026-09-17T08:00:00.000Z",
+              "durationMinutes": 60,
+              "dependencyFingerprint": "fdaad1618d8a135b",
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "demand-resource-footprint",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "productiveMinutes": 60,
+        "supportMinutes": 0,
+        "bufferMinutes": 0,
+        "totalResourceMinutes": 60,
+        "nominalResourceMinutes": 60,
+        "claims": [
+          {
+            "id": "d405cf578f6735d6",
+            "candidateParentId": "453106f4c9d34fe8",
+            "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+            "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+            "demandRevision": 1,
+            "demandProjectionId": "091245c9d388c725",
+            "productiveOpportunityId": "2b863a03d9ef5947",
+            "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+            "associationRevision": 1,
+            "role": "productive",
+            "interval": [
+              "2026-09-17T07:00:00.000Z",
+              "2026-09-17T08:00:00.000Z"
+            ],
+            "userDayDate": "2026-09-17",
+            "capacityIntervalId": "cb48420800b1b3d3",
+            "requiredness": "required",
+            "source": {
+              "kind": "direct"
+            },
+            "relationship": {
+              "kind": "productiveRoot"
+            },
+            "startsAt": "2026-09-17T07:00:00.000Z",
+            "endsAt": "2026-09-17T08:00:00.000Z",
+            "durationMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "resourceFootprints": [
+          {
+            "version": 1,
+            "id": "b469f2c3e60eb6be",
+            "candidateParentId": "453106f4c9d34fe8",
+            "productiveClaims": [
+              {
+                "id": "d405cf578f6735d6",
+                "candidateParentId": "453106f4c9d34fe8",
+                "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                "demandRevision": 1,
+                "demandProjectionId": "091245c9d388c725",
+                "productiveOpportunityId": "2b863a03d9ef5947",
+                "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                "associationRevision": 1,
+                "role": "productive",
+                "interval": [
+                  "2026-09-17T07:00:00.000Z",
+                  "2026-09-17T08:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-17",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "supportClaims": [],
+            "bufferClaims": [],
+            "omittedOptionalComponentIds": [],
+            "productiveMinutes": 60,
+            "supportMinutes": 0,
+            "bufferMinutes": 0,
+            "nominalResourceMinutes": 60,
+            "unionedResourceMinutes": 60,
+            "dependencyFingerprint": "fdaad1618d8a135b",
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "demand-resource-footprint",
+                "version": 1
+              }
+            }
+          }
+        ],
+        "assignments": [
+          {
+            "demandProjectionId": "091245c9d388c725",
+            "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+            "requestedMinutes": 60,
+            "attributedMinutes": 0,
+            "remainingRequestedMinutes": 60,
+            "assignedMinutes": 60,
+            "unmetMinutes": 0,
+            "outcome": "full",
+            "priorityEvidence": [],
+            "partitions": [
+              {
+                "id": "e5bac9c1a865a4b8",
+                "demandProjectionId": "091245c9d388c725",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "opportunityId": "2b863a03d9ef5947",
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "userDayDate": "2026-09-17",
+                "sessionIndex": 0
+              }
+            ],
+            "resourceFootprints": [
+              {
+                "version": 1,
+                "id": "b469f2c3e60eb6be",
+                "candidateParentId": "453106f4c9d34fe8",
+                "productiveClaims": [
+                  {
+                    "id": "d405cf578f6735d6",
+                    "candidateParentId": "453106f4c9d34fe8",
+                    "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                    "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                    "demandRevision": 1,
+                    "demandProjectionId": "091245c9d388c725",
+                    "productiveOpportunityId": "2b863a03d9ef5947",
+                    "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                    "associationRevision": 1,
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-17T07:00:00.000Z",
+                      "2026-09-17T08:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-17",
+                    "capacityIntervalId": "cb48420800b1b3d3",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-17T07:00:00.000Z",
+                    "endsAt": "2026-09-17T08:00:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "fdaad1618d8a135b",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ],
+                "supportClaims": [],
+                "bufferClaims": [],
+                "omittedOptionalComponentIds": [],
+                "productiveMinutes": 60,
+                "supportMinutes": 0,
+                "bufferMinutes": 0,
+                "nominalResourceMinutes": 60,
+                "unionedResourceMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "reasons": [
+              {
+                "code": "fullySatisfied"
+              }
+            ]
+          }
+        ],
+        "decisiveSnapshot": {
+          "proposalInputFingerprint": "6699526a369f573e",
+          "sourceAllocationId": "db4875a087a2b8f8",
+          "sourceAllocationDependencyFingerprint": "904ca9e1278ac4eb",
+          "capacityFingerprint": "5644780099844a96",
+          "option": {
+            "id": "c6686596b29a976d",
+            "sourceAllocationId": "db4875a087a2b8f8",
+            "sourceAlternativeId": "f07db3b8d7347b94",
+            "rank": 0,
+            "preferred": true,
+            "scope": {
+              "context": {
+                "kind": "ordinary"
+              },
+              "horizon": {
+                "startUserDayDate": "2026-09-17",
+                "endUserDayDateExclusive": "2026-09-18"
+              },
+              "acceptance": "oneOff",
+              "bundle": "independent",
+              "demandProjectionIds": [
+                "091245c9d388c725"
+              ],
+              "goalIds": [
+                "2594304b-8703-4b6b-8104-f351b1ca30ca"
+              ],
+              "userDayDates": [
+                "2026-09-17"
+              ],
+              "capacityClaims": [
+                {
+                  "id": "d405cf578f6735d6",
+                  "candidateParentId": "453106f4c9d34fe8",
+                  "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                  "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                  "demandRevision": 1,
+                  "demandProjectionId": "091245c9d388c725",
+                  "productiveOpportunityId": "2b863a03d9ef5947",
+                  "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                  "associationRevision": 1,
+                  "role": "productive",
+                  "interval": [
+                    "2026-09-17T07:00:00.000Z",
+                    "2026-09-17T08:00:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-17",
+                  "capacityIntervalId": "cb48420800b1b3d3",
+                  "requiredness": "required",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "productiveRoot"
+                  },
+                  "startsAt": "2026-09-17T07:00:00.000Z",
+                  "endsAt": "2026-09-17T08:00:00.000Z",
+                  "durationMinutes": 60,
+                  "dependencyFingerprint": "fdaad1618d8a135b",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "productiveMinutes": 60,
+            "supportMinutes": 0,
+            "bufferMinutes": 0,
+            "nominalResourceMinutes": 60,
+            "totalResourceMinutes": 60,
+            "resourceFootprints": [
+              {
+                "version": 1,
+                "id": "b469f2c3e60eb6be",
+                "candidateParentId": "453106f4c9d34fe8",
+                "productiveClaims": [
+                  {
+                    "id": "d405cf578f6735d6",
+                    "candidateParentId": "453106f4c9d34fe8",
+                    "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                    "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                    "demandRevision": 1,
+                    "demandProjectionId": "091245c9d388c725",
+                    "productiveOpportunityId": "2b863a03d9ef5947",
+                    "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                    "associationRevision": 1,
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-17T07:00:00.000Z",
+                      "2026-09-17T08:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-17",
+                    "capacityIntervalId": "cb48420800b1b3d3",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-17T07:00:00.000Z",
+                    "endsAt": "2026-09-17T08:00:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "fdaad1618d8a135b",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ],
+                "supportClaims": [],
+                "bufferClaims": [],
+                "omittedOptionalComponentIds": [],
+                "productiveMinutes": 60,
+                "supportMinutes": 0,
+                "bufferMinutes": 0,
+                "nominalResourceMinutes": 60,
+                "unionedResourceMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "assignments": [
+              {
+                "demandProjectionId": "091245c9d388c725",
+                "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                "requestedMinutes": 60,
+                "attributedMinutes": 0,
+                "remainingRequestedMinutes": 60,
+                "assignedMinutes": 60,
+                "unmetMinutes": 0,
+                "outcome": "full",
+                "priorityEvidence": [],
+                "partitions": [
+                  {
+                    "id": "e5bac9c1a865a4b8",
+                    "demandProjectionId": "091245c9d388c725",
+                    "capacityIntervalId": "cb48420800b1b3d3",
+                    "opportunityId": "2b863a03d9ef5947",
+                    "startsAt": "2026-09-17T07:00:00.000Z",
+                    "endsAt": "2026-09-17T08:00:00.000Z",
+                    "durationMinutes": 60,
+                    "userDayDate": "2026-09-17",
+                    "sessionIndex": 0
+                  }
+                ],
+                "resourceFootprints": [
+                  {
+                    "version": 1,
+                    "id": "b469f2c3e60eb6be",
+                    "candidateParentId": "453106f4c9d34fe8",
+                    "productiveClaims": [
+                      {
+                        "id": "d405cf578f6735d6",
+                        "candidateParentId": "453106f4c9d34fe8",
+                        "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                        "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                        "demandRevision": 1,
+                        "demandProjectionId": "091245c9d388c725",
+                        "productiveOpportunityId": "2b863a03d9ef5947",
+                        "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                        "associationRevision": 1,
+                        "role": "productive",
+                        "interval": [
+                          "2026-09-17T07:00:00.000Z",
+                          "2026-09-17T08:00:00.000Z"
+                        ],
+                        "userDayDate": "2026-09-17",
+                        "capacityIntervalId": "cb48420800b1b3d3",
+                        "requiredness": "required",
+                        "source": {
+                          "kind": "direct"
+                        },
+                        "relationship": {
+                          "kind": "productiveRoot"
+                        },
+                        "startsAt": "2026-09-17T07:00:00.000Z",
+                        "endsAt": "2026-09-17T08:00:00.000Z",
+                        "durationMinutes": 60,
+                        "dependencyFingerprint": "fdaad1618d8a135b",
+                        "provenance": {
+                          "version": 1,
+                          "role": "derivedArtifact",
+                          "origin": {
+                            "kind": "derivedFromDependencies"
+                          },
+                          "algorithm": {
+                            "id": "demand-resource-footprint",
+                            "version": 1
+                          }
+                        }
+                      }
+                    ],
+                    "supportClaims": [],
+                    "bufferClaims": [],
+                    "omittedOptionalComponentIds": [],
+                    "productiveMinutes": 60,
+                    "supportMinutes": 0,
+                    "bufferMinutes": 0,
+                    "nominalResourceMinutes": 60,
+                    "unionedResourceMinutes": 60,
+                    "dependencyFingerprint": "fdaad1618d8a135b",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ],
+                "reasons": [
+                  {
+                    "code": "fullySatisfied"
+                  }
+                ]
+              }
+            ],
+            "claims": [
+              {
+                "id": "d405cf578f6735d6",
+                "candidateParentId": "453106f4c9d34fe8",
+                "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+                "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+                "demandRevision": 1,
+                "demandProjectionId": "091245c9d388c725",
+                "productiveOpportunityId": "2b863a03d9ef5947",
+                "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+                "associationRevision": 1,
+                "role": "productive",
+                "interval": [
+                  "2026-09-17T07:00:00.000Z",
+                  "2026-09-17T08:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-17",
+                "capacityIntervalId": "cb48420800b1b3d3",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-17T07:00:00.000Z",
+                "endsAt": "2026-09-17T08:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "fdaad1618d8a135b",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ],
+            "qualification": "fullyQualified",
+            "reasons": [
+              {
+                "code": "allocationPreferred"
+              }
+            ],
+            "assumptions": [
+              {
+                "code": "supportAndBufferNotRequired"
+              }
+            ],
+            "tradeoffs": [],
+            "exclusions": [
+              {
+                "code": "unallocatedCapacity",
+                "minutes": 1260
+              }
+            ],
+            "rankingEvidence": {
+              "allocationRank": 0,
+              "allocationAlternativeId": "f07db3b8d7347b94"
+            },
+            "provenance": {
+              "version": 1,
+              "role": "derivedArtifact",
+              "origin": {
+                "kind": "derivedFromDependencies"
+              },
+              "algorithm": {
+                "id": "constructive-proposal",
+                "version": 1
+              }
+            }
+          }
+        },
+        "realization": "unrealized",
+        "footprintCompleteness": "complete",
+        "provenance": {
+          "version": 1,
+          "role": "acceptedAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      "realization": {
+        "status": "realized",
+        "realizationId": "b455640c383e4817",
+        "acceptedAllocationId": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+        "scheduledGoalWorkIds": [
+          "1b65628030fc67e5"
+        ],
+        "scheduledSupportActivityIds": [],
+        "bufferProtectionIds": [],
+        "conflicts": [],
+        "reasons": [],
+        "previewFreshnessImpact": "stale"
+      }
+    },
+    "persistence": "durable"
+  },
+  "authority": {
+    "version": 1,
+    "realizations": [
+      {
+        "recordType": "realization",
+        "version": 1,
+        "id": "b455640c383e4817",
+        "policy": {
+          "id": "accepted-allocation-realization",
+          "version": 1
+        },
+        "acceptedAllocationId": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+        "acceptedAllocationRevision": 1,
+        "proposalDecisionId": "cdebe5da-4600-4704-93f8-193f6fdf8e07",
+        "proposalId": "427e829012fb301f",
+        "proposalRevision": 1,
+        "optionId": "c6686596b29a976d",
+        "realizedAt": "2026-09-16T12:00:00.000Z",
+        "origin": "acceptedAllocation",
+        "result": "realized",
+        "scheduledGoalWorkIds": [
+          "1b65628030fc67e5"
+        ],
+        "scheduledSupportActivityIds": [],
+        "realizedBufferProtectionIds": [],
+        "acceptedClaimIds": [
+          "d405cf578f6735d6"
+        ],
+        "dependencyFingerprint": "9623175a7f0eaaef",
+        "provenance": {
+          "version": 1,
+          "role": "realizationEvidence"
+        }
+      }
+    ],
+    "facts": [
+      {
+        "recordType": "realizedScheduleFact",
+        "version": 1,
+        "id": "1b65628030fc67e5",
+        "sourceKind": "acceptedAllocation",
+        "scheduleRole": "productiveGoalWork",
+        "origin": {
+          "kind": "acceptedAllocation",
+          "realizationId": "b455640c383e4817",
+          "acceptedAllocationId": "74e3fedc-97aa-4c38-95be-1ddfcfd8f2c3",
+          "acceptedAllocationRevision": 1,
+          "acceptedClaimId": "d405cf578f6735d6",
+          "proposalDecisionId": "cdebe5da-4600-4704-93f8-193f6fdf8e07",
+          "proposalId": "427e829012fb301f",
+          "proposalRevision": 1,
+          "proposalOptionId": "c6686596b29a976d"
+        },
+        "startsAt": "2026-09-17T07:00:00.000Z",
+        "endsAt": "2026-09-17T08:00:00.000Z",
+        "durationMinutes": 60,
+        "userDayDate": "2026-09-17",
+        "capacityIntervalId": "cb48420800b1b3d3",
+        "placement": "fixedAcceptedGeometry",
+        "recurrence": "none",
+        "autonomousMovability": "prohibited",
+        "lineage": {
+          "candidateParentId": "453106f4c9d34fe8",
+          "goalId": "2594304b-8703-4b6b-8104-f351b1ca30ca",
+          "demandId": "21696222-6734-4107-81dd-8b851d3349a6",
+          "demandRevision": 1,
+          "demandProjectionId": "091245c9d388c725",
+          "productiveOpportunityId": "2b863a03d9ef5947",
+          "requiredness": "required",
+          "relationship": {
+            "kind": "productiveRoot"
+          },
+          "source": {
+            "kind": "direct"
+          },
+          "associationId": "483b6bf2-19af-4b8c-9a88-afe9111b3e82",
+          "associationRevision": 1
+        },
+        "timeSemantics": "activity",
+        "executionEligibility": "eligible"
+      }
+    ]
+  }
+}

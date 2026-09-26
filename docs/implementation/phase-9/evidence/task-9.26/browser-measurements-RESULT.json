@@ -1,0 +1,3379 @@
+[
+  {
+    "label": "source-A",
+    "goalId": "1369f406-9b34-423f-9de0-a980fcbfdc1d",
+    "requestId": "48a33bcb-5523-454e-af95-9d7903fdf568",
+    "acceptedIds": [
+      "4ca5647c-3afb-44df-9c66-ce7cfbae5b47",
+      "bc5185d4-4924-4615-865d-c0dbef765617",
+      "a7bbd037-d998-476b-ab81-8bf4beab4ccb"
+    ],
+    "browser": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "jsVersion": "15.3.76.13"
+    }
+  },
+  {
+    "label": "320-empty-file-selection",
+    "goalDraftPreserved": true,
+    "confirmationDialog": "No separate confirmation exists in this import contract; cancellation occurs before file selection."
+  },
+  {
+    "label": "320-native-invalid",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file is not valid JSON.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:05 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-rejection-nonmutation",
+    "sourceDigest": "6b530aa52745beb5708e1c29eb495baaf5b05eac9457f2d4700fd455453cc8de",
+    "restoredDigest": "6b530aa52745beb5708e1c29eb495baaf5b05eac9457f2d4700fd455453cc8de",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-native-unsupported",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file version is not supported.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:05 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-native-success",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H2",
+      "text": "September 2026",
+      "outline": "auto",
+      "outlineWidth": "1px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-native-import-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-replacement-identities",
+    "source": {
+      "goalId": "1369f406-9b34-423f-9de0-a980fcbfdc1d",
+      "requestId": "48a33bcb-5523-454e-af95-9d7903fdf568",
+      "acceptedIds": [
+        "4ca5647c-3afb-44df-9c66-ce7cfbae5b47",
+        "bc5185d4-4924-4615-865d-c0dbef765617",
+        "a7bbd037-d998-476b-ab81-8bf4beab4ccb"
+      ]
+    },
+    "destination": {
+      "goalId": "40e892a8-26c3-4f45-81e7-2b22aacdb715",
+      "requestId": "41b615cc-f51d-4f54-92ff-152d038ebdd1",
+      "acceptedIds": [
+        "d672744b-f951-4f67-9b3c-86887d695672",
+        "c55fe605-108a-41c8-bbfa-a22306262ded",
+        "80422c64-a683-4302-99fd-25e4c0b1059d"
+      ]
+    },
+    "destinationOnlyGoalAbsent": true,
+    "sentinel": "Destination B"
+  },
+  {
+    "label": "320-restored-inspection",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "320-reload-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-reload-inspection",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 215.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 76,
+        "width": 161.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 78,
+        "width": 149.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 76,
+        "width": 149.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 149.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 94,
+        "width": 161.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 112,
+        "width": 161.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 181.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 58,
+        "width": 193.40625
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 215.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-empty-file-selection",
+    "goalDraftPreserved": true,
+    "confirmationDialog": "No separate confirmation exists in this import contract; cancellation occurs before file selection."
+  },
+  {
+    "label": "390-native-invalid",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file is not valid JSON.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:15 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-rejection-nonmutation",
+    "sourceDigest": "0feea7babc594d2052c19455aa89460f6c2238e362f12e54442274f2304fb635",
+    "restoredDigest": "0feea7babc594d2052c19455aa89460f6c2238e362f12e54442274f2304fb635",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-native-unsupported",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file version is not supported.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:15 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-native-success",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H2",
+      "text": "September 2026",
+      "outline": "auto",
+      "outlineWidth": "1px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-native-import-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-replacement-identities",
+    "source": {
+      "goalId": "1369f406-9b34-423f-9de0-a980fcbfdc1d",
+      "requestId": "48a33bcb-5523-454e-af95-9d7903fdf568",
+      "acceptedIds": [
+        "4ca5647c-3afb-44df-9c66-ce7cfbae5b47",
+        "bc5185d4-4924-4615-865d-c0dbef765617",
+        "a7bbd037-d998-476b-ab81-8bf4beab4ccb"
+      ]
+    },
+    "destination": {
+      "goalId": "44006f97-1fb9-4fc1-8557-59f9a1d445b9",
+      "requestId": "073b0b83-4dc8-4c9c-9e70-feeeec078e0b",
+      "acceptedIds": [
+        "e1cccb9a-96bb-4d55-8d5e-4ee66abaaf10",
+        "ee834903-a007-4144-a9ac-6a320f22c805",
+        "7e2417ca-49ba-4399-87fc-cca7b2615dec"
+      ]
+    },
+    "destinationOnlyGoalAbsent": true,
+    "sentinel": "Destination B"
+  },
+  {
+    "label": "390-restored-inspection",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "390-reload-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-reload-inspection",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-empty-file-selection",
+    "goalDraftPreserved": true,
+    "confirmationDialog": "No separate confirmation exists in this import contract; cancellation occurs before file selection."
+  },
+  {
+    "label": "768-native-invalid",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file is not valid JSON.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:24 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-rejection-nonmutation",
+    "sourceDigest": "7c5ea177fd8e1ec4dd3adcbf763d256496bff5394f68f781bab5f738b51f2e2e",
+    "restoredDigest": "7c5ea177fd8e1ec4dd3adcbf763d256496bff5394f68f781bab5f738b51f2e2e",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-native-unsupported",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file version is not supported.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:24 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-native-success",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H2",
+      "text": "September 2026",
+      "outline": "auto",
+      "outlineWidth": "1px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-native-import-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-replacement-identities",
+    "source": {
+      "goalId": "1369f406-9b34-423f-9de0-a980fcbfdc1d",
+      "requestId": "48a33bcb-5523-454e-af95-9d7903fdf568",
+      "acceptedIds": [
+        "4ca5647c-3afb-44df-9c66-ce7cfbae5b47",
+        "bc5185d4-4924-4615-865d-c0dbef765617",
+        "a7bbd037-d998-476b-ab81-8bf4beab4ccb"
+      ]
+    },
+    "destination": {
+      "goalId": "fe8686aa-da76-4e71-9883-aaa318f7eda1",
+      "requestId": "443a2e51-2d77-4b19-9693-241d64c75965",
+      "acceptedIds": [
+        "1f26c842-661a-456b-b3e6-ea9b80671235",
+        "7c1ae161-ac3a-4908-9621-721a75f35629",
+        "09bdbe5e-216c-49c4-8a9b-b858e8b96d44"
+      ]
+    },
+    "destinationOnlyGoalAbsent": true,
+    "sentinel": "Destination B"
+  },
+  {
+    "label": "768-restored-inspection",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "768-reload-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-reload-inspection",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 199
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 565.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 593.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-empty-file-selection",
+    "goalDraftPreserved": true,
+    "confirmationDialog": "No separate confirmation exists in this import contract; cancellation occurs before file selection."
+  },
+  {
+    "label": "1280-native-invalid",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file is not valid JSON.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:34 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-rejection-nonmutation",
+    "sourceDigest": "ddea015844969174d81d7047ad7267c6d8193c06f02267812482cf3bbc019b85",
+    "restoredDigest": "ddea015844969174d81d7047ad7267c6d8193c06f02267812482cf3bbc019b85",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-native-unsupported",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Backup file version is not supported.",
+      "role": "alert",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:34 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-native-success",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H2",
+      "text": "September 2026",
+      "outline": "auto",
+      "outlineWidth": "1px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-native-import-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-replacement-identities",
+    "source": {
+      "goalId": "1369f406-9b34-423f-9de0-a980fcbfdc1d",
+      "requestId": "48a33bcb-5523-454e-af95-9d7903fdf568",
+      "acceptedIds": [
+        "4ca5647c-3afb-44df-9c66-ce7cfbae5b47",
+        "bc5185d4-4924-4615-865d-c0dbef765617",
+        "a7bbd037-d998-476b-ab81-8bf4beab4ccb"
+      ]
+    },
+    "destination": {
+      "goalId": "a913693b-6ff5-4531-ac56-1a6aa2b2dc32",
+      "requestId": "16824574-1031-48cd-825e-6b9469b0a711",
+      "acceptedIds": [
+        "d996242f-58f3-4df3-b4c0-ce4fb99be0bc",
+        "e8968f81-b52e-44f6-8398-27d37a0f2d9e",
+        "bdb62af0-9e01-4021-b47d-7f4a964fcbcb"
+      ]
+    },
+    "destinationOnlyGoalAbsent": true,
+    "sentinel": "Destination B"
+  },
+  {
+    "label": "1280-restored-inspection",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "1280-reload-authority",
+    "sourceDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "restoredDigest": "577604a68dc94b2c6a6667c84563484456df79b6e6a888b7709c0a04861bfab7",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-reload-inspection",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Source A restored Goal",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 357.34375
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 357.328125
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 44,
+        "width": 350.1875
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 44,
+        "width": 1040.8125
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 44,
+        "width": 397.046875
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 44,
+        "width": 502.859375
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 44,
+        "width": 1068.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 1096
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "native-reduced-height-keyboard",
+    "viewport": {
+      "width": 390,
+      "height": 420,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 44,
+        "width": 285.40625
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 44,
+        "width": 215.015625
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 58,
+        "width": 219.40625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 60,
+        "width": 219.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 58,
+        "width": 231.40625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 76,
+        "width": 231.40625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 60,
+        "width": 251.40625
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 44,
+        "width": 225.703125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 44,
+        "width": 285.40625
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "native-css-zoom-approximation",
+    "viewport": {
+      "width": 640,
+      "height": 800,
+      "client": 625,
+      "scroll": 625
+    },
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Import Setup Backup",
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 3,
+    "facts": 3,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 118,
+        "width": 449
+      },
+      {
+        "name": "Load Profile",
+        "height": 88,
+        "width": 230.78125
+      },
+      {
+        "name": "Delete Profile",
+        "height": 88,
+        "width": 252.09375
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 88,
+        "width": 413.953125
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 88,
+        "width": 358.828125
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 88,
+        "width": 298.34375
+      },
+      {
+        "name": "Close accepted planning",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Goal inspection start date",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Goal inspection end date",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Apply inspection period",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Refresh Goal evidence",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Close accepted iteration 1",
+        "height": 118,
+        "width": 377.8125
+      },
+      {
+        "name": "Close scheduled fact: Goal work, 2026-09-04",
+        "height": 155,
+        "width": 322.625
+      },
+      {
+        "name": "Publication: 2026-09-23 17:19:04 UTC",
+        "height": 159,
+        "width": 322.625
+      },
+      {
+        "name": "Open Daily Planner for 2026-09-04",
+        "height": 155,
+        "width": 322.625
+      },
+      {
+        "name": "Scheduled fact references",
+        "height": 122,
+        "width": 322.625
+      },
+      {
+        "name": "Inspect scheduled fact: Support activity, 2026-09-04",
+        "height": 192,
+        "width": 322.625
+      },
+      {
+        "name": "Inspect scheduled fact: Protected time · not an activity, 2026-09-04",
+        "height": 229,
+        "width": 322.625
+      },
+      {
+        "name": "Accepted planning references",
+        "height": 122,
+        "width": 377.8125
+      },
+      {
+        "name": "Inspect accepted iteration 2",
+        "height": 118,
+        "width": 377.8125
+      },
+      {
+        "name": "Inspect accepted iteration 3",
+        "height": 118,
+        "width": 377.8125
+      },
+      {
+        "name": "Review Schedule",
+        "height": 88,
+        "width": 433
+      }
+    ],
+    "validation": [
+      {
+        "name": "Goal inspection start date",
+        "invalid": "false",
+        "describedBy": null
+      },
+      {
+        "name": "Goal inspection end date",
+        "invalid": "false",
+        "describedBy": null
+      }
+    ]
+  },
+  {
+    "label": "uncaught-native-errors",
+    "errors": []
+  }
+]

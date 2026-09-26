@@ -1,3 +1,4 @@
+import { createSourceObservation, type SourceObservation } from "./sourceObservation.js";
 import type {
   AttachmentRelationshipV1,
   CompositeDecisionV1,
@@ -35,6 +36,7 @@ type Command<T> =
     };
 
 export function createCompositionSurface(options: {
+  reviewObservation?: SourceObservation;
   storage: IndexedDbCollectionStorage;
   listSources: () => CompositionTemplateSourceV1[];
   allocateId?: () => PlanningFactId;
@@ -43,6 +45,7 @@ export function createCompositionSurface(options: {
   notificationScheduler?: DayFrameNotificationScheduler;
   onAuthorityChanged?: () => void;
 }) {
+  const reviewObservation = options.reviewObservation ?? createSourceObservation();
   const storage = options.storage;
   const allocate = options.allocateId ?? allocatePlanningId;
   const now = options.now ?? (() => new Date().toISOString());
@@ -97,6 +100,7 @@ export function createCompositionSurface(options: {
   function protect(reason: "readFailure" | "invalidAuthority") {
     ingress = { status: "protected", reason };
     durability = "storageFailure";
+    reviewObservation.changed();
     return { status: "protected" as const };
   }
   async function createAttachment(
@@ -229,6 +233,7 @@ export function createCompositionSurface(options: {
     const saved = await persist(desired);
     authority = checked.authority;
     durability = saved ? "durable" : "pending";
+    reviewObservation.changed();
     options.onAuthorityChanged?.();
     notify();
     return {
@@ -256,6 +261,7 @@ export function createCompositionSurface(options: {
     if (options.canMutate && !options.canMutate()) return reject("authorityTransactionActive");
   }
   function notify() {
+    reviewObservation.changed();
     options.notificationScheduler?.notify("composition", () =>
       listeners.forEach((listener) => listener()),
     );
@@ -377,6 +383,7 @@ export function createCompositionSurface(options: {
       }
       return ok ? { status: "removed" as const } : { status: "storageFailure" as const };
     },
+    getCompositionReviewObservation: () => reviewObservation,
     getCompositionIngressStatus: () => clone(ingress),
     getCompositionDurabilityStatus: () => durability,
     retryCompositionPersistence: async () => {

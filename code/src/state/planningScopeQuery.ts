@@ -1,3 +1,21 @@
+import {
+  bindReviewSources,
+  qualifiedFamily,
+  qualificationFailure,
+  unqualified,
+  type QualifiedFamily,
+  type SourceQualifications,
+  type ReviewSourceSnapshot,
+} from "./reviewSourceQualification.js";
+import { getEffectiveHistoricalPlanRange } from "../core/historicalPlan/historicalPlanProjection.js";
+import { hasSleepPublicationSeamConflict } from "../core/sleep/sleepPublicationSeams.js";
+import { historicalPlanBatchFingerprint } from "../core/historicalPlan/historicalPlanFingerprint.js";
+import {
+  materializePlanPublication,
+  type MaterializePlanPublicationResult,
+} from "../core/historicalPlan/materializePlanPublication.js";
+import { publicationRangeFromReviewScope } from "../core/planning/reviewScope.js";
+import type { HistoricalPlanProtectionReason } from "./historicalPlanSurface.js";
 import { addUserDayLabels, resolveUserDayWindowForLabel } from "../core/time/canonicalUserDay.js";
 import {
   assessRangeCoverage,
@@ -14,17 +32,21 @@ import type { RealizationSurface } from "./realizationSurface.js";
 import type { HistoricalPlanSurface } from "./historicalPlanSurface.js";
 import { capacityFingerprint } from "../core/planning/capacityFingerprint.js";
 
-export type PlanningReviewReadModelV1 = {
-  version: 1;
+export type PlanningReviewReadModelV2 = {
+  version: 2;
+  sourceQualification: SourceQualifications;
+  queryState: "current" | "sourceChanged" | "contextReplaced";
+  publicationWitness: { status: "publishable" | "blocked" };
   sourceFingerprint: string;
   reviewScope: ReviewScopeV1;
   planningDataCoverage: PlanningScopeCoverageV1;
   preview: {
     availability: "available" | "unavailable";
+    revision: "generated" | "try";
     coverage: "covers" | "partiallyCovers" | "doesNotCover";
     freshness: "current" | "stale" | "unavailable";
   };
-  scheduledReality: Array<{
+  scheduledReality: QualifiedFamily<{
     epistemicClass: "scheduledReality";
     fact: ReturnType<RealizationSurface["listRealizedScheduleFacts"]>[number];
     authoritativeInterval: { startsAt: string; endsAt: string };
@@ -39,7 +61,7 @@ export type PlanningReviewReadModelV1 = {
     authoritativeInterval: { startsAt: string; endsAt: string };
     visibleInterval: { startsAt: string; endsAt: string };
   }>;
-  acceptedLiabilities: Array<{
+  acceptedLiabilities: QualifiedFamily<{
     epistemicClass: "acceptedAuthority";
     acceptedAllocationId: string;
     claim: ReturnType<
@@ -48,7 +70,7 @@ export type PlanningReviewReadModelV1 = {
     authoritativeInterval: { startsAt: string; endsAt: string };
     visibleInterval: { startsAt: string; endsAt: string };
   }>;
-  proposals: Array<{
+  proposals: QualifiedFamily<{
     epistemicClass: "proposed";
     proposal: ReturnType<ProposalSurface["listActionableProposals"]>[number];
     membership: "contained" | "intersecting";
@@ -56,6 +78,16 @@ export type PlanningReviewReadModelV1 = {
   unresolvedFrictionCount: number;
   publication: {
     epistemicClass: "historical";
+    availability:
+      | { status: "available" }
+      | { status: "protected"; reason: HistoricalPlanProtectionReason }
+      | { status: "unavailable"; reason: string };
+    materialization:
+      | { status: "eligible" }
+      | {
+          status: "blocked";
+          reason: Exclude<MaterializePlanPublicationResult, { status: "materialized" }>["status"];
+        };
     coverage: PlanningScopeCoverageV1;
     publishedUserDays: string[];
     missingUserDays: string[];
@@ -63,22 +95,44 @@ export type PlanningReviewReadModelV1 = {
 };
 
 export function createPlanningScopeQuery(options: {
+  captureSources: () => ReviewSourceSnapshot;
   getState: () => DayFrameState;
+  getSleepAuthority?: () => import("../core/sleep/sleepFoundationalOccupancy.js").SleepFoundationAuthority;
   proposals: Pick<ProposalSurface, "listActionableProposals" | "listUnrealizedAcceptedAllocations">;
   realizations: Pick<RealizationSurface, "listRealizedScheduleFacts">;
-  historicalPlan: Pick<HistoricalPlanSurface, "getHistoricalPlanRange">;
+  historicalPlan: Pick<HistoricalPlanSurface, "readReviewCollection">;
 }) {
   return async function queryPlanningReview(input: {
     reviewScope: ReviewScopeV1;
     historyAsOf: string;
-  }): Promise<PlanningReviewReadModelV1> {
+  }): Promise<PlanningReviewReadModelV2> {
     const finalLabel = addUserDayLabels(input.reviewScope.endUserDayDateExclusive, -1);
-    const history = await options.historicalPlan.getHistoricalPlanRange(
-      input.reviewScope.startUserDayDate,
-      finalLabel,
-      input.historyAsOf,
-    );
-    const state = options.getState();
+    const snapshot = options.captureSources();
+    const collection = await options.historicalPlan.readReviewCollection();
+    const afterRead = snapshot.checkQuery();
+    const state = snapshot.state;
+    const range =
+      collection.status === "available"
+        ? getEffectiveHistoricalPlanRange({
+            batches: collection.batches,
+            startUserDayDate: input.reviewScope.startUserDayDate,
+            endUserDayDate: finalLabel,
+            asOf: input.historyAsOf,
+          })
+        : undefined;
+    const history =
+      range?.status === "projected" && collection.status === "available"
+        ? {
+            status: "available" as const,
+            days: range.days.map((day) => ({
+              ...day,
+              durability: collection.pendingIds.some((id) => id === day.batchId)
+                ? "pending"
+                : "durable",
+            })),
+            missingDays: range.missingDays,
+          }
+        : undefined;
     const resolve = (date: ReviewScopeV1["startUserDayDate"]) =>
       resolveUserDayWindowForLabel({
         shiftCycles: state.shiftCycles,
@@ -88,7 +142,7 @@ export function createPlanningScopeQuery(options: {
     const reviewStart = resolve(input.reviewScope.startUserDayDate).start.toISOString();
     const reviewEnd = resolve(finalLabel).end.toISOString();
     const bounds = { startsAt: reviewStart, endsAt: reviewEnd };
-    const realized = options.realizations.listRealizedScheduleFacts();
+    const realized = snapshot.realized;
     const realizedAllocations = new Set(realized.map((fact) => fact.origin.acceptedAllocationId));
     const scheduledReality = realized.flatMap((fact) => {
       const visible = visibleInterval(fact, bounds);
@@ -132,9 +186,12 @@ export function createPlanningScopeQuery(options: {
             : [];
         })
       : [];
-    const acceptedLiabilities = options.proposals
-      .listUnrealizedAcceptedAllocations()
-      .filter((accepted) => !realizedAllocations.has(accepted.id))
+    const acceptedLiabilities = snapshot.accepted
+      .filter(
+        (accepted) =>
+          snapshot.qualification.realization.status !== "qualified" ||
+          !realizedAllocations.has(accepted.id),
+      )
       .flatMap((accepted) =>
         accepted.claims.flatMap((claim) => {
           const visible = visibleInterval(claim, bounds);
@@ -151,7 +208,7 @@ export function createPlanningScopeQuery(options: {
             : [];
         }),
       );
-    const proposals = options.proposals.listActionableProposals().flatMap((proposal) => {
+    const proposals = snapshot.proposals.flatMap((proposal) => {
       if (!intersectsRange(proposal.horizon as never, input.reviewScope)) return [];
       const contained =
         input.reviewScope.startUserDayDate <= proposal.horizon.startUserDayDate &&
@@ -170,55 +227,161 @@ export function createPlanningScopeQuery(options: {
       : undefined;
     const planningRange = state.preview?.scopeMetadata?.effectivePlanningDataHorizon.effective;
     const publishedUserDays =
-      history.status === "available" ? history.days.map((result) => result.day.userDayDate) : [];
-    const missingUserDays = history.status === "available" ? history.missingDays : [];
+      history?.status === "available" ? history.days.map((result) => result.day.userDayDate) : [];
+    const missingUserDays = history?.status === "available" ? history.missingDays : [];
     const expectedDays = duration(input.reviewScope);
     const unresolvedFriction =
       state.preview?.result.frictionPoints?.filter((point) => !point.ignored) ?? [];
     const publicationCoverage: PlanningScopeCoverageV1 =
-      history.status !== "available"
+      history?.status !== "available"
         ? "unknown"
         : publishedUserDays.length === expectedDays
           ? "complete"
           : publishedUserDays.length
             ? "partial"
             : "none";
-    return {
-      version: 1,
-      sourceFingerprint: capacityFingerprint({
-        preview: state.preview
+    // Dry-run the canonical materializer with deterministic providers; never writes or allocates authority.
+    let materialized: MaterializePlanPublicationResult = qualificationFailure(
+      snapshot.qualification,
+    )
+      ? {
+          status: "inconsistentPlanContext",
+          detail: "Required publication sources are unqualified",
+        }
+      : materializePlanPublication({
+          authoredSetup: snapshot.setup,
+          sleepAuthority: snapshot.sleep,
+          goals: snapshot.goals,
+          preview: state.preview,
+          publicationRange: publicationRangeFromReviewScope(input.reviewScope),
+          providers: {
+            now: () => input.historyAsOf,
+            allocateBatchId: () => "00000000-0000-4000-8000-000000000099" as never,
+          },
+        });
+    if (
+      materialized.status === "materialized" &&
+      collection.status === "available" &&
+      hasSleepPublicationSeamConflict(materialized.batch, collection.batches)
+    )
+      materialized = {
+        status: "inconsistentPlanContext",
+        detail: "Sleep publication conflicts with an effective neighboring day",
+      };
+    const availability: PlanningReviewReadModelV2["publication"]["availability"] =
+      collection.status === "protected"
+        ? { status: "protected", reason: collection.reason }
+        : !history
           ? {
-              generatedAt: state.preview.generatedAt,
-              revisedAt: state.preview.revisedAt,
-              isStale: state.preview.isStale,
-              range: previewRange,
-              friction: unresolvedFriction.map((point) => point.id).sort(),
+              status: "unavailable",
+              reason: collection.status === "available" ? "invalidRange" : collection.reason,
             }
-          : null,
-        realized: scheduledReality.map(({ fact }) => fact).sort((a, b) => a.id.localeCompare(b.id)),
-        accepted: acceptedLiabilities
-          .map(({ acceptedAllocationId, claim }) => ({ acceptedAllocationId, claim }))
-          .sort((a, b) => a.acceptedAllocationId.localeCompare(b.acceptedAllocationId)),
-      }),
+          : history.days.some((day) => day.durability !== "durable")
+            ? { status: "unavailable", reason: "pendingDurability" }
+            : { status: "available" };
+    const afterDerivation = snapshot.checkQuery();
+    const check = afterRead.status === "rejected" ? afterRead : afterDerivation;
+    const queryState =
+      check.status === "rejected"
+        ? check.reason === "contextReplaced"
+          ? "contextReplaced"
+          : "sourceChanged"
+        : collection.status === "stale"
+          ? collection.reason
+          : "current";
+    const sourceQualification: SourceQualifications = {
+      ...(queryState === "current" ? snapshot.qualification : snapshot.currentQualification()),
+      historicalPlan:
+        availability.status === "available"
+          ? snapshot.qualification.historicalPlan
+          : unqualified(
+              "historicalPlan",
+              availability.status === "protected"
+                ? "protected"
+                : availability.reason === "pendingDurability"
+                  ? "pendingDurability"
+                  : "readUnavailable",
+              availability.reason,
+            ),
+    };
+    const model: PlanningReviewReadModelV2 = {
+      version: 2,
+      sourceQualification,
+      queryState,
+      publicationWitness: {
+        status:
+          queryState === "current" &&
+          !qualificationFailure(sourceQualification) &&
+          availability.status === "available"
+            ? "publishable"
+            : "blocked",
+      },
+      sourceFingerprint:
+        "review-qualified-v2:" +
+        capacityFingerprint({
+          scope: {
+            startUserDayDate: input.reviewScope.startUserDayDate,
+            endUserDayDateExclusive: input.reviewScope.endUserDayDateExclusive,
+          },
+          qualification: sourceQualification,
+          goals: snapshot.goals,
+          planningCoverage: assessRangeCoverage(planningRange, input.reviewScope),
+          previewCoverage: assessPreviewReviewCoverage(previewRange, input.reviewScope),
+          publicationTruth:
+            materialized.status === "materialized"
+              ? historicalPlanBatchFingerprint(materialized.batch)
+              : materialized.status,
+          preview: state.preview
+            ? {
+                revision: state.preview.revisedAt === undefined ? "generated" : "try",
+                isStale: state.preview.isStale,
+                foundation: state.preview.result.foundation,
+                range: previewRange,
+                friction: unresolvedFriction.map((point) => point.id).sort(),
+              }
+            : null,
+          realized: scheduledReality
+            .map(({ fact }) => fact)
+            .sort((a, b) => a.id.localeCompare(b.id)),
+          accepted: acceptedLiabilities
+            .map(({ acceptedAllocationId, claim }) => ({ acceptedAllocationId, claim }))
+            .sort((a, b) => a.acceptedAllocationId.localeCompare(b.acceptedAllocationId)),
+        }),
       reviewScope: structuredClone(input.reviewScope),
-      planningDataCoverage: assessRangeCoverage(planningRange, input.reviewScope),
+      planningDataCoverage:
+        state.preview?.result.foundation?.status === "nonAllocatable"
+          ? "unknown"
+          : assessRangeCoverage(planningRange, input.reviewScope),
       preview: {
         availability: state.preview ? "available" : "unavailable",
+        revision: state.preview?.revisedAt !== undefined ? "try" : "generated",
         coverage: assessPreviewReviewCoverage(previewRange, input.reviewScope),
         freshness: state.preview ? (state.preview.isStale ? "stale" : "current") : "unavailable",
       },
-      scheduledReality,
+      scheduledReality: qualifiedFamily(scheduledReality, sourceQualification.realization),
       derivedSchedule,
-      acceptedLiabilities,
-      proposals,
+      acceptedLiabilities: qualifiedFamily(
+        acceptedLiabilities,
+        sourceQualification.proposal.status === "unqualified"
+          ? sourceQualification.proposal
+          : sourceQualification.realization,
+      ),
+      proposals: qualifiedFamily(proposals, sourceQualification.proposal),
       unresolvedFrictionCount: unresolvedFriction.length,
       publication: {
         epistemicClass: "historical",
+        availability,
+        materialization:
+          materialized.status === "materialized"
+            ? { status: "eligible" }
+            : { status: "blocked", reason: materialized.status },
         coverage: publicationCoverage,
         publishedUserDays,
         missingUserDays,
       },
     };
+    if (queryState === "current") bindReviewSources(model, snapshot);
+    return model;
   };
 }
 

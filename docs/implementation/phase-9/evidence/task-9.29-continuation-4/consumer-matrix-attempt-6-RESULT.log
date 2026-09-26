@@ -1,0 +1,29 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ReviewIndependentDrafts.test.tsx (1 test | 1 failed) 55ms
+   × Review and Summary preserve Measurement and Observation corrections at their original revisions 54ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ReviewIndependentDrafts.test.tsx > Review and Summary preserve Measurement and Observation corrections at their original revisions
+DayFrameMutationAdmissionError: DayFrame mutation is blocked: protected.
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3494:41
+    3492|             authorityTransaction.getState().status !== "inactive",
+    3493|           );
+    3494|           if (!admission.allowed) throw new DayFrameMutationAdmissionE…
+       |                                         ^
+    3495|           return (value as (...values: unknown[]) => unknown)(...args);
+    3496|         });
+ ❯ goalInspectionCanonicalFixture src/ui/tests/goalInspectionCanonicalFixture.ts:76:9
+ ❯ v14RestoreFixture src/ui/tests/v14RestoreFixture.ts:8:40
+ ❯ src/ui/tests/ReviewIndependentDrafts.test.tsx:9:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 61 passed (62)
+   Start at  13:25:54
+   Duration  12.20s (transform 1.46s, setup 0ms, import 1.79s, tests 8.90s, environment 1.24s)
+

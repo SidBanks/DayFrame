@@ -1,0 +1,155 @@
+NATIVE_CORE_PASS
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:42
+  throw Error(
+        ^
+
+Error: Timed out: document.body?.innerText.includes("Backup restore was not started")
+DayFrame
+Planner
+Summary
+Planner / Review Plan
+Back
+Settings and data
+Saved Setup Profiles
+
+Save named local setups, then load one later to replace the current active setup.
+
+Profile Name
+Save Current Setup as Profile
+
+No saved profiles yet.
+
+Export Complete Backup
+Import Setup Backup
+Clear Local Data
+
+Publication or another authority operation is still finishing. Clear was not started. Wait for settlement, then explicitly try again.
+
+Clear all locally saved DayFrame setup data?
+
+Confirm Clear Local Data
+Cancel
+
+LATEST SCHEDULE
+
+No friction
+
+September 17, 2026 · Generated Today at 10:17 AM
+
+Open Review Plan
+Planning Range
+September 17, 2026
+Generated
+Today at 10:17 AM
+Visible Days
+1
+Friction
+No friction
+Thu
+17
+Planner
+Calendar
+My Schedule
+Goals
+Review Plan
+Selected day: 2026-09-24
+Today
+Review Plan
+Refresh Schedule
+Review one user-day
+
+REVIEW WORKFLOW
+
+Review readiness
+
+2026-09-17 through 2026-09-18 (exclusive)
+
+Planning data
+complete
+Preview coverage
+covers
+Preview freshness
+current
+Schedule conflicts
+0
+Accepted awaiting realization
+0
+Proposals
+0
+Ready to publish
+
+This period satisfies the current derived publication-readiness policy. Publishing remains an explicit action.
+
+Published history covers this period.
+
+Publishing…
+
+No actionable Proposal intersects this Review Scope.
+
+Schedule details
+
+Review planned geometry for the selected user-day and try bounded resolution options when something conflicts.
+
+Summary
+Planning Window
+September 17, 2026
+Generated
+Today at 10:17 AM
+Revised
+Not revised yet
+Needs attention
+0 total, 0 critical, 0 warning, 0 infoWork-dependent activities skipped: 0
+Thursday, 2026-09-17
+Add Event
+Day Visualizer
+
+A read-only view across this 24-hour user-day.
+
+12:00 AM
+1:00 AM
+2:00 AM
+3:00 AM
+4:00 AM
+5:00 AM
+6:00 AM
+7:00 AM
+8:00 AM
+9:00 AM
+10:00 AM
+11:00 AM
+12:00 PM
+1:00 PM
+2:00 PM
+3:00 PM
+4:00 PM
+5:00 PM
+6:00 PM
+7:00 PM
+8:00 PM
+9:00 PM
+10:00 PM
+11:00 PM
+Native publication source native busy
+12:00 PM - 1:00 PM
+Routine
+6:00 PM - 6:30 PM
+Manual Events
+
+No manual events.
+
+Work
+Native publication source native busy 12:00 PM - 1:00 PMEdit Work
+Scheduled
+Routine 6:00 PM - 6:30 PM (Priority 2)Edit Commitment
+Plan attention — Unplaced
+
+No unplaced commitments.
+
+Needs attention
+
+No schedule conflicts detected.
+    at until (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:42:9)
+    at async mobileChecks (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:222:67)
+    at async file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:192:1
+
+Node.js v22.23.2

@@ -41,7 +41,17 @@ export type ManualEventOccurrenceIdentity = Omit<OccurrenceIdentityBase, "slot">
   manualEventId: string;
 };
 
+export type SleepOccurrenceIdentityV1 = {
+  version: 1;
+  sourceKind: "sleepRequirement";
+  requirementId: string;
+  scopeKind: "userDay";
+  userDayDate: LocalDateString;
+  slot: 0;
+};
+
 export type OccurrenceIdentity =
+  | SleepOccurrenceIdentityV1
   | TemplateOccurrenceIdentity
   | WorkOccurrenceIdentity
   | ManualEventOccurrenceIdentity;

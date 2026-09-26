@@ -1,0 +1,28 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceQualification.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/publicationSourceQualification.test.ts (20 tests | 1 failed) 1061ms
+   × source mutation during awaited collection read returns explicitly stale Review, then a fresh query qualifies 43ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/publicationSourceQualification.test.ts > source mutation during awaited collection read returns explicitly stale Review, then a fresh query qualifies
+TypeError: f.store.reviseGoal is not a function
+ ❯ src/state/publicationSourceQualification.test.ts:84:52
+     82|   vi.spyOn(f.history,"readReviewCollection").mockImplementationOnce(as…
+     83|   const query=f.store.queryPlanningReview(f.query);await entered.promi…
+     84|   const goal=f.store.listGoals()[0]!;await f.store.reviseGoal({goalId:…
+       |                                                    ^
+     85|   release.resolve();const model=await query;expect(model.queryState).t…
+     86|   expect((await f.store.queryPlanningReview(f.query)).queryState).toBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  11:36:06
+   Duration  1.84s (transform 844ms, setup 0ms, import 680ms, tests 1.06s, environment 0ms)
+

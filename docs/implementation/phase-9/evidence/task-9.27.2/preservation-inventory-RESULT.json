@@ -1,0 +1,309 @@
+{
+  "baselineHead": "c0cc9ae2ae68af626e64747539a417f10df1cf3a",
+  "baselineStatusEntries": 209,
+  "baselineFileCount": 1052,
+  "unchangedBaselineFiles": 1037,
+  "missingBaselineFiles": [],
+  "modifiedBaselineFiles": [
+    {
+      "path": "code/src/state/goalPlanningSurface.ts",
+      "beforeSha256": "be3ca872aca5897181d5b085a1c3069b1676be980a086a9f5ab17ae9d51fb2ba",
+      "afterSha256": "900a0675ed10a04f14813d1f68d8c127448501f704c66a871de1b12f9bcc8869"
+    },
+    {
+      "path": "code/src/state/dayFrameRestoreComposition.ts",
+      "beforeSha256": "649342fca9d08ba1a50ad92cbee968f90c8c75575bdef1e19e6bfd8c31e7ee80",
+      "afterSha256": "8fbf6346a5440576728f67b72b0234d18d992d6542e8c9ad06cb323012b57026"
+    },
+    {
+      "path": "code/src/state/goalStructureSurface.ts",
+      "beforeSha256": "49a32e6d2c8dafafd35462cfcc229b2d466553e4cf8f2f173906c56814e8deb4",
+      "afterSha256": "88e490447260b1641ae3c39989c7b57ea162b22a1fcc858f761110f0d1e5448e"
+    },
+    {
+      "path": "code/src/state/lazyGoalStructureSurface.ts",
+      "beforeSha256": "9f2f477f280c2d69e4e852a4b80db2474e8693cc69002786d6b2aee7f60b220e",
+      "afterSha256": "67462925ec8df8c4bb81ced82c7285d03f6041a1763e69964adab6197b7cca31"
+    },
+    {
+      "path": "code/src/state/goalDemandProjectionQuery.ts",
+      "beforeSha256": "e90f4b4adcbcf3e19626eb9d5f5a8b8aa0ead712ebe4af65dce42c94cce0748b",
+      "afterSha256": "2e55f4dad752ced0615316b688dd6aa04715edd5ed0798456fdb3dacbc5f9647"
+    },
+    {
+      "path": "code/src/state/dayFrameAuthorityTransaction.ts",
+      "beforeSha256": "754f08265c9bf3119007bffbb51092fe70a1ef73fcb5f655323abe818f347eea",
+      "afterSha256": "5d6008fbd234dbc52b9b2f32190a64f8afd63370c29472d85ecded595b050eb5"
+    },
+    {
+      "path": "code/src/state/capacitySurface.ts",
+      "beforeSha256": "b34fb7cd3c9bc9e699cf21d321c2208742aee39f626b215fe280ad8ba78cb73a",
+      "afterSha256": "f3f99099ff50b1b5fe752af25bf1f892a37af495688a32b11d30dc76712db383"
+    },
+    {
+      "path": "code/src/core/planning/goalDemandProjection.ts",
+      "beforeSha256": "a9cbedb2defae23fd5444550bd27c37da9dae3798638d9c1c8baf59e3321b7b8",
+      "afterSha256": "640e78bed06772ecea8af1bc72917f11143de458061c6ed9ac4ac60bf553b99f"
+    },
+    {
+      "path": "code/src/state/dayFrameRuntimeAuthority.ts",
+      "beforeSha256": "290c20cda8f60061ae0a63c2635ac5fd32ae1c439acd5aaeeecd63755698bf5b",
+      "afterSha256": "97bd5e82202a022ac9b4e3c725c7c8cca47c8e0d09f97eee8dad1f0d0ed733ca"
+    },
+    {
+      "path": "code/src/state/proposalSurface.ts",
+      "beforeSha256": "5485fc9c9bbff50142b3d62fca6016f17fea910a6a24c487ec8817ad4853a8b0",
+      "afterSha256": "2341cb16d129a8573354a7c5507f7d3f1721c144cb492dda2f65c19be0c23930"
+    },
+    {
+      "path": "code/src/ui/DayFrameApp.tsx",
+      "beforeSha256": "458a1677364a08ee2fe9044d136b5b56a18a70f12d1c886b307e4b208c088761",
+      "afterSha256": "bca974d01be22d85f78b1bdd828d702dedb7d54cee24221aff575a1ec48af204"
+    },
+    {
+      "path": "code/src/ui/GoalPlanningSection.tsx",
+      "beforeSha256": "26eef252f269544b0e655e1172f718ed1a9115f084ebd8c3bb95a65d770d16c0",
+      "afterSha256": "08ee5237e1a95480f92e608c1921de69ec643a5ffb834cc2c85e7d342e036740"
+    },
+    {
+      "path": "code/src/infrastructure/storage/indexedDbCollectionStorage.ts",
+      "beforeSha256": "c2e8c0789f2270b7a9ae4ae6e71637a04f2227dd6747c5eafc18829d544f76ed",
+      "afterSha256": "705487105f1ebec7a3ec5bea953375fa17c12f58292d96574c6b2c90f76ce29d"
+    },
+    {
+      "path": "code/src/state/dayFrameStore.ts",
+      "beforeSha256": "57be3fb620762334747523256fe9fc3eb61ebefbf41828bf0792a49a542f3e77",
+      "afterSha256": "561a586ecf00da893bf2951ad355d001cb7cb274786020e8b561dd71e270550e"
+    },
+    {
+      "path": "code/src/state/allocationSurface.ts",
+      "beforeSha256": "c682ad667508db247b5468d0f914c03da8d03b47edcb7238bcc0443023d38e9e",
+      "afterSha256": "07b67150b8d9af574839e5d85ff470ab4dbc83a28b8c0c124c4c563ad9d9dcea"
+    }
+  ],
+  "taskCreatedFiles": [
+    {
+      "path": "code/src/core/planning/goalStructureTemporal.ts",
+      "sha256": "16d513f08a1612285e9dd95286dde07433b29aa3d9c6945c7f9fc911524d773d",
+      "bytes": 11095
+    },
+    {
+      "path": "code/src/state/goalStructureOwnerSafety.test.ts",
+      "sha256": "1384d7c974b41d745865b21b4b291e045071193ad4d1781de154fa279f49b3ca",
+      "bytes": 23709
+    },
+    {
+      "path": "code/src/state/goalStructurePlanningSafety.test.ts",
+      "sha256": "91d7de6749925a98f10557f52a972e149c30b784c62857b7cf99286a3a075818",
+      "bytes": 12960
+    },
+    {
+      "path": "docs/adr/ADR_GOAL_STRUCTURE_TEMPORAL_QUALIFICATION_AND_OWNER_SAFETY_V1_RESULT.md",
+      "sha256": "b73cd85f019cbb566901471355e2bd45f15a026399bc9eb2925a0992f24d8afe",
+      "bytes": 2452
+    },
+    {
+      "path": "docs/implementation/phase-9/TASK_9.27.2_GOAL_STRUCTURE_CANONICAL_OWNER_REPAIR_V1_RESULT.md",
+      "sha256": "05ce8542b64604cf3227e27c6cbf18dd5ecb0836dcdf5f90bb1767d031faa3fc",
+      "bytes": 23238
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-B-after-rejection-RESULT.json",
+      "sha256": "388bd8bb97eede4000c361983a937246b8d2dc0941ff90b728f09e5dc86e5af0",
+      "bytes": 728317
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-B-before-RESULT.json",
+      "sha256": "b8c47f2f8ef081bb6f2fb841321808659b479593b83f17bd2f17069019ab900b",
+      "bytes": 728317
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-anomalous-after-evaluation-RESULT.json",
+      "sha256": "89e0243e59d5361300b9139c79dfa186cc7de60b092f6d1718dc5d19e7496a50",
+      "bytes": 730184
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-anomalous-export-RESULT.json",
+      "sha256": "e9fae1c2d02fd5fdc5b748e96e8e85d1aaea6d0c3e2ae47c9f4ac81d2071920c",
+      "bytes": 730184
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-anomalous-preservation-RESULT.png",
+      "sha256": "9d6062d8f450b109028bd852264550970954bb7765fc5048cca868c2de9eef62",
+      "bytes": 86999
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-coherent-export-RESULT.json",
+      "sha256": "7927b6cebfcf13ac6d84cd938be44034f506f4204dbfa5b1324eed0fe3818125",
+      "bytes": 728326
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-coherent-reloaded-RESULT.json",
+      "sha256": "1a0c0f5d3f17ffecbcb1b903e3f0ad9270e5011f2cc88dbe994a6fe603f3c1e3",
+      "bytes": 728326
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-planning-accepted-RESULT.json",
+      "sha256": "be385fad0c134f38a1a6205317ed7ac713d881ce8042ff9a5e9e8e37be00e5da",
+      "bytes": 822194
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-planning-protected-RESULT.png",
+      "sha256": "e43284d535cfb32e819bfe92dfae0da8e8047cf33c5f014dc4f18eefe927248f",
+      "bytes": 56992
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-reflow-RESULT.png",
+      "sha256": "9b2136fb560620c0e3d9878150183ee72df64a8dcdccf3afeda8cfd8bf9dcbfd",
+      "bytes": 100330
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/320-reloaded-native-export-RESULT.json",
+      "sha256": "40dcc112f4cfa5787c5f6ba3e58ce4f1f5317331854a0f8c625b586d3cb81e67",
+      "bytes": 730184
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/390-reduced-height-keyboard-RESULT.png",
+      "sha256": "12bd677b5c71744251b19f97f0080449910ebf6fd5aacf77affe7c6ff06331b5",
+      "bytes": 49721
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/REPRODUCTION_RESULT.md",
+      "sha256": "2a32c3e7db6fb897d0f11dfc55c911373908bb24ff11e7a820da7e73f70c3610",
+      "bytes": 4361
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/artifact-format-RESULT.log",
+      "sha256": "1cbfc9a95af5d8dd19045a4b855bcea0aa1cb182d039d190b67b499caa1dd415",
+      "bytes": 623
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-build-RESULT.log",
+      "sha256": "a6abb39bb4efd0ea2ba397fd257f8bc0603ad8473fb718dda9c30c18f446ffb5",
+      "bytes": 7438
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-bundle-RESULT.log",
+      "sha256": "76a8c0d71bbaa10639a66787622bffa5fd771ff540205d845889e68be0be3043",
+      "bytes": 4427
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-hashes-RESULT.json",
+      "sha256": "fd94acaadb1fe500cb5c22e0895af7decbb496364d4b1d38bd67ba82b79ebbc7",
+      "bytes": 155441
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-head-RESULT.txt",
+      "sha256": "647337dda1d5afeb8ae43c754a6d18cce5ac2ea718b4116e211060b41fb1259a",
+      "bytes": 41
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-status-RESULT.txt",
+      "sha256": "445d534c3c442c51827fa2f02567c27acbf8455225265435471a474804ec781a",
+      "bytes": 12265
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/baseline-tests-RESULT.log",
+      "sha256": "b98e7d9156ecf5a0277621f9e5523d66c3fa38e3d9a834ed97ede13e2cb7b20f",
+      "bytes": 321
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/browser-RESULT.log",
+      "sha256": "89c8a79e5f5aa18c5dd52f2f107d669f0cb5ba29f7b6c4e0f2b8296e0c54dbf1",
+      "bytes": 21
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/browser-driver-RESULT.mjs",
+      "sha256": "37413c2627dedc7018d70ec040e65702b422fe350d933f31577333c4b9a554bc",
+      "bytes": 17278
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/browser-measurements-RESULT.json",
+      "sha256": "d93ca78675ca3e951710392e8837c5f6617eb66e345cfa17dfd1c77138410fcd",
+      "bytes": 163503
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/build-RESULT.log",
+      "sha256": "55d0e1303f5d524ed1a0d157a46ea74940e6018b19d3fce530af5ebd57f320d6",
+      "bytes": 7529
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/bundle-RESULT.log",
+      "sha256": "5b684ebf600913f497e3656cff1b2ca10c1fc2670c6898cef2180ada85f3c235",
+      "bytes": 4475
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/canonical-seed-RESULT.ts",
+      "sha256": "d1eac871efe4a3735e2ea4cab8ac6f63df836c69ef229bd8136c88b12aba2cf2",
+      "bytes": 1848
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/diff-check-RESULT.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/format-RESULT.log",
+      "sha256": "be4fc3079d0939c2a76f373fbfa36291b780b38d566d7de060c4bbae400158f4",
+      "bytes": 136
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/legacy-anomalous-fixture-RESULT.json",
+      "sha256": "f910c04dc6a16ad4f1e86efcdb363caf1cabaee6d63cc0cd4cf7404837a782dd",
+      "bytes": 730184
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/lint-RESULT.log",
+      "sha256": "1389595f346d2e3a74f86aba1529c6c2d8ceb5000a2dfd6e2d8499f007b3dca5",
+      "bytes": 59
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/malformed-input-RESULT.json",
+      "sha256": "17eed55d881c0dd5fe0935a98d89dd9e52d62aed941f3fb7d17bd490e5aa3e8f",
+      "bytes": 4
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/planning-final-RESULT.log",
+      "sha256": "23d6dae0b4be22c1385b520cd7f9041f9d8a19210a51431a5ffaac016a58e151",
+      "bytes": 353
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/seed-build-RESULT.log",
+      "sha256": "6748c20216acb4c72fc67b82b23d87aa1d1287baa06d92bd4bf0d5800154fe67",
+      "bytes": 585
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/seed-build-config-RESULT.mjs",
+      "sha256": "b1bb96fbc9a6b4ad3e14122f098d887b847eb675915e6bce2bcfb9ccca76f336",
+      "bytes": 402
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/source-A-native-export-RESULT.json",
+      "sha256": "6be56a8f68b611deb75050a409e12d82f640ce89339aa02e50d2f893ebb7cb34",
+      "bytes": 728326
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/task-relative-RESULT.patch",
+      "sha256": "981480d97b070b0e36b64c21ca400c6d4b10e85ebf8b56b43a91cf4f44e1cee6",
+      "bytes": 90467
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/tests-RESULT.log",
+      "sha256": "8092fa25266b040523db03d556ca7a7980acb59ab62c7349e6779b46d0a690f4",
+      "bytes": 322
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/typecheck-RESULT.log",
+      "sha256": "049f30d16d457b1a0fd5c0f85e352f9036436c044e1906fddf4803014ee81027",
+      "bytes": 68
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.27.2/ui-followup-RESULT.log",
+      "sha256": "33ef79be568ac0a7dde66b8c9dc2c3aede8b83dfdfb5d75926ce81b9d9e9594b",
+      "bytes": 347
+    }
+  ],
+  "inventoryPath": "docs/implementation/phase-9/evidence/task-9.27.2/preservation-inventory-RESULT.json",
+  "inventoryExcludesItsOwnHash": true,
+  "proposalSha256": "925cecfbd58938cd6a75920e280209a509d88b7f647f5d0db6c471423fac3581"
+}

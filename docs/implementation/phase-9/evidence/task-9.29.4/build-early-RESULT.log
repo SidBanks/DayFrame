@@ -1,0 +1,6 @@
+npm notice run dayframe@0.1.0 build
+npm notice run tsc --noEmit && vite build
+src/core/planning/deriveFoundationalSchedule.ts(208,26): error TS2339: Property 'authority' does not exist on type 'FoundationalOccupancyV1 | SleepProtectionV1'.
+  Property 'authority' does not exist on type 'SleepProtectionV1'.
+src/core/planning/deriveFoundationalSchedule.ts(209,18): error TS2339: Property 'timeSemantics' does not exist on type 'FoundationalOccupancyV1 | SleepProtectionV1'.
+  Property 'timeSemantics' does not exist on type 'SleepProtectionV1'.

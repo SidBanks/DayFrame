@@ -1,0 +1,12 @@
+NATIVE_CORE_PASS
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:33
+  if (r.exceptionDetails) throw Error(JSON.stringify(r.exceptionDetails));
+                                ^
+
+Error: {"exceptionId":1,"text":"Uncaught","lineNumber":0,"columnNumber":157,"scriptId":"228","stackTrace":{"callFrames":[{"functionName":"","scriptId":"228","url":"","lineNumber":0,"columnNumber":163},{"functionName":"","scriptId":"228","url":"","lineNumber":0,"columnNumber":225}]},"exception":{"type":"object","subtype":"error","className":"Error","description":"Error: Missing Native publication source Goal\n    at <anonymous>:1:164\n    at <anonymous>:1:226","objectId":"-7628799401110719689.10.2"}}
+    at ev (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:33:33)
+    at async clickMatch (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:58:3)
+    at async mobileChecks (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:213:24)
+    at async file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.2/browser-driver-RESULT.mjs:192:1
+
+Node.js v22.23.2

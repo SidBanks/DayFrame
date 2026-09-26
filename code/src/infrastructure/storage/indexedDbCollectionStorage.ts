@@ -2,6 +2,7 @@ export const DAYFRAME_DURABLE_DB_NAME = "dayframe-durable-v1";
 export const DAYFRAME_DURABLE_DB_VERSION = 11;
 
 export type DurableStorageErrorCode =
+  | "admissionDenied"
   | "unavailable"
   | "openFailed"
   | "upgradeBlocked"
@@ -52,6 +53,11 @@ export type DurableIndexQuery = {
   direction?: IDBCursorDirection;
   limit?: number;
 };
+
+export type DurableTransactionReceipt = {
+  readonly terminal: Promise<"committed" | "aborted">;
+};
+export type DurableTransactionObserver = (receipt: DurableTransactionReceipt) => void;
 
 export type IndexedDbCollectionStorage = ReturnType<typeof createIndexedDbCollectionStorage>;
 
@@ -179,10 +185,13 @@ export function createIndexedDbCollectionStorage(options: {
 
   async function mutate(
     mutations: readonly DurableMutation[],
+    admit?: () => boolean,
+    observe?: DurableTransactionObserver,
   ): Promise<DurableStorageResult<void>> {
     if (mutations.length === 0) return success(undefined);
     const opened = await open();
     if (opened.status === "failure") return opened;
+    if (admit && !admit()) return failure("admissionDenied", "mutate");
     const stores = [...new Set(mutations.map((mutation) => mutation.store))];
     let transaction: IDBTransaction;
     try {
@@ -191,6 +200,16 @@ export function createIndexedDbCollectionStorage(options: {
       return normalizedFailure(error, "mutate", "writeFailed");
     }
     const completion = transactionCompletion(transaction, "mutate");
+    // Internal lifecycle observation cannot interrupt enqueueing or terminal handling.
+    try {
+      observe?.({
+        terminal: completion.then((result) =>
+          result.status === "success" ? "committed" : "aborted",
+        ),
+      });
+    } catch {
+      /* observer failure must not strand a live transaction */
+    }
     const requests: Promise<DurableStorageResult<unknown>>[] = [];
     try {
       for (const mutation of mutations) {
@@ -210,7 +229,12 @@ export function createIndexedDbCollectionStorage(options: {
         else requests.push(requestResult(store.clear(), "clear", "deleteFailed"));
       }
     } catch (error) {
-      transaction.abort();
+      try {
+        transaction.abort();
+      } catch {
+        /* already terminal */
+      }
+      await completion;
       return normalizedFailure(error, "mutate", "writeFailed");
     }
     const results = await Promise.all(requests);

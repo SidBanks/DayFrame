@@ -76,6 +76,9 @@ export function validateDayFrameProfilesStorageV2(value: unknown): DayFrameProfi
       !isRecord(entry.data) ||
       "shiftCycle" in entry.data ||
       !Array.isArray(entry.data.shiftCycles) ||
+      (entry.data.sleepRequirements !== undefined &&
+        (!Array.isArray(entry.data.sleepRequirements) ||
+          entry.data.sleepRequirements.length > 0)) ||
       hasSourceIncarnation(entry.data)
     ) {
       throw new RangeError("Profile V2 patterns must be plural and incarnation-free.");
@@ -182,6 +185,11 @@ function convertProfileEntries(entries: unknown[]): ProfileV1Conversion {
       continue;
     }
     try {
+      if (
+        entry.data.sleepRequirements !== undefined &&
+        (!Array.isArray(entry.data.sleepRequirements) || entry.data.sleepRequirements.length)
+      )
+        throw new RangeError("Sleep profiles require V3.");
       const data = stripSourceIncarnations(normalizeAuthoredSetup(entry.data));
       if (validateDayFrameAuthoredSetup(data).status === "invalid") {
         quarantinedProfiles.push(structuredClone(entry));

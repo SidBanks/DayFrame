@@ -1,4 +1,8 @@
 import {
+  validateSleepRequirements,
+  validateSleepRequirementPatterns,
+} from "../core/sleep/sleepRequirement.js";
+import {
   isSourceIncarnationId,
   type IncarnatedSource,
   type SourceIncarnationAllocator,
@@ -19,7 +23,19 @@ export function instantiateActiveSetup(
   pattern: DayFrameAuthoredPattern,
   allocate: SourceIncarnationAllocator,
 ): ActiveDayFrameAuthoredSetup {
+  const sleepPatterns = validateSleepRequirementPatterns(
+    pattern.sleepRequirements === undefined ? [] : pattern.sleepRequirements,
+  );
+  const sleepIncarnation = sleepPatterns.length ? allocated(allocate) : undefined;
   const active: ActiveDayFrameAuthoredSetup = {
+    ...(pattern.sleepRequirements !== undefined
+      ? {
+          sleepRequirements: sleepPatterns.map((revision) => ({
+            ...revision,
+            incarnationId: sleepIncarnation!,
+          })),
+        }
+      : {}),
     schedulingPreferences: { ...pattern.schedulingPreferences },
     previewRange: { ...pattern.previewRange },
     shiftDefinitions: pattern.shiftDefinitions.map((source) => incarnate(source, allocate)),
@@ -38,6 +54,9 @@ export function instantiateActiveSetup(
 }
 
 export function createActiveV2(data: ActiveDayFrameAuthoredSetup): DayFrameActiveV2 {
+  if (data.legacySleepConversions?.length)
+    throw new RangeError("Conversion authority requires Active V4.");
+  if (data.sleepRequirements?.length) throw new RangeError("Sleep authority requires Active V3.");
   return { app: "DayFrame", surface: "active", version: DAYFRAME_ACTIVE_V2_VERSION, data };
 }
 
@@ -53,6 +72,16 @@ export function validateActiveV2(value: unknown): DayFrameActiveV2 {
   }
 
   const data = value.data as unknown as ActiveDayFrameAuthoredSetup;
+  if (
+    data.legacySleepConversions !== undefined &&
+    (!Array.isArray(data.legacySleepConversions) || data.legacySleepConversions.length)
+  )
+    throw new RangeError("Conversion authority requires Active V4.");
+  if (
+    data.sleepRequirements !== undefined &&
+    (!Array.isArray(data.sleepRequirements) || data.sleepRequirements.length)
+  )
+    throw new RangeError("Sleep authority requires Active V3.");
   validateIncarnationGraph(data);
   const validation = validateDayFrameAuthoredSetup(data);
   if (validation.status === "invalid") {
@@ -63,6 +92,12 @@ export function validateActiveV2(value: unknown): DayFrameActiveV2 {
 
 export function cloneActiveSetup(data: ActiveDayFrameAuthoredSetup): ActiveDayFrameAuthoredSetup {
   return {
+    ...(data.legacySleepConversions?.length
+      ? { legacySleepConversions: structuredClone(data.legacySleepConversions) }
+      : {}),
+    ...(data.sleepRequirements !== undefined
+      ? { sleepRequirements: structuredClone(data.sleepRequirements) }
+      : {}),
     schedulingPreferences: { ...data.schedulingPreferences },
     previewRange: { ...data.previewRange },
     shiftDefinitions: data.shiftDefinitions.map((source) => ({
@@ -96,6 +131,13 @@ export function cloneActiveSetup(data: ActiveDayFrameAuthoredSetup): ActiveDayFr
 
 export function projectActiveToPattern(data: ActiveDayFrameAuthoredSetup): DayFrameAuthoredPattern {
   return {
+    ...(data.sleepRequirements?.length
+      ? {
+          sleepRequirements: data.sleepRequirements.map((revision) =>
+            structuredClone(stripIncarnation(revision)),
+          ),
+        }
+      : {}),
     schedulingPreferences: { ...data.schedulingPreferences },
     previewRange: { ...data.previewRange },
     shiftDefinitions: data.shiftDefinitions.map(stripIncarnation),
@@ -119,6 +161,10 @@ export function validateIncarnationGraph(data: ActiveDayFrameAuthoredSetup): voi
     ...data.blockRecurrences,
     ...data.manualEvents,
   ];
+  const sleep = validateSleepRequirements(
+    data.sleepRequirements === undefined ? [] : data.sleepRequirements,
+  );
+  if (sleep[0]) sources.push(sleep[0]);
   const seen = new Set<string>();
   for (const source of sources) {
     if (!isSourceIncarnationId(source.incarnationId)) {

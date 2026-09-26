@@ -1,3 +1,10 @@
+import { validateBlockTemplate } from "../core/blocks/validateBlockTemplate.js";
+import {
+  CommitmentRelationshipContext,
+  type CommitmentRelationshipStore,
+} from "./CommitmentRelationshipContext.js";
+import { DurationFields, durationLabel } from "./DurationFields.js";
+import { CommitmentAdvancedFields } from "./CommitmentAdvancedFields.js";
 import {
   useEffect,
   useRef,
@@ -25,6 +32,8 @@ export type CommitmentEditorTarget = {
   recurrenceIncarnationId: string;
 };
 type Props = {
+  compositionStore?: CommitmentRelationshipStore;
+  onEditingChange?: (editing: boolean) => void;
   draft: SetupDraft;
   setDraft: Dispatch<SetStateAction<SetupDraft>>;
   requestedEditorTarget?: CommitmentEditorTarget | null;
@@ -71,6 +80,8 @@ const weekdays: Weekday[] = [
 ];
 
 export function CommitmentSection({
+  compositionStore,
+  onEditingChange,
   draft,
   setDraft,
   requestedEditorTarget = null,
@@ -79,6 +90,10 @@ export function CommitmentSection({
   onRequestedAddEditorHandled,
   onOpenEditorInvalidated,
 }: Props): ReactElement {
+  const [search, setSearch] = useState("");
+  const [enabledFilter, setEnabledFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [limit, setLimit] = useState(10);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [error, setError] = useState("");
   const [removeId, setRemoveId] = useState<string | null>(null);
@@ -86,7 +101,18 @@ export function CommitmentSection({
   const titleRef = useRef<HTMLInputElement>(null);
   const returnFocusId = useRef<string | null>(null);
   const editorDraftFingerprint = useRef<string | null>(null);
+  useEffect(() => {
+    onEditingChange?.(!!editor);
+  }, [!!editor, onEditingChange]);
   const summaries = deriveCommitmentSummaries(draft.templateEntries);
+  const filtered = summaries.filter(
+    (s) =>
+      s.label.toLowerCase().includes(search.toLowerCase()) &&
+      (enabledFilter === "all" || s.enabled === (enabledFilter === "enabled")) &&
+      (categoryFilter === "all" ||
+        draft.templateEntries.find((e) => e.template.id === s.reference.logicalId)?.template
+          .category === categoryFilter),
+  );
 
   useEffect(() => {
     if (editor) titleRef.current?.focus();
@@ -176,8 +202,8 @@ export function CommitmentSection({
     setError("");
     editorDraftFingerprint.current = null;
     requestAnimationFrame(() => {
-      if (focusId) document.getElementById(`commitment-${focusId}`)?.focus();
-      else headingRef.current?.focus();
+      const target = focusId ? document.getElementById(`commitment-${focusId}`) : null;
+      (target ?? headingRef.current)?.focus();
     });
   }
 
@@ -202,6 +228,27 @@ export function CommitmentSection({
     ) {
       setError("Enter a positive whole number of times per user-week.");
       document.getElementById("commitment-times-per-user-week")?.focus();
+      return;
+    }
+    try {
+      const checked = validateBlockTemplate(editor.entry.template);
+      if (!checked.isValid) {
+        setError(
+          checked.errors
+            .join(" ")
+            .replaceAll("durationMinutes", "Duration")
+            .replaceAll("fixedStartTime", "Fixed start time")
+            .replaceAll("placementType", "placement")
+            .replaceAll("preferredWindow", "Preferred time")
+            .replaceAll("customWindowStartTime", "Custom window start")
+            .replaceAll("customWindowEndTime", "Custom window end"),
+        );
+        return;
+      }
+    } catch {
+      setError(
+        "Check the clock times in Advanced options. Use a complete time or explicitly clear a field that no longer applies.",
+      );
       return;
     }
     const entry = {
@@ -237,7 +284,10 @@ export function CommitmentSection({
   }
 
   return (
-    <section aria-labelledby="commitments-heading" className="df-panel df-form-stack">
+    <section
+      aria-labelledby="commitments-heading"
+      className="df-panel df-form-stack df-commitments"
+    >
       <div className="df-section-heading-row">
         <div>
           <h2 id="commitments-heading" ref={headingRef} tabIndex={-1}>
@@ -249,6 +299,53 @@ export function CommitmentSection({
           Add Commitment
         </button>
       </div>
+      <div className="df-grid">
+        <label className="df-field">
+          Search Commitments
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setLimit(10);
+            }}
+          />
+        </label>
+        <label className="df-field">
+          Commitment status
+          <select
+            value={enabledFilter}
+            onChange={(e) => {
+              setEnabledFilter(e.target.value);
+              setLimit(10);
+            }}
+          >
+            <option value="all">All</option>
+            <option value="enabled">Enabled</option>
+            <option value="disabled">Disabled</option>
+          </select>
+        </label>
+        <label className="df-field">
+          Commitment category
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setLimit(10);
+            }}
+          >
+            <option value="all">All categories</option>
+            {["work", ...categories].map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p>
+        {filtered.length} matching Commitments · {summaries.length} total. This list includes your
+        unsaved setup draft.
+      </p>
       {summaries.length === 0 ? (
         <p className="df-empty-state">
           Add the things you want DayFrame to make time for. Anchored calendar events remain in the
@@ -256,14 +353,22 @@ export function CommitmentSection({
         </p>
       ) : (
         <ul className="df-commitment-list">
-          {summaries.map((summary) => (
+          {filtered.slice(0, limit).map((summary) => (
             <li className="df-list-card" key={summary.reference.logicalId}>
               <div className="df-section-heading-row">
                 <div>
                   <h3>{summary.label}</h3>
                   <p className="df-support">
                     {summary.kind} · {summary.recurrence} · {summary.preferredTiming}
-                    {summary.enabled ? "" : " · Disabled"}
+                    {summary.enabled ? " · Enabled" : " · Disabled"} ·{" "}
+                    {durationLabel(
+                      draft.templateEntries.find(
+                        (e) => e.template.id === summary.reference.logicalId,
+                      )!.template.durationMinutes,
+                    )}
+                    {summary.kind === "Sleep"
+                      ? " · Legacy Sleep Commitment (conversion is explicit)"
+                      : ""}
                   </p>
                 </div>
                 <button
@@ -290,6 +395,11 @@ export function CommitmentSection({
             </li>
           ))}
         </ul>
+      )}
+      {filtered.length > limit && (
+        <button className="df-secondary-button" onClick={() => setLimit((v) => v + 10)}>
+          Show more Commitments
+        </button>
       )}
       {editor ? (
         <section
@@ -349,34 +459,26 @@ export function CommitmentSection({
                   })
                 }
               >
-                {categories.map((value) => (
+                {["work", ...categories].map((value) => (
                   <option key={value} value={value}>
                     {value}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="df-field">
-              <label htmlFor="commitment-duration">Duration (minutes)</label>
-              <input
-                id="commitment-duration"
-                min="1"
-                type="number"
-                value={editor.entry.template.durationMinutes}
-                onChange={(event) =>
-                  setEditor({
-                    ...editor,
-                    entry: {
-                      ...editor.entry,
-                      template: {
-                        ...editor.entry.template,
-                        durationMinutes: Number(event.target.value),
-                      },
-                    },
-                  })
-                }
-              />
-            </div>
+            <DurationFields
+              label="Duration"
+              value={editor.entry.template.durationMinutes}
+              onChange={(durationMinutes) =>
+                setEditor({
+                  ...editor,
+                  entry: {
+                    ...editor.entry,
+                    template: { ...editor.entry.template, durationMinutes },
+                  },
+                })
+              }
+            />
             <div className="df-field">
               <label htmlFor="commitment-repeats">Repeats</label>
               <select
@@ -524,6 +626,17 @@ export function CommitmentSection({
               Enabled
             </label>
           </div>
+          {compositionStore && (
+            <CommitmentRelationshipContext
+              store={compositionStore}
+              entry={editor.entry}
+              entries={draft.templateEntries}
+            />
+          )}
+          <CommitmentAdvancedFields
+            entry={editor.entry}
+            onChange={(entry) => setEditor({ ...editor, entry })}
+          />
           {error && error !== "Enter a commitment name." ? (
             <p className="df-danger-message" id="commitment-editor-error" role="alert">
               {error}

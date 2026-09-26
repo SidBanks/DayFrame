@@ -1,0 +1,2935 @@
+{
+  "app": "DayFrame",
+  "surface": "backup",
+  "version": 14,
+  "exportedAt": "2026-09-25T17:22:47.378Z",
+  "data": {
+    "active": {
+      "surfaceVersion": 3,
+      "data": {
+        "sleepRequirements": [
+          {
+            "enabled": true,
+            "effectiveFrom": "2026-09-01",
+            "weekdays": "all",
+            "durationMinutes": 120,
+            "bufferBeforeMinutes": 0,
+            "bufferAfterMinutes": 0,
+            "window": {
+              "kind": "clock",
+              "startClock": "00:00",
+              "endClock": "02:00"
+            },
+            "version": 1,
+            "id": "sleep",
+            "incarnationId": "a036fecf-a201-4fc7-b888-2f865f7ec790",
+            "revision": 1,
+            "createdAt": "2026-09-25T17:22:46.646Z",
+            "updatedAt": "2026-09-25T17:22:46.646Z"
+          }
+        ],
+        "schedulingPreferences": {
+          "dayBoundaryStartTime": "00:00",
+          "weekStartsOn": "monday"
+        },
+        "previewRange": {
+          "source": "custom",
+          "preset": "custom",
+          "startDate": "2026-09-26",
+          "endDate": "2026-09-26"
+        },
+        "shiftDefinitions": [
+          {
+            "id": "day",
+            "userId": "u",
+            "name": "Day",
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "workDays": [
+              "saturday"
+            ],
+            "crossesMidnight": false,
+            "createdAt": "2026-09-25T17:22:46.646Z",
+            "updatedAt": "2026-09-25T17:22:46.646Z",
+            "incarnationId": "2ef5b9cf-27c2-4302-9a14-897fd156b8b0"
+          }
+        ],
+        "shiftCycles": [
+          {
+            "id": "cycle",
+            "userId": "u",
+            "name": "Cycle",
+            "type": "fixedSegments",
+            "startsOnDate": "2026-09-01",
+            "endsOnDate": "2026-09-30",
+            "segments": [
+              {
+                "id": "segment",
+                "shiftCycleId": "cycle",
+                "shiftDefinitionId": "day",
+                "startsOnDate": "2026-09-01",
+                "endsOnDate": "2026-09-30",
+                "incarnationId": "adf73a8d-4cbd-44a6-82cb-698015e10e74"
+              }
+            ],
+            "createdAt": "2026-09-25T17:22:46.646Z",
+            "updatedAt": "2026-09-25T17:22:46.646Z",
+            "incarnationId": "86d192d2-74ff-48f1-a9d6-5b7cf934853f",
+            "sequence": []
+          }
+        ],
+        "blockTemplates": [
+          {
+            "id": "routine",
+            "userId": "u",
+            "title": "Routine",
+            "category": "maintenance",
+            "placementType": "fixed",
+            "fixedStartTime": "18:00",
+            "durationMinutes": 30,
+            "priority": 2,
+            "preferredWindow": "anyAvailable",
+            "rescheduleBehavior": "askUser",
+            "requiresResource": false,
+            "externalResources": [],
+            "enabled": true,
+            "createdAt": "2026-09-25T17:22:46.646Z",
+            "updatedAt": "2026-09-25T17:22:46.646Z",
+            "incarnationId": "bb216057-1158-4c02-82fd-4e764125b294"
+          }
+        ],
+        "blockRecurrences": [
+          {
+            "id": "daily",
+            "blockTemplateId": "routine",
+            "frequency": "daily",
+            "incarnationId": "d608b042-3415-4916-9a40-1557df05bfff"
+          }
+        ],
+        "manualEvents": []
+      }
+    },
+    "profiles": {
+      "surfaceVersion": 3,
+      "profiles": [],
+      "quarantinedProfiles": []
+    },
+    "planDecisions": {
+      "surfaceVersion": 1,
+      "decisions": [],
+      "quarantinedDecisions": []
+    },
+    "executionHistory": {
+      "app": "DayFrame",
+      "surface": "executionHistory",
+      "version": 1,
+      "records": [
+        {
+          "version": 1,
+          "id": "364d5d9e-acb5-450e-a329-41341cbc2dcb",
+          "subjectId": "e957b806-2a73-4b19-97e0-852fdf4ca75e",
+          "kind": "assertion",
+          "subject": {
+            "kind": "unplanned"
+          },
+          "snapshot": {
+            "sourceFamily": "unplanned",
+            "title": "Independent reading actual",
+            "category": "optional",
+            "userDay": {
+              "date": "2026-09-25",
+              "dayBoundaryStartTime": "00:00",
+              "utcOffsetMinutes": -300
+            },
+            "plan": {
+              "state": "unplanned"
+            }
+          },
+          "outcome": "completed",
+          "provenance": {
+            "kind": "userReported"
+          },
+          "recordedAt": "2026-09-25T17:22:46.663Z",
+          "actualTime": {
+            "durationMinutes": 20
+          },
+          "note": "Independent reported actual; not inferred from accepted schedule"
+        }
+      ],
+      "quarantinedComponents": []
+    },
+    "historicalPlan": {
+      "surfaceVersion": 1,
+      "batches": []
+    },
+    "goals": {
+      "version": 1,
+      "goals": [
+        {
+          "version": 1,
+          "id": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+          "revision": 1,
+          "title": "Native full footprint",
+          "status": "active",
+          "createdAt": "2026-09-25T17:22:46.657Z",
+          "updatedAt": "2026-09-25T17:22:46.657Z",
+          "links": []
+        },
+        {
+          "version": 1,
+          "id": "c706ea29-8e67-47cb-adcb-e38c93760b85",
+          "revision": 1,
+          "title": "Independent pages progress",
+          "status": "active",
+          "createdAt": "2026-09-25T17:22:46.659Z",
+          "updatedAt": "2026-09-25T17:22:46.659Z",
+          "links": []
+        }
+      ]
+    },
+    "measurementDefinitions": {
+      "version": 1,
+      "definitions": [
+        {
+          "version": 1,
+          "id": "1209fc88-d11a-4a8b-b45d-3701a46f722e",
+          "goalId": "c706ea29-8e67-47cb-adcb-e38c93760b85",
+          "revision": 1,
+          "status": "active",
+          "policyRef": {
+            "id": "manualQuantityTarget",
+            "version": 1
+          },
+          "config": {
+            "targetValue": "100",
+            "unitId": "pages"
+          },
+          "effectiveFrom": "2026-09-25T17:22:46.661Z",
+          "createdAt": "2026-09-25T17:22:46.661Z",
+          "fingerprint": "919a487599eadad3"
+        }
+      ]
+    },
+    "progressObservations": {
+      "version": 1,
+      "observations": [
+        {
+          "version": 1,
+          "id": "a6b42103-b6f5-4e24-a712-0c42afaacfff",
+          "revision": 1,
+          "goalId": "c706ea29-8e67-47cb-adcb-e38c93760b85",
+          "definitionId": "1209fc88-d11a-4a8b-b45d-3701a46f722e",
+          "definitionRevision": 1,
+          "unitId": "pages",
+          "value": "12",
+          "observedAt": "2026-09-25T17:22:46.661Z",
+          "recordedAt": "2026-09-25T17:22:46.662Z",
+          "status": "active",
+          "fingerprint": "e969bd188895c8c2"
+        }
+      ]
+    },
+    "goalStructure": {
+      "version": 1,
+      "relationships": [],
+      "milestones": []
+    },
+    "goalPlanning": {
+      "version": 2,
+      "demands": [
+        {
+          "recordType": "demand",
+          "version": 1,
+          "id": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+          "revision": 1,
+          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+          "requestedEffort": {
+            "unit": "minutes",
+            "amount": 60
+          },
+          "horizon": {
+            "kind": "userDayInterval",
+            "startUserDayDate": "2026-09-26",
+            "endUserDayDateExclusive": "2026-09-27"
+          },
+          "session": {
+            "mode": "indivisible",
+            "exactMinutes": 60
+          },
+          "satisfaction": {
+            "kind": "minimum",
+            "allowPartial": false
+          },
+          "cadence": {
+            "kind": "total"
+          },
+          "lifecycle": "active",
+          "createdAt": "2026-09-25T17:22:46.665Z",
+          "updatedAt": "2026-09-25T17:22:46.665Z",
+          "effectiveFrom": "2026-09-25T17:22:46.665Z",
+          "provenance": {
+            "version": 1,
+            "role": "authoredAuthority",
+            "origin": {
+              "kind": "directAuthoring"
+            }
+          }
+        }
+      ],
+      "priorities": [],
+      "footprintSpecifications": [
+        {
+          "recordType": "demandResourceFootprintSpec",
+          "version": 1,
+          "id": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+          "revision": 1,
+          "status": "active",
+          "name": "Required full footprint",
+          "variants": [
+            {
+              "id": "study",
+              "name": "Study",
+              "components": [
+                {
+                  "id": "notes",
+                  "role": "supportActivity",
+                  "scope": "perSession",
+                  "requiredness": "required",
+                  "durationMinutes": 30,
+                  "geometry": {
+                    "kind": "startsAtProductiveEnd"
+                  },
+                  "actor": "user",
+                  "source": {
+                    "kind": "direct"
+                  }
+                },
+                {
+                  "id": "buffer",
+                  "role": "bufferProtection",
+                  "scope": "perSession",
+                  "requiredness": "required",
+                  "durationMinutes": 15,
+                  "target": {
+                    "kind": "supportComponent",
+                    "componentId": "notes"
+                  },
+                  "side": "after",
+                  "source": {
+                    "kind": "direct"
+                  }
+                }
+              ]
+            }
+          ],
+          "createdAt": "2026-09-25T17:22:46.668Z",
+          "updatedAt": "2026-09-25T17:22:46.668Z",
+          "provenance": {
+            "version": 1,
+            "role": "authoredAuthority",
+            "origin": {
+              "kind": "directAuthoring"
+            }
+          }
+        }
+      ],
+      "footprintAssociations": [
+        {
+          "recordType": "demandResourceFootprintAssociation",
+          "version": 1,
+          "id": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+          "revision": 1,
+          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+          "status": "active",
+          "selection": {
+            "kind": "specification",
+            "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+            "specificationRevision": 1,
+            "variantId": "study",
+            "selectedOptionalComponentIds": []
+          },
+          "createdAt": "2026-09-25T17:22:46.670Z",
+          "updatedAt": "2026-09-25T17:22:46.670Z",
+          "provenance": {
+            "version": 1,
+            "role": "authoredAuthority",
+            "origin": {
+              "kind": "directAuthoring"
+            }
+          }
+        }
+      ]
+    },
+    "composition": {
+      "version": 1,
+      "relationships": [],
+      "decisions": []
+    },
+    "proposals": {
+      "version": 1,
+      "proposals": [
+        {
+          "recordType": "proposal",
+          "version": 1,
+          "id": "8e671e14c6da2621",
+          "revision": 1,
+          "generatedAt": "2026-09-25T17:22:46.646Z",
+          "evaluationCutoff": "2026-09-25T17:22:46.646Z",
+          "lifecycle": "generated",
+          "context": {
+            "kind": "ordinary"
+          },
+          "horizon": {
+            "startUserDayDate": "2026-09-26",
+            "endUserDayDateExclusive": "2026-09-27"
+          },
+          "scope": {
+            "context": {
+              "kind": "ordinary"
+            },
+            "horizon": {
+              "startUserDayDate": "2026-09-26",
+              "endUserDayDateExclusive": "2026-09-27"
+            },
+            "acceptance": "oneOff",
+            "bundle": "independent",
+            "demandProjectionIds": [
+              "aa5cf366488668f8"
+            ],
+            "goalIds": [
+              "12018360-3ec1-4dab-91a0-bbc2af4d728a"
+            ],
+            "userDayDates": [
+              "2026-09-26"
+            ],
+            "capacityClaims": [
+              {
+                "id": "f7909d6659d389f2",
+                "candidateParentId": "1bca6ccccc801a8d",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "488941ab9e1a8129",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "productive",
+                "interval": [
+                  "2026-09-26T18:00:00.000Z",
+                  "2026-09-26T19:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "8d10ec6f9ece0d58",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-26T18:00:00.000Z",
+                "endsAt": "2026-09-26T19:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "7df71909cd877e5b",
+                "candidateParentId": "1bca6ccccc801a8d",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "488941ab9e1a8129",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "supportActivity",
+                "interval": [
+                  "2026-09-26T19:00:00.000Z",
+                  "2026-09-26T19:30:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "8d10ec6f9ece0d58",
+                "requiredness": "required",
+                "componentId": "notes",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "supportsProductive",
+                  "productiveClaimId": "f7909d6659d389f2"
+                },
+                "startsAt": "2026-09-26T19:00:00.000Z",
+                "endsAt": "2026-09-26T19:30:00.000Z",
+                "durationMinutes": 30,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "373f50a4818828b1",
+                "candidateParentId": "1bca6ccccc801a8d",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "488941ab9e1a8129",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "bufferProtection",
+                "interval": [
+                  "2026-09-26T19:30:00.000Z",
+                  "2026-09-26T19:45:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "8d10ec6f9ece0d58",
+                "requiredness": "required",
+                "componentId": "buffer",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "protectsSupport",
+                  "supportClaimId": "7df71909cd877e5b",
+                  "supportComponentId": "notes"
+                },
+                "startsAt": "2026-09-26T19:30:00.000Z",
+                "endsAt": "2026-09-26T19:45:00.000Z",
+                "durationMinutes": 15,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "b1f9b83f914b0604",
+                "candidateParentId": "7938a506a6901858",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "50caef53ae93d924",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "productive",
+                "interval": [
+                  "2026-09-26T23:30:00.000Z",
+                  "2026-09-27T00:30:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "e70bc4896cd5c630",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-26T23:30:00.000Z",
+                "endsAt": "2026-09-27T00:30:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "4d9d3fe3b5f0211b",
+                "candidateParentId": "7938a506a6901858",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "50caef53ae93d924",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "supportActivity",
+                "interval": [
+                  "2026-09-27T00:30:00.000Z",
+                  "2026-09-27T01:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "e70bc4896cd5c630",
+                "requiredness": "required",
+                "componentId": "notes",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "supportsProductive",
+                  "productiveClaimId": "b1f9b83f914b0604"
+                },
+                "startsAt": "2026-09-27T00:30:00.000Z",
+                "endsAt": "2026-09-27T01:00:00.000Z",
+                "durationMinutes": 30,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "77258dc2108eaef5",
+                "candidateParentId": "7938a506a6901858",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "50caef53ae93d924",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "bufferProtection",
+                "interval": [
+                  "2026-09-27T01:00:00.000Z",
+                  "2026-09-27T01:15:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "e70bc4896cd5c630",
+                "requiredness": "required",
+                "componentId": "buffer",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "protectsSupport",
+                  "supportClaimId": "4d9d3fe3b5f0211b",
+                  "supportComponentId": "notes"
+                },
+                "startsAt": "2026-09-27T01:00:00.000Z",
+                "endsAt": "2026-09-27T01:15:00.000Z",
+                "durationMinutes": 15,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "d388a1649b8f0f80",
+                "candidateParentId": "983c4b344d3421fc",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "b31fad5ca0367a03",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "productive",
+                "interval": [
+                  "2026-09-26T07:00:00.000Z",
+                  "2026-09-26T08:00:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "f70b87f22af20e6b",
+                "requiredness": "required",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "productiveRoot"
+                },
+                "startsAt": "2026-09-26T07:00:00.000Z",
+                "endsAt": "2026-09-26T08:00:00.000Z",
+                "durationMinutes": 60,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "07282efdba46d8f0",
+                "candidateParentId": "983c4b344d3421fc",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "b31fad5ca0367a03",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "supportActivity",
+                "interval": [
+                  "2026-09-26T08:00:00.000Z",
+                  "2026-09-26T08:30:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "f70b87f22af20e6b",
+                "requiredness": "required",
+                "componentId": "notes",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "supportsProductive",
+                  "productiveClaimId": "d388a1649b8f0f80"
+                },
+                "startsAt": "2026-09-26T08:00:00.000Z",
+                "endsAt": "2026-09-26T08:30:00.000Z",
+                "durationMinutes": 30,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              },
+              {
+                "id": "0d6d2af5cb23c134",
+                "candidateParentId": "983c4b344d3421fc",
+                "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                "demandRevision": 1,
+                "demandProjectionId": "aa5cf366488668f8",
+                "productiveOpportunityId": "b31fad5ca0367a03",
+                "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                "associationRevision": 1,
+                "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                "specificationRevision": 1,
+                "variantId": "study",
+                "role": "bufferProtection",
+                "interval": [
+                  "2026-09-26T08:30:00.000Z",
+                  "2026-09-26T08:45:00.000Z"
+                ],
+                "userDayDate": "2026-09-26",
+                "capacityIntervalId": "f70b87f22af20e6b",
+                "requiredness": "required",
+                "componentId": "buffer",
+                "source": {
+                  "kind": "direct"
+                },
+                "relationship": {
+                  "kind": "protectsSupport",
+                  "supportClaimId": "07282efdba46d8f0",
+                  "supportComponentId": "notes"
+                },
+                "startsAt": "2026-09-26T08:30:00.000Z",
+                "endsAt": "2026-09-26T08:45:00.000Z",
+                "durationMinutes": 15,
+                "dependencyFingerprint": "8a61ca26838223ee",
+                "provenance": {
+                  "version": 1,
+                  "role": "derivedArtifact",
+                  "origin": {
+                    "kind": "derivedFromDependencies"
+                  },
+                  "algorithm": {
+                    "id": "demand-resource-footprint",
+                    "version": 1
+                  }
+                }
+              }
+            ]
+          },
+          "sourceAllocationId": "a664f186525f59e1",
+          "sourceCompetingSetId": "3a74521e8b6ed330",
+          "sourceAllocationDependencyFingerprint": "e2f45515ab5fa483",
+          "capacityFingerprint": "cd78866495c9ad6d",
+          "inputFingerprint": "d091adfdc6a09f61",
+          "policy": {
+            "id": "constructive-proposal",
+            "version": 1,
+            "maximumOptions": 32,
+            "expiry": "dependency-or-horizon"
+          },
+          "options": [
+            {
+              "id": "96b130ccf6482a26",
+              "sourceAllocationId": "a664f186525f59e1",
+              "sourceAlternativeId": "0211e1d568634275",
+              "rank": 0,
+              "preferred": true,
+              "scope": {
+                "context": {
+                  "kind": "ordinary"
+                },
+                "horizon": {
+                  "startUserDayDate": "2026-09-26",
+                  "endUserDayDateExclusive": "2026-09-27"
+                },
+                "acceptance": "oneOff",
+                "bundle": "independent",
+                "demandProjectionIds": [
+                  "aa5cf366488668f8"
+                ],
+                "goalIds": [
+                  "12018360-3ec1-4dab-91a0-bbc2af4d728a"
+                ],
+                "userDayDates": [
+                  "2026-09-26"
+                ],
+                "capacityClaims": [
+                  {
+                    "id": "b1f9b83f914b0604",
+                    "candidateParentId": "7938a506a6901858",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "50caef53ae93d924",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-26T23:30:00.000Z",
+                      "2026-09-27T00:30:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "e70bc4896cd5c630",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-26T23:30:00.000Z",
+                    "endsAt": "2026-09-27T00:30:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "4d9d3fe3b5f0211b",
+                    "candidateParentId": "7938a506a6901858",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "50caef53ae93d924",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "supportActivity",
+                    "interval": [
+                      "2026-09-27T00:30:00.000Z",
+                      "2026-09-27T01:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "e70bc4896cd5c630",
+                    "requiredness": "required",
+                    "componentId": "notes",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "supportsProductive",
+                      "productiveClaimId": "b1f9b83f914b0604"
+                    },
+                    "startsAt": "2026-09-27T00:30:00.000Z",
+                    "endsAt": "2026-09-27T01:00:00.000Z",
+                    "durationMinutes": 30,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "77258dc2108eaef5",
+                    "candidateParentId": "7938a506a6901858",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "50caef53ae93d924",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "bufferProtection",
+                    "interval": [
+                      "2026-09-27T01:00:00.000Z",
+                      "2026-09-27T01:15:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "e70bc4896cd5c630",
+                    "requiredness": "required",
+                    "componentId": "buffer",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "protectsSupport",
+                      "supportClaimId": "4d9d3fe3b5f0211b",
+                      "supportComponentId": "notes"
+                    },
+                    "startsAt": "2026-09-27T01:00:00.000Z",
+                    "endsAt": "2026-09-27T01:15:00.000Z",
+                    "durationMinutes": 15,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "productiveMinutes": 60,
+              "supportMinutes": 30,
+              "bufferMinutes": 15,
+              "nominalResourceMinutes": 105,
+              "totalResourceMinutes": 105,
+              "resourceFootprints": [
+                {
+                  "version": 1,
+                  "id": "15e0d5c6f5d89869",
+                  "candidateParentId": "7938a506a6901858",
+                  "productiveClaims": [
+                    {
+                      "id": "b1f9b83f914b0604",
+                      "candidateParentId": "7938a506a6901858",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "50caef53ae93d924",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "productive",
+                      "interval": [
+                        "2026-09-26T23:30:00.000Z",
+                        "2026-09-27T00:30:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "e70bc4896cd5c630",
+                      "requiredness": "required",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "productiveRoot"
+                      },
+                      "startsAt": "2026-09-26T23:30:00.000Z",
+                      "endsAt": "2026-09-27T00:30:00.000Z",
+                      "durationMinutes": 60,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "supportClaims": [
+                    {
+                      "id": "4d9d3fe3b5f0211b",
+                      "candidateParentId": "7938a506a6901858",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "50caef53ae93d924",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "supportActivity",
+                      "interval": [
+                        "2026-09-27T00:30:00.000Z",
+                        "2026-09-27T01:00:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "e70bc4896cd5c630",
+                      "requiredness": "required",
+                      "componentId": "notes",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "supportsProductive",
+                        "productiveClaimId": "b1f9b83f914b0604"
+                      },
+                      "startsAt": "2026-09-27T00:30:00.000Z",
+                      "endsAt": "2026-09-27T01:00:00.000Z",
+                      "durationMinutes": 30,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "bufferClaims": [
+                    {
+                      "id": "77258dc2108eaef5",
+                      "candidateParentId": "7938a506a6901858",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "50caef53ae93d924",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "bufferProtection",
+                      "interval": [
+                        "2026-09-27T01:00:00.000Z",
+                        "2026-09-27T01:15:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "e70bc4896cd5c630",
+                      "requiredness": "required",
+                      "componentId": "buffer",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "protectsSupport",
+                        "supportClaimId": "4d9d3fe3b5f0211b",
+                        "supportComponentId": "notes"
+                      },
+                      "startsAt": "2026-09-27T01:00:00.000Z",
+                      "endsAt": "2026-09-27T01:15:00.000Z",
+                      "durationMinutes": 15,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "omittedOptionalComponentIds": [],
+                  "productiveMinutes": 60,
+                  "supportMinutes": 30,
+                  "bufferMinutes": 15,
+                  "nominalResourceMinutes": 105,
+                  "unionedResourceMinutes": 105,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "assignments": [
+                {
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "requestedMinutes": 60,
+                  "attributedMinutes": 0,
+                  "remainingRequestedMinutes": 60,
+                  "assignedMinutes": 60,
+                  "unmetMinutes": 0,
+                  "outcome": "full",
+                  "priorityEvidence": [],
+                  "partitions": [
+                    {
+                      "id": "434985f8ac2ec537",
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "capacityIntervalId": "e70bc4896cd5c630",
+                      "opportunityId": "50caef53ae93d924",
+                      "startsAt": "2026-09-26T23:30:00.000Z",
+                      "endsAt": "2026-09-27T00:30:00.000Z",
+                      "durationMinutes": 60,
+                      "userDayDate": "2026-09-26",
+                      "sessionIndex": 0
+                    }
+                  ],
+                  "resourceFootprints": [
+                    {
+                      "version": 1,
+                      "id": "15e0d5c6f5d89869",
+                      "candidateParentId": "7938a506a6901858",
+                      "productiveClaims": [
+                        {
+                          "id": "b1f9b83f914b0604",
+                          "candidateParentId": "7938a506a6901858",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "50caef53ae93d924",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "productive",
+                          "interval": [
+                            "2026-09-26T23:30:00.000Z",
+                            "2026-09-27T00:30:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "e70bc4896cd5c630",
+                          "requiredness": "required",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "productiveRoot"
+                          },
+                          "startsAt": "2026-09-26T23:30:00.000Z",
+                          "endsAt": "2026-09-27T00:30:00.000Z",
+                          "durationMinutes": 60,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "supportClaims": [
+                        {
+                          "id": "4d9d3fe3b5f0211b",
+                          "candidateParentId": "7938a506a6901858",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "50caef53ae93d924",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "supportActivity",
+                          "interval": [
+                            "2026-09-27T00:30:00.000Z",
+                            "2026-09-27T01:00:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "e70bc4896cd5c630",
+                          "requiredness": "required",
+                          "componentId": "notes",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "supportsProductive",
+                            "productiveClaimId": "b1f9b83f914b0604"
+                          },
+                          "startsAt": "2026-09-27T00:30:00.000Z",
+                          "endsAt": "2026-09-27T01:00:00.000Z",
+                          "durationMinutes": 30,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "bufferClaims": [
+                        {
+                          "id": "77258dc2108eaef5",
+                          "candidateParentId": "7938a506a6901858",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "50caef53ae93d924",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "bufferProtection",
+                          "interval": [
+                            "2026-09-27T01:00:00.000Z",
+                            "2026-09-27T01:15:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "e70bc4896cd5c630",
+                          "requiredness": "required",
+                          "componentId": "buffer",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "protectsSupport",
+                            "supportClaimId": "4d9d3fe3b5f0211b",
+                            "supportComponentId": "notes"
+                          },
+                          "startsAt": "2026-09-27T01:00:00.000Z",
+                          "endsAt": "2026-09-27T01:15:00.000Z",
+                          "durationMinutes": 15,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "omittedOptionalComponentIds": [],
+                      "productiveMinutes": 60,
+                      "supportMinutes": 30,
+                      "bufferMinutes": 15,
+                      "nominalResourceMinutes": 105,
+                      "unionedResourceMinutes": 105,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "reasons": [
+                    {
+                      "code": "fullySatisfied"
+                    }
+                  ]
+                }
+              ],
+              "claims": [
+                {
+                  "id": "b1f9b83f914b0604",
+                  "candidateParentId": "7938a506a6901858",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "50caef53ae93d924",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "productive",
+                  "interval": [
+                    "2026-09-26T23:30:00.000Z",
+                    "2026-09-27T00:30:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "e70bc4896cd5c630",
+                  "requiredness": "required",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "productiveRoot"
+                  },
+                  "startsAt": "2026-09-26T23:30:00.000Z",
+                  "endsAt": "2026-09-27T00:30:00.000Z",
+                  "durationMinutes": 60,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "4d9d3fe3b5f0211b",
+                  "candidateParentId": "7938a506a6901858",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "50caef53ae93d924",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "supportActivity",
+                  "interval": [
+                    "2026-09-27T00:30:00.000Z",
+                    "2026-09-27T01:00:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "e70bc4896cd5c630",
+                  "requiredness": "required",
+                  "componentId": "notes",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "supportsProductive",
+                    "productiveClaimId": "b1f9b83f914b0604"
+                  },
+                  "startsAt": "2026-09-27T00:30:00.000Z",
+                  "endsAt": "2026-09-27T01:00:00.000Z",
+                  "durationMinutes": 30,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "77258dc2108eaef5",
+                  "candidateParentId": "7938a506a6901858",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "50caef53ae93d924",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "bufferProtection",
+                  "interval": [
+                    "2026-09-27T01:00:00.000Z",
+                    "2026-09-27T01:15:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "e70bc4896cd5c630",
+                  "requiredness": "required",
+                  "componentId": "buffer",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "protectsSupport",
+                    "supportClaimId": "4d9d3fe3b5f0211b",
+                    "supportComponentId": "notes"
+                  },
+                  "startsAt": "2026-09-27T01:00:00.000Z",
+                  "endsAt": "2026-09-27T01:15:00.000Z",
+                  "durationMinutes": 15,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "qualification": "fullyQualified",
+              "reasons": [
+                {
+                  "code": "allocationPreferred"
+                }
+              ],
+              "assumptions": [],
+              "tradeoffs": [],
+              "exclusions": [
+                {
+                  "code": "unallocatedCapacity",
+                  "minutes": 1125
+                }
+              ],
+              "rankingEvidence": {
+                "allocationRank": 0,
+                "allocationAlternativeId": "0211e1d568634275"
+              },
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "constructive-proposal",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "id": "0a5d1c7949fb6beb",
+              "sourceAllocationId": "a664f186525f59e1",
+              "sourceAlternativeId": "46bd3c82eb608fed",
+              "rank": 1,
+              "preferred": false,
+              "scope": {
+                "context": {
+                  "kind": "ordinary"
+                },
+                "horizon": {
+                  "startUserDayDate": "2026-09-26",
+                  "endUserDayDateExclusive": "2026-09-27"
+                },
+                "acceptance": "oneOff",
+                "bundle": "independent",
+                "demandProjectionIds": [
+                  "aa5cf366488668f8"
+                ],
+                "goalIds": [
+                  "12018360-3ec1-4dab-91a0-bbc2af4d728a"
+                ],
+                "userDayDates": [
+                  "2026-09-26"
+                ],
+                "capacityClaims": [
+                  {
+                    "id": "d388a1649b8f0f80",
+                    "candidateParentId": "983c4b344d3421fc",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "b31fad5ca0367a03",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-26T07:00:00.000Z",
+                      "2026-09-26T08:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "f70b87f22af20e6b",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-26T07:00:00.000Z",
+                    "endsAt": "2026-09-26T08:00:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "07282efdba46d8f0",
+                    "candidateParentId": "983c4b344d3421fc",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "b31fad5ca0367a03",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "supportActivity",
+                    "interval": [
+                      "2026-09-26T08:00:00.000Z",
+                      "2026-09-26T08:30:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "f70b87f22af20e6b",
+                    "requiredness": "required",
+                    "componentId": "notes",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "supportsProductive",
+                      "productiveClaimId": "d388a1649b8f0f80"
+                    },
+                    "startsAt": "2026-09-26T08:00:00.000Z",
+                    "endsAt": "2026-09-26T08:30:00.000Z",
+                    "durationMinutes": 30,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "0d6d2af5cb23c134",
+                    "candidateParentId": "983c4b344d3421fc",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "b31fad5ca0367a03",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "bufferProtection",
+                    "interval": [
+                      "2026-09-26T08:30:00.000Z",
+                      "2026-09-26T08:45:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "f70b87f22af20e6b",
+                    "requiredness": "required",
+                    "componentId": "buffer",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "protectsSupport",
+                      "supportClaimId": "07282efdba46d8f0",
+                      "supportComponentId": "notes"
+                    },
+                    "startsAt": "2026-09-26T08:30:00.000Z",
+                    "endsAt": "2026-09-26T08:45:00.000Z",
+                    "durationMinutes": 15,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "productiveMinutes": 60,
+              "supportMinutes": 30,
+              "bufferMinutes": 15,
+              "nominalResourceMinutes": 105,
+              "totalResourceMinutes": 105,
+              "resourceFootprints": [
+                {
+                  "version": 1,
+                  "id": "13cb417ba8f8b1c8",
+                  "candidateParentId": "983c4b344d3421fc",
+                  "productiveClaims": [
+                    {
+                      "id": "d388a1649b8f0f80",
+                      "candidateParentId": "983c4b344d3421fc",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "b31fad5ca0367a03",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "productive",
+                      "interval": [
+                        "2026-09-26T07:00:00.000Z",
+                        "2026-09-26T08:00:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "f70b87f22af20e6b",
+                      "requiredness": "required",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "productiveRoot"
+                      },
+                      "startsAt": "2026-09-26T07:00:00.000Z",
+                      "endsAt": "2026-09-26T08:00:00.000Z",
+                      "durationMinutes": 60,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "supportClaims": [
+                    {
+                      "id": "07282efdba46d8f0",
+                      "candidateParentId": "983c4b344d3421fc",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "b31fad5ca0367a03",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "supportActivity",
+                      "interval": [
+                        "2026-09-26T08:00:00.000Z",
+                        "2026-09-26T08:30:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "f70b87f22af20e6b",
+                      "requiredness": "required",
+                      "componentId": "notes",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "supportsProductive",
+                        "productiveClaimId": "d388a1649b8f0f80"
+                      },
+                      "startsAt": "2026-09-26T08:00:00.000Z",
+                      "endsAt": "2026-09-26T08:30:00.000Z",
+                      "durationMinutes": 30,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "bufferClaims": [
+                    {
+                      "id": "0d6d2af5cb23c134",
+                      "candidateParentId": "983c4b344d3421fc",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "b31fad5ca0367a03",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "bufferProtection",
+                      "interval": [
+                        "2026-09-26T08:30:00.000Z",
+                        "2026-09-26T08:45:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "f70b87f22af20e6b",
+                      "requiredness": "required",
+                      "componentId": "buffer",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "protectsSupport",
+                        "supportClaimId": "07282efdba46d8f0",
+                        "supportComponentId": "notes"
+                      },
+                      "startsAt": "2026-09-26T08:30:00.000Z",
+                      "endsAt": "2026-09-26T08:45:00.000Z",
+                      "durationMinutes": 15,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "omittedOptionalComponentIds": [],
+                  "productiveMinutes": 60,
+                  "supportMinutes": 30,
+                  "bufferMinutes": 15,
+                  "nominalResourceMinutes": 105,
+                  "unionedResourceMinutes": 105,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "assignments": [
+                {
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "requestedMinutes": 60,
+                  "attributedMinutes": 0,
+                  "remainingRequestedMinutes": 60,
+                  "assignedMinutes": 60,
+                  "unmetMinutes": 0,
+                  "outcome": "full",
+                  "priorityEvidence": [],
+                  "partitions": [
+                    {
+                      "id": "3477f511fb66da3a",
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "capacityIntervalId": "f70b87f22af20e6b",
+                      "opportunityId": "b31fad5ca0367a03",
+                      "startsAt": "2026-09-26T07:00:00.000Z",
+                      "endsAt": "2026-09-26T08:00:00.000Z",
+                      "durationMinutes": 60,
+                      "userDayDate": "2026-09-26",
+                      "sessionIndex": 0
+                    }
+                  ],
+                  "resourceFootprints": [
+                    {
+                      "version": 1,
+                      "id": "13cb417ba8f8b1c8",
+                      "candidateParentId": "983c4b344d3421fc",
+                      "productiveClaims": [
+                        {
+                          "id": "d388a1649b8f0f80",
+                          "candidateParentId": "983c4b344d3421fc",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "b31fad5ca0367a03",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "productive",
+                          "interval": [
+                            "2026-09-26T07:00:00.000Z",
+                            "2026-09-26T08:00:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "f70b87f22af20e6b",
+                          "requiredness": "required",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "productiveRoot"
+                          },
+                          "startsAt": "2026-09-26T07:00:00.000Z",
+                          "endsAt": "2026-09-26T08:00:00.000Z",
+                          "durationMinutes": 60,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "supportClaims": [
+                        {
+                          "id": "07282efdba46d8f0",
+                          "candidateParentId": "983c4b344d3421fc",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "b31fad5ca0367a03",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "supportActivity",
+                          "interval": [
+                            "2026-09-26T08:00:00.000Z",
+                            "2026-09-26T08:30:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "f70b87f22af20e6b",
+                          "requiredness": "required",
+                          "componentId": "notes",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "supportsProductive",
+                            "productiveClaimId": "d388a1649b8f0f80"
+                          },
+                          "startsAt": "2026-09-26T08:00:00.000Z",
+                          "endsAt": "2026-09-26T08:30:00.000Z",
+                          "durationMinutes": 30,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "bufferClaims": [
+                        {
+                          "id": "0d6d2af5cb23c134",
+                          "candidateParentId": "983c4b344d3421fc",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "b31fad5ca0367a03",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "bufferProtection",
+                          "interval": [
+                            "2026-09-26T08:30:00.000Z",
+                            "2026-09-26T08:45:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "f70b87f22af20e6b",
+                          "requiredness": "required",
+                          "componentId": "buffer",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "protectsSupport",
+                            "supportClaimId": "07282efdba46d8f0",
+                            "supportComponentId": "notes"
+                          },
+                          "startsAt": "2026-09-26T08:30:00.000Z",
+                          "endsAt": "2026-09-26T08:45:00.000Z",
+                          "durationMinutes": 15,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "omittedOptionalComponentIds": [],
+                      "productiveMinutes": 60,
+                      "supportMinutes": 30,
+                      "bufferMinutes": 15,
+                      "nominalResourceMinutes": 105,
+                      "unionedResourceMinutes": 105,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "reasons": [
+                    {
+                      "code": "fullySatisfied"
+                    }
+                  ]
+                }
+              ],
+              "claims": [
+                {
+                  "id": "d388a1649b8f0f80",
+                  "candidateParentId": "983c4b344d3421fc",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "b31fad5ca0367a03",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "productive",
+                  "interval": [
+                    "2026-09-26T07:00:00.000Z",
+                    "2026-09-26T08:00:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "f70b87f22af20e6b",
+                  "requiredness": "required",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "productiveRoot"
+                  },
+                  "startsAt": "2026-09-26T07:00:00.000Z",
+                  "endsAt": "2026-09-26T08:00:00.000Z",
+                  "durationMinutes": 60,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "07282efdba46d8f0",
+                  "candidateParentId": "983c4b344d3421fc",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "b31fad5ca0367a03",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "supportActivity",
+                  "interval": [
+                    "2026-09-26T08:00:00.000Z",
+                    "2026-09-26T08:30:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "f70b87f22af20e6b",
+                  "requiredness": "required",
+                  "componentId": "notes",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "supportsProductive",
+                    "productiveClaimId": "d388a1649b8f0f80"
+                  },
+                  "startsAt": "2026-09-26T08:00:00.000Z",
+                  "endsAt": "2026-09-26T08:30:00.000Z",
+                  "durationMinutes": 30,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "0d6d2af5cb23c134",
+                  "candidateParentId": "983c4b344d3421fc",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "b31fad5ca0367a03",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "bufferProtection",
+                  "interval": [
+                    "2026-09-26T08:30:00.000Z",
+                    "2026-09-26T08:45:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "f70b87f22af20e6b",
+                  "requiredness": "required",
+                  "componentId": "buffer",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "protectsSupport",
+                    "supportClaimId": "07282efdba46d8f0",
+                    "supportComponentId": "notes"
+                  },
+                  "startsAt": "2026-09-26T08:30:00.000Z",
+                  "endsAt": "2026-09-26T08:45:00.000Z",
+                  "durationMinutes": 15,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "qualification": "fullyQualified",
+              "reasons": [
+                {
+                  "code": "allocationAlternative"
+                }
+              ],
+              "assumptions": [],
+              "tradeoffs": [],
+              "exclusions": [
+                {
+                  "code": "unallocatedCapacity",
+                  "minutes": 1125
+                }
+              ],
+              "rankingEvidence": {
+                "allocationRank": 1,
+                "allocationAlternativeId": "46bd3c82eb608fed"
+              },
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "constructive-proposal",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "id": "ac7d4be6acc88f0d",
+              "sourceAllocationId": "a664f186525f59e1",
+              "sourceAlternativeId": "edb6a5f4f7a4aac8",
+              "rank": 2,
+              "preferred": false,
+              "scope": {
+                "context": {
+                  "kind": "ordinary"
+                },
+                "horizon": {
+                  "startUserDayDate": "2026-09-26",
+                  "endUserDayDateExclusive": "2026-09-27"
+                },
+                "acceptance": "oneOff",
+                "bundle": "independent",
+                "demandProjectionIds": [
+                  "aa5cf366488668f8"
+                ],
+                "goalIds": [
+                  "12018360-3ec1-4dab-91a0-bbc2af4d728a"
+                ],
+                "userDayDates": [
+                  "2026-09-26"
+                ],
+                "capacityClaims": [
+                  {
+                    "id": "f7909d6659d389f2",
+                    "candidateParentId": "1bca6ccccc801a8d",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "488941ab9e1a8129",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "productive",
+                    "interval": [
+                      "2026-09-26T18:00:00.000Z",
+                      "2026-09-26T19:00:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "8d10ec6f9ece0d58",
+                    "requiredness": "required",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "productiveRoot"
+                    },
+                    "startsAt": "2026-09-26T18:00:00.000Z",
+                    "endsAt": "2026-09-26T19:00:00.000Z",
+                    "durationMinutes": 60,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "7df71909cd877e5b",
+                    "candidateParentId": "1bca6ccccc801a8d",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "488941ab9e1a8129",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "supportActivity",
+                    "interval": [
+                      "2026-09-26T19:00:00.000Z",
+                      "2026-09-26T19:30:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "8d10ec6f9ece0d58",
+                    "requiredness": "required",
+                    "componentId": "notes",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "supportsProductive",
+                      "productiveClaimId": "f7909d6659d389f2"
+                    },
+                    "startsAt": "2026-09-26T19:00:00.000Z",
+                    "endsAt": "2026-09-26T19:30:00.000Z",
+                    "durationMinutes": 30,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  },
+                  {
+                    "id": "373f50a4818828b1",
+                    "candidateParentId": "1bca6ccccc801a8d",
+                    "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                    "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                    "demandRevision": 1,
+                    "demandProjectionId": "aa5cf366488668f8",
+                    "productiveOpportunityId": "488941ab9e1a8129",
+                    "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                    "associationRevision": 1,
+                    "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                    "specificationRevision": 1,
+                    "variantId": "study",
+                    "role": "bufferProtection",
+                    "interval": [
+                      "2026-09-26T19:30:00.000Z",
+                      "2026-09-26T19:45:00.000Z"
+                    ],
+                    "userDayDate": "2026-09-26",
+                    "capacityIntervalId": "8d10ec6f9ece0d58",
+                    "requiredness": "required",
+                    "componentId": "buffer",
+                    "source": {
+                      "kind": "direct"
+                    },
+                    "relationship": {
+                      "kind": "protectsSupport",
+                      "supportClaimId": "7df71909cd877e5b",
+                      "supportComponentId": "notes"
+                    },
+                    "startsAt": "2026-09-26T19:30:00.000Z",
+                    "endsAt": "2026-09-26T19:45:00.000Z",
+                    "durationMinutes": 15,
+                    "dependencyFingerprint": "8a61ca26838223ee",
+                    "provenance": {
+                      "version": 1,
+                      "role": "derivedArtifact",
+                      "origin": {
+                        "kind": "derivedFromDependencies"
+                      },
+                      "algorithm": {
+                        "id": "demand-resource-footprint",
+                        "version": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "productiveMinutes": 60,
+              "supportMinutes": 30,
+              "bufferMinutes": 15,
+              "nominalResourceMinutes": 105,
+              "totalResourceMinutes": 105,
+              "resourceFootprints": [
+                {
+                  "version": 1,
+                  "id": "da8167cfa533e0f9",
+                  "candidateParentId": "1bca6ccccc801a8d",
+                  "productiveClaims": [
+                    {
+                      "id": "f7909d6659d389f2",
+                      "candidateParentId": "1bca6ccccc801a8d",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "488941ab9e1a8129",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "productive",
+                      "interval": [
+                        "2026-09-26T18:00:00.000Z",
+                        "2026-09-26T19:00:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "8d10ec6f9ece0d58",
+                      "requiredness": "required",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "productiveRoot"
+                      },
+                      "startsAt": "2026-09-26T18:00:00.000Z",
+                      "endsAt": "2026-09-26T19:00:00.000Z",
+                      "durationMinutes": 60,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "supportClaims": [
+                    {
+                      "id": "7df71909cd877e5b",
+                      "candidateParentId": "1bca6ccccc801a8d",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "488941ab9e1a8129",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "supportActivity",
+                      "interval": [
+                        "2026-09-26T19:00:00.000Z",
+                        "2026-09-26T19:30:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "8d10ec6f9ece0d58",
+                      "requiredness": "required",
+                      "componentId": "notes",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "supportsProductive",
+                        "productiveClaimId": "f7909d6659d389f2"
+                      },
+                      "startsAt": "2026-09-26T19:00:00.000Z",
+                      "endsAt": "2026-09-26T19:30:00.000Z",
+                      "durationMinutes": 30,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "bufferClaims": [
+                    {
+                      "id": "373f50a4818828b1",
+                      "candidateParentId": "1bca6ccccc801a8d",
+                      "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                      "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                      "demandRevision": 1,
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "productiveOpportunityId": "488941ab9e1a8129",
+                      "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                      "associationRevision": 1,
+                      "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                      "specificationRevision": 1,
+                      "variantId": "study",
+                      "role": "bufferProtection",
+                      "interval": [
+                        "2026-09-26T19:30:00.000Z",
+                        "2026-09-26T19:45:00.000Z"
+                      ],
+                      "userDayDate": "2026-09-26",
+                      "capacityIntervalId": "8d10ec6f9ece0d58",
+                      "requiredness": "required",
+                      "componentId": "buffer",
+                      "source": {
+                        "kind": "direct"
+                      },
+                      "relationship": {
+                        "kind": "protectsSupport",
+                        "supportClaimId": "7df71909cd877e5b",
+                        "supportComponentId": "notes"
+                      },
+                      "startsAt": "2026-09-26T19:30:00.000Z",
+                      "endsAt": "2026-09-26T19:45:00.000Z",
+                      "durationMinutes": 15,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "omittedOptionalComponentIds": [],
+                  "productiveMinutes": 60,
+                  "supportMinutes": 30,
+                  "bufferMinutes": 15,
+                  "nominalResourceMinutes": 105,
+                  "unionedResourceMinutes": 105,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "assignments": [
+                {
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "requestedMinutes": 60,
+                  "attributedMinutes": 0,
+                  "remainingRequestedMinutes": 60,
+                  "assignedMinutes": 60,
+                  "unmetMinutes": 0,
+                  "outcome": "full",
+                  "priorityEvidence": [],
+                  "partitions": [
+                    {
+                      "id": "e6c17ee8c204e17b",
+                      "demandProjectionId": "aa5cf366488668f8",
+                      "capacityIntervalId": "8d10ec6f9ece0d58",
+                      "opportunityId": "488941ab9e1a8129",
+                      "startsAt": "2026-09-26T18:00:00.000Z",
+                      "endsAt": "2026-09-26T19:00:00.000Z",
+                      "durationMinutes": 60,
+                      "userDayDate": "2026-09-26",
+                      "sessionIndex": 0
+                    }
+                  ],
+                  "resourceFootprints": [
+                    {
+                      "version": 1,
+                      "id": "da8167cfa533e0f9",
+                      "candidateParentId": "1bca6ccccc801a8d",
+                      "productiveClaims": [
+                        {
+                          "id": "f7909d6659d389f2",
+                          "candidateParentId": "1bca6ccccc801a8d",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "488941ab9e1a8129",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "productive",
+                          "interval": [
+                            "2026-09-26T18:00:00.000Z",
+                            "2026-09-26T19:00:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "8d10ec6f9ece0d58",
+                          "requiredness": "required",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "productiveRoot"
+                          },
+                          "startsAt": "2026-09-26T18:00:00.000Z",
+                          "endsAt": "2026-09-26T19:00:00.000Z",
+                          "durationMinutes": 60,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "supportClaims": [
+                        {
+                          "id": "7df71909cd877e5b",
+                          "candidateParentId": "1bca6ccccc801a8d",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "488941ab9e1a8129",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "supportActivity",
+                          "interval": [
+                            "2026-09-26T19:00:00.000Z",
+                            "2026-09-26T19:30:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "8d10ec6f9ece0d58",
+                          "requiredness": "required",
+                          "componentId": "notes",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "supportsProductive",
+                            "productiveClaimId": "f7909d6659d389f2"
+                          },
+                          "startsAt": "2026-09-26T19:00:00.000Z",
+                          "endsAt": "2026-09-26T19:30:00.000Z",
+                          "durationMinutes": 30,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "bufferClaims": [
+                        {
+                          "id": "373f50a4818828b1",
+                          "candidateParentId": "1bca6ccccc801a8d",
+                          "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                          "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                          "demandRevision": 1,
+                          "demandProjectionId": "aa5cf366488668f8",
+                          "productiveOpportunityId": "488941ab9e1a8129",
+                          "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                          "associationRevision": 1,
+                          "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                          "specificationRevision": 1,
+                          "variantId": "study",
+                          "role": "bufferProtection",
+                          "interval": [
+                            "2026-09-26T19:30:00.000Z",
+                            "2026-09-26T19:45:00.000Z"
+                          ],
+                          "userDayDate": "2026-09-26",
+                          "capacityIntervalId": "8d10ec6f9ece0d58",
+                          "requiredness": "required",
+                          "componentId": "buffer",
+                          "source": {
+                            "kind": "direct"
+                          },
+                          "relationship": {
+                            "kind": "protectsSupport",
+                            "supportClaimId": "7df71909cd877e5b",
+                            "supportComponentId": "notes"
+                          },
+                          "startsAt": "2026-09-26T19:30:00.000Z",
+                          "endsAt": "2026-09-26T19:45:00.000Z",
+                          "durationMinutes": 15,
+                          "dependencyFingerprint": "8a61ca26838223ee",
+                          "provenance": {
+                            "version": 1,
+                            "role": "derivedArtifact",
+                            "origin": {
+                              "kind": "derivedFromDependencies"
+                            },
+                            "algorithm": {
+                              "id": "demand-resource-footprint",
+                              "version": 1
+                            }
+                          }
+                        }
+                      ],
+                      "omittedOptionalComponentIds": [],
+                      "productiveMinutes": 60,
+                      "supportMinutes": 30,
+                      "bufferMinutes": 15,
+                      "nominalResourceMinutes": 105,
+                      "unionedResourceMinutes": 105,
+                      "dependencyFingerprint": "8a61ca26838223ee",
+                      "provenance": {
+                        "version": 1,
+                        "role": "derivedArtifact",
+                        "origin": {
+                          "kind": "derivedFromDependencies"
+                        },
+                        "algorithm": {
+                          "id": "demand-resource-footprint",
+                          "version": 1
+                        }
+                      }
+                    }
+                  ],
+                  "reasons": [
+                    {
+                      "code": "fullySatisfied"
+                    }
+                  ]
+                }
+              ],
+              "claims": [
+                {
+                  "id": "f7909d6659d389f2",
+                  "candidateParentId": "1bca6ccccc801a8d",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "488941ab9e1a8129",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "productive",
+                  "interval": [
+                    "2026-09-26T18:00:00.000Z",
+                    "2026-09-26T19:00:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "8d10ec6f9ece0d58",
+                  "requiredness": "required",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "productiveRoot"
+                  },
+                  "startsAt": "2026-09-26T18:00:00.000Z",
+                  "endsAt": "2026-09-26T19:00:00.000Z",
+                  "durationMinutes": 60,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "7df71909cd877e5b",
+                  "candidateParentId": "1bca6ccccc801a8d",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "488941ab9e1a8129",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "supportActivity",
+                  "interval": [
+                    "2026-09-26T19:00:00.000Z",
+                    "2026-09-26T19:30:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "8d10ec6f9ece0d58",
+                  "requiredness": "required",
+                  "componentId": "notes",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "supportsProductive",
+                    "productiveClaimId": "f7909d6659d389f2"
+                  },
+                  "startsAt": "2026-09-26T19:00:00.000Z",
+                  "endsAt": "2026-09-26T19:30:00.000Z",
+                  "durationMinutes": 30,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                },
+                {
+                  "id": "373f50a4818828b1",
+                  "candidateParentId": "1bca6ccccc801a8d",
+                  "goalId": "12018360-3ec1-4dab-91a0-bbc2af4d728a",
+                  "demandId": "35ec0b68-45b5-420e-b804-01ebe4431c96",
+                  "demandRevision": 1,
+                  "demandProjectionId": "aa5cf366488668f8",
+                  "productiveOpportunityId": "488941ab9e1a8129",
+                  "associationId": "87c1e040-1e1a-4ae7-a137-93c33c61826a",
+                  "associationRevision": 1,
+                  "specificationId": "a1e1c384-9588-421a-9bf3-18c89249dc71",
+                  "specificationRevision": 1,
+                  "variantId": "study",
+                  "role": "bufferProtection",
+                  "interval": [
+                    "2026-09-26T19:30:00.000Z",
+                    "2026-09-26T19:45:00.000Z"
+                  ],
+                  "userDayDate": "2026-09-26",
+                  "capacityIntervalId": "8d10ec6f9ece0d58",
+                  "requiredness": "required",
+                  "componentId": "buffer",
+                  "source": {
+                    "kind": "direct"
+                  },
+                  "relationship": {
+                    "kind": "protectsSupport",
+                    "supportClaimId": "7df71909cd877e5b",
+                    "supportComponentId": "notes"
+                  },
+                  "startsAt": "2026-09-26T19:30:00.000Z",
+                  "endsAt": "2026-09-26T19:45:00.000Z",
+                  "durationMinutes": 15,
+                  "dependencyFingerprint": "8a61ca26838223ee",
+                  "provenance": {
+                    "version": 1,
+                    "role": "derivedArtifact",
+                    "origin": {
+                      "kind": "derivedFromDependencies"
+                    },
+                    "algorithm": {
+                      "id": "demand-resource-footprint",
+                      "version": 1
+                    }
+                  }
+                }
+              ],
+              "qualification": "fullyQualified",
+              "reasons": [
+                {
+                  "code": "allocationAlternative"
+                }
+              ],
+              "assumptions": [],
+              "tradeoffs": [],
+              "exclusions": [
+                {
+                  "code": "unallocatedCapacity",
+                  "minutes": 1125
+                }
+              ],
+              "rankingEvidence": {
+                "allocationRank": 2,
+                "allocationAlternativeId": "edb6a5f4f7a4aac8"
+              },
+              "provenance": {
+                "version": 1,
+                "role": "derivedArtifact",
+                "origin": {
+                  "kind": "derivedFromDependencies"
+                },
+                "algorithm": {
+                  "id": "constructive-proposal",
+                  "version": 1
+                }
+              }
+            }
+          ],
+          "preferredOptionId": "96b130ccf6482a26",
+          "qualification": "fullyQualified",
+          "reasons": [
+            {
+              "code": "allocationRecommendation"
+            }
+          ],
+          "provenance": {
+            "version": 1,
+            "role": "derivedArtifact",
+            "origin": {
+              "kind": "derivedFromDependencies"
+            },
+            "algorithm": {
+              "id": "constructive-proposal",
+              "version": 1
+            }
+          }
+        }
+      ],
+      "candidates": [],
+      "decisions": [],
+      "acceptedAllocations": []
+    },
+    "realizations": {
+      "version": 1,
+      "realizations": [],
+      "facts": []
+    }
+  }
+}

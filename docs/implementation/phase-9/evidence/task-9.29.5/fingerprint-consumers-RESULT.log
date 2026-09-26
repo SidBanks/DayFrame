@@ -1,0 +1,46 @@
+code/src/state/historicalPlanSurface.test.ts:163:      expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/historicalPlanSurface.test.ts:169:      await store.publishScheduleRange({ ...command, expectedSourceFingerprint: "old-review" }),
+code/src/state/types.ts:77:  expectedSourceFingerprint: string;
+code/src/state/historicalPlanSurface.ts:5:  historicalPlanBatchStorageFingerprint,
+code/src/state/historicalPlanSurface.ts:6:  historicalPlanDayStorageFingerprint,
+code/src/state/historicalPlanSurface.ts:830:      metadata.fingerprint !== historicalPlanBatchStorageFingerprint(checked.batch) ||
+code/src/state/historicalPlanSurface.ts:1127:      metadata.fingerprint !== historicalPlanBatchStorageFingerprint(checked.batch) ||
+code/src/state/historicalPlanSurface.ts:1160:    fingerprint: historicalPlanBatchStorageFingerprint(batch),
+code/src/state/historicalPlanSurface.ts:1171:    fingerprint: historicalPlanDayStorageFingerprint(day),
+code/src/state/historicalPlanSurface.ts:1213:    value.fingerprint === historicalPlanDayStorageFingerprint(day)
+code/src/state/schedulePublication.test.ts:15:    sourceFingerprint: "current",
+code/src/state/schedulePublication.test.ts:39:      expectedSourceFingerprint: "current",
+code/src/state/schedulePublication.test.ts:79:    [{ sourceFingerprint: "changed" }, "sourceChanged"],
+code/src/state/schedulePublication.test.ts:105:    const dependencies = options(review({ proposals: [{}], sourceFingerprint: "changed" }));
+code/src/state/dayFrameRestoreComposition.ts:179:    captureSourceFingerprint: async () => sourceFingerprint(options.storage, key),
+code/src/state/dayFrameRestoreComposition.ts:181:      sourceFingerprint(options.storage, key) === expected ? success() : failure("sourceChanged"),
+code/src/state/dayFrameRestoreComposition.ts:586:function sourceFingerprint(storage: Pick<Storage, "getItem">, key: string) {
+code/src/state/publicationReplacementIsolation.test.ts:150:  return { publicationRange, publishedAt: at, expectedSourceFingerprint: review.sourceFingerprint };
+code/src/state/schedulePublication.ts:82:    if (review.sourceFingerprint !== input.expectedSourceFingerprint)
+code/src/state/productEvidence.test.ts:100:      expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/planningScopeQuery.ts:27:  sourceFingerprint: string;
+code/src/state/planningScopeQuery.ts:243:      sourceFingerprint: capacityFingerprint({
+code/src/state/sleepPublicationExecution.test.ts:125:    expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/sleepPublicationExecution.test.ts:557:      expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/sleepPublicationExecution.test.ts:614:          expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/sleepPublicationExecution.test.ts:704:          expectedSourceFingerprint: review.sourceFingerprint,
+code/src/state/legacySleepConversion.test.ts:274:    expectedSourceFingerprint: planning.sourceFingerprint,
+code/src/state/legacySleepConversion.test.ts:316:      expectedSourceFingerprint: review.sourceFingerprint,
+code/src/ui/tests/goalInspectionCanonicalFixture.ts:196:    expectedSourceFingerprint: reviewed.sourceFingerprint,
+code/src/ui/ScheduleReviewPanel.tsx:47:    expectedSourceFingerprint: string;
+code/src/ui/ScheduleReviewPanel.tsx:173:        expectedSourceFingerprint:
+code/src/ui/ScheduleReviewPanel.tsx:174:          result === "loading" || result === "error" ? "" : result.sourceFingerprint,
+code/src/ui/tests/ScheduleReviewPanel.test.tsx:75:    sourceFingerprint: "source-1",
+code/src/ui/tests/ScheduleReviewPanel.test.tsx:143:      expectedSourceFingerprint: "source-1",
+code/src/ui/tests/DayWorksurface.test.tsx:235:      expectedSourceFingerprint: review.sourceFingerprint,
+code/src/core/historicalPlan/historicalPlanFingerprint.ts:149:export function historicalPlanDayStorageFingerprint(day: HistoricalPlanDayPublicationV1): string {
+code/src/core/historicalPlan/historicalPlanFingerprint.ts:155:export function historicalPlanBatchStorageFingerprint(batch: PlanPublicationBatchV1): string {
+code/src/core/historicalPlan/historicalPlanFingerprint.ts:161:          .map(historicalPlanDayStorageFingerprint),
+code/src/infrastructure/restore/restoreStaging.ts:41:  sourceFingerprints: RestoreFingerprints;
+code/src/infrastructure/restore/restoreStaging.ts:77:    sourceFingerprints: RestoreFingerprints = fingerprintPayloads(recovery),
+code/src/infrastructure/restore/restoreStaging.ts:98:      sourceFingerprints: structuredClone(sourceFingerprints),
+code/src/infrastructure/restore/restoreStaging.ts:246:        typeof value.sourceFingerprints[id] === "string",
+code/src/infrastructure/restore/restoreCoordinator.ts:80:    sourceFingerprints: RestoreFingerprints,
+code/src/infrastructure/restore/restoreCoordinator.ts:92:          sourceFingerprints?: RestoreFingerprints;
+code/src/infrastructure/restore/restoreCoordinator.ts:233:        !staged.metadata.sourceFingerprints ||
+code/src/infrastructure/restore/restoreCoordinator.ts:234:        !(await recheckSources(staged.metadata.sourceFingerprints))

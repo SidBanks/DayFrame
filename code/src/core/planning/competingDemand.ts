@@ -51,6 +51,7 @@ export type CompetingDemandSetV1 = {
   provenance: PlanningProvenanceV1;
 };
 export type CompetingDemandResultV1 = {
+  qualification?: "nonAllocatable";
   version: 1;
   id: string;
   policy: typeof COMPETITION_POLICY_V1;
@@ -73,6 +74,7 @@ export function deriveCompetingDemandSets(input: {
     a.demand.semanticId.localeCompare(b.demand.semanticId),
   )) {
     const compatible =
+      input.capacity.qualification.allocability !== "nonAllocatable" &&
       item.feasibility.capacityFingerprint === input.capacity.fingerprint &&
       !["unknown", "stale", "unavailableCoverage", "structurallyIneligible", "infeasible"].includes(
         item.feasibility.classification,
@@ -108,6 +110,9 @@ export function deriveCompetingDemandSets(input: {
       .sort(),
   });
   const base = {
+    ...(input.capacity.qualification.allocability === "nonAllocatable"
+      ? { qualification: "nonAllocatable" as const }
+      : {}),
     version: 1 as const,
     policy: COMPETITION_POLICY_V1,
     capacityFingerprint: input.capacity.fingerprint,

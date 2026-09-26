@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/proposalWriteLifecycle.test.ts src/state/acceptanceOwnerLifecycle.test.ts src/state/acceptanceReplacementIsolation.test.ts src/state/goalStructurePlanningSafety.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  4 passed (4)
+      Tests  37 passed (37)
+   Start at  08:23:41
+   Duration  8.34s (transform 1.49s, setup 0ms, import 1.48s, tests 5.98s, environment 472ms)
+

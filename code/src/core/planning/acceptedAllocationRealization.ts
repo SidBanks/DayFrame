@@ -55,16 +55,36 @@ export type RealizationConflictSubjectV1 = Pick<
 > & { scheduleRole?: RealizedScheduleFactV1["scheduleRole"] };
 
 export type RealizationReasonCodeV1 =
+  | "sleepFoundationReviewRequired"
   | "alreadyRealized"
   | "acceptedAllocationIncomplete"
   | "acceptedAllocationInvalid"
   | "claimGeometryMismatch"
   | "claimIdentityMismatch"
   | "scheduleConflict"
-  | "atomicPersistenceFailure";
+  | "atomicPersistenceFailure"
+  | "sourceUnavailable"
+  | "sourceChanged"
+  | "realizationBusy"
+  | "replacementBusy"
+  | "contextReplaced"
+  | "authorityUnavailable"
+  | "authorityProtected"
+  | "commitStateUncertain"
+  | "verificationFailedAfterCommit";
 
 export type RealizationCommandResultV1 = {
-  status: "realized" | "alreadyRealized" | "conflicted" | "inapplicable" | "invalid" | "failed";
+  status:
+    | "realized"
+    | "alreadyRealized"
+    | "conflicted"
+    | "inapplicable"
+    | "invalid"
+    | "failed"
+    | "rejected"
+    | "protected"
+    | "unconfirmed";
+  reviewRequired?: boolean;
   acceptedAllocationId: string;
   realizationId?: RealizationId;
   scheduledGoalWorkIds: string[];

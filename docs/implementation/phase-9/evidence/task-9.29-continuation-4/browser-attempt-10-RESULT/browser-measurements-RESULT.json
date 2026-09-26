@@ -1,0 +1,122 @@
+[
+  {
+    "label": "320-contextual-returns",
+    "width": 320,
+    "height": 844,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Add Event",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "390-contextual-returns",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Add Event",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "768-contextual-returns",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Add Event",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  },
+  {
+    "label": "1280-contextual-returns",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Add Event",
+      "outline": "solid",
+      "width": "2px"
+    },
+    "alerts": [
+      "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": false
+      }
+    ]
+  }
+]

@@ -1,3 +1,5 @@
+import type { GoalEditingContext } from "./goalEditingContext.js";
+import { useGoalPresentationState } from "./useGoalPresentationState.js";
 import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from "react";
 import {
   GOAL_ACTIVITY_POLICY_V1,
@@ -11,13 +13,13 @@ import type { HistoricalIntelligenceSummaryStore } from "./HistoricalIntelligenc
 import { formatHumanTimeRange } from "./timeDisplay.js";
 import { GoalProgressSummary } from "./GoalProgressSummary.js";
 
-type Available = Extract<
+export type Available = Extract<
   GoalActivityResultV1,
   { status: "available" | "partialCoverage" | "unavailable" }
 >;
 type PlanningCategory = "scheduled" | "unplaced" | "omitted" | "blocked";
 type ExecutionCategory = "completed" | "partial" | "skipped" | "unknown" | "notReported";
-type Detail =
+export type Detail =
   | { kind: "planning"; category: PlanningCategory }
   | { kind: "execution"; category: ExecutionCategory }
   | null;
@@ -45,19 +47,39 @@ export function GoalActivitySummary({
   range,
   evaluationAsOf,
   onOpenPlanner,
+  context,
+  onInspectGoal,
 }: {
   store: HistoricalIntelligenceSummaryStore;
   range: { start: LocalDateString; end: LocalDateString };
   evaluationAsOf: string;
   onOpenPlanner?: () => void;
+  context?: GoalEditingContext;
+  onInspectGoal?: (id: string) => void;
 }): ReactElement {
   const [goals, setGoals] = useState(() => store.listGoals());
   const [ingress, setIngress] = useState(() => store.getGoalIngressStatus());
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useGoalPresentationState(
+    context,
+    store,
+    "summary:goal-selectedId",
+    "",
+  );
   const [result, setResult] = useState<GoalActivityQueryResultV1 | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [detail, setDetail] = useState<Detail>(null);
+  const [detail, setDetail] = useGoalPresentationState<Detail>(
+    context,
+    store,
+    "summary:goal-detail",
+    null,
+  );
+  const [progressOpen, setProgressOpen] = useGoalPresentationState(
+    context,
+    store,
+    "summary:progress-open",
+    false,
+  );
   const request = useRef(0);
   const detailRef = useRef<HTMLDivElement>(null);
   const focusDetail = useRef(false);
@@ -88,7 +110,7 @@ export function GoalActivitySummary({
     setLoading(true);
     setError(false);
     setResult(null);
-    setDetail(null);
+    if (!context) setDetail(null);
     void store
       .getGoalActivity({
         policy: GOAL_ACTIVITY_POLICY_V1,
@@ -180,6 +202,11 @@ export function GoalActivitySummary({
       {selected ? (
         <div className="df-goal-activity-context">
           <h4 className="df-group-title">{selected.title}</h4>
+          {onInspectGoal && (
+            <button type="button" onClick={() => onInspectGoal(selected.id)}>
+              Inspect this Goal
+            </button>
+          )}
           <p>{statusLabel(selected.status)}</p>
           {selected.description ? <p>{selected.description}</p> : null}
           {selected.targetDate ? <p>Target date: {selected.targetDate}</p> : null}
@@ -187,6 +214,7 @@ export function GoalActivitySummary({
       ) : null}
       {selected ? (
         <GoalProgressSummary
+          {...(context ? { disclosure: { open: progressOpen, setOpen: setProgressOpen } } : {})}
           evaluationAsOf={evaluationAsOf}
           goal={selected}
           {...(onOpenPlanner ? { onOpenPlanner } : {})}
@@ -235,16 +263,27 @@ export function GoalActivitySummary({
   );
 }
 
-function Activity({
+export function Activity({
   value,
   detail,
   activate,
   detailRef,
+  bounds,
+  onDay,
 }: {
   value: Available;
   detail: Detail;
   activate: (next: Exclude<Detail, null>, event: MouseEvent<HTMLButtonElement>) => void;
   detailRef: { current: HTMLDivElement | null };
+  bounds?: {
+    rows: number;
+    coverage: number;
+    coverageOpen: boolean;
+    moreRows: () => void;
+    moreCoverage: () => void;
+    setCoverageOpen: (value: boolean) => void;
+  };
+  onDay?: (day: LocalDateString) => void;
 }) {
   const frozenTitles = [
     ...new Set(
@@ -266,7 +305,7 @@ function Activity({
   const reports = value.reportingCoverage;
   return (
     <div className="df-goal-activity-result">
-      {frozenTitles.map((title) => (
+      {frozenTitles.slice(0, bounds ? 10 : undefined).map((title) => (
         <p className="df-muted" key={title}>
           Goal at the time: {title}
         </p>
@@ -359,13 +398,21 @@ function Activity({
           <p className="df-muted">{categoryExplanation(detail)}</p>
           {evidence.length ? (
             <ul className="df-history-detail-list">
-              {evidence.map((item) => (
+              {evidence.slice(0, bounds?.rows).map((item) => (
                 <Evidence
                   currentGoalTitle={value.goalContext.title}
                   key={`${item.userDayDate}:${JSON.stringify(item.reference)}`}
                   value={item}
+                  {...(onDay ? { onDay } : {})}
                 />
               ))}
+              {bounds && evidence.length > bounds.rows && (
+                <li>
+                  <button type="button" onClick={bounds.moreRows}>
+                    Show more Activity rows
+                  </button>
+                </li>
+              )}
             </ul>
           ) : (
             <p className="df-empty">No occurrences in this category.</p>
@@ -373,10 +420,20 @@ function Activity({
         </div>
       ) : null}
       {value.provenance.coverage.length ? (
-        <details>
+        <details
+          {...(bounds
+            ? {
+                open: bounds.coverageOpen,
+                onToggle: (event: React.SyntheticEvent<HTMLDetailsElement>) => {
+                  if (event.currentTarget.open !== bounds.coverageOpen)
+                    bounds.setCoverageOpen(event.currentTarget.open);
+                },
+              }
+            : {})}
+        >
           <summary>Goal-link coverage details ({value.provenance.coverage.length})</summary>
           <ul className="df-history-detail-list">
-            {value.provenance.coverage.map((item) => (
+            {value.provenance.coverage.slice(0, bounds?.coverage).map((item) => (
               <li key={`${item.reason}:${item.userDayDate}:${JSON.stringify(item.reference)}`}>
                 <strong>{item.title}</strong>
                 <span>
@@ -389,6 +446,13 @@ function Activity({
                 </span>
               </li>
             ))}
+            {bounds && value.provenance.coverage.length > bounds.coverage && (
+              <li>
+                <button type="button" onClick={bounds.moreCoverage}>
+                  Show more coverage details
+                </button>
+              </li>
+            )}
           </ul>
         </details>
       ) : null}
@@ -458,9 +522,11 @@ function Distribution({
 function Evidence({
   value,
   currentGoalTitle,
+  onDay,
 }: {
   value: GoalActivityLinkedProvenanceV1;
   currentGoalTitle: string;
+  onDay?: (day: LocalDateString) => void;
 }) {
   const time =
     value.plan.state === "scheduled"
@@ -477,6 +543,17 @@ function Evidence({
         {value.category} ·{" "}
         {value.sourceFamily === "manualEvent" ? "manual event" : value.sourceFamily}
       </span>
+      {onDay && (
+        <>
+          <span>
+            Publication: {value.batchId} · {value.publishedAt}
+          </span>
+          <span>Frozen Goal: {value.frozenGoal.goalId}</span>
+          <button type="button" onClick={() => onDay(value.userDayDate)}>
+            Open Activity day {value.userDayDate}
+          </button>
+        </>
+      )}
       {value.frozenGoal.title !== currentGoalTitle ? (
         <span>Goal at the time: {value.frozenGoal.title}</span>
       ) : null}
@@ -491,7 +568,7 @@ function CoverageRow({ label, text }: { label: string; text: string }) {
     </p>
   );
 }
-function Unavailable({
+export function Unavailable({
   reason,
 }: {
   reason:

@@ -1,0 +1,93 @@
+npm notice run dayframe@0.1.0 build
+npm notice run tsc --noEmit && vite build
+vite v8.0.10 building client environment for production...
+[2Ktransforming...✓ 221 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                1.09 kB │ gzip:   0.44 kB
+dist/.vite/manifest.json                                      25.86 kB │ gzip:   3.22 kB
+dist/assets/index-D5PviTJe.css                                37.62 kB │ gzip:   7.03 kB
+dist/assets/publicationReceipt-eQQQgln4.js                     0.08 kB │ gzip:   0.09 kB
+dist/assets/dayFrameRuntimeAuthority-xpXPkD2o.js               0.10 kB │ gzip:   0.12 kB
+dist/assets/useGoalEditingState-C7mcpKpp.js                    0.17 kB │ gzip:   0.16 kB
+dist/assets/rolldown-runtime-9SAPJn0b.js                       0.22 kB │ gzip:   0.19 kB
+dist/assets/capacityFingerprint-D6Kh-Up0.js                    0.38 kB │ gzip:   0.29 kB
+dist/assets/evidence-gf0IxyKE.js                               0.40 kB │ gzip:   0.29 kB
+dist/assets/useGoalPresentationState-BJ-JLdCJ.js               0.47 kB │ gzip:   0.32 kB
+dist/assets/DurationFields-DvLXToIA.js                         0.72 kB │ gzip:   0.39 kB
+dist/assets/userDay-BjAk0cL3.js                                0.78 kB │ gzip:   0.41 kB
+dist/assets/publicationEligibility-Can92lCy.js                 0.83 kB │ gzip:   0.38 kB
+dist/assets/dayFrameBackupV10-B8BvPcM5.js                      1.13 kB │ gzip:   0.58 kB
+dist/assets/reviewScope-DGEjJFHF.js                            1.29 kB │ gzip:   0.63 kB
+dist/assets/dayFrameBackupV9-DHAKqbn2.js                       1.38 kB │ gzip:   0.70 kB
+dist/assets/productEvidenceSources-BxDr45_J.js                 1.49 kB │ gzip:   0.69 kB
+dist/assets/dayFrameBackupV13-BfKhh2UV.js                      1.69 kB │ gzip:   0.75 kB
+dist/assets/dayFrameBackupV12-Cs6H7KCX.js                      1.70 kB │ gzip:   0.79 kB
+dist/assets/schedulingRealization-usa5-SfD.js                  1.75 kB │ gzip:   0.77 kB
+dist/assets/dayFrameBackupV8-BGns1E18.js                       1.77 kB │ gzip:   0.78 kB
+dist/assets/dayFrameBackupV14-DX8CKQNC.js                      1.77 kB │ gzip:   0.76 kB
+dist/assets/dayFrameBackupV11-BxBW8lWS.js                      1.78 kB │ gzip:   0.78 kB
+dist/assets/todayQuery-Dw-J6Rnp.js                             1.82 kB │ gzip:   0.78 kB
+dist/assets/sleepExecutionCommand-DAcSKP4D.js                  2.00 kB │ gzip:   0.85 kB
+dist/assets/MyScheduleSurface-C28guSX2.js                      2.52 kB │ gzip:   1.03 kB
+dist/assets/schedulePublication-CGleKtWj.js                    2.57 kB │ gzip:   0.99 kB
+dist/assets/sleepHistoryQuery-DthQ9YiN.js                      2.89 kB │ gzip:   1.17 kB
+dist/assets/allocationSurface-pJ-T918l.js                      2.93 kB │ gzip:   0.90 kB
+dist/assets/capacitySurface-ChzY3h52.js                        3.08 kB │ gzip:   1.31 kB
+dist/assets/goalDemandProjectionQuery-DL4fxm9F.js              3.24 kB │ gzip:   1.22 kB
+dist/assets/planningResultCopy-32X48U7X.js                     3.52 kB │ gzip:   1.43 kB
+dist/assets/acceptedAllocationRealization-DBPwh-3E.js          3.54 kB │ gzip:   1.35 kB
+dist/assets/planningFoundation-BQMOviKu.js                     3.72 kB │ gzip:   1.48 kB
+dist/assets/acceptedPlanningSummaryPresentation-a2lF-a2V.js    3.83 kB │ gzip:   1.51 kB
+dist/assets/dayFrameBackupV7-B4gwh2FF.js                       3.86 kB │ gzip:   0.97 kB
+dist/assets/sleepRequirement-BF3kSIge.js                       4.03 kB │ gzip:   1.64 kB
+dist/assets/buildTodayReadModel-Ccd1zl5c.js                    4.13 kB │ gzip:   1.51 kB
+dist/assets/competingDemand-4IdlIbwo.js                        4.21 kB │ gzip:   1.54 kB
+dist/assets/completionDistribution-BwUDrzg_.js                 4.36 kB │ gzip:   1.69 kB
+dist/assets/planningScopeQuery-BXWDr4we.js                     4.51 kB │ gzip:   1.76 kB
+dist/assets/goalStructureTemporal-BKGEln9U.js                  4.73 kB │ gzip:   1.72 kB
+dist/assets/plannerReviewPresentation-qC-D7pnG.js              4.79 kB │ gzip:   1.64 kB
+dist/assets/goalActivity-Bt_0Qc-q.js                           4.87 kB │ gzip:   1.86 kB
+dist/assets/realizationSurface-99qznViq.js                     4.99 kB │ gzip:   1.62 kB
+dist/assets/goalFeasibility-g1vl3RVX.js                        5.66 kB │ gzip:   2.03 kB
+dist/assets/DayOutcomeControl-D0SEyyVj.js                      5.97 kB │ gzip:   2.16 kB
+dist/assets/LegacySleepConversionSection-DfT3_f6U.js           6.55 kB │ gzip:   2.29 kB
+dist/assets/dayFrameDurableDb-Dt7pkWWV.js                      6.69 kB │ gzip:   2.32 kB
+dist/assets/selectedDayEvidenceQuery-iVwzDqgT.js               7.28 kB │ gzip:   2.55 kB
+dist/assets/allocation-DQWo4d6y.js                             7.36 kB │ gzip:   2.54 kB
+dist/assets/legacySleepConversion-ZBEEc1Ev.js                  7.37 kB │ gzip:   2.71 kB
+dist/assets/capacity-CPhfubog.js                               7.42 kB │ gzip:   2.39 kB
+dist/assets/goalDemand-DPmdaDMj.js                             7.46 kB │ gzip:   2.54 kB
+dist/assets/compositionSurface-BMU7izQG.js                     8.27 kB │ gzip:   2.89 kB
+dist/assets/deriveFoundationalSchedule-B-CFxb3Q.js             8.30 kB │ gzip:   2.97 kB
+dist/assets/GoalRecordedInspection-CRH5TCVN.js                 8.61 kB │ gzip:   3.32 kB
+dist/assets/goalStructureSurface-ftxxWzk5.js                   8.78 kB │ gzip:   2.69 kB
+dist/assets/acceptedPlanningEvidenceQuery-DAKJzT0S.js          8.90 kB │ gzip:   2.67 kB
+dist/assets/proposalSurface-BHgmBJm9.js                        9.03 kB │ gzip:   3.02 kB
+dist/assets/goalStructure-COh2WHwU.js                          9.06 kB │ gzip:   2.71 kB
+dist/assets/SleepRequirementSection-DWtqj7lj.js                9.60 kB │ gzip:   3.20 kB
+dist/assets/goalPlanningSurface-CZgp0Wup.js                   10.03 kB │ gzip:   3.01 kB
+dist/assets/commitmentComposition-vn3W6WX3.js                 10.79 kB │ gzip:   3.64 kB
+dist/assets/queryMonthlyPlanner-B065ycxZ.js                   10.83 kB │ gzip:   3.79 kB
+dist/assets/demandResourceFootprint-KUlre3iv.js               11.31 kB │ gzip:   3.36 kB
+dist/assets/materializePlanPublication-4rb539o_.js            12.32 kB │ gzip:   3.61 kB
+dist/assets/AcceptedPlanningSummary-BcKKy0ob.js               12.91 kB │ gzip:   3.69 kB
+dist/assets/ScheduleReviewPanel-Cv2EbMfh.js                   13.30 kB │ gzip:   4.20 kB
+dist/assets/proposal-CT93T8zS.js                              13.85 kB │ gzip:   4.06 kB
+dist/assets/GoalAcceptedPlanningSection-D1O_MiOZ.js           15.19 kB │ gzip:   4.71 kB
+dist/assets/DayWorksurface-lsBEihcf.js                        15.58 kB │ gzip:   4.85 kB
+dist/assets/resolveRequiredSleep-D5kIm7JQ.js                  18.42 kB │ gzip:   5.75 kB
+dist/assets/HistoricalIntelligenceSummary-DHnRIZHZ.js         18.79 kB │ gzip:   5.04 kB
+dist/assets/MonthlyPlannerSurface-QejLQCnO.js                 19.20 kB │ gzip:   5.33 kB
+dist/assets/GoalActivitySummary-Briqr8MH.js                   19.56 kB │ gzip:   5.64 kB
+dist/assets/GoalStructureSection-gYVYjafh.js                  20.24 kB │ gzip:   6.45 kB
+dist/assets/GoalPlanningSection-CYqN_Vpf.js                   22.61 kB │ gzip:   7.11 kB
+dist/assets/PreviewScreen-CC4ewT-I.js                         23.37 kB │ gzip:   6.03 kB
+dist/assets/backupTransferSurface-DD_sxTrC.js                 23.79 kB │ gzip:   3.57 kB
+dist/assets/dayFrameRestoreComposition-DpnsipIe.js            34.71 kB │ gzip:   7.41 kB
+dist/assets/GoalSection-DxXVOt99.js                           36.24 kB │ gzip:   9.36 kB
+dist/assets/SetupScreen-X1_eGXct.js                           62.65 kB │ gzip:  13.25 kB
+dist/assets/vendor-react-BiBT4RTg.js                         189.63 kB │ gzip:  59.64 kB
+dist/assets/index-5pDruqtS.js                                431.65 kB │ gzip: 102.89 kB
+
+✓ built in 283ms

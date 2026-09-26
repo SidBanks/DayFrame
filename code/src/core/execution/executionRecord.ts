@@ -1,8 +1,13 @@
+import { capacityFingerprint } from "../planning/capacityFingerprint.js";
+import {
+  isSleepOccurrenceReference,
+  type SleepOccurrenceReferenceV1,
+} from "../occurrences/sleepOccurrenceReference.js";
 import type { BlockCategory } from "../blocks/types.js";
 import {
   cloneDurableOccurrenceReference,
   durableOccurrenceReferencesEqual,
-  validateDurableOccurrenceReference,
+  validateScheduledOccurrenceReference,
   type DurableOccurrenceReference,
 } from "../occurrences/durableOccurrenceReference.js";
 import type { LocalDateString } from "../shifts/types.js";
@@ -62,16 +67,28 @@ function allocateUuid(name: string): string {
   return value;
 }
 
+export type PublishedSleepExecutionSubjectV1 = {
+  kind: "publishedSleep";
+  version: 1;
+  publicationBatchId: string;
+  snapshotId: string;
+  reference: SleepOccurrenceReferenceV1;
+};
+export type UnplannedSleepExecutionSubjectV1 = { kind: "unplannedSleep"; version: 1 };
 export type ExecutionSubject =
   | { kind: "planned"; reference: DurableOccurrenceReference }
-  | { kind: "unplanned" };
+  | { kind: "unplanned" }
+  | PublishedSleepExecutionSubjectV1
+  | UnplannedSleepExecutionSubjectV1;
 
 export type ExecutionSnapshotFamily =
   | "template"
   | "work"
   | "manualEvent"
   | "acceptedAllocation"
-  | "unplanned";
+  | "unplanned"
+  | "sleepRequirement"
+  | "unplannedSleep";
 export type ExecutionPlanContext =
   | { state: "scheduled"; startsAt: string; endsAt: string }
   | { state: "unplaced" | "omitted" | "blocked" | "unplanned" };
@@ -402,10 +419,34 @@ function validateAssertion(value: Record<string, unknown>, issues: string[]): vo
   validateSubject(value.subject, issues);
   validateSnapshot(value.snapshot, issues);
   if (!isOutcome(value.outcome)) issues.push("outcome is invalid");
-  if (value.outcome === "skipped" && record(value.subject) && value.subject.kind !== "planned") {
+  if (
+    value.outcome === "skipped" &&
+    record(value.subject) &&
+    value.subject.kind !== "planned" &&
+    value.subject.kind !== "publishedSleep"
+  ) {
     issues.push("skipped requires a planned subject");
   }
   validateActualTime(value.actualTime, value.recordedAt, value.outcome, issues);
+  if (
+    record(value.subject) &&
+    ["publishedSleep", "unplannedSleep"].includes(value.subject.kind as string) &&
+    value.outcome !== "skipped"
+  ) {
+    if (
+      !record(value.actualTime) ||
+      value.actualTime.occurredAt === undefined ||
+      value.actualTime.durationMinutes === undefined
+    )
+      issues.push("Sleep actuals require an explicitly reported start and elapsed duration");
+    else if (
+      isCanonicalUtc(value.actualTime.occurredAt) &&
+      isCanonicalUtc(value.recordedAt) &&
+      Date.parse(value.actualTime.occurredAt) + Number(value.actualTime.durationMinutes) * 60000 >
+        Date.parse(value.recordedAt)
+    )
+      issues.push("Sleep actual end cannot be after recordedAt");
+  }
   if (record(value.subject) && record(value.snapshot))
     validateSubjectSnapshot(value.subject, value.snapshot, issues);
 }
@@ -451,7 +492,7 @@ function validateSubject(value: unknown, issues: string[]): void {
   }
   if (value.kind === "planned") {
     exact(value, ["kind", "reference"], [], "subject", issues);
-    const validation = validateDurableOccurrenceReference(value.reference);
+    const validation = validateScheduledOccurrenceReference(value.reference);
     if (validation.status === "unsupportedVersion")
       issues.push("subject reference version is unsupported");
     else if (validation.status === "invalid")
@@ -461,6 +502,25 @@ function validateSubject(value: unknown, issues: string[]): void {
       validation.reference.scheduleRole === "bufferProtection"
     )
       issues.push("Buffer protection is not an execution subject");
+  } else if (value.kind === "publishedSleep") {
+    exact(
+      value,
+      ["kind", "version", "publicationBatchId", "snapshotId", "reference"],
+      [],
+      "subject",
+      issues,
+    );
+    if (
+      value.version !== 1 ||
+      !isExecutionRecordId(value.publicationBatchId) ||
+      typeof value.snapshotId !== "string" ||
+      !value.snapshotId.length ||
+      !isSleepOccurrenceReference(value.reference)
+    )
+      issues.push("Invalid published Sleep identity");
+  } else if (value.kind === "unplannedSleep") {
+    exact(value, ["kind", "version"], [], "subject", issues);
+    if (value.version !== 1) issues.push("Unsupported unplanned Sleep version");
   } else if (value.kind === "unplanned") exact(value, ["kind"], [], "subject", issues);
   else issues.push("subject.kind is invalid");
 }
@@ -472,9 +532,15 @@ function validateSnapshot(value: unknown, issues: string[]): void {
   }
   exact(value, ["sourceFamily", "title", "category", "userDay", "plan"], [], "snapshot", issues);
   if (
-    !["template", "work", "manualEvent", "acceptedAllocation", "unplanned"].includes(
-      value.sourceFamily as string,
-    )
+    ![
+      "template",
+      "work",
+      "manualEvent",
+      "acceptedAllocation",
+      "unplanned",
+      "sleepRequirement",
+      "unplannedSleep",
+    ].includes(value.sourceFamily as string)
   )
     issues.push("snapshot.sourceFamily is invalid");
   if (
@@ -564,6 +630,24 @@ function validateSubjectSnapshot(
   snapshot: Record<string, unknown>,
   issues: string[],
 ): void {
+  if (subject.kind === "publishedSleep" || subject.kind === "unplannedSleep") {
+    if (
+      snapshot.category !== "sleep" ||
+      snapshot.sourceFamily !==
+        (subject.kind === "publishedSleep" ? "sleepRequirement" : "unplannedSleep") ||
+      !record(snapshot.plan) ||
+      snapshot.plan.state !== (subject.kind === "publishedSleep" ? "scheduled" : "unplanned")
+    )
+      issues.push("Sleep subject requires matching Sleep snapshot");
+    if (
+      subject.kind === "publishedSleep" &&
+      isSleepOccurrenceReference(subject.reference) &&
+      record(snapshot.userDay) &&
+      snapshot.userDay.date !== subject.reference.coordinate.userDayDate
+    )
+      issues.push("Sleep owner day mismatch");
+    return;
+  }
   if (subject.kind === "unplanned") {
     if (
       snapshot.sourceFamily !== "unplanned" ||
@@ -615,11 +699,22 @@ function validateCollectionIntegrity(records: ExecutionRecordV1[]): ExecutionCol
   }
   const bySubject = groupBySubject(records);
   const plannedSubjects: { subjectId: string; reference: DurableOccurrenceReference }[] = [];
+  const sleepSubjects = new Set<string>();
   for (const [subjectId, subjectRecords] of bySubject) {
     const assertions = subjectRecords.filter(
       (current): current is ExecutionAssertionRecordV1 => current.kind === "assertion",
     );
     const origin = assertions[0]?.subject;
+    if (origin?.kind === "publishedSleep") {
+      const key = `${origin.publicationBatchId}|${origin.snapshotId}`;
+      if (sleepSubjects.has(key)) issues.push({ code: "duplicatePlannedReference", subjectId });
+      sleepSubjects.add(key);
+    }
+    if (origin?.kind === "publishedSleep" || origin?.kind === "unplannedSleep") {
+      for (const current of assertions.slice(1))
+        if (capacityFingerprint(current.snapshot) !== capacityFingerprint(assertions[0]!.snapshot))
+          issues.push(issue("subjectMismatch", current));
+    }
     for (const current of assertions.slice(1))
       if (!subjectsEqual(origin!, current.subject)) issues.push(issue("subjectMismatch", current));
     if (origin?.kind === "planned")
@@ -734,6 +829,12 @@ function findHead(records: ExecutionRecordV1[]): ExecutionRecordV1 | undefined {
 
 function subjectsEqual(left: ExecutionSubject, right: ExecutionSubject): boolean {
   return (
+    (left.kind === "unplannedSleep" && right.kind === "unplannedSleep") ||
+    (left.kind === "publishedSleep" &&
+      right.kind === "publishedSleep" &&
+      left.publicationBatchId === right.publicationBatchId &&
+      left.snapshotId === right.snapshotId &&
+      durableOccurrenceReferencesEqual(left.reference, right.reference)) ||
     (left.kind === "unplanned" && right.kind === "unplanned") ||
     (left.kind === "planned" &&
       right.kind === "planned" &&
@@ -742,6 +843,8 @@ function subjectsEqual(left: ExecutionSubject, right: ExecutionSubject): boolean
 }
 
 function cloneSubject(subject: ExecutionSubject): ExecutionSubject {
+  if (subject.kind === "publishedSleep" || subject.kind === "unplannedSleep")
+    return structuredClone(subject);
   return subject.kind === "planned"
     ? { kind: "planned", reference: cloneDurableOccurrenceReference(subject.reference) }
     : { kind: "unplanned" };

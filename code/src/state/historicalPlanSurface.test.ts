@@ -1,5 +1,5 @@
 import { IDBFactory } from "fake-indexeddb";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, afterEach } from "vitest";
 import {
   HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
   HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION,
@@ -15,7 +15,8 @@ import {
   HISTORICAL_PLAN_DAY_STORE,
 } from "../infrastructure/storage/dayFrameDurableDb.js";
 import { createHistoricalPlanSurface } from "./historicalPlanSurface.js";
-import { createReadyDayFrameTestStore } from "./tests/dayFrameStoreTestUtils.js";
+import { createDayFrameStore } from "./dayFrameStore.js";
+afterEach(() => vi.unstubAllGlobals());
 import {
   createReviewScope,
   publicationRangeFromReviewScope,
@@ -75,8 +76,10 @@ function v2Batch(
   kind: "allDay" | "timed",
 ): PlanPublicationBatchV1 {
   const value = structuredClone(batch(id, publishedAt));
+  const occurrence = value.days[0]!.occurrences[0]!;
+  if (occurrence.version !== 1) throw new Error("Expected legacy fixture");
   value.days[0]!.occurrences[0] = {
-    ...value.days[0]!.occurrences[0]!,
+    ...occurrence,
     version: HISTORICAL_PLANNED_OCCURRENCE_SNAPSHOT_V2_VERSION,
     timing: { kind },
   };
@@ -92,10 +95,21 @@ function setup() {
 
 describe("HistoricalPlan IndexedDB authority", () => {
   it("publishes only after explicit authorization of a fresh reviewed Preview", async () => {
+    const values = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+      get length() {
+        return values.size;
+      },
+      key: (index: number) => [...values.keys()][index] ?? null,
+    });
+    vi.stubGlobal("indexedDB", new IDBFactory());
     const { surface } = setup();
     await surface.initialize();
     const timestamps = { createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z" };
-    const store = createReadyDayFrameTestStore(
+    const store = createDayFrameStore(
       {
         shiftDefinitions: [
           {
@@ -131,6 +145,7 @@ describe("HistoricalPlan IndexedDB authority", () => {
       },
       { historicalPlanSurface: surface },
     );
+    await store.whenReady();
     expect(
       (await surface.exportHistoricalPlan()).status === "exported" &&
         ((await surface.exportHistoricalPlan()) as { batches: unknown[] }).batches,
@@ -226,7 +241,7 @@ describe("HistoricalPlan IndexedDB authority", () => {
       },
     });
     await surface.initialize();
-    expect((await surface.publishAtomically(batch())).status).toBe("materializationUnavailable");
+    expect((await surface.publishAtomically(batch())).status).toBe("writeFailedBeforeCommit");
     expect(surface.getPendingPublications()).toEqual([]);
     expect(await surface.getHistoricalPlanDay("2026-08-20", "2026-08-21T00:00:00.000Z")).toEqual({
       status: "unavailableNoPublication",
@@ -441,4 +456,61 @@ describe("HistoricalPlan IndexedDB authority", () => {
     expect(events).toEqual(["publicationAccepted"]);
     surface.close();
   });
+});
+
+describe("Task 9.9 commit certainty", () => {
+  it.each(["indexedRead", "metadataRead", "missingMetadata", "throwAfterCommit"] as const)(
+    "protects a complete commit after %s without blind retry",
+    async (fault) => {
+      const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory(), name: "certainty" });
+      let committed = false,
+        writes = 0;
+      const wrapped = {
+        ...storage,
+        mutate: async (changes: Parameters<typeof storage.mutate>[0]) => {
+          writes++;
+          const result = await storage.mutate(changes);
+          committed = result.status === "success";
+          if (fault === "throwAfterCommit") throw new Error("lost response");
+          return result;
+        },
+        get: async (...args: Parameters<typeof storage.get>) =>
+          committed && fault === "metadataRead"
+            ? {
+                status: "failure" as const,
+                error: { code: "readFailed" as const, operation: "get" },
+              }
+            : committed && fault === "missingMetadata"
+              ? { status: "success" as const, value: undefined }
+              : storage.get(...args),
+        queryIndex: async (...args: Parameters<typeof storage.queryIndex>) =>
+          committed && fault === "indexedRead"
+            ? {
+                status: "failure" as const,
+                error: { code: "readFailed" as const, operation: "queryIndex" },
+              }
+            : storage.queryIndex(...args),
+      } as typeof storage;
+      const surface = createHistoricalPlanSurface({ storage: wrapped });
+      const result = await surface.publishAtomically(batch());
+      expect(result).toMatchObject({
+        status:
+          fault === "throwAfterCommit" ? "commitStateUncertain" : "verificationFailedAfterCommit",
+      });
+      expect(surface.getStatus()).toMatchObject({ status: "protected" });
+      expect(await surface.publishAtomically(batch())).toMatchObject({
+        status: "publicationBlockedProtected",
+      });
+      expect((await surface.retryPendingPublications()).status).toBe("notAttempted");
+      expect(writes).toBe(1);
+      expect(await surface.recheckProtectedSource()).toBe("unchanged");
+      expect(await surface.exportProtectedSource()).toMatchObject({ status: "exported" });
+      const reader = createHistoricalPlanSurface({ storage });
+      expect(await reader.getHistoricalPlanDay("2026-08-20", "2026-08-21T00:00:00Z")).toMatchObject(
+        { status: "available", durability: "durable" },
+      );
+      surface.close();
+      reader.close();
+    },
+  );
 });

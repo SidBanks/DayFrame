@@ -150,7 +150,9 @@ export function PreviewScreen({
   return (
     <main className="df-preview-layout">
       <header className="df-panel df-screen-header">
-        <h2 className="df-screen-title">Schedule details</h2>
+        <h2 id="schedule-friction-heading" tabIndex={-1} className="df-screen-title">
+          Schedule details
+        </h2>
         <p className="df-screen-subtitle">
           Review planned geometry for the selected user-day and try bounded resolution options when
           something conflicts.
@@ -313,6 +315,8 @@ export function PreviewScreen({
               <button
                 aria-label={`Add event to ${formatDayHeading(dayGroup.userDayDate)}`}
                 className="df-secondary-button"
+                data-review-return={`add-event:${dayGroup.userDayDate}`}
+                data-review-section="schedule-friction-heading"
                 onClick={() => onAddEvent(dayGroup.userDayDate as LocalDateString)}
                 type="button"
               >
@@ -397,6 +401,8 @@ export function PreviewScreen({
                           <button
                             aria-label={`Edit work configuration for ${workBlock.title}`}
                             className="df-secondary-button"
+                            data-review-return={`work:${workBlock.id}`}
+                            data-review-section="schedule-friction-heading"
                             onClick={onEditWork}
                             type="button"
                           >
@@ -550,13 +556,13 @@ function AcceptedChoicesSection({
               <p className="df-meta">Status: {decision.statusLabel}</p>
             </div>
             <button
-              aria-label={`Remove accepted choice for ${decision.targetSummary}`}
+              aria-label={`${decision.removalLabel ?? "Remove"} accepted choice for ${decision.targetSummary}`}
               className="df-secondary-button"
-              disabled={removalProtected}
+              disabled={removalProtected || decision.status === "revoked"}
               onClick={() => onRemove?.(decision.decisionId)}
               type="button"
             >
-              Remove
+              {decision.removalLabel ?? "Remove"}
             </button>
           </li>
         ))}
@@ -798,6 +804,14 @@ function resolveFrictionGroupUserDayDate(
   getDayBoundaryStartTimeForUserDayDate: PreviewScreenProps["getDayBoundaryStartTimeForUserDayDate"],
   getUserDayWindowForUserDayDate?: PreviewScreenProps["getUserDayWindowForUserDayDate"],
 ): string | null {
+  if (frictionPoint.sleepEvidence) {
+    const scope = frictionPoint.sleepEvidence.proofScope;
+    return (
+      visibleUserDayDates.find(
+        (day) => day >= scope.startUserDayDate && day < scope.endUserDayDateExclusive,
+      ) ?? null
+    );
+  }
   for (const userDayDate of visibleUserDayDates) {
     const dayBoundaryStartTime = getDayBoundaryStartTimeForUserDayDate(userDayDate);
 
@@ -936,6 +950,8 @@ function renderCommitmentEditAction(
     return null;
   return (
     <button
+      data-review-return={`commitment:${navigationIdentity.templateIncarnationId}:${navigationIdentity.recurrenceIncarnationId}:${item.id}`}
+      data-review-section="schedule-friction-heading"
       aria-label={`Edit commitment ${item.title}`}
       className="df-secondary-button"
       onClick={() =>
@@ -968,6 +984,8 @@ function renderEventEditAction(
   if (!event) return null;
   return (
     <button
+      data-review-return={`event:${event.id}:${getIncarnationId(event)}:${item.userDayDate}`}
+      data-review-section="schedule-friction-heading"
       aria-label={`Edit event ${item.title}`}
       className="df-secondary-button"
       onClick={() =>

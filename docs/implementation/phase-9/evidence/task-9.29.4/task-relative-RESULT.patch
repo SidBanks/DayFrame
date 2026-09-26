@@ -1,0 +1,3740 @@
+--- baseline/code/src/core/planning/acceptedAllocationRealization.ts
++++ final/code/src/core/planning/acceptedAllocationRealization.ts
+@@ -62,10 +62,29 @@
+   | "claimGeometryMismatch"
+   | "claimIdentityMismatch"
+   | "scheduleConflict"
+-  | "atomicPersistenceFailure";
++  | "atomicPersistenceFailure"
++  | "sourceUnavailable"
++  | "sourceChanged"
++  | "realizationBusy"
++  | "replacementBusy"
++  | "contextReplaced"
++  | "authorityUnavailable"
++  | "authorityProtected"
++  | "commitStateUncertain"
++  | "verificationFailedAfterCommit";
+ 
+ export type RealizationCommandResultV1 = {
+-  status: "realized" | "alreadyRealized" | "conflicted" | "inapplicable" | "invalid" | "failed";
++  status:
++    | "realized"
++    | "alreadyRealized"
++    | "conflicted"
++    | "inapplicable"
++    | "invalid"
++    | "failed"
++    | "rejected"
++    | "protected"
++    | "unconfirmed";
++  reviewRequired?: boolean;
+   acceptedAllocationId: string;
+   realizationId?: RealizationId;
+   scheduledGoalWorkIds: string[];
+--- baseline/code/src/core/planning/deriveFoundationalSchedule.ts
++++ final/code/src/core/planning/deriveFoundationalSchedule.ts
+@@ -185,3 +185,65 @@
+ export type FoundationalScheduleV1 = ReturnType<typeof deriveFoundationalSchedule>;
+ 
+ export { trySleepPlacement, sleepCorrectionFingerprint } from "../sleep/sleepCorrective.js";
++
++/** Current realization evidence uses saved canonical sources, never the Preview cache. */
++export function prepareRealizationSources(
++  input: Parameters<typeof deriveFoundationalSchedule>[0],
++  accepted: import("./proposal.js").AcceptedAllocationV2,
++):
++  | {
++      status: "eligible";
++      schedule: import("./acceptedAllocationRealization.js").RealizationConflictSubjectV1[];
++    }
++  | { status: "reviewRequired" | "unavailable" } {
++  if (input.authority.status !== "complete") return { status: "unavailable" };
++  try {
++    const planning = deriveFoundationalSchedule(input);
++    if (
++      planning.foundation.status === "nonAllocatable" ||
++      accepted.claims.some(
++        (claim) =>
++          Date.parse(claim.startsAt) < planning.planningWindow.startsAt.getTime() ||
++          Date.parse(claim.endsAt) > planning.planningWindow.endsAt.getTime() ||
++          planning.foundation.protection.some(
++            (p) => claim.startsAt < p.endsAt && p.startsAt < claim.endsAt,
++          ),
++      )
++    )
++      return { status: "reviewRequired" };
++    const hard = planning.hardOccupancy;
++    const realizedIds = new Set(input.authority.realizedFacts.map((f) => f.id));
++    const hardIds = new Set(hard.map((item) => item.id));
++    return {
++      status: "eligible",
++      schedule: [
++        ...hard
++          .filter((item) => !item.id.startsWith("realized:"))
++          .map((item) => ({
++            id: item.id as never,
++            startsAt: item.startsAt,
++            endsAt: item.endsAt,
++            sourceKind: ("authority" in item ? item.authority : "sleep") as never,
++            ...(!("timeSemantics" in item) || item.timeSemantics === "protection"
++              ? { scheduleRole: "bufferProtection" as const }
++              : {}),
++          })),
++        ...planning.schedule.scheduledBlocks
++          .filter(
++            (item) =>
++              !realizedIds.has(item.id as never) &&
++              !hardIds.has(`fixed:${item.id}`) &&
++              !hardIds.has(`event:${item.id}`),
++          )
++          .map((item) => ({
++            id: item.id as never,
++            startsAt: item.startsAt.toISOString(),
++            endsAt: item.endsAt.toISOString(),
++            sourceKind: item.source as never,
++          })),
++      ],
++    };
++  } catch {
++    return { status: "unavailable" };
++  }
++}
+--- baseline/code/src/state/acceptanceCoordinator.test.ts
++++ final/code/src/state/acceptanceCoordinator.test.ts
+@@ -0,0 +1,165 @@
++import { expect, it, vi } from "vitest";
++import { prepared, deferred } from "./acceptanceLifecycleTestFixtures.js";
++import { createProposalSurface } from "./proposalSurface.js";
++import { createHistoricalPlanSurface } from "./historicalPlanSurface.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import {
++  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY as capability,
++  getDayFrameRuntimeAuthorityController,
++} from "./dayFrameRuntimeAuthority.js";
++import {
++  PLAN_PUBLICATION_BATCH_VERSION,
++  HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
++  HISTORICAL_PLAN_SURFACE_VERSION,
++} from "../core/historicalPlan/historicalPlan.js";
++
++it("all four real registered owners must settle before before-snapshot replacement", async () => {
++  const db = createDayFrameDurableDb(),
++    proposals = createProposalSurface({ storage: db }),
++    history = createHistoricalPlanSurface({ storage: db });
++  const { store, input } = await prepared(true, {
++    restoreIndexedDb: db,
++    proposalSurface: proposals,
++    historicalPlanSurface: history,
++  });
++  expect(
++    (
++      await store.acceptProposalOption({
++        ...input,
++        current: { status: "proposed", proposal: proposals.listActionableProposals()[0]! },
++      })
++    ).status,
++  ).toBe("accepted");
++  const accepted = store.exportProposalAuthority().acceptedAllocations[0]!;
++  const gates = Object.fromEntries(
++    ["realizationAuthority", "proposalAuthority", "goalStructure", "historicalPlanBatches"].map(
++      (name) => [name, { entered: deferred(), release: deferred() }],
++    ),
++  );
++  const real = db.mutate;
++  vi.spyOn(db, "mutate").mockImplementation(async (rows, admit, observe) => {
++    const gate = gates[rows[0]!.store];
++    if (gate) {
++      gate.entered.resolve();
++      await gate.release.promise;
++    }
++    return real(rows, admit, observe);
++  });
++  const realization = store.realizeAcceptedAllocation(accepted.id);
++  await gates.realizationAuthority!.entered.promise;
++  const proposal = store.retryProposalPersistence();
++  await gates.proposalAuthority!.entered.promise;
++  const structure = store.createMilestone({
++    ownerGoalId: store.listGoals()[0]!.id,
++    title: "Independent milestone",
++  });
++  await gates.goalStructure!.entered.promise;
++  const publication = history.publishAtomically({
++    surfaceVersion: HISTORICAL_PLAN_SURFACE_VERSION,
++    version: PLAN_PUBLICATION_BATCH_VERSION,
++    id: "11111111-1111-4111-8111-111111111111" as never,
++    publishedAt: "2026-09-16T12:00:00.000Z",
++    range: { startUserDayDate: "2026-09-15", endUserDayDate: "2026-09-15" },
++    days: [
++      {
++        version: HISTORICAL_PLAN_DAY_PUBLICATION_VERSION,
++        userDayDate: "2026-09-15",
++        dayBoundaryStartTime: "00:00",
++        weekStartsOn: "monday",
++        utcOffsetMinutes: 0,
++        occurrences: [],
++      },
++    ],
++  });
++  await gates.historicalPlanBatches!.entered.promise;
++  const controller = getDayFrameRuntimeAuthorityController(store, capability),
++    epoch = controller.getEpoch!();
++  for (const [name, operation] of [
++    ["proposalAuthority", proposal],
++    ["realizationAuthority", realization],
++    ["historicalPlanBatches", publication],
++    ["goalStructure", structure],
++  ] as const) {
++    expect(controller.begin()).toEqual({ status: "busy" });
++    expect(controller.getEpoch!()).toBe(epoch);
++    gates[name]!.release.resolve();
++    const outcome = await operation;
++    expect(outcome.status).toBe(
++      name === "proposalAuthority"
++        ? "durable"
++        : name === "realizationAuthority"
++          ? "realized"
++          : name === "historicalPlanBatches"
++            ? "publishedAndDurable"
++            : "accepted",
++    );
++  }
++  expect(controller.begin().status).toBe("begun");
++  expect(controller.abort().status).toBe("aborted");
++});
++
++it.each(["snapshotFailure", "abort"] as const)(
++  "%s advances lifetime; exact returned data does not revive an old Proposal origin",
++  async (phase) => {
++    const db = createDayFrameDurableDb(),
++      proposals = createProposalSurface({ storage: db });
++    const { store, input } = await prepared(false, {
++      restoreIndexedDb: db,
++      proposalSurface: proposals,
++    });
++    const shell = proposals.getProposalLifecycle(capability),
++      origin = shell.capture(),
++      before = store.exportProposalAuthority();
++    const controller = getDayFrameRuntimeAuthorityController(store, capability),
++      epoch = controller.getEpoch!();
++    if (phase === "snapshotFailure") {
++      vi.spyOn(
++        proposals.getProposalRuntimeAdapter(capability),
++        "captureRuntimeSnapshot",
++      ).mockImplementationOnce(() => {
++        throw Error("snapshot");
++      });
++      expect(controller.begin()).toEqual({ status: "snapshotFailed" });
++    } else {
++      expect(controller.begin().status).toBe("begun");
++      expect(controller.abort().status).toBe("aborted");
++    }
++    expect(controller.getEpoch!()).toBe(epoch + 1);
++    const writes = vi.spyOn(db, "mutate");
++    expect(await shell.enter(origin, () => proposals.acceptProposalOption(input))).toMatchObject({
++      status: "rejected",
++      reason: "contextReplaced",
++    });
++    expect(writes).not.toHaveBeenCalled();
++    expect(store.exportProposalAuthority()).toEqual(before);
++  },
++);
++
++it("direct attached install and stale coordinator capability cannot bypass replacement admission", async () => {
++  const db = createDayFrameDurableDb(),
++    proposals = createProposalSurface({ storage: db });
++  await prepared(false, { restoreIndexedDb: db, proposalSurface: proposals });
++  const adapter = proposals.getProposalRuntimeAdapter(capability),
++    snapshot = adapter.captureRuntimeSnapshot();
++  expect(() => adapter.installRuntimeExact(snapshot)).toThrow(/coordinator/);
++  expect(await proposals.clearProposalForCoordinator(capability, -1)).toEqual({
++    status: "storageFailure",
++  });
++  expect(() => proposals.getProposalRuntimeAdapter(Symbol() as never)).toThrow(/capability/);
++  expect(adapter.captureRuntimeSnapshot()).toEqual(snapshot);
++});
++
++it("accepted-evidence query cannot deliver pre-replacement authority after a begun and aborted epoch", async () => {
++  const { store } = await prepared(true);
++  const query = {
++    startUserDayDate: "2026-09-17",
++    endUserDayDateExclusive: "2026-09-18",
++    asOf: "2026-09-16T12:00:00.000Z",
++  };
++  const pending = store.queryAcceptedPlanningEvidence(query);
++  const controller = getDayFrameRuntimeAuthorityController(store, capability);
++  expect(controller.begin().status).toBe("begun");
++  expect(controller.abort().status).toBe("aborted");
++  expect(await pending).toEqual({ status: "error", reason: "evidenceQueryFailed" });
++  expect((await store.queryAcceptedPlanningEvidence(query)).status).toBe("projected");
++});
+--- baseline/code/src/state/acceptanceLifecycle.ts
++++ final/code/src/state/acceptanceLifecycle.ts
+@@ -0,0 +1,132 @@
++/** Lightweight process-local shell shared by a lazy façade and its concrete owner. */
++export type AcceptanceOrigin = Readonly<{ isCurrent(): boolean; desiredVersion?: number }>;
++export type AcceptanceReceipt = AcceptanceOrigin;
++export type AcceptanceAdmission = "replacementBusy" | "authorityUnavailable" | "authorityProtected";
++export type AcceptanceLifecycle = ReturnType<typeof createAcceptanceLifecycle>;
++const receipts = new WeakSet<object>();
++
++export function hasCurrentAcceptanceReceipt(value: unknown): boolean {
++  if (!value || typeof value !== "object" || !("receipt" in value)) return false;
++  const receipt = value.receipt;
++  return (
++    !!receipt &&
++    typeof receipt === "object" &&
++    receipts.has(receipt) &&
++    (receipt as AcceptanceReceipt).isCurrent()
++  );
++}
++
++export function createAcceptanceLifecycle() {
++  let generation = 0;
++  let desiredVersion = 0;
++  let active: AcceptanceOrigin | undefined;
++  let entering: AcceptanceOrigin | undefined;
++  let getEpoch = () => 0;
++  let peerGeneration = () => 0;
++  let admission: () => AcceptanceAdmission | undefined = () => undefined;
++  let coordinatorCurrent: (epoch: number) => boolean = () => false;
++  let canInstall = () => true;
++  let replacement:
++    | (<T>(run: (epoch: number) => Promise<T>) => Promise<T | { status: "failure" }>)
++    | undefined;
++  const issued = new WeakSet<object>();
++  function capture(parent?: AcceptanceOrigin): AcceptanceOrigin {
++    const epoch = getEpoch(),
++      own = generation,
++      peer = peerGeneration();
++    const origin = Object.freeze({
++      desiredVersion,
++      isCurrent: () =>
++        own === generation &&
++        peer === peerGeneration() &&
++        epoch === getEpoch() &&
++        (!parent || parent.isCurrent()),
++    });
++    issued.add(origin);
++    return origin;
++  }
++  function current(origin: AcceptanceOrigin) {
++    return issued.has(origin) && origin.isCurrent();
++  }
++  function result<T extends object>(
++    value: T,
++    origin: AcceptanceOrigin,
++  ): T & { readonly receipt: AcceptanceReceipt } {
++    const receipt = Object.freeze({ isCurrent: () => current(origin) });
++    receipts.add(receipt);
++    return Object.defineProperty(value, "receipt", { value: receipt }) as T & {
++      readonly receipt: AcceptanceReceipt;
++    };
++  }
++  return {
++    capture,
++    current,
++    result,
++    origin: () => entering ?? capture(),
++    // The context is synchronous dispatch only. Async owners retain their own local origin.
++    enter<T>(origin: AcceptanceOrigin, invoke: () => T): T {
++      if (!issued.has(origin)) throw new Error("Unrecognized operation origin");
++      const previous = entering;
++      entering = origin;
++      try {
++        return invoke();
++      } finally {
++        entering = previous;
++      }
++    },
++    acquire(origin: AcceptanceOrigin) {
++      if (!current(origin)) return "contextReplaced" as const;
++      const denied = admission();
++      if (denied) return denied;
++      if (active) return "busy" as const;
++      active = origin;
++    },
++    release(origin: AcceptanceOrigin) {
++      if (active === origin) active = undefined;
++    },
++    owns: (origin: AcceptanceOrigin) => active === origin && current(origin),
++    active: () => active,
++    admission: () => admission(),
++    isQuiescent: () => !active,
++    generation: () => generation,
++    desiredVersion: () => desiredVersion,
++    supersedeDesired: () => {
++      desiredVersion++;
++    },
++    invalidate: () => {
++      generation++;
++    },
++    coordinatorCurrent: (epoch: number) => coordinatorCurrent(epoch),
++    assertInstall() {
++      if (active || !canInstall())
++        throw new Error("Runtime installation requires quiescent coordinator authority");
++    },
++    configure(value: {
++      getEpoch: () => number;
++      peerGeneration: () => number;
++      admission: () => AcceptanceAdmission | undefined;
++      coordinatorCurrent: (epoch: number) => boolean;
++      canInstall: () => boolean;
++      replace: <T>(run: (epoch: number) => Promise<T>) => Promise<T | { status: "failure" }>;
++    }) {
++      getEpoch = value.getEpoch;
++      peerGeneration = value.peerGeneration;
++      admission = value.admission;
++      coordinatorCurrent = value.coordinatorCurrent;
++      canInstall = value.canInstall;
++      replacement = value.replace;
++    },
++    async replace<T>(run: (epoch?: number) => Promise<T>): Promise<T | { status: "failure" }> {
++      if (active || admission()) return { status: "failure" };
++      if (replacement) return replacement(run);
++      const origin = capture();
++      active = origin;
++      generation++;
++      try {
++        return await run();
++      } finally {
++        if (active === origin) active = undefined;
++      }
++    },
++  };
++}
+--- baseline/code/src/state/acceptanceLifecycleTestFixtures.ts
++++ final/code/src/state/acceptanceLifecycleTestFixtures.ts
+@@ -0,0 +1,179 @@
++import { beforeEach, afterEach, expect, vi } from "vitest";
++import { IDBFactory } from "fake-indexeddb";
++import { createDayFrameStore } from "./dayFrameStore.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import type { DayFrameStore } from "./types.js";
++import type { SleepRequirementIntentV1 } from "../core/sleep/sleepRequirement.js";
++// Canonical disposable fixture derived from the retained 9.29.3 diagnostic.
++// Supporting setup derives a real allocation and Proposal from saved Goal/Demand/Sleep.
++class MemoryStorage implements Storage {
++  values = new Map<string, string>();
++  get length() {
++    return this.values.size;
++  }
++  key(i: number) {
++    return [...this.values.keys()][i] ?? null;
++  }
++  getItem(k: string) {
++    return this.values.get(k) ?? null;
++  }
++  setItem(k: string, v: string) {
++    this.values.set(k, v);
++  }
++  removeItem(k: string) {
++    this.values.delete(k);
++  }
++  clear() {
++    this.values.clear();
++  }
++}
++let storage: MemoryStorage;
++beforeEach(() => {
++  storage = new MemoryStorage();
++  vi.stubGlobal("localStorage", storage);
++  vi.stubGlobal("indexedDB", new IDBFactory());
++  vi.useFakeTimers({ toFake: ["Date"] });
++  vi.setSystemTime(new Date("2026-09-16T12:00:00.000Z"));
++});
++export const range = {
++  startUserDayDate: "2026-09-17",
++  endUserDayDateExclusive: "2026-09-18",
++} as const;
++export const at = "2026-09-16T12:00:00.000Z";
++export function author(store: DayFrameStore, patch: Partial<SleepRequirementIntentV1> = {}) {
++  const head = store.getState().sleepRequirements?.at(-1);
++  const result = store.authorSleepRequirement({
++    id: "sleep",
++    expectedRevision: head?.revision ?? null,
++    ...(head ? { expectedIncarnationId: head.incarnationId } : {}),
++    recordedAt: at,
++    intent: {
++      enabled: true,
++      effectiveFrom: "2026-09-01",
++      weekdays: "all",
++      durationMinutes: 120,
++      bufferBeforeMinutes: 0,
++      bufferAfterMinutes: 0,
++      window: { kind: "clock", startClock: "00:00", endClock: "02:00" },
++      ...patch,
++    },
++  });
++  expect(result.status).toBe("authored");
++  return result;
++}
++async function start(options: Parameters<typeof createDayFrameStore>[1] = {}) {
++  const durable = options.restoreIndexedDb ?? createDayFrameDurableDb();
++  const store = createDayFrameStore(undefined, { ...options, restoreIndexedDb: durable });
++  await store.whenReady();
++  store.setSchedulingPreferences({
++    dayBoundaryStartTime: "00:00",
++    weekStartsOn: "monday",
++  });
++  author(store);
++  const goal = await store.createGoal({ title: "Study" });
++  if (goal.status !== "accepted") throw new Error("goal");
++  const demand = await store.createDemand({
++    goalId: goal.goal.id,
++    requestedEffort: { unit: "minutes", amount: 60 },
++    horizon: { kind: "userDayInterval", ...range },
++    session: { mode: "indivisible", exactMinutes: 60 },
++    satisfaction: { kind: "minimum", allowPartial: false },
++    cadence: { kind: "total" },
++  });
++  if (demand.status !== "accepted") throw new Error("demand");
++  await store.setDemandResourceFootprintAssociation({
++    demandId: demand.value.id,
++    selection: { kind: "productiveOnly" },
++  });
++  return { store, durable, demandId: demand.value.id };
++}
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++});
++export function deferred() {
++  let resolve!: () => void;
++  const promise = new Promise<void>((r) => {
++    resolve = r;
++  });
++  return { promise, resolve };
++}
++export async function prepared(
++  multiRole = false,
++  options: Parameters<typeof createDayFrameStore>[1] = {},
++) {
++  const f = await start(options);
++  if (multiRole) {
++    const spec = await f.store.createDemandResourceFootprintSpec({
++      name: "Required full footprint",
++      variants: [
++        {
++          id: "study",
++          name: "Study",
++          components: [
++            {
++              id: "notes",
++              role: "supportActivity",
++              scope: "perSession",
++              requiredness: "required",
++              durationMinutes: 30,
++              geometry: { kind: "startsAtProductiveEnd" },
++              actor: "user",
++              source: { kind: "direct" },
++            },
++            {
++              id: "buffer",
++              role: "bufferProtection",
++              scope: "perSession",
++              requiredness: "required",
++              durationMinutes: 15,
++              target: { kind: "supportComponent", componentId: "notes" },
++              side: "after",
++              source: { kind: "direct" },
++            },
++          ],
++        },
++      ],
++    });
++    if (spec.status !== "accepted") throw Error(JSON.stringify(spec));
++    expect(
++      (
++        await f.store.setDemandResourceFootprintAssociation({
++          demandId: f.demandId,
++          expectedRevision: 1,
++          selection: {
++            kind: "specification",
++            specificationId: spec.value.id,
++            specificationRevision: spec.value.revision,
++            variantId: "study",
++            selectedOptionalComponentIds: [],
++          },
++        })
++      ).status,
++    ).toBe("accepted");
++  }
++  const evaluated = await f.store.evaluateCompetingAllocation({
++    ...range,
++    evaluationCutoff: at,
++  });
++  if (evaluated.status !== "evaluated") throw Error(JSON.stringify(evaluated));
++  const generated = await f.store.deriveProposal({
++    allocation: evaluated.allocation.allocations[0]!,
++    horizon: range,
++    allocationHorizon: range,
++    generatedAt: at,
++    evaluationCutoff: at,
++  });
++  if (generated.status !== "proposed") throw Error(JSON.stringify(generated));
++  expect((await f.store.recordProposal(generated)).status).toBe("accepted");
++  return {
++    ...f,
++    input: {
++      proposalId: generated.proposal.id,
++      proposalRevision: generated.proposal.revision,
++      optionId: generated.proposal.preferredOptionId,
++    },
++  };
++}
+--- baseline/code/src/state/acceptanceOwnerLifecycle.test.ts
++++ final/code/src/state/acceptanceOwnerLifecycle.test.ts
+@@ -0,0 +1,323 @@
++import { expect, it, vi } from "vitest";
++import { prepared, deferred, at } from "./acceptanceLifecycleTestFixtures.js";
++import { createAcceptanceLifecycle, hasCurrentAcceptanceReceipt } from "./acceptanceLifecycle.js";
++import { createRealizationSurface } from "./realizationSurface.js";
++import { createProposalSurface } from "./proposalSurface.js";
++import { createLazyProposalSurface } from "./lazyProposalSurface.js";
++import { createLazyRealizationSurface } from "./lazyRealizationSurface.js";
++import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY as capability } from "./dayFrameRuntimeAuthority.js";
++import { allocation, horizon } from "../core/planning/proposalTestFixtures.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import { IDBFactory } from "fake-indexeddb";
++
++async function retained() {
++  const f = await prepared(true),
++    real = f.durable.mutate;
++  const spy = vi
++    .spyOn(f.durable, "mutate")
++    .mockImplementation((rows, admit, observe) =>
++      real(
++        rows,
++        rows.some((r) => r.store === "realizationAuthority") ? () => false : admit,
++        observe,
++      ),
++    );
++  expect((await f.store.acceptProposalOption(f.input)).status).toBe("accepted");
++  spy.mockRestore();
++  const lifecycle = createAcceptanceLifecycle();
++  const owner = createRealizationSurface({
++    storage: f.durable,
++    lifecycle,
++    resolveAcceptedAllocation: f.store.resolveAcceptedAllocation as never,
++    now: () => at,
++  });
++  await owner.initializeRealizations();
++  return {
++    ...f,
++    lifecycle,
++    owner,
++    id: f.store.exportProposalAuthority().acceptedAllocations[0]!.id,
++  };
++}
++
++it.each([
++  "throwBefore",
++  "abort",
++  "abortLost",
++  "abortMissingAck",
++  "throwAfter",
++  "missingAck",
++  "readFailure",
++  "missingFact",
++  "extraFact",
++  "mismatchedFact",
++] as const)("realization physical certainty: %s", async (fault) => {
++  const f = await retained(),
++    real = f.durable.mutate,
++    read = f.durable.getAll;
++  let delayed: (() => ReturnType<typeof real>) | undefined;
++  let transactions = 0;
++  vi.spyOn(f.durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++    if (fault === "throwBefore") {
++      delayed = () => real(rows, admit, observe);
++      throw Error("before delegation");
++    }
++    if (fault === "abort" || fault === "abortLost" || fault === "abortMissingAck") {
++      const aborted = await real(
++        [...rows, { type: "put", store: "realizationAuthority", value: { bad: "missing key" } }],
++        admit,
++        observe,
++      );
++      if (fault === "abortLost") throw Error("aborted acknowledgment lost");
++      if (fault === "abortMissingAck") return new Promise(() => {});
++      return aborted;
++    }
++    const result = await real(rows, admit, (receipt) => {
++      transactions++;
++      observe?.(receipt);
++    });
++    if (fault === "throwAfter") throw Error("lost acknowledgment");
++    if (fault === "missingAck") return new Promise(() => {});
++    return result;
++  });
++  vi.spyOn(f.durable, "getAll").mockImplementation(async (...args) => {
++    const result = await read(...args);
++    if (args[0] !== "realizationAuthority" || !transactions) return result;
++    if (fault === "readFailure")
++      return { status: "failure", error: { code: "readFailed", operation: "verify" } };
++    if (result.status !== "success") return result;
++    if (fault === "missingFact") return { status: "success", value: result.value.slice(1) };
++    if (fault === "extraFact")
++      return { status: "success", value: [...result.value, result.value[0]] };
++    if (fault === "mismatchedFact")
++      return {
++        status: "success",
++        value: result.value.map((row, index) =>
++          index ? row : { ...(row as object), realizedAt: "2001-01-01T00:00:00.000Z" },
++        ),
++      };
++    return result;
++  });
++  const result = await f.owner.realizeAcceptedAllocation(f.id);
++  const known =
++    fault === "throwBefore" ||
++    fault === "abort" ||
++    fault === "abortLost" ||
++    fault === "abortMissingAck";
++  expect(result).toMatchObject({
++    status: known ? "failed" : "unconfirmed",
++    reasons: [
++      known
++        ? "atomicPersistenceFailure"
++        : fault === "throwAfter" || fault === "missingAck"
++          ? "commitStateUncertain"
++          : "verificationFailedAfterCommit",
++    ],
++  });
++  expect(f.lifecycle.isQuiescent()).toBe(true);
++  expect(f.owner.listRealizedScheduleFacts()).toEqual([]);
++  expect(f.store.exportProposalAuthority().acceptedAllocations).toHaveLength(1);
++  if (delayed) expect((await delayed()).status).toBe("failure");
++  expect(await read("realizationAuthority")).toMatchObject({
++    status: "success",
++    value: known ? [] : expect.any(Array),
++  });
++  if (!known) {
++    expect(f.owner.getRealizationProtectionEvidence(capability)?.attempted).toBeDefined();
++    expect(await f.owner.realizeAcceptedAllocation(f.id)).toMatchObject({
++      status: "protected",
++      reasons: ["authorityProtected"],
++    });
++  }
++});
++
++it("live native receipt remains leased through an outward throw until actual terminal", async () => {
++  const f = await retained(),
++    real = f.durable.mutate,
++    entered = deferred(),
++    terminal = deferred();
++  vi.spyOn(f.durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++    await real(rows, admit, (receipt) =>
++      observe?.({
++        terminal: receipt.terminal.then(async (state) => {
++          entered.resolve();
++          await terminal.promise;
++          return state;
++        }),
++      }),
++    );
++    throw Error("lost");
++  });
++  const pending = f.owner.realizeAcceptedAllocation(f.id);
++  await entered.promise;
++  expect(f.lifecycle.isQuiescent()).toBe(false);
++  expect(await f.owner.clearRealizationAuthority()).toEqual({ status: "storageFailure" });
++  expect(await f.owner.realizeAcceptedAllocation(f.id)).toMatchObject({
++    reasons: ["realizationBusy"],
++  });
++  terminal.resolve();
++  expect(await pending).toMatchObject({ status: "unconfirmed", reasons: ["commitStateUncertain"] });
++  expect(f.lifecycle.isQuiescent()).toBe(true);
++});
++
++it("unresolved native terminal never releases its fence", async () => {
++  const f = await retained(),
++    entered = deferred();
++  vi.spyOn(f.durable, "mutate").mockImplementation(async (_rows, _admit, observe) => {
++    observe?.({ terminal: new Promise(() => {}) });
++    entered.resolve();
++    throw Error("lost");
++  });
++  void f.owner.realizeAcceptedAllocation(f.id);
++  await entered.promise;
++  await Promise.resolve();
++  expect(f.lifecycle.isQuiescent()).toBe(false);
++  expect(await f.owner.clearRealizationAuthority()).toEqual({ status: "storageFailure" });
++});
++
++it("verification and synchronous notification both retain replacement exclusion", async () => {
++  const f = await retained(),
++    entered = deferred(),
++    release = deferred(),
++    read = f.durable.getAll;
++  const notify = vi.fn(() => expect(f.lifecycle.isQuiescent()).toBe(false));
++  const owner = createRealizationSurface({
++    storage: f.durable,
++    lifecycle: f.lifecycle,
++    resolveAcceptedAllocation: f.store.resolveAcceptedAllocation as never,
++    onAuthorityChanged: notify,
++  });
++  await owner.initializeRealizations();
++  vi.spyOn(f.durable, "getAll").mockImplementation(async (...args) => {
++    entered.resolve();
++    await release.promise;
++    return read(...args);
++  });
++  const pending = owner.realizeAcceptedAllocation(f.id);
++  await entered.promise;
++  expect(await owner.clearRealizationAuthority()).toEqual({ status: "storageFailure" });
++  release.resolve();
++  expect((await pending).status).toBe("realized");
++  expect(notify).toHaveBeenCalledOnce();
++});
++
++it.each(["proposals", "realizations"] as const)(
++  "stale %s initialization cannot replace installed authority or protection",
++  async (kind) => {
++    const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() });
++    const lifecycle = createAcceptanceLifecycle(),
++      entered = deferred(),
++      release = deferred(),
++      read = storage.getAll;
++    const owner =
++      kind === "proposals"
++        ? createProposalSurface({ storage, lifecycle })
++        : createRealizationSurface({
++            storage,
++            lifecycle,
++            resolveAcceptedAllocation: () => ({ status: "notFound" }),
++          });
++    const adapter =
++      "getProposalRuntimeAdapter" in owner
++        ? owner.getProposalRuntimeAdapter(capability)
++        : owner.getRealizationRuntimeAdapter(capability);
++    const snapshot = adapter.captureRuntimeSnapshot();
++    vi.spyOn(storage, "getAll").mockImplementation(async (...args) => {
++      const result = await read(...args);
++      entered.resolve();
++      await release.promise;
++      return result;
++    });
++    const pending =
++      "initializeProposals" in owner ? owner.initializeProposals() : owner.initializeRealizations();
++    await entered.promise;
++    adapter.installRuntimeExact(snapshot as never);
++    release.resolve();
++    expect(await pending).toEqual({ status: "contextReplaced" });
++    expect(adapter.captureRuntimeSnapshot()).toEqual(snapshot);
++  },
++);
++
++it.each(["proposals", "realizations"] as const)(
++  "%s lazy install before module dispatch retains target and invalidates old command",
++  async (kind) => {
++    const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() });
++    if (kind === "proposals") {
++      const owner = createLazyProposalSurface({ storage });
++      const adapter = owner.getProposalRuntimeAdapter(capability),
++        snapshot = adapter.captureRuntimeSnapshot();
++      const pending = owner.rejectProposal({ proposalId: "missing", proposalRevision: 1 });
++      adapter.installRuntimeExact({
++        ...snapshot,
++        ingress: { status: "accepted" },
++        durability: "durable",
++      });
++      expect(owner.getProposalIngressStatus().status).toBe("accepted");
++      expect(owner.exportProposalAuthority()).toEqual(snapshot.authority);
++      expect(await pending).toMatchObject({ status: "rejected", reason: "contextReplaced" });
++      expect(owner.getProposalIngressStatus().status).toBe("accepted");
++    } else {
++      const owner = createLazyRealizationSurface({
++        storage,
++        resolveAcceptedAllocation: () => ({ status: "notFound" }),
++      });
++      const adapter = owner.getRealizationRuntimeAdapter(capability),
++        snapshot = adapter.captureRuntimeSnapshot();
++      const pending = owner.realizeAcceptedAllocation("missing");
++      adapter.installRuntimeExact({ ...snapshot, ingress: "ready" });
++      expect(owner.getRealizationIngressStatus()).toBe("ready");
++      expect(owner.exportRealizationAuthority()).toEqual(snapshot.authority);
++      expect(await pending).toMatchObject({ status: "rejected", reasons: ["contextReplaced"] });
++      expect(owner.getRealizationIngressStatus()).toBe("ready");
++    }
++  },
++);
++
++it("replacement at the exact released acceptance handoff makes the outer historical and inner displaced", async () => {
++  const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() }),
++    proposals = createAcceptanceLifecycle(),
++    realizations = createAcceptanceLifecycle();
++  const realizer = createRealizationSurface({
++    storage,
++    lifecycle: realizations,
++    resolveAcceptedAllocation: (id) => owner.resolveAcceptedAllocation(id) as never,
++  });
++  await realizer.initializeRealizations();
++  const owner = createProposalSurface({
++    storage,
++    lifecycle: proposals,
++    allocateId: (() => {
++      let n = 0;
++      return () => `id-${++n}`;
++    })(),
++    onAcceptedAllocation: async (id, parent) => {
++      expect(proposals.isQuiescent()).toBe(true);
++      expect((await owner.clearProposalAuthority()).status).toBe("removed");
++      return realizations.enter(realizations.capture(parent), () =>
++        realizer.realizeAcceptedAllocation(id),
++      );
++    },
++  });
++  await owner.initializeProposals();
++  const generated = owner.deriveProposal({
++    allocation: allocation(),
++    horizon,
++    allocationHorizon: horizon,
++    generatedAt: at,
++  });
++  if (generated.status !== "proposed") throw Error("fixture");
++  await owner.recordProposal(generated);
++  const outcome = await owner.acceptProposalOption({
++    proposalId: generated.proposal.id,
++    proposalRevision: 1,
++    optionId: generated.proposal.preferredOptionId,
++    current: generated,
++  });
++  expect(outcome).toMatchObject({
++    status: "accepted",
++    value: { realization: { status: "rejected", reasons: ["contextReplaced"] } },
++  });
++  expect(hasCurrentAcceptanceReceipt(outcome)).toBe(false);
++  expect(owner.exportProposalAuthority().acceptedAllocations).toEqual([]);
++  expect(await storage.getAll("realizationAuthority")).toEqual({ status: "success", value: [] });
++});
+--- baseline/code/src/state/acceptancePersistence.ts
++++ final/code/src/state/acceptancePersistence.ts
+@@ -0,0 +1,77 @@
++import type {
++  DurableMutation,
++  DurableTransactionReceipt,
++  IndexedDbCollectionStorage,
++} from "../infrastructure/storage/indexedDbCollectionStorage.js";
++
++/** Physical completion is required even when the adapter's outward promise is lost. */
++export async function persistAcceptanceMutation(
++  storage: IndexedDbCollectionStorage,
++  mutations: DurableMutation[],
++  admit: () => boolean,
++): Promise<"committed" | "notWritten" | "uncertain"> {
++  let open = true;
++  const receipts: DurableTransactionReceipt[] = [];
++  let lost!: () => void;
++  const missing = new Promise<never>((_, reject) => {
++    lost = () => reject(new Error("Missing transaction acknowledgment"));
++  });
++  try {
++    const acknowledgment = await Promise.race([
++      storage.mutate(
++        mutations,
++        () => open && admit(),
++        (receipt) => {
++          receipts.push(receipt);
++          void receipt.terminal.then(() => {
++            const channel = new MessageChannel();
++            channel.port1.onmessage = () => {
++              channel.port1.close();
++              channel.port2.close();
++              lost();
++            };
++            channel.port2.postMessage(null);
++          });
++        },
++      ),
++      missing,
++    ]);
++    open = false;
++    const terminal = await Promise.all(receipts.map((r) => r.terminal));
++    if (terminal.includes("aborted")) return "notWritten";
++    if (acknowledgment.status === "failure")
++      return terminal.includes("committed") ? "uncertain" : "notWritten";
++    // Supported adapters register their native transaction before enqueuing requests.
++    return terminal.length === 1 && terminal[0] === "committed" ? "committed" : "uncertain";
++  } catch {
++    open = false;
++    const terminal = await Promise.all(receipts.map((r) => r.terminal));
++    return terminal.length === 0 || terminal.every((value) => value === "aborted")
++      ? "notWritten"
++      : "uncertain";
++  }
++}
++
++/** Only top-level collection order is unspecified; nested payloads remain exact. */
++export function exactAuthorityRows(left: readonly unknown[], right: readonly unknown[]) {
++  const order = (rows: readonly unknown[]) => rows.map((row) => JSON.stringify(row)).sort();
++  return JSON.stringify(order(left)) === JSON.stringify(order(right));
++}
++
++export async function captureAcceptanceProtectionEvidence(
++  storage: IndexedDbCollectionStorage,
++  store: string,
++  attempted: unknown,
++) {
++  try {
++    return {
++      attempted: structuredClone(attempted),
++      observed: await storage.getAll<unknown>(store),
++    };
++  } catch {
++    return { attempted: structuredClone(attempted), observed: { status: "unavailable" as const } };
++  }
++}
++export type AcceptanceProtectionEvidence = Awaited<
++  ReturnType<typeof captureAcceptanceProtectionEvidence>
++>;
+--- baseline/code/src/state/acceptanceReplacementIsolation.test.ts
++++ final/code/src/state/acceptanceReplacementIsolation.test.ts
+@@ -0,0 +1,176 @@
++import { expect, it, vi } from "vitest";
++import { prepared, deferred, at, author } from "./acceptanceLifecycleTestFixtures.js";
++import { createDayFrameStore } from "./dayFrameStore.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import {
++  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY as capability,
++  getDayFrameRuntimeAuthorityController,
++} from "./dayFrameRuntimeAuthority.js";
++import { hasCurrentAcceptanceReceipt } from "./acceptanceLifecycle.js";
++
++it.each(["automatic", "retry", "proposal"] as const)(
++  "%s × clear/V14 excludes replacement before physical creation",
++  async (path) => {
++    for (const replacement of ["clear", "restore"] as const) {
++      // A fresh fixture/factory for each ordering is provided by the test globals.
++      const { store, durable, input } = await prepared(true);
++      const real = durable.mutate;
++      if (path === "retry") {
++        const fault = vi
++          .spyOn(durable, "mutate")
++          .mockImplementation((rows, admit, observe) =>
++            real(
++              rows,
++              rows.some((r) => r.store === "realizationAuthority") ? () => false : admit,
++              observe,
++            ),
++          );
++        const accepted = await store.acceptProposalOption(input);
++        expect(accepted.status).toBe("accepted");
++        expect(store.listRealizations()).toEqual([]);
++        fault.mockRestore();
++      }
++      const backup = await store.exportBackupV14(at);
++      if (backup.status !== "exported") throw Error(backup.status);
++      const entered = deferred(),
++        release = deferred();
++      let attempts = 0,
++        transactions = 0;
++      const spy = vi.spyOn(durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++        const selected = rows.some(
++          (r) =>
++            r.type === "put" &&
++            r.store === (path === "proposal" ? "proposalAuthority" : "realizationAuthority"),
++        );
++        if (selected) {
++          attempts++;
++          entered.resolve();
++          await release.promise;
++        }
++        return real(rows, admit, (receipt) => {
++          if (selected) transactions++;
++          observe?.(receipt);
++        });
++      });
++      const pending =
++        path === "retry"
++          ? store.realizeAcceptedAllocation(
++              store.exportProposalAuthority().acceptedAllocations[0]!.id,
++            )
++          : store.acceptProposalOption(input);
++      await entered.promise;
++      const controller = getDayFrameRuntimeAuthorityController(store, capability),
++        epoch = controller.getEpoch!();
++      expect(attempts).toBe(1);
++      expect(transactions).toBe(0);
++      expect(controller.begin()).toEqual({ status: "busy" });
++      if (replacement === "clear") await expect(store.clearLocalData()).rejects.toThrow();
++      else
++        expect(await store.importBackupV14(backup.backup)).toMatchObject({ status: "restoreBusy" });
++      expect(controller.getEpoch!()).toBe(epoch);
++      release.resolve();
++      const outcome = await pending;
++      expect(outcome.status).toBe(path === "retry" ? "realized" : "accepted");
++      expect(hasCurrentAcceptanceReceipt(outcome)).toBe(true);
++      expect(transactions).toBe(1);
++      expect(store.listRealizedScheduleFacts()).toHaveLength(3);
++      spy.mockRestore();
++      const replaced =
++        replacement === "clear"
++          ? await store.clearLocalData()
++          : await store.importBackupV14(backup.backup);
++      expect(replaced.status).toBe(replacement === "clear" ? "cleared" : "restoredV14");
++      expect(hasCurrentAcceptanceReceipt(outcome)).toBe(false);
++      const restarted = createDayFrameStore(undefined, {
++        restoreIndexedDb: createDayFrameDurableDb(),
++      });
++      await restarted.whenReady();
++      expect(restarted.getRealizationIngressStatus()).toBe("ready");
++      expect(restarted.exportRealizationAuthority()).toEqual(store.exportRealizationAuthority());
++      expect(restarted.exportProposalAuthority()).toEqual(store.exportProposalAuthority());
++      if (replacement === "restore" && path === "retry") {
++        const fresh = await store.realizeAcceptedAllocation(
++          store.exportProposalAuthority().acceptedAllocations[0]!.id,
++        );
++        expect(fresh.status).toBe("realized");
++      }
++      await store.clearLocalData();
++    }
++  },
++);
++
++it("automatic + same-target retry rejects busy; fresh retry verifies complete original identities", async () => {
++  const { store, durable, input } = await prepared(true);
++  const entered = deferred(),
++    release = deferred(),
++    real = durable.mutate;
++  let transactions = 0;
++  vi.spyOn(durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++    const selected = rows.some((r) => r.store === "realizationAuthority");
++    if (selected) {
++      entered.resolve();
++      await release.promise;
++    }
++    return real(rows, admit, (receipt) => {
++      if (selected) transactions++;
++      observe?.(receipt);
++    });
++  });
++  const automatic = store.acceptProposalOption(input);
++  await entered.promise;
++  const id = store.exportProposalAuthority().acceptedAllocations[0]!.id;
++  expect(await store.realizeAcceptedAllocation(id)).toMatchObject({
++    status: "rejected",
++    reasons: ["realizationBusy"],
++  });
++  release.resolve();
++  await automatic;
++  const before = store.exportRealizationAuthority();
++  expect(await store.realizeAcceptedAllocation(id)).toMatchObject({ status: "alreadyRealized" });
++  expect(store.exportRealizationAuthority()).toEqual(before);
++  expect(transactions).toBe(1);
++});
++
++it.each(["before", "after"] as const)(
++  "saved source edit %s physical admission has selected effect",
++  async (phase) => {
++    const { store, durable, input } = await prepared(true);
++    const entered = deferred(),
++      release = deferred(),
++      real = durable.mutate;
++    let transactions = 0;
++    vi.spyOn(durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++      if (!rows.some((r) => r.store === "realizationAuthority")) return real(rows, admit, observe);
++      if (phase === "before") {
++        entered.resolve();
++        await release.promise;
++      }
++      const result = await real(rows, admit, (receipt) => {
++        transactions++;
++        observe?.(receipt);
++      });
++      if (phase === "after") {
++        entered.resolve();
++        await release.promise;
++      }
++      return result;
++    });
++    const pending = store.acceptProposalOption(input);
++    await entered.promise;
++    author(store, { durationMinutes: 90 });
++    release.resolve();
++    const outcome = await pending;
++    expect(outcome).toMatchObject({
++      status: "accepted",
++      value: {
++        realization:
++          phase === "before"
++            ? { status: "rejected", reasons: ["sourceChanged"] }
++            : { status: "realized", reviewRequired: true },
++      },
++    });
++    expect(transactions).toBe(phase === "before" ? 0 : 1);
++    expect(store.listRealizedScheduleFacts()).toHaveLength(phase === "before" ? 0 : 3);
++    expect(store.exportProposalAuthority().acceptedAllocations).toHaveLength(1);
++  },
++);
+--- baseline/code/src/state/acceptanceSourceWitness.test.ts
++++ final/code/src/state/acceptanceSourceWitness.test.ts
+@@ -0,0 +1,159 @@
++import { expect, it, vi } from "vitest";
++import { deriveOrdinaryProposal } from "../core/planning/proposal.js";
++import { allocation, horizon } from "../core/planning/proposalTestFixtures.js";
++import { prepared, deferred, at, range } from "./acceptanceLifecycleTestFixtures.js";
++
++it.each(["work", "manual", "fixed", "sleepPlacement"] as const)(
++  "saved %s edit during storage opening denies realization before transaction creation",
++  async (source) => {
++    const { store, durable, input } = await prepared(true);
++    const entered = deferred(),
++      release = deferred(),
++      real = durable.mutate;
++    let transactions = 0;
++    vi.spyOn(durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++      if (!rows.some((r) => r.store === "realizationAuthority")) return real(rows, admit, observe);
++      entered.resolve();
++      await release.promise;
++      return real(rows, admit, (receipt) => {
++        transactions++;
++        observe?.(receipt);
++      });
++    });
++    const pending = store.acceptProposalOption(input);
++    await entered.promise;
++    const accepted = store.exportProposalAuthority().acceptedAllocations;
++    if (source === "manual")
++      store.setManualEvents([
++        {
++          id: "later",
++          title: "Later saved event",
++          userDayDate: "2026-09-17",
++          allDay: true,
++          createdAt: at,
++          updatedAt: at,
++        },
++      ]);
++    if (source === "work") {
++      store.setShiftDefinitions([
++        {
++          id: "work",
++          userId: "u",
++          name: "Work",
++          startTime: "00:00",
++          endTime: "23:59",
++          workDays: ["thursday"],
++          crossesMidnight: false,
++          createdAt: at,
++          updatedAt: at,
++        },
++      ]);
++      store.setShiftCycles([
++        {
++          id: "cycle",
++          userId: "u",
++          name: "Cycle",
++          type: "fixedSegments",
++          startsOnDate: "2026-09-01",
++          endsOnDate: "2026-09-30",
++          segments: [
++            {
++              id: "segment",
++              shiftCycleId: "cycle",
++              shiftDefinitionId: "work",
++              startsOnDate: "2026-09-01",
++              endsOnDate: "2026-09-30",
++            },
++          ],
++          createdAt: at,
++          updatedAt: at,
++        },
++      ]);
++    }
++    if (source === "fixed") {
++      store.setBlockTemplates([
++        {
++          id: "fixed",
++          userId: "u",
++          title: "Fixed",
++          category: "admin",
++          placementType: "fixed",
++          durationMinutes: 1439,
++          priority: 1,
++          preferredWindow: "anyAvailable",
++          fixedStartTime: "00:00",
++          rescheduleBehavior: "skip",
++          requiresResource: false,
++          externalResources: [],
++          enabled: true,
++          createdAt: at,
++          updatedAt: at,
++        },
++      ]);
++      store.setBlockRecurrences([
++        {
++          id: "fixed-rule",
++          blockTemplateId: "fixed",
++          frequency: "daily",
++          startsOnDate: "2026-09-17",
++          endsOnDate: "2026-09-17",
++        },
++      ]);
++    }
++    if (source === "sleepPlacement") {
++      const resolution = await store.resolveRequiredSleep({ ownerRange: range });
++      if (resolution.status !== "satisfied") throw Error(resolution.status);
++      const trial = store.trySleepPlacement({
++        ownerRange: range,
++        target: resolution.occurrences.find((o) => o.membership === "requested")!.reference,
++        sleepStart: new Date(2026, 8, 17, 0).toISOString(),
++      });
++      if (trial.status !== "available") throw Error(JSON.stringify(trial));
++      expect(store.acceptPlanDecision(trial.candidate).status).toBe("accepted");
++    }
++    release.resolve();
++    expect(await pending).toMatchObject({
++      status: "accepted",
++      value: { realization: { status: "rejected", reasons: ["sourceChanged"] } },
++    });
++    expect(transactions).toBe(0);
++    expect(store.exportProposalAuthority().acceptedAllocations).toEqual(accepted);
++    expect(store.listRealizedScheduleFacts()).toEqual([]);
++    const fresh = await store.realizeAcceptedAllocation(accepted[0]!.id);
++    expect(fresh.status).toBe(source === "sleepPlacement" ? "realized" : "inapplicable");
++    expect(transactions).toBe(source === "sleepPlacement" ? 1 : 0);
++    expect(store.exportProposalAuthority().acceptedAllocations).toEqual(accepted);
++  },
++);
++
++it("unrelated Proposal lifecycle append can settle during realization without invalidating its exact acceptance", async () => {
++  const { store, durable, input } = await prepared(true),
++    entered = deferred(),
++    release = deferred(),
++    real = durable.mutate;
++  vi.spyOn(durable, "mutate").mockImplementation(async (rows, admit, observe) => {
++    if (rows.some((r) => r.store === "realizationAuthority")) {
++      entered.resolve();
++      await release.promise;
++    }
++    return real(rows, admit, observe);
++  });
++  const pending = store.acceptProposalOption(input);
++  await entered.promise;
++  const accepted = store.exportProposalAuthority().acceptedAllocations;
++  const generated = deriveOrdinaryProposal({
++    allocation: allocation(),
++    horizon,
++    allocationHorizon: horizon,
++    generatedAt: at,
++  });
++  if (generated.status !== "proposed") throw Error(generated.status);
++  expect((await store.recordProposal(generated)).status).toBe("accepted");
++  release.resolve();
++  expect(await pending).toMatchObject({
++    status: "accepted",
++    value: { realization: { status: "realized" } },
++  });
++  expect(store.exportProposalAuthority().acceptedAllocations).toEqual(accepted);
++  expect(store.listRealizedScheduleFacts()).toHaveLength(3);
++});
+--- baseline/code/src/state/dayFrameStore.ts
++++ final/code/src/state/dayFrameStore.ts
+@@ -1,3 +1,4 @@
++import { createAcceptanceLifecycle, type AcceptanceOrigin } from "./acceptanceLifecycle.js";
+ import { withPublicationReceipt } from "./publicationReceipt.js";
+ import {
+   createCurrentActive as createActiveV3,
+@@ -729,17 +730,28 @@
+     goals: goalSurface,
+     planning: goalPlanningSurface,
+   });
++  const proposalLifecycle =
++    options.proposalSurface?.getProposalLifecycle(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) ??
++    createAcceptanceLifecycle();
++  const realizationLifecycle = createAcceptanceLifecycle();
++  const acceptanceSourceWitness = () =>
++    JSON.stringify({
++      setup: getActiveSetup(state),
++      sleep: captureSleepAuthority(),
++      goals: goalSurface.exportAuthority(),
++      planning: goalPlanningSurface.exportGoalPlanningAuthority(),
++      structure: goalStructureSurface.exportGoalStructureAuthority(),
++    });
+   let proposalMutationAdmission = () => true;
+-  let realizeAcceptedAllocationAfterAcceptance: (id: string) => Promise<unknown> = async () => ({
+-    status: "notInitialized",
+-  });
+   const proposalSurface =
+     options.proposalSurface ??
+     createLazyProposalSurface({
++      lifecycle: proposalLifecycle,
++      sourceWitness: acceptanceSourceWitness,
+       storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+       notificationScheduler,
+       canMutate: () => proposalMutationAdmission(),
+-      onAcceptedAllocation: (id) => realizeAcceptedAllocationAfterAcceptance(id),
++      onAcceptedAllocation: (id, origin) => realizeAcceptedAllocationAfterAcceptance(id, origin),
+       qualifyFoundation: (input) => {
+         if (!foundationModule) return "unknown";
+         const foundation = deriveCurrentPlanning(
+@@ -814,43 +826,22 @@
+   const realizationSurface = createLazyRealizationSurface({
+     storage: options.restoreIndexedDb ?? createDayFrameDurableDb(),
+     resolveAcceptedAllocation: proposalSurface.resolveAcceptedAllocation as never,
+-    checkFoundation: (accepted) => {
+-      if (!foundationModule) return "reviewRequired";
+-      const range = accepted.scope.horizon;
+-      const planning = deriveCurrentPlanning({
+-        startUserDayDate: range.startUserDayDate as never,
+-        endUserDayDateExclusive: range.endUserDayDateExclusive as never,
+-      });
+-      const blocked =
+-        planning.foundation.status === "nonAllocatable" ||
+-        accepted.claims.some(
+-          (claim) =>
+-            Date.parse(claim.startsAt) < planning.planningWindow.startsAt.getTime() ||
+-            Date.parse(claim.endsAt) > planning.planningWindow.endsAt.getTime(),
+-        ) ||
+-        accepted.claims.some((claim) =>
+-          planning.foundation.protection.some(
+-            (p) =>
+-              Date.parse(claim.startsAt) < Date.parse(p.endsAt) &&
+-              Date.parse(p.startsAt) < Date.parse(claim.endsAt),
+-          ),
+-        );
+-      return blocked ? "reviewRequired" : "eligible";
++    lifecycle: realizationLifecycle,
++    sourceWitness: () =>
++      JSON.stringify({ setup: getActiveSetup(state), sleep: captureSleepAuthority() }),
++    prepareSources: async (accepted, at) => {
++      const foundation = await loadFoundation();
++      return foundation.prepareRealizationSources(
++        {
++          generatedAt: at,
++          ownerRange: accepted.scope
++            .horizon as import("../core/sleep/sleepResolution.js").SleepOwnerRange,
++          authoredState: getActiveSetup(state),
++          authority: captureSleepAuthority(),
++        },
++        accepted,
++      );
+     },
+-    currentSchedule: () => [
+-      ...(state.preview?.result.generatedWorkBlocks.map((item) => ({
+-        id: item.id as never,
+-        startsAt: item.startsAt.toISOString(),
+-        endsAt: item.endsAt.toISOString(),
+-        sourceKind: "work" as never,
+-      })) ?? []),
+-      ...(state.preview?.result.scheduledBlocks.map((item) => ({
+-        id: item.id as never,
+-        startsAt: item.startsAt.toISOString(),
+-        endsAt: item.endsAt.toISOString(),
+-        sourceKind: item.source as never,
+-      })) ?? []),
+-    ],
+     onAuthorityChanged: () => {
+       if (state.preview && !state.preview.isStale) {
+         state = { ...state, preview: markPreviewStale(state.preview) };
+@@ -859,7 +850,12 @@
+     },
+   });
+   listRealizedScheduleFactsForCapacity = realizationSurface.listRealizedScheduleFacts;
+-  realizeAcceptedAllocationAfterAcceptance = realizationSurface.realizeAcceptedAllocation;
++  function realizeAcceptedAllocationAfterAcceptance(id: string, parent: AcceptanceOrigin) {
++    const origin = realizationLifecycle.capture(parent);
++    return realizationLifecycle.enter(origin, () =>
++      realizationSurface.realizeAcceptedAllocation(id),
++    );
++  }
+   listAcceptedAllocationsForCapacity = () =>
+     proposalSurface
+       .exportProposalAuthority()
+@@ -1041,9 +1037,17 @@
+   const authorityTransaction = createDayFrameAuthorityTransaction({
+     canBegin: () =>
+       goalStructureSurface.isGoalStructureQuiescent() &&
+-      historicalPlanSurface.isHistoricalPlanQuiescent(),
++      historicalPlanSurface.isHistoricalPlanQuiescent() &&
++      proposalLifecycle.isQuiescent() &&
++      realizationLifecycle.isQuiescent(),
+     protectedParticipant: () =>
+-      historicalPlanSurface.isHistoricalPlanProtected() ? "historicalPlan" : undefined,
++      historicalPlanSurface.isHistoricalPlanProtected()
++        ? "historicalPlan"
++        : proposalSurface.getProposalIngressStatus().status === "protected"
++          ? "proposals"
++          : realizationSurface.getRealizationIngressStatus() === "protected"
++            ? "realizations"
++            : undefined,
+     scheduler: notificationScheduler,
+     participants: runtimeParticipants.map((participant) => ({
+       id: participant.id,
+@@ -1051,6 +1055,39 @@
+       installExact: (value: unknown) => participant.installRuntimeExact(value as never),
+     })),
+   });
++  for (const [owner, peer] of [
++    [proposalLifecycle, realizationLifecycle],
++    [realizationLifecycle, proposalLifecycle],
++  ] as const) {
++    owner.configure({
++      getEpoch: authorityTransaction.getEpoch,
++      peerGeneration: peer.generation,
++      canInstall: () => ["active", "aborting"].includes(authorityTransaction.getState().status),
++      admission: () =>
++        authorityTransaction.getState().status !== "inactive"
++          ? "replacementBusy"
++          : readiness.status === "protected"
++            ? "authorityProtected"
++            : readiness.status !== "ready"
++              ? "authorityUnavailable"
++              : undefined,
++      coordinatorCurrent: (epoch) =>
++        authorityTransaction.getState().status === "active" &&
++        authorityTransaction.getEpoch() === epoch,
++      replace: async (run) => {
++        const begun = authorityTransaction.begin("internalReplacement");
++        if (begun.status !== "begun") return { status: "failure" };
++        try {
++          const result = await run(begun.epoch);
++          authorityTransaction.commit();
++          return result;
++        } catch (error) {
++          authorityTransaction.abort();
++          throw error;
++        }
++      },
++    });
++  }
+   historicalPlanSurface.configureLifecycle(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY, {
+     getEpoch: authorityTransaction.getEpoch,
+     admission: () =>
+@@ -2284,8 +2321,14 @@
+     );
+     const goalPlanningPromise = goalPlanningSurface.clearGoalPlanning();
+     const compositionPromise = compositionSurface.clearCompositionAuthority();
+-    const proposalsPromise = proposalSurface.clearProposalAuthority();
+-    const realizationsPromise = realizationSurface.clearRealizationAuthority();
++    const proposalsPromise = proposalSurface.clearProposalForCoordinator(
++      DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      begun.epoch,
++    );
++    const realizationsPromise = realizationSurface.clearRealizationForCoordinator(
++      DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      begun.epoch,
++    );
+     if (profiles.status === "removed") {
+       transitionProfileIngress({ status: "noSource", reason: "missing" });
+       quarantinedProfiles = [];
+@@ -3281,8 +3324,17 @@
+       });
+     },
+     queryAcceptedPlanningEvidence: async (query) => {
++      const origin = proposalLifecycle.capture();
++      const ingress = () =>
++        JSON.stringify([
++          proposalSurface.getProposalIngressStatus(),
++          realizationSurface.getRealizationIngressStatus(),
++        ]);
++      const before = ingress();
+       const { queryAcceptedPlanningEvidence } = await import("./acceptedPlanningEvidenceQuery.js");
+-      return queryAcceptedPlanningEvidence(query, {
++      if (!origin.isCurrent() || before !== ingress())
++        return { status: "error" as const, reason: "evidenceQueryFailed" as const };
++      const result = await queryAcceptedPlanningEvidence(query, {
+         proposals: proposalSurface,
+         realizations: realizationSurface,
+         goals: goalSurface,
+@@ -3290,6 +3342,9 @@
+         historicalPlan: historicalPlanSurface,
+         execution: executionHistorySurface,
+       });
++      return origin.isCurrent() && before === ingress()
++        ? result
++        : { status: "error" as const, reason: "evidenceQueryFailed" as const };
+     },
+     recordSleepExecution,
+     querySleepHistory: async (query) => {
+--- baseline/code/src/state/goalStructurePlanningSafety.test.ts
++++ final/code/src/state/goalStructurePlanningSafety.test.ts
+@@ -269,7 +269,7 @@
+   const before = adapter.captureRuntimeSnapshot();
+   adapter.installRuntimeExact(before);
+   release();
+-  expect(await pending).toMatchObject({ status: "rejected", reason: "notActionable" });
++  expect(await pending).toMatchObject({ status: "rejected", reason: "contextReplaced" });
+   expect(owner.exportProposalAuthority()).toEqual(before.authority);
+ });
+ 
+--- baseline/code/src/state/lazyProposalSurface.ts
++++ final/code/src/state/lazyProposalSurface.ts
+@@ -1,3 +1,4 @@
++import { createAcceptanceLifecycle } from "./acceptanceLifecycle.js";
+ import type { ProposalAuthorityV1 } from "../core/planning/proposal.js";
+ import type { ProposalSurface, createProposalSurface } from "./proposalSurface.js";
+ import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY } from "./dayFrameRuntimeAuthority.js";
+@@ -6,12 +7,25 @@
+ export function createLazyProposalSurface(
+   options: Parameters<typeof createProposalSurface>[0],
+ ): ProposalSurface {
++  const lifecycle = options.lifecycle ?? createAcceptanceLifecycle();
++  let installed: Parameters<typeof createProposalSurface>[0]["initialRuntime"];
+   let surface: ProposalSurface | undefined;
+   let loading: Promise<ProposalSurface>;
+   const load = () =>
+-    (loading ??= import("./proposalSurface.js").then(
+-      (module) => (surface = module.createProposalSurface(options)),
+-    ));
++    (loading ??= import("./proposalSurface.js").then((module) => {
++      surface = module.createProposalSurface({
++        ...options,
++        lifecycle,
++        ...(installed === undefined
++          ? {}
++          : {
++              initialRuntime: installed as NonNullable<
++                Parameters<typeof createProposalSurface>[0]["initialRuntime"]
++              >,
++            }),
++      });
++      return surface;
++    }));
+   const emptyProposalAuthority = (): ProposalAuthorityV1 => ({
+     version: 1,
+     proposals: [],
+@@ -24,18 +38,52 @@
+       surface && (surface.deriveProposal as (...values: never[]) => unknown)(...args),
+     evaluateProposalFreshness: (...args) =>
+       surface && (surface.evaluateProposalFreshness as (...values: never[]) => unknown)(...args),
+-    listActionableProposals: () => surface?.listActionableProposals() ?? [],
+-    listProposalHistory: (...args) => surface?.listProposalHistory(...args) ?? [],
+-    listUnrealizedAcceptedAllocations: () => surface?.listUnrealizedAcceptedAllocations() ?? [],
++    listActionableProposals: () => {
++      if (surface) return surface.listActionableProposals();
++      const latest = new Map<string, ProposalAuthorityV1["proposals"][number]>();
++      for (const value of installed?.authority.proposals ?? [])
++        if (!latest.has(value.id) || latest.get(value.id)!.revision < value.revision)
++          latest.set(value.id, value);
++      return structuredClone(
++        [...latest.values()]
++          .sort((a, b) => a.id.localeCompare(b.id))
++          .filter((value) => value.lifecycle === "generated" || value.lifecycle === "shown"),
++      );
++    },
++    listProposalHistory: (limit = 100) =>
++      surface?.listProposalHistory(limit) ??
++      structuredClone(
++        (installed?.authority.proposals ?? [])
++          .slice()
++          .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt))
++          .slice(0, Math.max(0, limit)),
++      ),
++    listUnrealizedAcceptedAllocations: () =>
++      surface?.listUnrealizedAcceptedAllocations() ??
++      structuredClone(
++        (installed?.authority.acceptedAllocations ?? []).filter(
++          (item) => item.realization === "unrealized",
++        ),
++      ),
+     // Realization consumes this lookup synchronously after proposal bootstrap.
+-    resolveAcceptedAllocation: (id: string) =>
+-      surface?.resolveAcceptedAllocation(id) ?? { status: "notFound" },
+-    exportProposalAuthority: () => surface?.exportProposalAuthority() ?? emptyProposalAuthority(),
++    resolveAcceptedAllocation: (id: string) => {
++      if (surface) return surface.resolveAcceptedAllocation(id);
++      const value = installed?.authority.acceptedAllocations.find((item) => item.id === id);
++      return value
++        ? { status: "resolved", acceptedAllocation: structuredClone(value) }
++        : { status: "notFound" };
++    },
++    exportProposalAuthority: () =>
++      surface?.exportProposalAuthority() ??
++      structuredClone(installed?.authority ?? emptyProposalAuthority()),
+     getProposalIngressStatus: () =>
+-      surface?.getProposalIngressStatus() ?? { status: "initializing" },
+-    getProposalDurabilityStatus: () => surface?.getProposalDurabilityStatus() ?? "unknown",
++      surface?.getProposalIngressStatus() ??
++      structuredClone(installed?.ingress ?? { status: "initializing" }),
++    getProposalDurabilityStatus: () =>
++      surface?.getProposalDurabilityStatus() ?? installed?.durability ?? "unknown",
+   };
+   const keys = [
++    "getProposalLifecycle",
+     "initializeProposals",
+     "deriveProposal",
+     "recordProposal",
+@@ -59,26 +107,71 @@
+     "getProposalDurabilityStatus",
+     "retryProposalPersistence",
+     "subscribeProposals",
++    "getProposalProtectionEvidence",
+     "getProposalRuntimeAdapter",
++    "clearProposalForCoordinator",
+   ];
++  const dispatch = Object.fromEntries(
++    [
++      "initializeProposals",
++      "recordProposal",
++      "markProposalShown",
++      "supersedeProposal",
++      "createModificationCandidate",
++      "acceptProposalOption",
++      "modifyAndAcceptCandidate",
++      "rejectOption",
++      "rejectProposal",
++      "retryProposalPersistence",
++      "replaceProposalAuthority",
++      "clearProposalAuthority",
++    ].map((key) => [
++      key,
++      (...args: unknown[]) => {
++        const origin = lifecycle.origin(),
++          input = structuredClone(args);
++        const invoke = (owner: ProposalSurface) =>
++          lifecycle.enter(origin, () =>
++            (owner[key as keyof ProposalSurface] as (...values: unknown[]) => unknown)(...input),
++          );
++        return surface ? invoke(surface) : load().then(invoke);
++      },
++    ]),
++  );
+   return createLazySurface(keys, load, {
+     ...sync,
++    ...dispatch,
++    getProposalLifecycle: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
++      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++        throw new Error("Invalid capability");
++      return lifecycle;
++    },
+     subscribeProposals: (listener: () => void) =>
+       surface?.subscribeProposals(listener) ?? (() => undefined),
++    getProposalProtectionEvidence: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
++      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++        throw new Error("Invalid capability");
++      return surface?.getProposalProtectionEvidence(capability);
++    },
+     getProposalRuntimeAdapter: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
+       if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
+         throw new Error("Invalid capability");
+       return {
+         id: "proposals" as const,
+         captureRuntimeSnapshot: () =>
+-          surface?.getProposalRuntimeAdapter(capability).captureRuntimeSnapshot() ?? {
++          surface?.getProposalRuntimeAdapter(capability).captureRuntimeSnapshot() ??
++          installed ?? {
+             authority: emptyProposalAuthority(),
+             desired: emptyProposalAuthority(),
+             ingress: { status: "initializing" as const },
+             durability: "unknown" as const,
+           },
+-        installRuntimeExact: (value: never) =>
+-          surface?.getProposalRuntimeAdapter(capability).installRuntimeExact(value),
++        installRuntimeExact: (value: never) => {
++          lifecycle.assertInstall();
++          lifecycle.invalidate();
++          installed = structuredClone(value);
++          surface?.getProposalRuntimeAdapter(capability).installRuntimeExact(value);
++        },
+       };
+     },
+   });
+--- baseline/code/src/state/lazyRealizationSurface.ts
++++ final/code/src/state/lazyRealizationSurface.ts
+@@ -1,3 +1,4 @@
++import { createAcceptanceLifecycle } from "./acceptanceLifecycle.js";
+ import type { RealizationAuthorityV1 } from "../core/planning/acceptedAllocationRealization.js";
+ import type { RealizationSurface, createRealizationSurface } from "./realizationSurface.js";
+ import { createLazySurface } from "./lazySurface.js";
+@@ -6,13 +7,56 @@
+ export function createLazyRealizationSurface(
+   options: Parameters<typeof createRealizationSurface>[0],
+ ): RealizationSurface {
++  const lifecycle = options.lifecycle ?? createAcceptanceLifecycle();
++  let installed: Parameters<typeof createRealizationSurface>[0]["initialRuntime"];
+   let surface: RealizationSurface | undefined;
+   let loading: Promise<RealizationSurface>;
+   const load = () =>
+-    (loading ??= import("./realizationSurface.js").then(
+-      (module) => (surface = module.createRealizationSurface(options)),
+-    ));
++    (loading ??= import("./realizationSurface.js").then((module) => {
++      surface = module.createRealizationSurface({
++        ...options,
++        lifecycle,
++        ...(installed === undefined
++          ? {}
++          : {
++              initialRuntime: installed as NonNullable<
++                Parameters<typeof createRealizationSurface>[0]["initialRuntime"]
++              >,
++            }),
++      });
++      return surface;
++    }));
+   const empty = (): RealizationAuthorityV1 => ({ version: 1, realizations: [], facts: [] });
++  const selectInstalled = (
++    role: RealizationAuthorityV1["facts"][number]["scheduleRole"],
++    range?: { startsAt: string; endsAt: string },
++  ) =>
++    structuredClone(
++      (installed?.authority.facts ?? []).filter(
++        (fact) =>
++          fact.scheduleRole === role &&
++          (!range || (fact.startsAt < range.endsAt && range.startsAt < fact.endsAt)),
++      ),
++    );
++  const dispatch = Object.fromEntries(
++    [
++      "initializeRealizations",
++      "realizeAcceptedAllocation",
++      "replaceRealizationAuthority",
++      "clearRealizationAuthority",
++    ].map((key) => [
++      key,
++      (...args: unknown[]) => {
++        const origin = lifecycle.origin(),
++          input = structuredClone(args);
++        const invoke = (owner: RealizationSurface) =>
++          lifecycle.enter(origin, () =>
++            (owner[key as keyof RealizationSurface] as (...values: unknown[]) => unknown)(...input),
++          );
++        return surface ? invoke(surface) : load().then(invoke);
++      },
++    ]),
++  );
+   return createLazySurface(
+     [
+       "initializeRealizations",
+@@ -30,32 +74,51 @@
+       "replaceRealizationAuthority",
+       "clearRealizationAuthority",
+       "getRealizationIngressStatus",
++      "getRealizationProtectionEvidence",
+       "getRealizationRuntimeAdapter",
++      "clearRealizationForCoordinator",
+     ],
+     load,
+     {
+-      listRealizations: () => surface?.listRealizations() ?? [],
+-      listRealizedScheduleFacts: () => surface?.listRealizedScheduleFacts() ?? [],
++      ...dispatch,
++      listRealizations: () =>
++        surface?.listRealizations() ?? structuredClone(installed?.authority.realizations ?? []),
++      listRealizedScheduleFacts: () =>
++        surface?.listRealizedScheduleFacts() ?? structuredClone(installed?.authority.facts ?? []),
+       listScheduledGoalWork: (range?: { startsAt: string; endsAt: string }) =>
+-        surface?.listScheduledGoalWork(range) ?? [],
++        surface?.listScheduledGoalWork(range) ?? selectInstalled("productiveGoalWork", range),
+       listScheduledSupportActivities: (range?: { startsAt: string; endsAt: string }) =>
+-        surface?.listScheduledSupportActivities(range) ?? [],
++        surface?.listScheduledSupportActivities(range) ?? selectInstalled("supportActivity", range),
+       listRealizedBufferProtections: (range?: { startsAt: string; endsAt: string }) =>
+-        surface?.listRealizedBufferProtections(range) ?? [],
+-      exportRealizationAuthority: () => surface?.exportRealizationAuthority() ?? empty(),
+-      getRealizationIngressStatus: () => surface?.getRealizationIngressStatus() ?? "initializing",
++        surface?.listRealizedBufferProtections(range) ?? selectInstalled("bufferProtection", range),
++      exportRealizationAuthority: () =>
++        surface?.exportRealizationAuthority() ?? structuredClone(installed?.authority ?? empty()),
++      getRealizationIngressStatus: () =>
++        surface?.getRealizationIngressStatus() ?? installed?.ingress ?? "initializing",
++      getRealizationProtectionEvidence: (
++        capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      ) => {
++        if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++          throw new Error("Invalid capability");
++        return surface?.getRealizationProtectionEvidence(capability);
++      },
+       getRealizationRuntimeAdapter: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
+         if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
+           throw new Error("Invalid capability");
+         return {
+           id: "realizations" as const,
+           captureRuntimeSnapshot: () =>
+-            surface?.getRealizationRuntimeAdapter(capability).captureRuntimeSnapshot() ?? {
++            surface?.getRealizationRuntimeAdapter(capability).captureRuntimeSnapshot() ??
++            installed ?? {
+               authority: empty(),
+               ingress: "initializing" as const,
+             },
+-          installRuntimeExact: (value: never) =>
+-            surface?.getRealizationRuntimeAdapter(capability).installRuntimeExact(value),
++          installRuntimeExact: (value: never) => {
++            lifecycle.assertInstall();
++            lifecycle.invalidate();
++            installed = structuredClone(value);
++            surface?.getRealizationRuntimeAdapter(capability).installRuntimeExact(value);
++          },
+         };
+       },
+     },
+--- baseline/code/src/state/proposalSurface.ts
++++ final/code/src/state/proposalSurface.ts
+@@ -1,3 +1,15 @@
++import {
++  createAcceptanceLifecycle,
++  type AcceptanceLifecycle,
++  type AcceptanceOrigin,
++} from "./acceptanceLifecycle.js";
++import {
++  persistAcceptanceMutation,
++  exactAuthorityRows,
++  captureAcceptanceProtectionEvidence,
++  type AcceptanceProtectionEvidence,
++} from "./acceptancePersistence.js";
++import type { RealizationCommandResultV1 } from "../core/planning/acceptedAllocationRealization.js";
+ import {
+   claimsConflict,
+   createModificationCandidate as buildCandidate,
+@@ -25,11 +37,24 @@
+   | { status: "initializing" | "accepted" }
+   | { status: "protected"; reason: "readFailure" | "invalidAuthority" };
+ type Durability = "unknown" | "durable" | "pending" | "storageFailure";
+-type Command<T> =
++export type ProposalRuntimeSnapshot = {
++  authority: ProposalAuthorityV1;
++  desired: ProposalAuthorityV1;
++  ingress: Ingress;
++  durability: Durability;
++};
++export type ProposalCommand<T> =
++  | { status: "unconfirmed"; reason: "commitStateUncertain" | "verificationFailedAfterCommit" }
+   | { status: "accepted"; value: T; persistence: "durable" | "pending" }
+   | {
+       status: "rejected";
+       reason:
++        | "proposalBusy"
++        | "contextReplaced"
++        | "sourceChanged"
++        | "authorityUnavailable"
++        | "authorityProtected"
++        | "replacementBusy"
+         | "initializing"
+         | "protected"
+         | "authorityTransactionActive"
+@@ -44,12 +69,18 @@
+ 
+ export function createProposalSurface(options: {
+   storage: IndexedDbCollectionStorage;
++  lifecycle?: AcceptanceLifecycle;
++  initialRuntime?: ProposalRuntimeSnapshot;
++  sourceWitness?: () => string;
+   now?: () => string;
+   allocateId?: () => string;
+   canMutate?: () => boolean;
+   notificationScheduler?: DayFrameNotificationScheduler;
+   onAuthorityChanged?: () => void;
+-  onAcceptedAllocation?: (acceptedAllocationId: string) => Promise<unknown>;
++  onAcceptedAllocation?: (
++    acceptedAllocationId: string,
++    origin: AcceptanceOrigin,
++  ) => Promise<RealizationCommandResultV1>;
+   qualifyFoundation?: (
+     input: Parameters<typeof deriveOrdinaryProposal>[0],
+   ) => "known" | "unknown" | "stale";
+@@ -58,12 +89,16 @@
+     acceptanceInstant: string,
+   ) => Promise<ProposalGenerationResultV1> | ProposalGenerationResultV1;
+ }) {
++  const lifecycle = options.lifecycle ?? createAcceptanceLifecycle();
++  const source = () => options.sourceWitness?.() ?? "";
+   const now = options.now ?? (() => new Date().toISOString()),
+     allocate = options.allocateId ?? randomId;
+-  let authority = emptyProposalAuthority(),
+-    desired = clone(authority),
+-    ingress: Ingress = { status: "initializing" },
+-    durability: Durability = "unknown";
++  let authority = clone(options.initialRuntime?.authority ?? emptyProposalAuthority()),
++    desired = clone(options.initialRuntime?.desired ?? authority),
++    ingress: Ingress = clone(options.initialRuntime?.ingress ?? { status: "initializing" }),
++    durability: Durability = options.initialRuntime?.durability ?? "unknown";
++  let desiredWitness: string | undefined;
++  let protectionEvidence: AcceptanceProtectionEvidence | undefined;
+   const listeners = new Set<() => void>();
+   const runtime: RuntimeAuthorityAdapter<{
+     authority: ProposalAuthorityV1;
+@@ -74,8 +109,13 @@
+     id: "proposals",
+     captureRuntimeSnapshot: () => clone({ authority, desired, ingress, durability }),
+     installRuntimeExact: (value) => {
++      lifecycle.assertInstall();
++      lifecycle.invalidate();
++      protectionEvidence = undefined;
++      lifecycle.supersedeDesired();
+       authority = clone(value.authority);
+       desired = clone(value.desired);
++      desiredWitness = undefined;
+       ingress = clone(value.ingress);
+       durability = value.durability;
+       notify();
+@@ -83,7 +123,19 @@
+   };
+ 
+   async function initializeProposals() {
++    if (ingress.status === "protected") return { status: "protected" as const };
++    const origin = lifecycle.origin();
++    const base = authority,
++      previousIngress = ingress;
++    if (!lifecycle.isQuiescent()) return { status: "busy" as const };
+     const loaded = await options.storage.getAll<unknown>(STORE);
++    if (
++      !lifecycle.current(origin) ||
++      authority !== base ||
++      ingress !== previousIngress ||
++      !lifecycle.isQuiescent()
++    )
++      return { status: "contextReplaced" as const };
+     if (loaded.status === "failure") return protect("readFailure");
+     const checked = validateProposalAuthority({
+       version: 1,
+@@ -123,7 +175,7 @@
+     );
+   }
+   async function markProposalShown(id: string, revision: number) {
+-    return lifecycle(id, revision, "shown");
++    return transitionLifecycle(id, revision, "shown");
+   }
+   async function supersedeProposal(
+     id: string,
+@@ -147,7 +199,7 @@
+       transitioned,
+     );
+   }
+-  async function lifecycle(
++  async function transitionLifecycle(
+     id: string,
+     revision: number,
+     next: "shown" | "stale" | "expired" | "superseded" | "inapplicable",
+@@ -214,109 +266,136 @@
+     },
+     candidate: ProposalAuthorityV1["candidates"][number] | undefined,
+   ) {
++    input = clone(input);
++    const origin = lifecycle.origin();
++    const finish = <T extends object>(value: T) => lifecycle.result(value, origin);
++    if (!lifecycle.current(origin)) return finish(reject("contextReplaced"));
++    if (!lifecycle.isQuiescent()) return finish(reject("proposalBusy"));
+     const blocked = mutationBlocked();
+     if (blocked) return blocked;
+     const proposal = exactProposal(input.proposalId, input.proposalRevision);
+     if (!proposal) return reject("notFound");
+     if (!actionable(proposal) || rejectedOption(proposal, input.optionId))
+       return reject("notActionable");
++    const witness = source();
+     const at = now();
+     const revalidated = options.revalidate
+       ? await options.revalidate(clone(proposal), at)
+       : input.current;
++    if (!lifecycle.current(origin)) return finish(reject("contextReplaced"));
+     const afterRead = mutationBlocked();
+-    if (afterRead) return afterRead;
+-    if (exactProposal(input.proposalId, input.proposalRevision) !== proposal)
+-      return reject("notActionable");
+-    if (!revalidated || evaluateProposalFreshness(proposal, revalidated).status !== "current")
+-      return staleProposal(proposal);
+-    const currentProposal = revalidated.status === "proposed" ? revalidated.proposal : undefined,
+-      currentOption = currentProposal?.options.find((value) => value.id === input.optionId),
+-      option = candidate?.finalOption ?? currentOption;
+-    if (!currentOption || !option) return reject("stale");
+-    if (
+-      authority.acceptedAllocations.some((accepted) =>
+-        claimsConflict(accepted.claims, option.claims),
++    if (afterRead) return finish(afterRead);
++    if (source() !== witness) return finish(reject("sourceChanged"));
++    const denial = lifecycle.acquire(origin);
++    if (denial) return finish(reject(denial === "busy" ? "proposalBusy" : denial));
++    let committed;
++    try {
++      if (exactProposal(input.proposalId, input.proposalRevision) !== proposal)
++        return reject("notActionable");
++      if (!revalidated || evaluateProposalFreshness(proposal, revalidated).status !== "current")
++        return await staleProposal(proposal);
++      const currentProposal = revalidated.status === "proposed" ? revalidated.proposal : undefined,
++        currentOption = currentProposal?.options.find((value) => value.id === input.optionId),
++        option = candidate?.finalOption ?? currentOption;
++      if (!currentOption || !option) return reject("stale");
++      if (
++        authority.acceptedAllocations.some((accepted) =>
++          claimsConflict(accepted.claims, option.claims),
++        )
+       )
+-    )
+-      return staleProposal(proposal, "conflictingClaim");
+-    let decisionId: string, acceptedId: string;
+-    try {
+-      decisionId = allocate();
+-      acceptedId = allocate();
+-    } catch {
+-      return reject("allocationFailure");
++        return await staleProposal(proposal, "conflictingClaim");
++      let decisionId: string, acceptedId: string;
++      try {
++        decisionId = allocate();
++        acceptedId = allocate();
++      } catch {
++        return reject("allocationFailure");
++      }
++      const decision: ProposalDecisionV1 = {
++          recordType: "proposalDecision",
++          version: 1,
++          revision: 1,
++          id: decisionId,
++          proposalId: proposal.id,
++          proposalRevision: proposal.revision,
++          optionId: candidate ? candidate.sourceOptionId : option.id,
++          ...(candidate ? { candidateId: candidate.id } : {}),
++          decision: candidate ? "modifyAndAccept" : "accept",
++          decidedAt: at,
++          actor: { kind: "user" },
++          acceptedScope: clone(option.scope),
++          decisiveFingerprint: proposal.inputFingerprint,
++          provenance: acceptedProvenance(),
++        },
++        acceptedAllocation:
++          | AcceptedAllocationV1
++          | import("../core/planning/proposal.js").AcceptedAllocationV2 = {
++          recordType: "acceptedAllocation",
++          version: 2,
++          revision: 1,
++          id: acceptedId,
++          decisionId,
++          proposalId: proposal.id,
++          proposalRevision: proposal.revision,
++          sourceOptionId: candidate ? candidate.sourceOptionId : option.id,
++          ...(candidate ? { sourceCandidateId: candidate.id } : {}),
++          acceptedAt: at,
++          actor: { kind: "user" },
++          scope: clone(option.scope),
++          productiveMinutes: option.productiveMinutes,
++          supportMinutes: option.supportMinutes,
++          bufferMinutes: option.bufferMinutes,
++          totalResourceMinutes: option.totalResourceMinutes,
++          nominalResourceMinutes: option.nominalResourceMinutes,
++          claims: clone(option.claims),
++          resourceFootprints: clone(option.resourceFootprints),
++          assignments: clone(option.assignments),
++          decisiveSnapshot: {
++            proposalInputFingerprint: proposal.inputFingerprint,
++            sourceAllocationId: proposal.sourceAllocationId,
++            sourceAllocationDependencyFingerprint: proposal.sourceAllocationDependencyFingerprint,
++            capacityFingerprint: proposal.capacityFingerprint,
++            option: clone(option),
++          },
++          realization: "unrealized",
++          footprintCompleteness: "complete",
++          provenance: acceptedProvenance(),
++        },
++        terminal = transitionProposal(proposal, "accepted")!;
++      const proposals = [...authority.proposals, terminal];
++      for (const latest of latestProposals(authority.proposals)) {
++        if (latest.id === proposal.id || !actionable(latest)) continue;
++        if (latest.options.some((value) => claimsConflict(value.claims, option.claims))) {
++          const stale = transitionProposal(latest, "stale");
++          if (stale) proposals.push(stale);
++        }
++      }
++      const next = {
++        ...authority,
++        proposals,
++        decisions: [...authority.decisions, decision],
++        acceptedAllocations: [...authority.acceptedAllocations, acceptedAllocation],
++      };
++      committed = await commit(next, { decision, acceptedAllocation });
++    } finally {
++      lifecycle.release(origin);
+     }
+-    const decision: ProposalDecisionV1 = {
+-        recordType: "proposalDecision",
+-        version: 1,
+-        revision: 1,
+-        id: decisionId,
+-        proposalId: proposal.id,
+-        proposalRevision: proposal.revision,
+-        optionId: candidate ? candidate.sourceOptionId : option.id,
+-        ...(candidate ? { candidateId: candidate.id } : {}),
+-        decision: candidate ? "modifyAndAccept" : "accept",
+-        decidedAt: at,
+-        actor: { kind: "user" },
+-        acceptedScope: clone(option.scope),
+-        decisiveFingerprint: proposal.inputFingerprint,
+-        provenance: acceptedProvenance(),
++    if (committed.status !== "accepted" || !options.onAcceptedAllocation) return finish(committed);
++    const realization = await options.onAcceptedAllocation(
++      committed.value.acceptedAllocation.id,
++      origin,
++    );
++    return finish({
++      status: "accepted" as const,
++      persistence: committed.persistence,
++      value: {
++        decision: committed.value.decision,
++        acceptedAllocation: committed.value.acceptedAllocation,
++        realization,
+       },
+-      acceptedAllocation:
+-        | AcceptedAllocationV1
+-        | import("../core/planning/proposal.js").AcceptedAllocationV2 = {
+-        recordType: "acceptedAllocation",
+-        version: 2,
+-        revision: 1,
+-        id: acceptedId,
+-        decisionId,
+-        proposalId: proposal.id,
+-        proposalRevision: proposal.revision,
+-        sourceOptionId: candidate ? candidate.sourceOptionId : option.id,
+-        ...(candidate ? { sourceCandidateId: candidate.id } : {}),
+-        acceptedAt: at,
+-        actor: { kind: "user" },
+-        scope: clone(option.scope),
+-        productiveMinutes: option.productiveMinutes,
+-        supportMinutes: option.supportMinutes,
+-        bufferMinutes: option.bufferMinutes,
+-        totalResourceMinutes: option.totalResourceMinutes,
+-        nominalResourceMinutes: option.nominalResourceMinutes,
+-        claims: clone(option.claims),
+-        resourceFootprints: clone(option.resourceFootprints),
+-        assignments: clone(option.assignments),
+-        decisiveSnapshot: {
+-          proposalInputFingerprint: proposal.inputFingerprint,
+-          sourceAllocationId: proposal.sourceAllocationId,
+-          sourceAllocationDependencyFingerprint: proposal.sourceAllocationDependencyFingerprint,
+-          capacityFingerprint: proposal.capacityFingerprint,
+-          option: clone(option),
+-        },
+-        realization: "unrealized",
+-        footprintCompleteness: "complete",
+-        provenance: acceptedProvenance(),
+-      },
+-      terminal = transitionProposal(proposal, "accepted")!;
+-    const proposals = [...authority.proposals, terminal];
+-    for (const latest of latestProposals(authority.proposals)) {
+-      if (latest.id === proposal.id || !actionable(latest)) continue;
+-      if (latest.options.some((value) => claimsConflict(value.claims, option.claims))) {
+-        const stale = transitionProposal(latest, "stale");
+-        if (stale) proposals.push(stale);
+-      }
+-    }
+-    const next = {
+-      ...authority,
+-      proposals,
+-      decisions: [...authority.decisions, decision],
+-      acceptedAllocations: [...authority.acceptedAllocations, acceptedAllocation],
+-    };
+-    const committed = await commit(next, { decision, acceptedAllocation });
+-    if (committed.status !== "accepted" || !options.onAcceptedAllocation) return committed;
+-    const realization = await options.onAcceptedAllocation(acceptedAllocation.id);
+-    return { ...committed, value: { ...committed.value, realization } };
+-  }
++    });
++  }
++
+   async function rejectOption(input: {
+     proposalId: string;
+     proposalRevision: number;
+@@ -391,16 +470,96 @@
+         value.decision === "rejectOption",
+     );
+   }
+-  async function commit<T>(next: ProposalAuthorityV1, value: T): Promise<Command<T>> {
++  async function commit<T>(next: ProposalAuthorityV1, value: T): Promise<ProposalCommand<T>> {
++    const origin = lifecycle.active();
++    if (!origin || !lifecycle.owns(origin)) return reject("contextReplaced");
+     const checked = validateProposalAuthority(next);
+     if (checked.status === "invalid") return reject("invalidInput");
++    const base = authority,
++      witness = source();
++    lifecycle.supersedeDesired();
+     desired = checked.authority;
+-    if (!(await persist(desired))) return reject("persistenceFailure");
++    desiredWitness = witness;
++    const intended = desired;
++    let sourceChanged = false;
++    const persisted = await persist(intended, () => {
++      sourceChanged = source() !== witness;
++      return (
++        lifecycle.owns(origin) &&
++        !lifecycle.admission() &&
++        !mutationBlocked() &&
++        authority === base &&
++        desired === intended &&
++        !sourceChanged
++      );
++    });
++    if (persisted === "notWritten") {
++      durability = "storageFailure";
++      return reject(sourceChanged ? "sourceChanged" : "persistenceFailure");
++    }
++    if (persisted === "uncertain") {
++      protect("readFailure");
++      protectionEvidence = await captureAcceptanceProtectionEvidence(
++        options.storage,
++        STORE,
++        intended,
++      );
++      return { status: "unconfirmed", reason: "commitStateUncertain" };
++    }
++    if (
++      !(await verify(intended)) ||
++      authority !== base ||
++      desired !== intended ||
++      !lifecycle.current(origin)
++    ) {
++      protect("invalidAuthority");
++      protectionEvidence = await captureAcceptanceProtectionEvidence(
++        options.storage,
++        STORE,
++        intended,
++      );
++      return { status: "unconfirmed", reason: "verificationFailedAfterCommit" };
++    }
+     authority = checked.authority;
+     durability = "durable";
+-    options.onAuthorityChanged?.();
+-    notify();
++    try {
++      options.onAuthorityChanged?.();
++      notify();
++    } catch {
++      protect("invalidAuthority");
++      protectionEvidence = await captureAcceptanceProtectionEvidence(
++        options.storage,
++        STORE,
++        intended,
++      );
++      return { status: "unconfirmed", reason: "verificationFailedAfterCommit" };
++    }
+     return accepted(value);
++  }
++  function deliver<A extends unknown[], T extends object>(run: (...args: A) => Promise<T>) {
++    return async (...args: A) => {
++      const origin = lifecycle.origin(),
++        input = clone(args);
++      if (!lifecycle.current(origin)) return lifecycle.result(reject("contextReplaced"), origin);
++      if (!lifecycle.isQuiescent()) return lifecycle.result(reject("proposalBusy"), origin);
++      const value = await lifecycle.enter(origin, () => run(...input));
++      return Object.hasOwn(value, "receipt") ? value : lifecycle.result(value, origin);
++    };
++  }
++  function write<A extends unknown[], T extends object>(run: (...args: A) => Promise<T>) {
++    return async (...args: A) => {
++      const input = clone(args),
++        origin = lifecycle.origin();
++      const finish = <R extends object>(value: R) => lifecycle.result(value, origin);
++      const denied = lifecycle.acquire(origin);
++      if (denied) return finish(reject(denied === "busy" ? "proposalBusy" : denied));
++      try {
++        const blocked = mutationBlocked();
++        return finish(blocked ?? (await run(...input)));
++      } finally {
++        lifecycle.release(origin);
++      }
++    };
+   }
+   async function staleProposal(
+     proposal: ConstructiveProposalV1,
+@@ -414,25 +573,60 @@
+     );
+     return recorded.status === "accepted" ? reject(reason) : recorded;
+   }
+-  async function persist(value: ProposalAuthorityV1) {
+-    const records = [
++  function records(value: ProposalAuthorityV1) {
++    return [
+       ...value.proposals,
+       ...value.candidates,
+       ...value.decisions,
+       ...value.acceptedAllocations,
+     ];
+-    const result = await options.storage.mutate([
+-      { type: "clear", store: STORE },
+-      ...records.map((value) => ({ type: "put" as const, store: STORE, value })),
+-    ]);
+-    return result.status === "success";
++  }
++  async function persist(value: ProposalAuthorityV1, admit: () => boolean) {
++    return persistAcceptanceMutation(
++      options.storage,
++      [
++        { type: "clear", store: STORE },
++        ...records(value).map((value) => ({ type: "put" as const, store: STORE, value })),
++      ],
++      admit,
++    );
++  }
++  async function verify(value: ProposalAuthorityV1) {
++    try {
++      const read = await options.storage.getAll<unknown>(STORE);
++      return read.status === "success" && exactAuthorityRows(read.value, records(value));
++    } catch {
++      return false;
++    }
++  }
++  async function replace(value: ProposalAuthorityV1, epoch?: number) {
++    if (epoch !== undefined && !lifecycle.coordinatorCurrent(epoch))
++      return { status: "failure" as const };
++    const checked = validateProposalAuthority(clone(value));
++    if (checked.status === "invalid") return { status: "invalid" as const };
++    const persisted = await persist(
++      checked.authority,
++      () => epoch === undefined || lifecycle.coordinatorCurrent(epoch),
++    );
++    if (persisted === "notWritten") return { status: "failure" as const };
++    if (persisted !== "committed" || !(await verify(checked.authority))) {
++      protect("invalidAuthority");
++      return { status: "failure" as const };
++    }
++    lifecycle.invalidate();
++    authority = checked.authority;
++    desired = clone(authority);
++    ingress = { status: "accepted" };
++    durability = "durable";
++    notify();
++    return { status: "accepted" as const };
+   }
+   function mutationBlocked() {
+     if (ingress.status === "initializing") return reject("initializing");
+     if (ingress.status === "protected") return reject("protected");
+     if (options.canMutate && !options.canMutate()) return reject("authorityTransactionActive");
+   }
+-  function accepted<T>(value: T): Command<T> {
++  function accepted<T>(value: T): ProposalCommand<T> {
+     return {
+       status: "accepted",
+       value: clone(value),
+@@ -445,21 +639,37 @@
+     return { status: "protected" as const };
+   }
+   function notify() {
+-    options.notificationScheduler?.notify("proposals", () =>
+-      listeners.forEach((listener) => listener()),
+-    );
++    const origin = lifecycle.capture(),
++      installed = authority,
++      protection = ingress;
++    const emit = () => {
++      if (lifecycle.current(origin) && authority === installed && ingress === protection)
++        listeners.forEach((listener) => listener());
++    };
++    if (options.notificationScheduler) options.notificationScheduler.notify("proposals", emit);
++    else emit();
+   }
+   return {
++    getProposalProtectionEvidence: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
++      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++        throw new Error("Invalid capability");
++      return structuredClone(protectionEvidence);
++    },
++    getProposalLifecycle: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
++      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++        throw new Error("Invalid capability");
++      return lifecycle;
++    },
+     initializeProposals,
+     deriveProposal,
+-    recordProposal,
+-    markProposalShown,
+-    supersedeProposal,
+-    createModificationCandidate,
+-    acceptProposalOption,
+-    modifyAndAcceptCandidate,
+-    rejectOption,
+-    rejectProposal,
++    recordProposal: write(recordProposal),
++    markProposalShown: write(markProposalShown),
++    supersedeProposal: write(supersedeProposal),
++    createModificationCandidate: write(createModificationCandidate),
++    acceptProposalOption: deliver(acceptProposalOption),
++    modifyAndAcceptCandidate: deliver(modifyAndAcceptCandidate),
++    rejectOption: write(rejectOption),
++    rejectProposal: write(rejectProposal),
+     evaluateProposalFreshness,
+     resolveProposalRevision: (id: string, revision: number) => {
+       const proposal = exactProposal(id, revision);
+@@ -485,28 +695,46 @@
+     listUnrealizedAcceptedAllocations: () =>
+       clone(authority.acceptedAllocations.filter((item) => item.realization === "unrealized")),
+     exportProposalAuthority: () => clone(authority),
+-    replaceProposalAuthority: async (value: ProposalAuthorityV1) => {
+-      const checked = validateProposalAuthority(value);
+-      if (checked.status === "invalid") return { status: "invalid" as const };
+-      if (!(await persist(checked.authority))) return { status: "failure" as const };
+-      authority = checked.authority;
+-      desired = clone(authority);
+-      ingress = { status: "accepted" };
+-      durability = "durable";
+-      notify();
+-      return { status: "accepted" as const };
+-    },
+-    clearProposalAuthority: async () =>
+-      (await commit(emptyProposalAuthority(), undefined)).status === "accepted"
++    replaceProposalAuthority: (value: ProposalAuthorityV1) => {
++      const frozen = clone(value);
++      return !lifecycle.current(lifecycle.origin()) || ingress.status === "protected"
++        ? Promise.resolve({ status: "failure" as const })
++        : lifecycle.replace((epoch) => replace(frozen, epoch));
++    },
++    clearProposalAuthority: async () => {
++      const result =
++        !lifecycle.current(lifecycle.origin()) || ingress.status === "protected"
++          ? { status: "failure" }
++          : await lifecycle.replace((epoch) => replace(emptyProposalAuthority(), epoch));
++      return result.status === "accepted"
+         ? { status: "removed" as const }
+-        : { status: "storageFailure" as const },
++        : { status: "storageFailure" as const };
++    },
++    clearProposalForCoordinator: async (
++      capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      epoch: number,
++    ) => {
++      if (
++        capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY ||
++        !lifecycle.coordinatorCurrent(epoch)
++      )
++        return { status: "storageFailure" as const };
++      const result = await replace(emptyProposalAuthority(), epoch);
++      return result.status === "accepted"
++        ? { status: "removed" as const }
++        : { status: "storageFailure" as const };
++    },
+     getProposalIngressStatus: () => clone(ingress),
+     getProposalDurabilityStatus: () => durability,
+-    retryProposalPersistence: async () => {
+-      const ok = await persist(desired);
+-      durability = ok ? "durable" : "storageFailure";
+-      return { status: ok ? ("durable" as const) : ("storageFailure" as const) };
+-    },
++    retryProposalPersistence: write(async () => {
++      const origin = lifecycle.active()!;
++      if (origin.desiredVersion !== lifecycle.desiredVersion()) return reject("contextReplaced");
++      const intended = desired;
++      if (desiredWitness !== undefined && source() !== desiredWitness)
++        return reject("sourceChanged");
++      const result = await commit(intended, undefined);
++      return result.status === "accepted" ? { status: "durable" as const } : result;
++    }),
+     subscribeProposals: (listener: () => void) => {
+       listeners.add(listener);
+       return () => listeners.delete(listener);
+--- baseline/code/src/state/proposalWriteLifecycle.test.ts
++++ final/code/src/state/proposalWriteLifecycle.test.ts
+@@ -0,0 +1,211 @@
++import { IDBFactory } from "fake-indexeddb";
++import { expect, it, vi, afterEach } from "vitest";
++import { allocation, horizon } from "../core/planning/proposalTestFixtures.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import { createProposalSurface } from "./proposalSurface.js";
++import { createAcceptanceLifecycle, hasCurrentAcceptanceReceipt } from "./acceptanceLifecycle.js";
++import { DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY as capability } from "./dayFrameRuntimeAuthority.js";
++
++afterEach(() => vi.restoreAllMocks());
++function deferred() {
++  let resolve!: () => void;
++  const promise = new Promise<void>((r) => {
++    resolve = r;
++  });
++  return { promise, resolve };
++}
++async function fixture() {
++  const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() }),
++    lifecycle = createAcceptanceLifecycle();
++  let n = 0,
++    source = "A";
++  const accepted = vi.fn(async () => ({
++    status: "failed" as const,
++    acceptedAllocationId: "unused",
++    scheduledGoalWorkIds: [],
++    scheduledSupportActivityIds: [],
++    bufferProtectionIds: [],
++    conflicts: [],
++    reasons: ["atomicPersistenceFailure" as const],
++    previewFreshnessImpact: "none" as const,
++  }));
++  const owner = createProposalSurface({
++    storage,
++    lifecycle,
++    allocateId: () => `identity-${++n}`,
++    sourceWitness: () => source,
++    onAcceptedAllocation: accepted,
++  });
++  await owner.initializeProposals();
++  const generated = owner.deriveProposal({
++    allocation: allocation(),
++    horizon,
++    allocationHorizon: horizon,
++    generatedAt: "2026-09-04T12:00:00.000Z",
++  });
++  if (generated.status !== "proposed") throw Error("fixture");
++  await owner.recordProposal(generated);
++  const input = {
++    proposalId: generated.proposal.id,
++    proposalRevision: 1,
++    optionId: generated.proposal.preferredOptionId,
++    current: generated,
++  };
++  return {
++    storage,
++    lifecycle,
++    owner,
++    generated,
++    input,
++    accepted,
++    setSource: () => {
++      source = "B";
++    },
++  };
++}
++
++it("every common writer alias rejects busy without computing a deferred candidate", async () => {
++  const f = await fixture(),
++    entered = deferred(),
++    release = deferred(),
++    real = f.storage.mutate;
++  const spy = vi.spyOn(f.storage, "mutate").mockImplementation(async (...args) => {
++    entered.resolve();
++    await release.promise;
++    return real(...args);
++  });
++  const first = f.owner.markProposalShown(f.input.proposalId, 1);
++  await entered.promise;
++  const commands = [
++    () => f.owner.recordProposal(f.generated),
++    () => f.owner.markProposalShown(f.input.proposalId, 1),
++    () => f.owner.supersedeProposal(f.input.proposalId, 1, f.generated.proposal),
++    () => f.owner.createModificationCandidate(f.input.proposalId, 1, f.input.optionId, {} as never),
++    () => f.owner.rejectOption(f.input),
++    () => f.owner.rejectProposal(f.input),
++    () => f.owner.acceptProposalOption(f.input),
++    () => f.owner.modifyAndAcceptCandidate({ ...f.input, candidateId: "invalid" }),
++    () => f.owner.retryProposalPersistence(),
++  ];
++  for (const command of commands) {
++    const result = await command();
++    expect(result).toMatchObject({ status: "rejected", reason: "proposalBusy" });
++    expect(hasCurrentAcceptanceReceipt(result)).toBe(true);
++  }
++  expect(spy).toHaveBeenCalledOnce();
++  expect(await f.owner.clearProposalAuthority()).toEqual({ status: "storageFailure" });
++  release.resolve();
++  expect((await first).status).toBe("accepted");
++  expect(f.owner.listProposalHistory()).toHaveLength(2);
++});
++
++it.each(["abort", "lost", "verify"] as const)(
++  "acceptance %s preserves exact desired or protection without automatic realization",
++  async (fault) => {
++    const f = await fixture(),
++      real = f.storage.mutate,
++      read = f.storage.getAll;
++    const spy = vi.spyOn(f.storage, "mutate").mockImplementation(async (rows, admit, observe) => {
++      if (fault === "abort")
++        return real(
++          [...rows, { type: "put", store: "proposalAuthority", value: { invalid: true } }],
++          admit,
++          observe,
++        );
++      const result = await real(rows, admit, observe);
++      if (fault === "lost") throw Error("lost acknowledgment");
++      return result;
++    });
++    const readSpy = vi
++      .spyOn(f.storage, "getAll")
++      .mockImplementation(async (...args) =>
++        fault === "verify" ? { status: "success", value: [] } : read(...args),
++      );
++    const result = await f.owner.acceptProposalOption(f.input);
++    expect(result).toMatchObject(
++      fault === "abort"
++        ? { status: "rejected", reason: "persistenceFailure" }
++        : {
++            status: "unconfirmed",
++            reason: fault === "lost" ? "commitStateUncertain" : "verificationFailedAfterCommit",
++          },
++    );
++    expect(f.accepted).not.toHaveBeenCalled();
++    expect(f.owner.exportProposalAuthority().acceptedAllocations).toEqual([]);
++    const desired = f.owner.getProposalRuntimeAdapter(capability).captureRuntimeSnapshot().desired;
++    expect(desired.acceptedAllocations).toHaveLength(1);
++    spy.mockRestore();
++    readSpy.mockRestore();
++    if (fault === "abort") {
++      expect(await f.owner.retryProposalPersistence()).toMatchObject({ status: "durable" });
++      expect(f.owner.exportProposalAuthority()).toEqual(desired);
++      expect(f.accepted).not.toHaveBeenCalled();
++      const physical = await read("proposalAuthority");
++      expect(physical.status === "success" && physical.value.length).toBe(
++        desired.proposals.length + desired.decisions.length + desired.acceptedAllocations.length,
++      );
++    } else {
++      expect(await f.owner.retryProposalPersistence()).toMatchObject({
++        status: "rejected",
++        reason: "protected",
++      });
++      expect(await f.owner.initializeProposals()).toEqual({ status: "protected" });
++    }
++  },
++);
++
++it("a superseded desired retry origin cannot persist the later version", async () => {
++  const f = await fixture(),
++    old = f.lifecycle.capture();
++  await f.owner.markProposalShown(f.input.proposalId, 1);
++  const spy = vi.spyOn(f.storage, "mutate");
++  expect(await f.lifecycle.enter(old, () => f.owner.retryProposalPersistence())).toMatchObject({
++    status: "rejected",
++    reason: "contextReplaced",
++  });
++  expect(spy).not.toHaveBeenCalled();
++});
++
++it("source changes while Proposal storage opens deny transaction creation and stale desired retry", async () => {
++  const f = await fixture(),
++    entered = deferred(),
++    release = deferred(),
++    real = f.storage.mutate;
++  let transactions = 0;
++  vi.spyOn(f.storage, "mutate").mockImplementation(async (rows, admit, observe) => {
++    entered.resolve();
++    await release.promise;
++    return real(rows, admit, (receipt) => {
++      transactions++;
++      observe?.(receipt);
++    });
++  });
++  const pending = f.owner.acceptProposalOption(f.input);
++  await entered.promise;
++  f.setSource();
++  release.resolve();
++  expect(await pending).toMatchObject({ status: "rejected", reason: "sourceChanged" });
++  expect(transactions).toBe(0);
++  expect(await f.owner.retryProposalPersistence()).toMatchObject({
++    status: "rejected",
++    reason: "sourceChanged",
++  });
++  expect(f.accepted).not.toHaveBeenCalled();
++});
++
++it("post-commit notification exception protects without another transaction or auto-handoff", async () => {
++  const f = await fixture(),
++    spy = vi.spyOn(f.storage, "mutate");
++  f.owner.subscribeProposals(() => {
++    expect(f.lifecycle.isQuiescent()).toBe(false);
++    throw Error("subscriber");
++  });
++  expect(await f.owner.acceptProposalOption(f.input)).toMatchObject({
++    status: "unconfirmed",
++    reason: "verificationFailedAfterCommit",
++  });
++  expect(spy).toHaveBeenCalledOnce();
++  expect(f.lifecycle.isQuiescent()).toBe(true);
++  expect(f.owner.getProposalIngressStatus().status).toBe("protected");
++  expect(f.accepted).not.toHaveBeenCalled();
++});
+--- baseline/code/src/state/realizationConcurrency.test.ts
++++ final/code/src/state/realizationConcurrency.test.ts
+@@ -0,0 +1,199 @@
++import { expect, it, vi, afterEach } from "vitest";
++import { IDBFactory } from "fake-indexeddb";
++import { allocation, alternative } from "../core/planning/proposalTestFixtures.js";
++import { createProposalSurface } from "./proposalSurface.js";
++import { createRealizationSurface } from "./realizationSurface.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import { createAcceptanceLifecycle } from "./acceptanceLifecycle.js";
++afterEach(() => vi.restoreAllMocks());
++function deferred() {
++  let resolve!: () => void;
++  const promise = new Promise<void>((r) => {
++    resolve = r;
++  });
++  return { promise, resolve };
++}
++
++// Each accepted target is produced by the actual Proposal command against a complete
++// validated domain footprint. Overlap cases use independent Proposal fixtures: they
++// test the realization resolver boundary, not a claim that UI can accept conflicting offers.
++async function acceptance(
++  id: string,
++  start: string,
++  supportStart: string,
++  bufferStart: string,
++  supportDay: `${number}-${number}-${number}` = "2026-09-04",
++) {
++  const base = alternative(id, `demand-${id}`, start),
++    productive = base.resourceClaims[0]!;
++  const support = {
++    ...productive,
++    id: `support-${id}`,
++    role: "supportActivity" as const,
++    componentId: "support",
++    startsAt: supportStart,
++    endsAt: new Date(Date.parse(supportStart) + 30 * 60_000).toISOString(),
++    durationMinutes: 30,
++    userDayDate: supportDay,
++    relationship: { kind: "supportsProductive" as const, productiveClaimId: productive.id },
++  };
++  const buffer = {
++    ...productive,
++    id: `buffer-${id}`,
++    role: "bufferProtection" as const,
++    componentId: "buffer",
++    startsAt: bufferStart,
++    endsAt: new Date(Date.parse(bufferStart) + 15 * 60_000).toISOString(),
++    durationMinutes: 15,
++    userDayDate: supportDay,
++    relationship: {
++      kind: "protectsSupport" as const,
++      supportClaimId: support.id,
++      supportComponentId: "support",
++    },
++  };
++  const footprint = {
++    ...base.assignments[0]!.resourceFootprints[0]!,
++    supportClaims: [support],
++    bufferClaims: [buffer],
++    supportMinutes: 30,
++    bufferMinutes: 15,
++    nominalResourceMinutes: 105,
++    unionedResourceMinutes: 105,
++  };
++  const enriched = {
++    ...base,
++    assignments: [{ ...base.assignments[0]!, resourceFootprints: [footprint] }],
++    resourceClaims: [productive, support, buffer],
++    supportMinutes: 30,
++    bufferMinutes: 15,
++    nominalResourceMinutes: 105,
++    unionedResourceMinutes: 105,
++  };
++  const store = createProposalSurface({
++    storage: createDayFrameDurableDb({ indexedDB: new IDBFactory() }),
++    allocateId: (() => {
++      let n = 0;
++      return () => `${id}-${++n}`;
++    })(),
++  });
++  await store.initializeProposals();
++  const horizon = { startUserDayDate: "2026-09-04", endUserDayDateExclusive: "2026-09-06" };
++  const generated = store.deriveProposal({
++    allocation: allocation([enriched]),
++    horizon,
++    allocationHorizon: horizon,
++    generatedAt: "2026-09-04T12:00:00.000Z",
++  });
++  if (generated.status !== "proposed") throw Error(JSON.stringify(generated));
++  expect((await store.recordProposal(generated)).status).toBe("accepted");
++  const result = await store.acceptProposalOption({
++    proposalId: generated.proposal.id,
++    proposalRevision: 1,
++    optionId: generated.proposal.preferredOptionId,
++    current: generated,
++  });
++  if (result.status !== "accepted") throw Error(JSON.stringify(result));
++  return result.value.acceptedAllocation;
++}
++
++it.each(["nonoverlap", "activityOverlap", "bufferOverlap"] as const)(
++  "distinct attempts: %s rejects concurrent B then rechecks the settled base",
++  async (kind) => {
++    const a = await acceptance(
++      "A",
++      "2026-09-04T15:00:00.000Z",
++      "2026-09-04T14:30:00.000Z",
++      "2026-09-04T16:00:00.000Z",
++    );
++    const b = await acceptance(
++      "B",
++      kind === "activityOverlap" ? "2026-09-04T15:30:00.000Z" : "2026-09-04T18:00:00.000Z",
++      kind === "activityOverlap" ? "2026-09-04T15:00:00.000Z" : "2026-09-04T17:30:00.000Z",
++      kind === "bufferOverlap" ? "2026-09-04T16:00:00.000Z" : "2026-09-04T19:00:00.000Z",
++    );
++    const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() }),
++      real = storage.mutate,
++      entered = deferred(),
++      release = deferred();
++    const targets = [a, b];
++    const owner = createRealizationSurface({
++      storage,
++      resolveAcceptedAllocation: (id) => ({
++        status: "resolved",
++        acceptedAllocation: targets.find((value) => value.id === id)!,
++      }),
++    });
++    await owner.initializeRealizations();
++    const spy = vi.spyOn(storage, "mutate").mockImplementation(async (...args) => {
++      entered.resolve();
++      await release.promise;
++      return real(...args);
++    });
++    const pending = owner.realizeAcceptedAllocation(a.id);
++    await entered.promise;
++    expect(await owner.realizeAcceptedAllocation(b.id)).toMatchObject({
++      status: "rejected",
++      reasons: ["realizationBusy"],
++    });
++    release.resolve();
++    expect((await pending).status).toBe("realized");
++    const before = owner.exportRealizationAuthority();
++    expect((await owner.realizeAcceptedAllocation(b.id)).status).toBe(
++      kind === "activityOverlap" ? "conflicted" : "realized",
++    );
++    expect(owner.listRealizedScheduleFacts()).toEqual(expect.arrayContaining(before.facts));
++    expect(owner.listRealizedScheduleFacts()).toHaveLength(kind === "activityOverlap" ? 3 : 6);
++    expect(spy).toHaveBeenCalledTimes(kind === "activityOverlap" ? 1 : 2);
++  },
++);
++
++it("complete adjacent-owner-day footprint survives exact readback and fresh already-realized verification", async () => {
++  const accepted = await acceptance(
++    "adjacent",
++    "2026-09-04T22:30:00.000Z",
++    "2026-09-05T00:00:00.000Z",
++    "2026-09-05T00:30:00.000Z",
++    "2026-09-05",
++  );
++  const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() });
++  const owner = createRealizationSurface({
++    storage,
++    resolveAcceptedAllocation: () => ({ status: "resolved", acceptedAllocation: accepted }),
++  });
++  await owner.initializeRealizations();
++  expect((await owner.realizeAcceptedAllocation(accepted.id)).status).toBe("realized");
++  const authority = owner.exportRealizationAuthority();
++  expect(new Set(authority.facts.map((f) => f.userDayDate))).toEqual(
++    new Set(["2026-09-04", "2026-09-05"]),
++  );
++  const spy = vi.spyOn(storage, "mutate");
++  expect((await owner.realizeAcceptedAllocation(accepted.id)).status).toBe("alreadyRealized");
++  expect(spy).not.toHaveBeenCalled();
++  expect(owner.exportRealizationAuthority()).toEqual(authority);
++});
++
++it("identical installed bytes cannot renew old intent, but a fresh explicit call verifies current authority", async () => {
++  const accepted = await acceptance(
++    "identical",
++    "2026-09-04T15:00:00.000Z",
++    "2026-09-04T14:30:00.000Z",
++    "2026-09-04T16:00:00.000Z",
++  );
++  const storage = createDayFrameDurableDb({ indexedDB: new IDBFactory() }),
++    lifecycle = createAcceptanceLifecycle();
++  const owner = createRealizationSurface({
++    storage,
++    lifecycle,
++    resolveAcceptedAllocation: () => ({ status: "resolved", acceptedAllocation: accepted }),
++  });
++  await owner.initializeRealizations();
++  await owner.realizeAcceptedAllocation(accepted.id);
++  const old = lifecycle.capture(),
++    authority = owner.exportRealizationAuthority();
++  expect((await owner.replaceRealizationAuthority(authority)).status).toBe("accepted");
++  expect(
++    await lifecycle.enter(old, () => owner.realizeAcceptedAllocation(accepted.id)),
++  ).toMatchObject({ reasons: ["contextReplaced"] });
++  expect((await owner.realizeAcceptedAllocation(accepted.id)).status).toBe("alreadyRealized");
++});
+--- baseline/code/src/state/realizationSurface.ts
++++ final/code/src/state/realizationSurface.ts
+@@ -1,3 +1,10 @@
++import { createAcceptanceLifecycle, type AcceptanceLifecycle } from "./acceptanceLifecycle.js";
++import {
++  persistAcceptanceMutation,
++  exactAuthorityRows,
++  captureAcceptanceProtectionEvidence,
++  type AcceptanceProtectionEvidence,
++} from "./acceptancePersistence.js";
+ import {
+   stageAcceptedAllocationRealization,
+   validateRealizationAuthority,
+@@ -15,6 +22,22 @@
+ 
+ export function createRealizationSurface(options: {
+   storage: IndexedDbCollectionStorage;
++  lifecycle?: AcceptanceLifecycle;
++  initialRuntime?: {
++    authority: RealizationAuthorityV1;
++    ingress: "initializing" | "ready" | "protected";
++  };
++  sourceWitness?: () => string;
++  prepareSources?: (
++    accepted: AcceptedAllocationV2,
++    at: string,
++  ) => Promise<
++    | {
++        status: "eligible";
++        schedule: readonly import("../core/planning/acceptedAllocationRealization.js").RealizationConflictSubjectV1[];
++      }
++    | { status: "reviewRequired" | "unavailable" }
++  >;
+   resolveAcceptedAllocation: (
+     id: string,
+   ) =>
+@@ -25,9 +48,13 @@
+   currentSchedule?: () => readonly import("../core/planning/acceptedAllocationRealization.js").RealizationConflictSubjectV1[];
+   onAuthorityChanged?: () => void;
+ }) {
++  const lifecycle = options.lifecycle ?? createAcceptanceLifecycle();
+   type Ingress = "initializing" | "ready" | "protected";
+-  let authority: RealizationAuthorityV1 = emptyRealizationAuthority(),
+-    ingress: Ingress = "initializing";
++  let authority: RealizationAuthorityV1 = structuredClone(
++      options.initialRuntime?.authority ?? emptyRealizationAuthority(),
++    ),
++    ingress: Ingress = options.initialRuntime?.ingress ?? "initializing";
++  let protectionEvidence: AcceptanceProtectionEvidence | undefined;
+   const runtime: RuntimeAuthorityAdapter<{
+     authority: RealizationAuthorityV1;
+     ingress: Ingress;
+@@ -35,13 +62,28 @@
+     id: "realizations",
+     captureRuntimeSnapshot: () => structuredClone({ authority, ingress }),
+     installRuntimeExact: (value) => {
++      lifecycle.assertInstall();
++      lifecycle.invalidate();
++      protectionEvidence = undefined;
+       authority = structuredClone(value.authority);
+       ingress = value.ingress;
+     },
+   };
+ 
+   async function initializeRealizations() {
++    if (ingress === "protected") return { status: "protected" as const };
++    const origin = lifecycle.origin();
++    const previous = authority,
++      previousIngress = ingress;
++    if (!lifecycle.isQuiescent()) return { status: "busy" as const };
+     const loaded = await options.storage.getAll<unknown>(REALIZATION_AUTHORITY_STORE);
++    if (
++      !lifecycle.current(origin) ||
++      authority !== previous ||
++      ingress !== previousIngress ||
++      !lifecycle.isQuiescent()
++    )
++      return { status: "contextReplaced" as const };
+     if (loaded.status === "failure") return protect();
+     const checked = validateRealizationAuthority({
+       version: 1,
+@@ -63,53 +105,207 @@
+   async function realizeAcceptedAllocation(
+     acceptedAllocationId: string,
+   ): Promise<RealizationCommandResultV1> {
+-    if (ingress !== "ready") return failed(acceptedAllocationId);
+-    const existing = authority.realizations.find(
+-      (item) => item.acceptedAllocationId === acceptedAllocationId,
++    const origin = lifecycle.origin();
++    const finish = (value: RealizationCommandResultV1) => lifecycle.result(value, origin);
++    const refusal = (
++      status: RealizationCommandResultV1["status"],
++      reason: RealizationCommandResultV1["reasons"][number],
++    ) => finish({ ...invalid(acceptedAllocationId), status, reasons: [reason] });
++    if (!lifecycle.current(origin)) return refusal("rejected", "contextReplaced");
++    const denied = lifecycle.acquire(origin);
++    if (denied)
++      return refusal(
++        denied === "authorityProtected" ? "protected" : "rejected",
++        denied === "busy" ? "realizationBusy" : denied,
++      );
++    // Every awaited physical mutation below owns its terminal waiting. No unresolved
++    // transaction can reach this release; unresolved calls keep this invocation pending.
++    try {
++      if (ingress !== "ready")
++        return refusal(
++          ingress === "protected" ? "protected" : "rejected",
++          ingress === "protected" ? "authorityProtected" : "authorityUnavailable",
++        );
++      const resolved = options.resolveAcceptedAllocation(acceptedAllocationId);
++      if (resolved.status !== "resolved") return finish(invalid(acceptedAllocationId));
++      if (resolved.acceptedAllocation.version !== 2)
++        return refusal("inapplicable", "acceptedAllocationIncomplete");
++      const accepted = structuredClone(resolved.acceptedAllocation);
++      const base = authority;
++      const exactTarget = () => {
++        const current = options.resolveAcceptedAllocation(acceptedAllocationId);
++        return (
++          current.status === "resolved" &&
++          JSON.stringify(current.acceptedAllocation) === JSON.stringify(accepted)
++        );
++      };
++      const source = () =>
++        options.sourceWitness?.() ?? JSON.stringify(options.currentSchedule?.() ?? []);
++      const existing = base.realizations.find(
++        (item) => item.acceptedAllocationId === acceptedAllocationId,
++      );
++      if (existing) {
++        const verified = await verify(base);
++        if (!lifecycle.current(origin)) return refusal("rejected", "contextReplaced");
++        if (!verified || authority !== base || !exactTarget()) {
++          protect();
++          protectionEvidence = await captureAcceptanceProtectionEvidence(
++            options.storage,
++            REALIZATION_AUTHORITY_STORE,
++            base,
++          );
++          return refusal("unconfirmed", "verificationFailedAfterCommit");
++        }
++        return finish(resultFor(existing, "alreadyRealized", "none", ["alreadyRealized"]));
++      }
++      const at = (options.now ?? (() => new Date().toISOString()))();
++      const witness = source();
++      const sources = await options.prepareSources?.(accepted, at);
++      if (source() !== witness || !exactTarget()) return refusal("rejected", "sourceChanged");
++      if (sources?.status === "unavailable") return refusal("inapplicable", "sourceUnavailable");
++      if (
++        sources?.status === "reviewRequired" ||
++        (!sources && options.checkFoundation?.(accepted) === "reviewRequired")
++      )
++        return refusal("inapplicable", "sleepFoundationReviewRequired");
++      const staged = stageAcceptedAllocationRealization({
++        acceptedAllocation: accepted,
++        realizedAt: at,
++        currentSchedule: [
++          ...base.facts,
++          ...(sources?.status === "eligible"
++            ? sources.schedule
++            : (options.currentSchedule?.() ?? [])),
++        ],
++      });
++      if (staged.status !== "staged") return finish(staged.result);
++      const next = {
++        version: 1 as const,
++        realizations: [...base.realizations, staged.realization],
++        facts: [...base.facts, ...staged.facts],
++      };
++      const checked = validateRealizationAuthority(next);
++      if (checked.status === "invalid") return finish(invalid(acceptedAllocationId));
++      let sourceChanged = false;
++      const persisted = await persistAcceptanceMutation(
++        options.storage,
++        [
++          { type: "put", store: REALIZATION_AUTHORITY_STORE, value: staged.realization },
++          ...staged.facts.map((value) => ({
++            type: "put" as const,
++            store: REALIZATION_AUTHORITY_STORE,
++            value,
++          })),
++        ],
++        () => {
++          sourceChanged = source() !== witness || !exactTarget();
++          return (
++            lifecycle.owns(origin) &&
++            !lifecycle.admission() &&
++            ingress === "ready" &&
++            authority === base &&
++            !sourceChanged
++          );
++        },
++      );
++      if (persisted === "notWritten")
++        return sourceChanged
++          ? refusal("rejected", "sourceChanged")
++          : finish(failed(acceptedAllocationId));
++      if (persisted === "uncertain") {
++        protect();
++        protectionEvidence = await captureAcceptanceProtectionEvidence(
++          options.storage,
++          REALIZATION_AUTHORITY_STORE,
++          next,
++        );
++        return refusal("unconfirmed", "commitStateUncertain");
++      }
++      if (
++        !(await verify(next)) ||
++        authority !== base ||
++        !exactTarget() ||
++        !lifecycle.current(origin)
++      ) {
++        protect();
++        protectionEvidence = await captureAcceptanceProtectionEvidence(
++          options.storage,
++          REALIZATION_AUTHORITY_STORE,
++          next,
++        );
++        return refusal("unconfirmed", "verificationFailedAfterCommit");
++      }
++      const reviewRequired = source() !== witness;
++      authority = checked.authority;
++      try {
++        options.onAuthorityChanged?.();
++      } catch {
++        protect();
++        protectionEvidence = await captureAcceptanceProtectionEvidence(
++          options.storage,
++          REALIZATION_AUTHORITY_STORE,
++          next,
++        );
++        return refusal("unconfirmed", "verificationFailedAfterCommit");
++      }
++      return finish({
++        ...resultFor(staged.realization, "realized", "stale", []),
++        ...(reviewRequired ? { reviewRequired: true } : {}),
++      });
++    } finally {
++      lifecycle.release(origin);
++    }
++  }
++
++  async function verify(value: RealizationAuthorityV1) {
++    try {
++      const loaded = await options.storage.getAll<unknown>(REALIZATION_AUTHORITY_STORE);
++      return (
++        loaded.status === "success" &&
++        exactAuthorityRows(loaded.value, [...value.realizations, ...value.facts]) &&
++        relationshipsResolve(value)
++      );
++    } catch {
++      return false;
++    }
++  }
++  async function replace(value: RealizationAuthorityV1, epoch?: number) {
++    if (epoch !== undefined && !lifecycle.coordinatorCurrent(epoch))
++      return { status: "failure" as const };
++    const checked = validateRealizationAuthority(structuredClone(value));
++    if (checked.status === "invalid" || !relationshipsResolve(checked.authority))
++      return { status: "invalid" as const };
++    const persisted = await persistAcceptanceMutation(
++      options.storage,
++      [
++        { type: "clear", store: REALIZATION_AUTHORITY_STORE },
++        ...[...checked.authority.realizations, ...checked.authority.facts].map((value) => ({
++          type: "put" as const,
++          store: REALIZATION_AUTHORITY_STORE,
++          value,
++        })),
++      ],
++      () => epoch === undefined || lifecycle.coordinatorCurrent(epoch),
+     );
+-    if (existing) return resultFor(existing, "alreadyRealized", "none", ["alreadyRealized"]);
+-    const resolved = options.resolveAcceptedAllocation(acceptedAllocationId);
+-    if (resolved.status !== "resolved") return invalid(acceptedAllocationId);
+-    if (resolved.acceptedAllocation.version !== 2)
+-      return {
+-        ...invalid(acceptedAllocationId),
+-        status: "inapplicable",
+-        reasons: ["acceptedAllocationIncomplete"],
+-      };
+-    if (options.checkFoundation?.(resolved.acceptedAllocation) === "reviewRequired")
+-      return {
+-        ...invalid(acceptedAllocationId),
+-        status: "inapplicable",
+-        reasons: ["sleepFoundationReviewRequired"],
+-      };
+-    const staged = stageAcceptedAllocationRealization({
+-      acceptedAllocation: resolved.acceptedAllocation,
+-      realizedAt: (options.now ?? (() => new Date().toISOString()))(),
+-      currentSchedule: [...authority.facts, ...(options.currentSchedule?.() ?? [])],
+-    });
+-    if (staged.status !== "staged") return staged.result;
+-    const next = {
+-      version: 1 as const,
+-      realizations: [...authority.realizations, staged.realization],
+-      facts: [...authority.facts, ...staged.facts],
+-    };
+-    const checked = validateRealizationAuthority(next);
+-    if (checked.status === "invalid") return invalid(acceptedAllocationId);
+-    const persisted = await options.storage.mutate([
+-      { type: "put", store: REALIZATION_AUTHORITY_STORE, value: staged.realization },
+-      ...staged.facts.map((fact) => ({
+-        type: "put" as const,
+-        store: REALIZATION_AUTHORITY_STORE,
+-        value: fact,
+-      })),
+-    ]);
+-    if (persisted.status === "failure") return failed(acceptedAllocationId);
++    if (persisted === "notWritten") return { status: "failure" as const };
++    if (persisted !== "committed" || !(await verify(checked.authority))) {
++      protect();
++      return { status: "failure" as const };
++    }
++    lifecycle.invalidate();
+     authority = checked.authority;
+-    options.onAuthorityChanged?.();
+-    return resultFor(staged.realization, "realized", "stale", []);
++    ingress = "ready";
++    return { status: "accepted" as const };
+   }
+ 
+   return {
++    getRealizationProtectionEvidence: (
++      capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++    ) => {
++      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
++        throw new Error("Invalid capability");
++      return structuredClone(protectionEvidence);
++    },
+     initializeRealizations,
+     realizeAcceptedAllocation,
+     resolveRealization: (id: string) => {
+@@ -149,28 +345,34 @@
+         : { status: "notFound" as const };
+     },
+     exportRealizationAuthority: () => structuredClone(authority),
+-    replaceRealizationAuthority: async (value: RealizationAuthorityV1) => {
+-      const checked = validateRealizationAuthority(value);
+-      if (checked.status === "invalid") return { status: "invalid" as const };
+-      const records = [...checked.authority.realizations, ...checked.authority.facts];
+-      const persisted = await options.storage.mutate([
+-        { type: "clear", store: REALIZATION_AUTHORITY_STORE },
+-        ...records.map((value) => ({
+-          type: "put" as const,
+-          store: REALIZATION_AUTHORITY_STORE,
+-          value,
+-        })),
+-      ]);
+-      if (persisted.status === "failure") return { status: "failure" as const };
+-      authority = checked.authority;
+-      ingress = "ready";
+-      return { status: "accepted" as const };
++    replaceRealizationAuthority: (value: RealizationAuthorityV1) => {
++      const frozen = structuredClone(value);
++      return !lifecycle.current(lifecycle.origin()) || ingress === "protected"
++        ? Promise.resolve({ status: "failure" as const })
++        : lifecycle.replace((epoch) => replace(frozen, epoch));
+     },
+     clearRealizationAuthority: async () => {
+-      const result = await options.storage.clear(REALIZATION_AUTHORITY_STORE);
+-      if (result.status === "failure") return { status: "storageFailure" as const };
+-      authority = emptyRealizationAuthority();
+-      return { status: "removed" as const };
++      const result =
++        !lifecycle.current(lifecycle.origin()) || ingress === "protected"
++          ? { status: "failure" }
++          : await lifecycle.replace((epoch) => replace(emptyRealizationAuthority(), epoch));
++      return result.status === "accepted"
++        ? { status: "removed" as const }
++        : { status: "storageFailure" as const };
++    },
++    clearRealizationForCoordinator: async (
++      capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      epoch: number,
++    ) => {
++      if (
++        capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY ||
++        !lifecycle.coordinatorCurrent(epoch)
++      )
++        return { status: "storageFailure" as const };
++      const result = await replace(emptyRealizationAuthority(), epoch);
++      return result.status === "accepted"
++        ? { status: "removed" as const }
++        : { status: "storageFailure" as const };
+     },
+     getRealizationIngressStatus: () => ingress,
+     getRealizationRuntimeAdapter: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
+@@ -204,7 +406,11 @@
+         realizedAt: realization.realizedAt,
+         currentSchedule: [],
+       });
+-      if (staged.status !== "staged" || staged.realization.id !== realization.id) return false;
++      if (
++        staged.status !== "staged" ||
++        JSON.stringify(staged.realization) !== JSON.stringify(realization)
++      )
++        return false;
+       const owned = value.facts.filter((fact) => fact.origin.realizationId === realization.id);
+       const ordered = (facts: RealizedScheduleFactV1[]) =>
+         facts.slice().sort((left, right) => left.id.localeCompare(right.id));
+--- baseline/code/src/state/types.ts
++++ final/code/src/state/types.ts
+@@ -903,8 +903,20 @@
+   Omit<GoalStructureSurface, "clearGoalStructure" | "getRuntimeAuthorityAdapter"> &
+   Omit<GoalPlanningSurface, "clearGoalPlanning" | "getRuntimeAuthorityAdapter"> &
+   Omit<CompositionSurface, "clearCompositionAuthority" | "getCompositionRuntimeAdapter"> &
+-  Omit<ProposalSurface, "clearProposalAuthority" | "getProposalRuntimeAdapter"> &
+-  Omit<RealizationSurface, "clearRealizationAuthority" | "getRealizationRuntimeAdapter">;
++  Omit<
++    ProposalSurface,
++    | "getProposalLifecycle"
++    | "clearProposalAuthority"
++    | "clearProposalForCoordinator"
++    | "getProposalRuntimeAdapter"
++  > &
++  Omit<
++    RealizationSurface,
++    | "getRealizationProtectionEvidence"
++    | "clearRealizationAuthority"
++    | "clearRealizationForCoordinator"
++    | "getRealizationRuntimeAdapter"
++  >;
+ 
+ export type { SourceIncarnationId };
+ export type { PlanDecisionId, PlanDecisionIdAllocator, PlanDecisionV1 };
+--- baseline/code/src/ui/GoalPlanningSection.tsx
++++ final/code/src/ui/GoalPlanningSection.tsx
+@@ -1,3 +1,4 @@
++import { hasCurrentAcceptanceReceipt } from "../state/acceptanceLifecycle.js";
+ import { useEffect, useId, useRef, useState } from "react";
+ import type { GoalV1 } from "../core/goals/goal.js";
+ import type {
+@@ -983,9 +984,13 @@
+               {offer.status === "proposed" ? (
+                 <>
+                   <p>
+-                    {recording?.status === "accepted" && recording.persistence === "durable"
++                    {recording?.status === "accepted" &&
++                    recording.persistence === "durable" &&
++                    hasCurrentAcceptanceReceipt(recording)
+                       ? "Proposal saved for review. Nothing has been accepted or scheduled by this evaluation."
+-                      : "A proposal was calculated but could not be saved. Retry evaluation before deciding."}
++                      : recording?.status === "unconfirmed"
++                        ? "The proposal write is unconfirmed. Authority is protected; do not retry evaluation until it can be verified."
++                        : "A proposal was calculated but is not confirmed as current saved authority. Review its status before deciding."}
+                   </p>
+                   <p>{offer.proposal.options.length} option(s). Open Review Schedule to decide.</p>
+                   {offer.proposal.options
+--- baseline/code/src/ui/ScheduleReviewPanel.tsx
++++ final/code/src/ui/ScheduleReviewPanel.tsx
+@@ -1,4 +1,9 @@
+-import { useEffect, useState, type ReactElement } from "react";
++import { hasCurrentAcceptanceReceipt } from "../state/acceptanceLifecycle.js";
++import type { ProposalSurface } from "../state/proposalSurface.js";
++type ProposalOutcome =
++  | Awaited<ReturnType<ProposalSurface["acceptProposalOption"]>>
++  | Awaited<ReturnType<ProposalSurface["rejectProposal"]>>;
++import { useEffect, useState, useRef, type ReactElement } from "react";
+ import type { LocalDateString } from "../core/shifts/types.js";
+ import type { ReviewScopeV1 } from "../core/planning/planningScope.js";
+ import { createReviewScope } from "../core/planning/reviewScope.js";
+@@ -32,8 +37,11 @@
+     proposalId: string;
+     proposalRevision: number;
+     optionId: string;
+-  }) => Promise<unknown>;
+-  onRejectProposal: (input: { proposalId: string; proposalRevision: number }) => Promise<unknown>;
++  }) => Promise<ProposalOutcome>;
++  onRejectProposal: (input: {
++    proposalId: string;
++    proposalRevision: number;
++  }) => Promise<ProposalOutcome>;
+   onPublish: (input: {
+     publicationRange: ReturnType<typeof publicationRangeFromReviewScope>;
+     expectedSourceFingerprint: string;
+@@ -53,6 +61,15 @@
+   });
+   const [result, setResult] = useState<PlanningReviewReadModelV1 | "loading" | "error">("loading");
+   const [refresh, setRefresh] = useState(0);
++  const request = useRef<object | null>(null);
++  const requestContext = useRef({ query: props.query, scope: reviewScope.id });
++  requestContext.current = { query: props.query, scope: reviewScope.id };
++  useEffect(
++    () => () => {
++      request.current = null;
++    },
++    [],
++  );
+   const [pending, setPending] = useState<string | null>(null);
+   const [mutationMessage, setMutationMessage] = useState("");
+   const [publicationMessage, setPublicationMessage] = useState<{
+@@ -90,38 +107,59 @@
+     publicationRangeValid: true,
+   });
+   const presentation = presentPlanningReview(result);
+-  async function decide(id: string, action: () => Promise<unknown>) {
++  async function decide(id: string, action: () => Promise<ProposalOutcome>) {
++    if (request.current) return;
++    const token = {},
++      context = requestContext.current;
++    request.current = token;
++    const current = () =>
++      request.current === token &&
++      requestContext.current.query === context.query &&
++      requestContext.current.scope === context.scope;
+     setPending(id);
+     setMutationMessage("");
+     try {
+       const outcome = await action();
++      if (!current() || !hasCurrentAcceptanceReceipt(outcome)) return;
+       setMutationMessage(decisionMessage(outcome));
++      setRefresh((value) => value + 1);
+     } catch {
+-      setMutationMessage(
+-        "The decision result could not be confirmed. Review the refreshed acceptance and scheduling state before retrying.",
+-      );
++      if (current())
++        setMutationMessage(
++          "The decision result could not be confirmed. Review current authority before retrying.",
++        );
+     } finally {
+-      setPending(null);
+-      setRefresh((value) => value + 1);
++      if (request.current === token) {
++        request.current = null;
++        setPending(null);
++      }
+     }
+   }
+   async function retryRealization(id: string) {
+-    if (!props.onRetryRealization) return;
++    if (!props.onRetryRealization || request.current) return;
++    const token = {},
++      context = requestContext.current;
++    request.current = token;
++    const current = () =>
++      request.current === token &&
++      requestContext.current.query === context.query &&
++      requestContext.current.scope === context.scope;
+     setPending(id);
+     try {
+       const outcome = await props.onRetryRealization(id);
+-      setMutationMessage(
+-        outcome.status === "realized" || outcome.status === "alreadyRealized"
+-          ? "Accepted work is scheduled. Refresh the schedule, review it, then publish explicitly."
+-          : `Acceptance is still saved; scheduling has not completed. ${outcome.reasons.map((reason) => realizationReasons[reason]).join(" ")}`,
+-      );
++      if (!current() || !hasCurrentAcceptanceReceipt(outcome)) return;
++      setMutationMessage(realizationMessage(outcome));
++      setRefresh((value) => value + 1);
+     } catch {
+-      setMutationMessage(
+-        "Acceptance is still saved. Scheduling could not complete; retry without accepting again.",
+-      );
++      if (current())
++        setMutationMessage(
++          "Scheduling could not be confirmed. Review current authority before retrying; do not accept again.",
++        );
+     } finally {
+-      setPending(null);
+-      setRefresh((value) => value + 1);
++      if (request.current === token) {
++        request.current = null;
++        setPending(null);
++      }
+     }
+   }
+   async function publish() {
+@@ -218,7 +256,7 @@
+           </p>
+         ))}
+         <p className="df-support">{presentation.publication.label}</p>
+-        {mutationMessage ? <p>{mutationMessage}</p> : null}
++        {mutationMessage ? <p role="status">{mutationMessage}</p> : null}
+         {publicationMessage ? (
+           <p role={publicationMessage.tone === "failure" ? "alert" : "status"}>
+             {publicationMessage.text}
+@@ -401,35 +439,43 @@
+   return "Publication could not proceed. Review the current blockers before publishing.";
+ }
+ 
+-function commandAccepted(value: unknown) {
+-  return (
+-    typeof value === "object" &&
+-    value !== null &&
+-    "status" in value &&
+-    (value as { status: string }).status === "accepted"
+-  );
++function realizationMessage(outcome: RealizationCommandResultV1): string {
++  if (outcome.status === "realized" || outcome.status === "alreadyRealized")
++    return outcome.reviewRequired
++      ? "Accepted work was saved. The current schedule needs review."
++      : "Accepted work is scheduled. Refresh the schedule and review it before explicit publication.";
++  const reason = outcome.reasons.map((value) => realizationReasons[value]).join(" ");
++  if (
++    outcome.status === "unconfirmed" ||
++    outcome.status === "protected" ||
++    outcome.status === "rejected"
++  )
++    return reason;
++  return `Acceptance is saved, but scheduling has not completed. ${reason}`;
+ }
+-
+-function decisionMessage(value: unknown): string {
+-  if (!commandAccepted(value)) {
+-    const reason =
+-      value && typeof value === "object" && "reason" in value ? value.reason : undefined;
+-    return reason === "stale" || reason === "conflictingClaim"
+-      ? "This Proposal is out of date. Evaluate the planning opportunity again before accepting. No new acceptance was made."
+-      : "The decision was not recorded; existing authority is unchanged.";
++function decisionMessage(value: ProposalOutcome): string {
++  switch (value.status) {
++    case "unconfirmed":
++      return value.reason === "commitStateUncertain"
++        ? "The decision may have been saved, but its outcome is unconfirmed. Authority is protected; do not accept again."
++        : "The decision write completed, but verification failed. Authority is protected; scheduling was not started.";
++    case "rejected":
++      if (value.reason === "stale" || value.reason === "conflictingClaim")
++        return "This Proposal is out of date. Evaluate the planning opportunity again before accepting. No new acceptance was made.";
++      if (value.reason === "proposalBusy")
++        return "Another decision is finishing. Try again after it settles.";
++      if (value.reason === "contextReplaced")
++        return "The decision belongs to an earlier state. Review the current state.";
++      if (value.reason === "sourceChanged")
++        return "Saved planning information changed. Review it before deciding again.";
++      if (value.reason === "protected" || value.reason === "authorityProtected")
++        return "Decision authority is protected. Its evidence has been preserved.";
++      if (value.reason === "replacementBusy" || value.reason === "authorityTransactionActive")
++        return "Clear or restore is in progress. Wait for it to finish.";
++      return "The decision was not recorded; existing authority is unchanged.";
++    case "accepted":
++      if ("realization" in value.value)
++        return `Decision recorded. ${realizationMessage(value.value.realization as RealizationCommandResultV1)}`;
++      return "Decision recorded. Review state refreshed.";
+   }
+-  if (
+-    value &&
+-    typeof value === "object" &&
+-    "value" in value &&
+-    value.value &&
+-    typeof value.value === "object" &&
+-    "realization" in value.value
+-  ) {
+-    const outcome = value.value.realization as RealizationCommandResultV1;
+-    return outcome.status === "realized" || outcome.status === "alreadyRealized"
+-      ? "Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication."
+-      : `Decision recorded. Acceptance is saved, but scheduling has not completed. ${(outcome.reasons ?? []).map((reason) => realizationReasons[reason]).join(" ")} Retry scheduling below without accepting again.`;
+-  }
+-  return "Decision recorded. Review state refreshed.";
+ }
+--- baseline/code/src/ui/planningResultCopy.ts
++++ final/code/src/ui/planningResultCopy.ts
+@@ -50,6 +50,18 @@
+   incompleteInput: "Planning information is incomplete or out of date.",
+ };
+ export const realizationReasons: Record<RealizationReasonCodeV1, string> = {
++  sourceUnavailable:
++    "Current scheduling evidence is unavailable. Refresh and review before retrying.",
++  sourceChanged: "Saved scheduling information changed. Review it before retrying.",
++  realizationBusy: "Another scheduling operation is finishing. Try again after it settles.",
++  replacementBusy: "Clear or restore is in progress. Wait for it to finish.",
++  contextReplaced: "This result belongs to an earlier state. Review the current state.",
++  authorityUnavailable: "Scheduling authority is not available yet.",
++  authorityProtected: "Scheduling authority is protected. Its evidence has been preserved.",
++  commitStateUncertain:
++    "Scheduling may have been saved, but its outcome is unconfirmed. Do not retry while authority is protected.",
++  verificationFailedAfterCommit:
++    "The write completed, but its complete scheduling evidence could not be verified. Authority is protected.",
+   sleepFoundationReviewRequired:
+     "Required Sleep has changed or is unresolved. Review this accepted work before scheduling it.",
+   alreadyRealized: "This accepted work is already scheduled.",
+--- baseline/code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx
++++ final/code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx
+@@ -356,13 +356,13 @@
+     let fail = false;
+     const storage: IndexedDbCollectionStorage = {
+       ...db,
+-      mutate: async (operations) => {
++      mutate: async (operations, admit, observe) => {
+         if (fail && operations.some((op) => op.store === "goalPlanning"))
+           return {
+             status: "failure",
+             error: { code: "transactionAborted", operation: "planning" },
+           };
+-        return db.mutate(operations);
++        return db.mutate(operations, admit, observe);
+       },
+     };
+     const store = await mount({ storage });
+@@ -420,7 +420,7 @@
+     let fail = true;
+     const storage: IndexedDbCollectionStorage = {
+       ...db,
+-      mutate: async (operations) => {
++      mutate: async (operations, admit, observe) => {
+         if (
+           fail &&
+           operations.some((op) => op.store === REALIZATION_AUTHORITY_STORE && op.type === "put")
+@@ -429,7 +429,7 @@
+             status: "failure",
+             error: { code: "transactionAborted", operation: "realization" },
+           };
+-        return db.mutate(operations);
++        return db.mutate(operations, admit, observe);
+       },
+     };
+     const store = await mount({ storage });
+--- baseline/code/src/ui/tests/ScheduleReviewPanel.test.tsx
++++ final/code/src/ui/tests/ScheduleReviewPanel.test.tsx
+@@ -1,3 +1,4 @@
++import { createAcceptanceLifecycle } from "../../state/acceptanceLifecycle.js";
+ /* @vitest-environment jsdom */
+ import "@testing-library/jest-dom/vitest";
+ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+@@ -5,6 +6,68 @@
+ import { ScheduleReviewPanel } from "../ScheduleReviewPanel.js";
+ 
+ afterEach(cleanup);
++
++function acceptancePanel(
++  onAcceptProposal: Parameters<typeof ScheduleReviewPanel>[0]["onAcceptProposal"],
++  query = vi.fn(async () => queryResult() as never),
++) {
++  render(
++    <ScheduleReviewPanel
++      startUserDayDate="2026-09-05"
++      endUserDayDateExclusive="2026-09-06"
++      weekStartsOn="monday"
++      historyAsOf="2026-09-05T12:00:00Z"
++      query={query}
++      unresolvedFrictionCount={0}
++      onGeneratePreview={vi.fn()}
++      onOpenFriction={vi.fn()}
++      onAcceptProposal={onAcceptProposal}
++      onRejectProposal={vi.fn()}
++      onPublish={vi.fn()}
++      getPublishedAt={() => "2026-09-05T13:00:00Z"}
++    />,
++  );
++  return query;
++}
++
++it.each(["commitStateUncertain", "verificationFailedAfterCommit"] as const)(
++  "acceptance %s never says not recorded or invites reacceptance",
++  async (reason) => {
++    const lifecycle = createAcceptanceLifecycle();
++    acceptancePanel(async () =>
++      lifecycle.result({ status: "unconfirmed", reason }, lifecycle.capture()),
++    );
++    fireEvent.click(await screen.findByRole("button", { name: "Accept preferred option" }));
++    expect(await screen.findByText(/Authority is protected/)).toBeVisible();
++    expect(screen.queryByText(/decision was not recorded/i)).not.toBeInTheDocument();
++  },
++);
++
++it("duplicate acceptance clicks invoke one command and displaced completion does not refresh or install success", async () => {
++  const lifecycle = createAcceptanceLifecycle(),
++    origin = lifecycle.capture();
++  let finish!: () => void;
++  const gate = new Promise<void>((resolve) => {
++    finish = resolve;
++  });
++  const action = vi.fn(async () => {
++    await gate;
++    return lifecycle.result(
++      { status: "accepted" as const, value: {} as never, persistence: "durable" as const },
++      origin,
++    );
++  });
++  const query = acceptancePanel(action);
++  const button = await screen.findByRole("button", { name: "Accept preferred option" });
++  fireEvent.click(button);
++  fireEvent.click(button);
++  expect(action).toHaveBeenCalledOnce();
++  lifecycle.invalidate();
++  finish();
++  await waitFor(() => expect(button).not.toBeDisabled());
++  expect(query).toHaveBeenCalledOnce();
++  expect(screen.queryByText(/Decision recorded/)).not.toBeInTheDocument();
++});
+ 
+ function queryResult() {
+   return {
+@@ -85,7 +148,13 @@
+   });
+ 
+   it("shows readiness, keeps Proposal non-authoritative, and routes decisions through existing commands", async () => {
+-    const accept = vi.fn(async () => ({ status: "accepted" }));
++    const lifecycle = createAcceptanceLifecycle();
++    const accept = vi.fn(async () =>
++      lifecycle.result(
++        { status: "accepted" as const, value: {} as never, persistence: "durable" as const },
++        lifecycle.capture(),
++      ),
++    );
+     const query = vi.fn(async () => queryResult() as never);
+     render(
+       <ScheduleReviewPanel
+@@ -98,7 +167,12 @@
+         onGeneratePreview={vi.fn()}
+         onOpenFriction={vi.fn()}
+         onAcceptProposal={accept}
+-        onRejectProposal={vi.fn(async () => ({ status: "accepted" }))}
++        onRejectProposal={vi.fn(async () =>
++          lifecycle.result(
++            { status: "accepted" as const, value: {} as never, persistence: "durable" as const },
++            lifecycle.capture(),
++          ),
++        )}
+         onPublish={vi.fn(async () => ({
+           status: "published" as const,
+           batchId: "batch",

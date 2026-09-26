@@ -1,0 +1,5580 @@
+[
+  {
+    "label": "320-milestone-form",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-graph-error",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "DayFramePlannerSummaryPlanner / GoalsBackSettings and dataSaved Setup ProfilesSave named local setups, then load one later to repl",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Broader Goal — contains the selected SubgoalSubgoal — contained by the selected broader Goal",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Choose an existing endpointDuplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7Duplicate target · 529ccca3-b693-4bf1-807d-05e41f410a58Native source · 6adcd408-a6e8-4659-95a1-e47de159d81dPlanning proof · c657fbcb-d27b-4675-8088-20aa05454b97Source A child · 632cac41-a651-4449-b389-04473a613b6eSupporting Goal 10 · 479eb257-6282-4923-bf0a-531388fc111fSupporting Goal 11 · 91b14496-153c-4968-b3c5-1ecb561a6349Supporting Goal 12 · 0bb85456-f40e-4376-890c-4c9f382930b0Supporting Goal 13 · d16215c9-7037-42ad-9991-a62d8cead015Supporting Goal 14 · 2f5992cc-2741-4778-b5a0-f1949b41547c",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Show more endpoints",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Choose required or optionalRequiredOptional",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Record details: 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-unmet-planning",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Record details: 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-satisfied-planning",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Record details: 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-related-return",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 177
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Record details: 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-ui-authored-reload",
+    "sourceDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "restoredDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-ui-authored-import",
+    "sourceDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "restoredDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-ui-authored-import-reload",
+    "sourceDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "restoredDigest": "3284fce92f6f0c09bb258723cfb0bf47d2caef463b5c9a2286c9fca8a9928b26",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-protected-structure",
+    "viewport": {
+      "width": 320,
+      "height": 800,
+      "client": 305,
+      "scroll": 305
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 58,
+        "width": 217
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Record details: 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Retire relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 60,
+        "width": 209
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Record details: 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 544e0123-2ba5-468e-8f2f-383ac771131b",
+        "height": 78,
+        "width": 209
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "320-anomalous-preservation",
+    "sourceDigest": "f2bdc977442728f2e66bf72721e2f0e852fb5d809b4e022c54da2235004c3597",
+    "restoredDigest": "f2bdc977442728f2e66bf72721e2f0e852fb5d809b4e022c54da2235004c3597",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "320-canonical-authoring",
+    "satisfied": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "544e0123-2ba5-468e-8f2f-383ac771131b",
+      "revision": 2,
+      "ownerGoalId": "c657fbcb-d27b-4675-8088-20aa05454b97",
+      "title": "Native checkpoint",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:28:36.824Z",
+      "updatedAt": "2026-09-23T21:28:39.431Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "targetDate": "2026-10-01",
+      "satisfiedAt": "2026-09-23T21:28:39.431Z"
+    },
+    "renamed": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "544e0123-2ba5-468e-8f2f-383ac771131b",
+      "revision": 3,
+      "ownerGoalId": "c657fbcb-d27b-4675-8088-20aa05454b97",
+      "title": "Renamed after satisfaction",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:28:36.824Z",
+      "updatedAt": "2026-09-23T21:28:39.976Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "satisfiedAt": "2026-09-23T21:28:39.431Z",
+      "targetDate": "2026-10-01"
+    },
+    "retired": [
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "c657fbcb-d27b-4675-8088-20aa05454b97",
+        "target": {
+          "kind": "goal",
+          "goalId": "3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "revision": 1,
+        "status": "active",
+        "createdAt": "2026-09-23T21:28:36.158Z",
+        "updatedAt": "2026-09-23T21:28:36.158Z",
+        "effectiveFrom": "2026-09-23T21:28:36.158Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "c657fbcb-d27b-4675-8088-20aa05454b97",
+        "target": {
+          "kind": "goal",
+          "goalId": "3fc7ae7e-0ea4-43db-8056-2978dfdfbfb7"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+        "revision": 2,
+        "status": "retired",
+        "createdAt": "2026-09-23T21:28:36.158Z",
+        "updatedAt": "2026-09-23T21:28:40.521Z",
+        "effectiveFrom": "2026-09-23T21:28:36.158Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        },
+        "effectiveTo": "2026-09-23T21:28:40.521Z"
+      }
+    ],
+    "query": {
+      "status": "evaluated",
+      "value": {
+        "version": 2,
+        "basis": "currentAuthority",
+        "evaluatedAt": "2026-09-23T21:28:40.713Z",
+        "qualification": "qualified",
+        "eligibility": "eligible",
+        "records": {
+          "status": "available",
+          "values": [
+            {
+              "id": "51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:28:37.659Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            },
+            {
+              "id": "8157e35b-2b07-4fb6-bb43-4c11a1bbb9e0",
+              "revision": 2,
+              "status": "retired",
+              "effectiveFrom": "2026-09-23T21:28:36.158Z",
+              "effectiveTo": "2026-09-23T21:28:40.521Z",
+              "intervalPosition": "atOrAfterEnd",
+              "applicability": "notApplicable",
+              "reason": "retired"
+            },
+            {
+              "id": "eabcc3b2-5d76-4b95-912b-37cb84e25e33",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:28:35.707Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            }
+          ]
+        },
+        "reasons": [],
+        "dependencies": [
+          {
+            "version": 1,
+            "kind": "goal.authority",
+            "id": "c657fbcb-d27b-4675-8088-20aa05454b97",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.relationship",
+            "id": "51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.milestone",
+            "id": "544e0123-2ba5-468e-8f2f-383ac771131b",
+            "revision": 3
+          }
+        ],
+        "authorityFingerprint": "55616584c426e1bf",
+        "applicabilityFingerprint": "04f680e9e066eb88",
+        "legacy": {
+          "version": 1,
+          "goalId": "c657fbcb-d27b-4675-8088-20aa05454b97",
+          "status": "eligible",
+          "reasons": [],
+          "dependencies": [
+            {
+              "version": 1,
+              "kind": "goal.authority",
+              "id": "c657fbcb-d27b-4675-8088-20aa05454b97",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.relationship",
+              "id": "51c64b9d-2451-4ef3-944e-e9b0ae2e3966",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.milestone",
+              "id": "544e0123-2ba5-468e-8f2f-383ac771131b",
+              "revision": 3
+            }
+          ],
+          "dependencyFingerprint": {
+            "version": 1,
+            "algorithm": "fnv1a64-canonical-v1",
+            "ordering": "set",
+            "value": "2ec176ce9d6ec69e"
+          }
+        }
+      }
+    }
+  },
+  {
+    "label": "390-milestone-form",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-graph-error",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "DayFramePlannerSummaryPlanner / GoalsBackSettings and dataSaved Setup ProfilesSave named local setups, then load one later to repl",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Broader Goal — contains the selected SubgoalSubgoal — contained by the selected broader Goal",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Choose an existing endpointDuplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0Duplicate target · 2f0677bc-0137-4fc0-b43d-7b2706377df1Native source · cfb16cfa-9b80-435b-8d68-2d0fe1e5a8aePlanning proof · b46a5b42-3f09-4bb0-88af-dfa0274ea3f5Source A child · 36145b48-f03a-4115-aafa-f73b09f16b45Supporting Goal 10 · 5dd8efc8-e32e-4a5b-b0ba-e98bc6591223Supporting Goal 11 · 2a7e4dd4-ef9d-4d53-a387-fef176a48270Supporting Goal 12 · 8fcb9459-5a90-4663-9fa0-98dc6872fafdSupporting Goal 13 · 26af26e9-bd73-4850-98f0-6018ab09fa54Supporting Goal 14 · 01f1b94c-59ff-4804-8faf-bf14d0c1b8ae",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Show more endpoints",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Choose required or optionalRequiredOptional",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-unmet-planning",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-satisfied-planning",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-related-return",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-ui-authored-reload",
+    "sourceDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "restoredDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-ui-authored-import",
+    "sourceDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "restoredDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-ui-authored-import-reload",
+    "sourceDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "restoredDigest": "a431166ce43313572b58d50bb038828dbcaed05d5253f7e822c4550afeb068db",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-protected-structure",
+    "viewport": {
+      "width": 390,
+      "height": 800,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 1e585108-cc91-44bd-8890-3e4fbb9538d0",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 48a8037e-6015-42d1-9c22-3226847580e4",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "390-anomalous-preservation",
+    "sourceDigest": "4ea546ad41e9190c6f9bb7591b67632eff2cd9fb8e81a88bfdac958a10641205",
+    "restoredDigest": "4ea546ad41e9190c6f9bb7591b67632eff2cd9fb8e81a88bfdac958a10641205",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "390-canonical-authoring",
+    "satisfied": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "48a8037e-6015-42d1-9c22-3226847580e4",
+      "revision": 2,
+      "ownerGoalId": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+      "title": "Native checkpoint",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:28:51.488Z",
+      "updatedAt": "2026-09-23T21:28:54.045Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "targetDate": "2026-10-01",
+      "satisfiedAt": "2026-09-23T21:28:54.045Z"
+    },
+    "renamed": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "48a8037e-6015-42d1-9c22-3226847580e4",
+      "revision": 3,
+      "ownerGoalId": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+      "title": "Renamed after satisfaction",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:28:51.488Z",
+      "updatedAt": "2026-09-23T21:28:54.578Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "satisfiedAt": "2026-09-23T21:28:54.045Z",
+      "targetDate": "2026-10-01"
+    },
+    "retired": [
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+        "target": {
+          "kind": "goal",
+          "goalId": "1e585108-cc91-44bd-8890-3e4fbb9538d0"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "revision": 1,
+        "status": "active",
+        "createdAt": "2026-09-23T21:28:50.879Z",
+        "updatedAt": "2026-09-23T21:28:50.879Z",
+        "effectiveFrom": "2026-09-23T21:28:50.879Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+        "target": {
+          "kind": "goal",
+          "goalId": "1e585108-cc91-44bd-8890-3e4fbb9538d0"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "76aff08a-98a8-4ae0-b988-c3175839bf2c",
+        "revision": 2,
+        "status": "retired",
+        "createdAt": "2026-09-23T21:28:50.879Z",
+        "updatedAt": "2026-09-23T21:28:55.132Z",
+        "effectiveFrom": "2026-09-23T21:28:50.879Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        },
+        "effectiveTo": "2026-09-23T21:28:55.132Z"
+      }
+    ],
+    "query": {
+      "status": "evaluated",
+      "value": {
+        "version": 2,
+        "basis": "currentAuthority",
+        "evaluatedAt": "2026-09-23T21:28:55.354Z",
+        "qualification": "qualified",
+        "eligibility": "eligible",
+        "records": {
+          "status": "available",
+          "values": [
+            {
+              "id": "04a79bed-ee4d-4d86-97ef-69bb49c66bea",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:28:50.420Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            },
+            {
+              "id": "76aff08a-98a8-4ae0-b988-c3175839bf2c",
+              "revision": 2,
+              "status": "retired",
+              "effectiveFrom": "2026-09-23T21:28:50.879Z",
+              "effectiveTo": "2026-09-23T21:28:55.132Z",
+              "intervalPosition": "atOrAfterEnd",
+              "applicability": "notApplicable",
+              "reason": "retired"
+            },
+            {
+              "id": "f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:28:52.342Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            }
+          ]
+        },
+        "reasons": [],
+        "dependencies": [
+          {
+            "version": 1,
+            "kind": "goal.authority",
+            "id": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.relationship",
+            "id": "f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.milestone",
+            "id": "48a8037e-6015-42d1-9c22-3226847580e4",
+            "revision": 3
+          }
+        ],
+        "authorityFingerprint": "ec7dd0d8e39d8a6b",
+        "applicabilityFingerprint": "7d0fe579c7481c63",
+        "legacy": {
+          "version": 1,
+          "goalId": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+          "status": "eligible",
+          "reasons": [],
+          "dependencies": [
+            {
+              "version": 1,
+              "kind": "goal.authority",
+              "id": "b46a5b42-3f09-4bb0-88af-dfa0274ea3f5",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.relationship",
+              "id": "f1d57e1f-dcdd-4782-9ee0-bbc5ff4387ce",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.milestone",
+              "id": "48a8037e-6015-42d1-9c22-3226847580e4",
+              "revision": 3
+            }
+          ],
+          "dependencyFingerprint": {
+            "version": 1,
+            "algorithm": "fnv1a64-canonical-v1",
+            "ordering": "set",
+            "value": "29d85efa026bd0c5"
+          }
+        }
+      }
+    }
+  },
+  {
+    "label": "768-milestone-form",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-graph-error",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "DayFramePlannerSummaryPlanner / GoalsBackSettings and dataSaved Setup ProfilesSave named local setups, then load one later to repl",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Broader Goal — contains the selected SubgoalSubgoal — contained by the selected broader Goal",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Choose an existing endpointDuplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60Duplicate target · b7ccece8-c378-484d-a174-5f71eed70658Native source · 4f63cfc7-133f-49ca-aa60-dc2481f696a8Planning proof · f9f7139e-3c65-4e19-b43d-5051afa0515aSource A child · cc9cbb38-1ad2-4aa6-be4f-fd857d9a926dSupporting Goal 10 · 9b250ffd-93b5-4f2f-8877-2a185bbce7c4Supporting Goal 11 · acde002b-9bfa-413a-a40c-16f4ec2eb8dcSupporting Goal 12 · 4936a9c9-5816-40d5-865f-e0260eb3dd3bSupporting Goal 13 · 55c560ad-8144-4b8d-a623-b8b3c8018924Supporting Goal 14 · e7166b74-4ce8-4450-b1ef-9fd70c6ba936",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Show more endpoints",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Choose required or optionalRequiredOptional",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 435.015625
+      },
+      {
+        "name": "Retire relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 450.125
+      },
+      {
+        "name": "Record details: 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 557.421875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-unmet-planning",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 435.015625
+      },
+      {
+        "name": "Retire relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 450.125
+      },
+      {
+        "name": "Record details: 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 557.421875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-satisfied-planning",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 435.015625
+      },
+      {
+        "name": "Retire relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 450.125
+      },
+      {
+        "name": "Record details: 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-related-return",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 589
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 435.015625
+      },
+      {
+        "name": "Retire relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 450.125
+      },
+      {
+        "name": "Record details: 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-ui-authored-reload",
+    "sourceDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "restoredDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-ui-authored-import",
+    "sourceDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "restoredDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-ui-authored-import-reload",
+    "sourceDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "restoredDigest": "f2a1173a60b359bd4f851d681698d9b74cf68b92b1740b25506a20258b58c996",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-protected-structure",
+    "viewport": {
+      "width": 768,
+      "height": 800,
+      "client": 753,
+      "scroll": 753
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 434.109375
+      },
+      {
+        "name": "Retire relationship 2cc00aab-7810-4f9b-a032-37a217a23478",
+        "height": 44,
+        "width": 449.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 435.015625
+      },
+      {
+        "name": "Retire relationship 39ea0036-c37a-4ed3-9749-e754e9fa8277",
+        "height": 44,
+        "width": 450.125
+      },
+      {
+        "name": "Record details: 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 428.765625
+      },
+      {
+        "name": "Retire relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 443.875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 00e725d0-e3b2-482e-a410-44b4f8fc7d60",
+        "height": 44,
+        "width": 578.1875
+      },
+      {
+        "name": "Record details: 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · 8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+        "height": 44,
+        "width": 621
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "768-anomalous-preservation",
+    "sourceDigest": "aac3f64e5538ba49562cd425ae6a0ec233d642556f2fb5fc5c8b6eee4c062c35",
+    "restoredDigest": "aac3f64e5538ba49562cd425ae6a0ec233d642556f2fb5fc5c8b6eee4c062c35",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "768-canonical-authoring",
+    "satisfied": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+      "revision": 2,
+      "ownerGoalId": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+      "title": "Native checkpoint",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:29:07.486Z",
+      "updatedAt": "2026-09-23T21:29:09.969Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "targetDate": "2026-10-01",
+      "satisfiedAt": "2026-09-23T21:29:09.969Z"
+    },
+    "renamed": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+      "revision": 3,
+      "ownerGoalId": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+      "title": "Renamed after satisfaction",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:29:07.486Z",
+      "updatedAt": "2026-09-23T21:29:10.502Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "satisfiedAt": "2026-09-23T21:29:09.969Z",
+      "targetDate": "2026-10-01"
+    },
+    "retired": [
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+        "target": {
+          "kind": "goal",
+          "goalId": "00e725d0-e3b2-482e-a410-44b4f8fc7d60"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "2cc00aab-7810-4f9b-a032-37a217a23478",
+        "revision": 1,
+        "status": "active",
+        "createdAt": "2026-09-23T21:29:06.901Z",
+        "updatedAt": "2026-09-23T21:29:06.901Z",
+        "effectiveFrom": "2026-09-23T21:29:06.901Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+        "target": {
+          "kind": "goal",
+          "goalId": "00e725d0-e3b2-482e-a410-44b4f8fc7d60"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "2cc00aab-7810-4f9b-a032-37a217a23478",
+        "revision": 2,
+        "status": "retired",
+        "createdAt": "2026-09-23T21:29:06.901Z",
+        "updatedAt": "2026-09-23T21:29:11.062Z",
+        "effectiveFrom": "2026-09-23T21:29:06.901Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        },
+        "effectiveTo": "2026-09-23T21:29:11.062Z"
+      }
+    ],
+    "query": {
+      "status": "evaluated",
+      "value": {
+        "version": 2,
+        "basis": "currentAuthority",
+        "evaluatedAt": "2026-09-23T21:29:11.268Z",
+        "qualification": "qualified",
+        "eligibility": "eligible",
+        "records": {
+          "status": "available",
+          "values": [
+            {
+              "id": "2cc00aab-7810-4f9b-a032-37a217a23478",
+              "revision": 2,
+              "status": "retired",
+              "effectiveFrom": "2026-09-23T21:29:06.901Z",
+              "effectiveTo": "2026-09-23T21:29:11.062Z",
+              "intervalPosition": "atOrAfterEnd",
+              "applicability": "notApplicable",
+              "reason": "retired"
+            },
+            {
+              "id": "39ea0036-c37a-4ed3-9749-e754e9fa8277",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:29:08.325Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            },
+            {
+              "id": "9d8eaeb7-63d7-4ccb-8a92-df4583d63d21",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:29:06.459Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            }
+          ]
+        },
+        "reasons": [],
+        "dependencies": [
+          {
+            "version": 1,
+            "kind": "goal.authority",
+            "id": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.relationship",
+            "id": "39ea0036-c37a-4ed3-9749-e754e9fa8277",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.milestone",
+            "id": "8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+            "revision": 3
+          }
+        ],
+        "authorityFingerprint": "8380abd025a773e8",
+        "applicabilityFingerprint": "4c1df646156316aa",
+        "legacy": {
+          "version": 1,
+          "goalId": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+          "status": "eligible",
+          "reasons": [],
+          "dependencies": [
+            {
+              "version": 1,
+              "kind": "goal.authority",
+              "id": "f9f7139e-3c65-4e19-b43d-5051afa0515a",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.relationship",
+              "id": "39ea0036-c37a-4ed3-9749-e754e9fa8277",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.milestone",
+              "id": "8dbf327a-ea9d-47e2-a685-499e2c5e7ff4",
+              "revision": 3
+            }
+          ],
+          "dependencyFingerprint": {
+            "version": 1,
+            "algorithm": "fnv1a64-canonical-v1",
+            "ordering": "set",
+            "value": "e3888256b0e6af42"
+          }
+        }
+      }
+    }
+  },
+  {
+    "label": "1280-milestone-form",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-graph-error",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "BODY",
+      "text": "DayFramePlannerSummaryPlanner / GoalsBackSettings and dataSaved Setup ProfilesSave named local setups, then load one later to repl",
+      "outline": "none",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Broader Goal — contains the selected SubgoalSubgoal — contained by the selected broader Goal",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Choose an existing endpointDuplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64Duplicate target · aea79922-5dbe-465b-b743-c4ac487943e2Native source · 11d2d9e2-de9d-4b4b-91a5-54d4a29e8db5Planning proof · b777e005-784a-4106-b22e-37ac82be58a2Source A child · d5561ba7-fb04-453d-a723-eadd4c770963Supporting Goal 10 · 0b7ed5e7-1160-42fb-b6e4-2147fd00a70aSupporting Goal 11 · 095d568b-e517-455e-abd3-1777e60988c0Supporting Goal 12 · 2458ee88-d89d-4dc7-a8f7-56727db8f4d4Supporting Goal 13 · 7ad6f766-3311-44f3-8a31-73b202c34a73Supporting Goal 14 · 884f7032-52fe-4660-943a-d7ddae6e8e70",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Show more endpoints",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Choose required or optionalRequiredOptional",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 429.65625
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 444.765625
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 565.71875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-unmet-planning",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 429.65625
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 444.765625
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit Milestone: Native checkpoint · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 565.71875
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-satisfied-planning",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 429.65625
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 444.765625
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 629.75
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-related-return",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Goal title",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete DayFrame backup downloaded.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 1064
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 429.65625
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 444.765625
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 629.75
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-ui-authored-reload",
+    "sourceDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "restoredDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-ui-authored-import",
+    "sourceDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "restoredDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-ui-authored-import-reload",
+    "sourceDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "restoredDigest": "d5cf6cc2d770e197608c1a40fbbe69380ba233ebf378874296fa921af9e68426",
+    "exactArrayOrder": false,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-protected-structure",
+    "viewport": {
+      "width": 1280,
+      "height": 800,
+      "client": 1265,
+      "scroll": 1265
+    },
+    "focus": {
+      "tag": "H3",
+      "text": "Structure",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 426.109375
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 441.21875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 439.46875
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 454.578125
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 428.765625
+      },
+      {
+        "name": "Retire relationship 6fa8bf7c-ea34-4054-a5bc-23c9a13eea7e",
+        "height": 44,
+        "width": 443.875
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 44,
+        "width": 582.640625
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 429.65625
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 444.765625
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 1096
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 44,
+        "width": 629.75
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "1280-anomalous-preservation",
+    "sourceDigest": "b7b17b1b422687445794742fc2b0f952730f371ee5b8fd2ad7e042cc3ea6182e",
+    "restoredDigest": "b7b17b1b422687445794742fc2b0f952730f371ee5b8fd2ad7e042cc3ea6182e",
+    "exactArrayOrder": true,
+    "allAuthorityEqualWithOnlyListedCollectionOrdering": true,
+    "collectionOrdering": [
+      [
+        "proposals",
+        "proposals"
+      ],
+      [
+        "proposals",
+        "candidates"
+      ],
+      [
+        "proposals",
+        "decisions"
+      ],
+      [
+        "proposals",
+        "acceptedAllocations"
+      ],
+      [
+        "realizations",
+        "realizations"
+      ],
+      [
+        "realizations",
+        "facts"
+      ]
+    ]
+  },
+  {
+    "label": "1280-canonical-authoring",
+    "satisfied": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "aac04ed4-1c2a-41e1-8659-34f4d872e427",
+      "revision": 2,
+      "ownerGoalId": "b777e005-784a-4106-b22e-37ac82be58a2",
+      "title": "Native checkpoint",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:29:22.138Z",
+      "updatedAt": "2026-09-23T21:29:24.626Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "targetDate": "2026-10-01",
+      "satisfiedAt": "2026-09-23T21:29:24.626Z"
+    },
+    "renamed": {
+      "recordType": "milestone",
+      "version": 1,
+      "id": "aac04ed4-1c2a-41e1-8659-34f4d872e427",
+      "revision": 3,
+      "ownerGoalId": "b777e005-784a-4106-b22e-37ac82be58a2",
+      "title": "Renamed after satisfaction",
+      "state": "satisfied",
+      "satisfactionPolicy": {
+        "kind": "manual"
+      },
+      "createdAt": "2026-09-23T21:29:22.138Z",
+      "updatedAt": "2026-09-23T21:29:25.180Z",
+      "provenance": {
+        "version": 1,
+        "role": "authoredAuthority",
+        "origin": {
+          "kind": "directAuthoring"
+        }
+      },
+      "satisfiedAt": "2026-09-23T21:29:24.626Z",
+      "targetDate": "2026-10-01"
+    },
+    "retired": [
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "b777e005-784a-4106-b22e-37ac82be58a2",
+        "target": {
+          "kind": "goal",
+          "goalId": "547a60a0-58ae-4a55-bc42-63d03bab0f64"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "revision": 1,
+        "status": "active",
+        "createdAt": "2026-09-23T21:29:21.550Z",
+        "updatedAt": "2026-09-23T21:29:21.550Z",
+        "effectiveFrom": "2026-09-23T21:29:21.550Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        }
+      },
+      {
+        "kind": "contributesTo",
+        "sourceGoalId": "b777e005-784a-4106-b22e-37ac82be58a2",
+        "target": {
+          "kind": "goal",
+          "goalId": "547a60a0-58ae-4a55-bc42-63d03bab0f64"
+        },
+        "semantics": {
+          "kind": "contribution",
+          "mode": "nonAggregating"
+        },
+        "recordType": "relationship",
+        "version": 1,
+        "id": "bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "revision": 2,
+        "status": "retired",
+        "createdAt": "2026-09-23T21:29:21.550Z",
+        "updatedAt": "2026-09-23T21:29:25.729Z",
+        "effectiveFrom": "2026-09-23T21:29:21.550Z",
+        "provenance": {
+          "version": 1,
+          "role": "authoredAuthority",
+          "origin": {
+            "kind": "directAuthoring"
+          }
+        },
+        "effectiveTo": "2026-09-23T21:29:25.729Z"
+      }
+    ],
+    "query": {
+      "status": "evaluated",
+      "value": {
+        "version": 2,
+        "basis": "currentAuthority",
+        "evaluatedAt": "2026-09-23T21:29:25.960Z",
+        "qualification": "qualified",
+        "eligibility": "eligible",
+        "records": {
+          "status": "available",
+          "values": [
+            {
+              "id": "bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+              "revision": 2,
+              "status": "retired",
+              "effectiveFrom": "2026-09-23T21:29:21.550Z",
+              "effectiveTo": "2026-09-23T21:29:25.729Z",
+              "intervalPosition": "atOrAfterEnd",
+              "applicability": "notApplicable",
+              "reason": "retired"
+            },
+            {
+              "id": "bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:29:22.980Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            },
+            {
+              "id": "ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+              "revision": 1,
+              "status": "active",
+              "effectiveFrom": "2026-09-23T21:29:21.106Z",
+              "intervalPosition": "inside",
+              "applicability": "applicable",
+              "reason": "activeInterval"
+            }
+          ]
+        },
+        "reasons": [],
+        "dependencies": [
+          {
+            "version": 1,
+            "kind": "goal.authority",
+            "id": "b777e005-784a-4106-b22e-37ac82be58a2",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.relationship",
+            "id": "bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+            "revision": 1
+          },
+          {
+            "version": 1,
+            "kind": "goalstructure.milestone",
+            "id": "aac04ed4-1c2a-41e1-8659-34f4d872e427",
+            "revision": 3
+          }
+        ],
+        "authorityFingerprint": "65cd8ce1ec0b656b",
+        "applicabilityFingerprint": "27fb549cd9b8093a",
+        "legacy": {
+          "version": 1,
+          "goalId": "b777e005-784a-4106-b22e-37ac82be58a2",
+          "status": "eligible",
+          "reasons": [],
+          "dependencies": [
+            {
+              "version": 1,
+              "kind": "goal.authority",
+              "id": "b777e005-784a-4106-b22e-37ac82be58a2",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.relationship",
+              "id": "bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+              "revision": 1
+            },
+            {
+              "version": 1,
+              "kind": "goalstructure.milestone",
+              "id": "aac04ed4-1c2a-41e1-8659-34f4d872e427",
+              "revision": 3
+            }
+          ],
+          "dependencyFingerprint": {
+            "version": 1,
+            "algorithm": "fnv1a64-canonical-v1",
+            "ordering": "set",
+            "value": "6e3ee8d29fe89ea5"
+          }
+        }
+      }
+    }
+  },
+  {
+    "label": "reduced-height-keyboard",
+    "viewport": {
+      "width": 390,
+      "height": 420,
+      "client": 375,
+      "scroll": 375
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone target date (optional)",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 44,
+        "width": 241.671875
+      },
+      {
+        "name": "Load Profile",
+        "height": 44,
+        "width": 115.390625
+      },
+      {
+        "name": "Delete Profile",
+        "height": 44,
+        "width": 126.046875
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 44,
+        "width": 206.984375
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 44,
+        "width": 179.421875
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 44,
+        "width": 149.171875
+      },
+      {
+        "name": "Close Structure",
+        "height": 44,
+        "width": 126.265625
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 44,
+        "width": 209.875
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 44,
+        "width": 108.515625
+      },
+      {
+        "name": "Add contribution",
+        "height": 44,
+        "width": 131.640625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 44,
+        "width": 132.515625
+      },
+      {
+        "name": "Create Milestone",
+        "height": 44,
+        "width": 136.953125
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Save Structure",
+        "height": 44,
+        "width": 247
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 44,
+        "width": 279
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 60,
+        "width": 279
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 60,
+        "width": 279
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "css-reflow",
+    "viewport": {
+      "width": 640,
+      "height": 800,
+      "client": 625,
+      "scroll": 625
+    },
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "name": "Milestone target date (optional)",
+      "outline": "solid",
+      "outlineWidth": "3px"
+    },
+    "feedback": {
+      "text": "Complete backup restored across setup, history, goals, measurement definitions, and observations.",
+      "role": "status",
+      "describedBy": "backup-import-feedback"
+    },
+    "iterations": 0,
+    "facts": 0,
+    "controls": [
+      {
+        "name": "Save Current Setup as Profile",
+        "height": 118,
+        "width": 449
+      },
+      {
+        "name": "Load Profile",
+        "height": 88,
+        "width": 230.78125
+      },
+      {
+        "name": "Delete Profile",
+        "height": 88,
+        "width": 252.09375
+      },
+      {
+        "name": "Export Complete Backup",
+        "height": 88,
+        "width": 413.953125
+      },
+      {
+        "name": "Import Setup Backup",
+        "height": 88,
+        "width": 358.828125
+      },
+      {
+        "name": "Clear Local Data",
+        "height": 88,
+        "width": 298.34375
+      },
+      {
+        "name": "Close Structure",
+        "height": 88,
+        "width": 252.53125
+      },
+      {
+        "name": "Refresh Structure evidence",
+        "height": 88,
+        "width": 419.75
+      },
+      {
+        "name": "Link Subgoal",
+        "height": 88,
+        "width": 217.03125
+      },
+      {
+        "name": "Add contribution",
+        "height": 88,
+        "width": 263.265625
+      },
+      {
+        "name": "Add prerequisite",
+        "height": 88,
+        "width": 265.03125
+      },
+      {
+        "name": "Create Milestone",
+        "height": 88,
+        "width": 273.890625
+      },
+      {
+        "name": "",
+        "height": 88,
+        "width": 369
+      },
+      {
+        "name": "",
+        "height": 88,
+        "width": 369
+      },
+      {
+        "name": "Save Structure",
+        "height": 88,
+        "width": 369
+      },
+      {
+        "name": "Cancel Structure edit",
+        "height": 88,
+        "width": 433
+      },
+      {
+        "name": "Record details: ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 159,
+        "width": 433
+      },
+      {
+        "name": "Edit relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Retire relationship ded131b8-19e7-4212-8af4-a2f9fb0c0553",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 160,
+        "width": 433
+      },
+      {
+        "name": "Record details: bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 159,
+        "width": 433
+      },
+      {
+        "name": "Edit relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Retire relationship bd90509c-8172-4eb2-9755-691a4a2a7a7a",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Open related Goal: Duplicate target · 547a60a0-58ae-4a55-bc42-63d03bab0f64",
+        "height": 160,
+        "width": 433
+      },
+      {
+        "name": "Record details: bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 159,
+        "width": 433
+      },
+      {
+        "name": "Edit relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Retire relationship bdd56533-4979-4c10-bac3-d78d1f2f64a9",
+        "height": 123,
+        "width": 433
+      },
+      {
+        "name": "Record details: aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 159,
+        "width": 433
+      },
+      {
+        "name": "Edit Milestone: Renamed after satisfaction · aac04ed4-1c2a-41e1-8659-34f4d872e427",
+        "height": 160,
+        "width": 433
+      }
+    ],
+    "validation": []
+  },
+  {
+    "label": "uncaught-native-errors",
+    "errors": []
+  }
+]

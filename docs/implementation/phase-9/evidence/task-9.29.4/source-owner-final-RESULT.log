@@ -1,0 +1,28 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/acceptanceSourceWitness.test.ts src/state/acceptanceOwnerLifecycle.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/acceptanceSourceWitness.test.ts (5 tests | 1 failed) 542ms
+   × unrelated Proposal lifecycle append can settle during realization without invalidating its exact acceptance 65ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/acceptanceSourceWitness.test.ts > unrelated Proposal lifecycle append can settle during realization without invalidating its exact acceptance
+Error: noProposal
+ ❯ src/state/acceptanceSourceWitness.test.ts:57:46
+     55|   const accepted = store.exportProposalAuthority().acceptedAllocations;
+     56|   const generated = await store.deriveProposal({ allocation: allocatio…
+     57|   if (generated.status !== "proposed") throw Error(generated.status);
+       |                                              ^
+     58|   expect((await store.recordProposal(generated)).status).toBe("accepte…
+     59|   release.resolve();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 22 passed (23)
+   Start at  08:54:54
+   Duration  2.83s (transform 788ms, setup 0ms, import 899ms, tests 1.67s, environment 0ms)
+

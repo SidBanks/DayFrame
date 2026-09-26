@@ -1,0 +1,261 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/DayFrameApp.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/DayFrameApp.test.tsx (124 tests | 3 failed) 25641ms
+     × keeps the selected compact-preview day stable when switching between Setup and Preview 366ms
+     × opens exact Month attention in specialized Review without cloning resolution 376ms
+     × reviews one selected canonical user-day without execution outcome controls 88ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps the selected compact-preview day stable when switching between Setup and Preview
+AssertionError: expected [ …(3) ] to have a length of 1 but got 3
+
+- Expected
++ Received
+
+- 1
++ 3
+
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1771:72
+    1769|       screen.getByRole("button", { name: "Tuesday, May 5, 2026, select…
+    1770|     ).toHaveAttribute("aria-pressed", "true");
+    1771|     expect(screen.getAllByRole("heading", { name: "Day Visualizer" }))…
+       |                                                                        ^
+    1772|     expect(screen.getByRole("heading", { name: "Tuesday, 2026-05-05" }…
+    1773|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > opens exact Month attention in specialized Review without cloning resolution
+TestingLibraryElementError: Found multiple elements with the role "button" and name `/Try|Accept conflict|Move|Skip/`
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mclass[39m=[32m"df-secondary-button"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mTry: [0m
+  [0mAccept conflict[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mclass[39m=[32m"df-fix-button"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0mAccept conflict[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-app"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-shell"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"df-foundation-header"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0mDayFrame[0m
+          [36m</strong>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"App Sections"[39m
+            [33mclass[39m=[32m"df-foundation-primary"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"true"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mPlanner[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"false"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mSummary[0m
+            [36m</button>[39m
+          [36m</nav>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-location"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"df-foundation-location-title"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mPlanner / Review Schedule[0m
+            [36m</h2>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mBack[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-foundation-support"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-support-content"[39m
+          [36m>[39m
+            [36m<details[39m
+              [33mclass[39m=[32m"df-foundation-utilities"[39m
+            [36m>[39m
+              [36m<summary>[39m
+                [0mSettings and data[0m
+              [36m</summary>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"df-confirmation df-workflow-block df-workflow-block--profiles"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-form-stack"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-header"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"df-panel-title"[39m
+                    [36m>[39m
+                      [0mSaved Setup Profiles[0m
+                    [36m</h2>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-support"[39m
+                    [36m>[39m
+                      [0mSave named local setups, then load one later to replace the current active setup.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-field"[39m
+                  [36m>[39m
+                    [36m<label[39m
+                      [33mfor[39m=[32m"dayframe-profile-name"[39m
+                    [36m>[39m
+                      [0mProfile Name[0m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mid[39m=[32m"dayframe-profile-name"[39m
+                      [33mplaceholder[39m=[32m"Profile name"[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-actions"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mSave Current Setup as Profile[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"df-support"[39m
+                  [36m>[39m
+                    [0mNo saved profiles yet.[0m
+                  [36m</p>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-screen-actions"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mExport Complete Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mImport Setup Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mClear Local Data[0m
+                  [36m</button>[39m
+                [36m</div>[39m
+                [36m<input[39m
+                  [33maccept[39m=[32m"application/json,.json"[39m
+                  [33maria-label[39m=[32m"Import Setup Backup File"[39m
+                  [33mhidden[39m=[32m""[39m
+                  [33mtype[39m=[32m"file"[39m
+                [36m/>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"df-support"[39m
+                [36m>[39m
+                  [0mComplete backups include setup, profiles, accepted decisions, historical plans, execution outcomes, notes, and timestamps. Preview data is not included; protect the downloaded JSON as private personal data.[0m
+                [36m</p>[39m
+              [36m</section>[39m
+            [36m</details>[39m
+            [36m<section[39m
+              [33mclass[39m=[32m"df-compatibility-actions"[39m
+            [36m>[39m
+              [36m<section[39m
+                [33maria-labelledby[39m=[32m"compact-preview-heading"[39m
+                [33mclass[39m=[32m"df-compact-preview"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-compact-preview-header"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-header"[39m
+                  [36m>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+                    [36m>[39m
+  ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2458:14
+    2456|     await waitFor(() => expect(document.activeElement?.id).toMatch(/^r…
+    2457|     expect(
+    2458|       screen.getByRole("button", { name: /Try|Accept conflict|Move|Ski…
+       |              ^
+    2459|     ).toBeInTheDocument();
+    2460|     expect(exactName).toContain("Resolve");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > reviews one selected canonical user-day without execution outcome controls
+Error: expect(element).toHaveValue(null)
+
+Expected the element to have value:
+  null
+Received:
+
+ ❯ src/ui/tests/DayFrameApp.test.tsx:5017:17
+    5015|     const lastDay = day.getAttribute("max")!;
+    5016|     fireEvent.change(day, { target: { value: lastDay } });
+    5017|     expect(day).toHaveValue(lastDay);
+       |                 ^
+    5018|     expect(screen.getAllByRole("heading", { name: "Day Visualizer" }))…
+    5019|     expect(screen.queryByRole("button", { name: /report outcome/i })).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 121 passed (124)
+   Start at  20:22:11
+   Duration  28.01s (transform 2.34s, setup 0ms, import 1.80s, tests 25.64s, environment 461ms)
+

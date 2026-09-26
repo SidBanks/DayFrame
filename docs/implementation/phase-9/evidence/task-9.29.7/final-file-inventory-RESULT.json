@@ -1,0 +1,656 @@
+[
+  {
+    "path": "code/src/state/dayFrameStore.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 161504,
+    "sha256": "b3fc5e0842e5239526a583f44546b6adcf90025cf80dbfc0334c75dc45d36503"
+  },
+  {
+    "path": "code/src/core/engine/generatePlanningSchedule.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 18000,
+    "sha256": "a1cf015bdcc2f2ebbe2fc8dbbe1892a9f29f501fa83dad6bc711b16c735bb433"
+  },
+  {
+    "path": "code/src/core/historicalPlan/materializePlanPublication.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 16854,
+    "sha256": "83883c21e899881019a394ad57bbb9ba4f631ad458df052082e6fa81782320b6"
+  },
+  {
+    "path": "code/src/core/decisions/replayPlanDecisions.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 9837,
+    "sha256": "e90d64451b852843a28422a572979a24d5e1fad19c67a722c6276afec3c0b94c"
+  },
+  {
+    "path": "code/src/core/execution/historicalExecutionTarget.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 14967,
+    "sha256": "1ac9c0a5b9874ab6ee4274314ee8765b600979499faafabfe81426f6413e784c"
+  },
+  {
+    "path": "code/src/state/omissionPublicationTestFixtures.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 4375,
+    "sha256": "75495e9205e5768203d50d6ffd84ec4b8eb8852b31feba696d13298949973dfc"
+  },
+  {
+    "path": "code/src/state/omissionPublication.test.ts",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 23107,
+    "sha256": "de60851740d71002b0b157ac99ed453dc95278b63cc013923535fcbc8b786d13"
+  },
+  {
+    "path": "code/src/ui/tests/OmissionPublicationWorkflow.test.tsx",
+    "purpose": "permanent application change or regression fixture/test",
+    "bytes": 2101,
+    "sha256": "9bfe71d28d0d01c457b6f0899a20ffa8c8f1c4d2668d576e15fbb7bbdf4a8fc3"
+  },
+  {
+    "path": "docs/implementation/phase-9/TASK_9.29.7_ACCEPTED_OMISSION_PUBLICATION_EVIDENCE_REPAIR_V1_RESULT.md",
+    "purpose": "task determination and acceptance report",
+    "bytes": 19475,
+    "sha256": "fd834dbd9f564e7e3af38a1eeaadea6a9df05e3e2643ea7ef6873c256d4d9755"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/CONTRACT_RECONCILIATION_RESULT.md",
+    "purpose": "contract or validation record",
+    "bytes": 9501,
+    "sha256": "faa7711a063da1ac1d234c4636c77b083afc198e840b722268dc5ea7416b1a99"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/VALIDATION_HISTORY_RESULT.md",
+    "purpose": "contract or validation record",
+    "bytes": 8556,
+    "sha256": "9f09df70b5727a63fbbc3732592b05bc57ca9cff5ddc42b319fb88d69fae0f05"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/admission-history-attempt-8-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 850,
+    "sha256": "841bfbf7ce22f54c2e4a33aa5cf50bc41a516b84e2ad44d8ac80e0045a8dee65"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/admission-integration-attempt-6-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 2158,
+    "sha256": "1827f938b884a75be4709d20e73da28372d7c85948e966befa828480a8438a54"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/admission-integration-attempt-7-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 1205,
+    "sha256": "8a163831e96e2cd7db60ef41e0a015b0726772e729bd6e04a06b422500411f8f"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-build-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 8142,
+    "sha256": "ccbf9a30bcc7a828c2776a2f5ab10c11aace41580062ff792bbbf8ca2cd5e97a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-bundle-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 4806,
+    "sha256": "f056b85842e2cf8caf30c9f291748be8ae9101fa1474725bab7eebc5718e98f2"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-format-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 66,
+    "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 159536,
+    "sha256": "acad49ba23553168da596644d29628067ded6e3a10c4fa7d172195eb287597cb"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-head-RESULT.txt",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 41,
+    "sha256": "647337dda1d5afeb8ae43c754a6d18cce5ac2ea718b4116e211060b41fb1259a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-lint-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 35,
+    "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-reproduction-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 229,
+    "sha256": "ea3699ef4dd59010111609df11f371481114ef4af3f4149b0f722a1b42727d15"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-source-RESULT.tar.gz",
+    "purpose": "task-relative source archive",
+    "bytes": 6498830,
+    "sha256": "21461c983a60a6efd138f2d4c94f78678586e577fcc9e7bde1a18cf3a104c56a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-status-RESULT.txt",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 19231,
+    "sha256": "2e367a1a805483b07c31f81c30c29775ea4d65e59fa837b4d89b80a41a70b5ce"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/baseline-tests-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 299,
+    "sha256": "fbe65c7554bd1214c7ed7eb5edd02bd5ec5421d5c17eccafa871cbb01bb45d6a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 821,
+    "sha256": "531ef6815742dcafd05c0ece9a6f1b5b0b1616d8ea59d889e732c4846ea3fa2d"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-accepted-generation-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 61054,
+    "sha256": "e43c75b28434df4f31b96820b4407d4b6d813560a74dde74267c5c36f6c24435"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-before-correction-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 205747,
+    "sha256": "a8b4a10de4e4fac872c2869851d266dc8b3d9cfe0ac5dba11918fb22cc5109d1"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-durable-after-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 280203,
+    "sha256": "0cf1d09fb9f0661d602a51718c5e4bd086d1d3f9ee32992f86dca885bb7c2f5e"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-published-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 141687,
+    "sha256": "8e808a0b0e979d3eba60c21838836fcd3b7ba5631fc86491e3c51e2bb0611454"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-published-export-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259903,
+    "sha256": "6d54e1cd2b278745a5b0aa0b04d6c63da86dde0ec6bc9464795722633829bfa2"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-qualified-review-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 12426,
+    "sha256": "d13dad19e8ac5932c45c262101961208e29ece8bf2c882c5320007661056254e"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/1280-try-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 135689,
+    "sha256": "a5b622d770f7d8ea757adc53bdb0862653bf026e62b0d8cf77267e40591168c7"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-accepted-generation-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 61054,
+    "sha256": "bf2ae354ad4711581eba05bb34c5a594d981b034617d221472046ca877c6c4b5"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-before-correction-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 205747,
+    "sha256": "52c92d922b8c1cec7ece6795469a52d0c06368cdd02cca6b36dc6bc0cc90e3bb"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-durable-after-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 280187,
+    "sha256": "50c5d1f3cd8ac9066d58ca12b0201ff4a3201ff4e3620273ab332b9929c2ded4"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-published-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 54852,
+    "sha256": "ffb205cb7f516b4c7c879879bd335ec5efeb9774fdad054a1900cae68ee0d083"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-published-export-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259898,
+    "sha256": "c25096845380d368dd1871433053e99011745ab25f96a8310d17b35623e69b4b"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-qualified-review-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 12426,
+    "sha256": "648fc629f77b7ebb0dfb0a85236e44d93d69b1cf03b2fe9a83e928b9e659c17c"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-reduced-height-focus-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 55481,
+    "sha256": "bf326d60a263fb135b77ceffd5ae11a2836c584a7bb72f6f74492b379258d113"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/320-try-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 55424,
+    "sha256": "8b9a688299100a692463e103dc318c1c0770c5f2a276cfd7f354b8f3aada97ca"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-accepted-generation-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 61054,
+    "sha256": "135cffa341cd53c21b735e021fbe00330b614c3c93fc73f205d31266d3d63510"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-before-correction-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 205747,
+    "sha256": "4edf0e16f229d6af4c492bd4d7c3de308373979dc10fa8e317d9366ec6924737"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-durable-after-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 280187,
+    "sha256": "5c68ff3fffc19bb362495bcda1920ae9bffe6b5d3256a9843a47f48ac567aade"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-published-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 91899,
+    "sha256": "8ee5514169772fe4e7b900cc4545395cba243f779853f5403f91e4021a65b239"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-published-export-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259898,
+    "sha256": "79bb86d7cf50f2801b883969c903bd9c8cafdbe16ea64959043035817086026b"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-qualified-review-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 12426,
+    "sha256": "2dd58f2299eab824f797334cff4a28ad8a84d16d883450489e08ffed94627ad8"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-removed-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 100857,
+    "sha256": "8b35e9150d34c8ef2397ab93148beaa1652a43fc6fd1e859794e00874fd44713"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/390-try-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 92176,
+    "sha256": "00e3c932d99034a568ab99f29d36fadd16ea3f0ce6849f222cfa232b429f53f7"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-accepted-generation-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 61054,
+    "sha256": "22e8435ddb7414a02e49eb0920a394e8ac9531fed03bc3d25c3ce2b7293b8910"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-before-correction-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 205747,
+    "sha256": "ce7d4b7579e25b5516ab24f403f293687acbcbee9dc318641ee27537d18f09ed"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-durable-after-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 280187,
+    "sha256": "34fcad82a78002327b9a3bb54d390e6515dac6e339fd3fe50713419d73dd9e40"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-published-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 131171,
+    "sha256": "9aadd5fa8cba3aed7acc2c9a79d9ea788415769573dd83a2e886f93ab0cf32e5"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-published-export-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259898,
+    "sha256": "930b4deca1a747ca33f4ea2ca21e3237c6428eb8c6608e45ed675155f1fa2991"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-qualified-review-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 12426,
+    "sha256": "f668e300e50490c4407370edf629ca9e1421ab682c245b10d82f1d4b25bca0a4"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/768-try-RESULT.png",
+    "purpose": "production browser screenshot",
+    "bytes": 122423,
+    "sha256": "192f8ce43e8e9b8ac88d24a35eba8f819a45603563f3538d2fcdf06738cdf1cc"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/browser-checks-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 6992,
+    "sha256": "96b124220cc4eaa5e1613200477ec165c4ac254067e200f3acb8f9621a610659"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/browser-measurements-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 10395,
+    "sha256": "a0e6ccaa93a515d88cf4893c0606cc990e77a5803e9be5ec24683db680c5004d"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/destination-after-removal-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 280187,
+    "sha256": "5c68ff3fffc19bb362495bcda1920ae9bffe6b5d3256a9843a47f48ac567aade"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/destination-reexport-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259898,
+    "sha256": "8fd45fef3875d5c36bc2138ad0bb43d15e4279e4149b38bf909b47f8e4d6e0b2"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT/destination-reload-export-RESULT.json",
+    "purpose": "actual V14 authority export",
+    "bytes": 259898,
+    "sha256": "e1e96c3cdfcf4ae605dcf4a82d703ff5d2f4769ca29b4c840dcc2f59de86bdc6"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-attempt-2-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 17,
+    "sha256": "1c1870d41bc062cc164694dc04d76727b8256f3a10cd69e4bea9c76c26ea3d7f"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/browser-driver-RESULT.mjs",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 19123,
+    "sha256": "6df1be1d640a3eb9a35c48715da3fa8f4781176b632ac124098bf3e47dbbd30a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/canonical-seed-RESULT.ts",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 6152,
+    "sha256": "4eda203e4bc5e156b35083c00703480d23955c81a1ee8140032e8deb6938221d"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/chromium-process-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 1074,
+    "sha256": "b3a3ce9416260c3dd5d49265c33c76dc8ec205f946bf03e4859a7a782cf6507d"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/core-integration-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 3523,
+    "sha256": "9747d41eb1f6c1d12344faab3df9aaee8eb207cef5934923798d8d33b38252ae"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/correction-publication-repro-RESULT.test.ts",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 3587,
+    "sha256": "c6e0765321790886f44eb0506d5d0204c743d49c9879043856526a24c39cc2b7"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/correction-publication-repro-evidence-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 5136,
+    "sha256": "ac797d7fa8b343c82fd3399e8191367503c85e52081b855b36e8ec91e787cd0f"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/correction-repro-config-RESULT.mjs",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 193,
+    "sha256": "6c56552ed0ebe67a2f3173bb727b762a1d3cb7e9c508d5dc0cdd4ea24c08f7ac"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/early-build-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 8142,
+    "sha256": "327d0c97979a8f186b5a84281f0d4e30a8f823e35a95a49a9e673af2f8d821c8"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/early-bundle-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 4806,
+    "sha256": "9a650ddac82106846b4defc7ffb231c095d8ed7a44c90a8efc5ec008f6336b89"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-build-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 8142,
+    "sha256": "93549faa2ca89c8acb9c204a57935a846e83070c91fee21e728bc358cabc648b"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-build-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 10763,
+    "sha256": "41dbccfdb98ac7496b24db7a7f15ea8a024a25d67fa018a03e93221a13f5a841"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-bundle-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 4806,
+    "sha256": "9a650ddac82106846b4defc7ffb231c095d8ed7a44c90a8efc5ec008f6336b89"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-changed-source-RESULT.tar.gz",
+    "purpose": "task-relative source archive",
+    "bytes": 45970,
+    "sha256": "092a503b0ef8f8e3be2de40aa5d5dc73b2d592e2b8cc4c8231a0d35098756ba2"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-diff-check-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-format-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 66,
+    "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-lint-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 35,
+    "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-source-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 975,
+    "sha256": "651d15b1d7d6d21b2229fbcd20a993e10f623b9f187af2a70a50b880bbc8d4cf"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-tests-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 299,
+    "sha256": "8acbfab5c185e89420a067a5503a3ec1fff2b5af30617eac9266ccd70117be1a"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-typecheck-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 44,
+    "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/final-validation-summary-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 1615,
+    "sha256": "ae91d1be81f2244cb6aa5af8b55a9277285c6499e51a203fc61034b816edfe68"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/format-changed-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 404,
+    "sha256": "8e7102ddc66981d16583dfcb12af2aa1201d45e415d9689e31ef9ef7c05c732f"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/format-tests-attempt-2-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 94,
+    "sha256": "a1208a23340ab81d74b72b8e2f88ce33d5ba9e375d09effebcb19801278ebade"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/governing-source-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 113954,
+    "sha256": "4bd4d48d1db1814a01b5cb686f47d8f5a7d4a2053f610b308eff776daaa3dc70"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/integration-attempt-11-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 231,
+    "sha256": "ebab0c5d97497d696c895159266229f610ca932dafb392db7c446f790fd71ce0"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/integration-attempt-9-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 1110,
+    "sha256": "bb3d37e7c65208ab86d3bdc8f95bb1bf892d024924af21e6f6b61324878cb2e6"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/lint-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 35,
+    "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/native-build-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 10531,
+    "sha256": "c4c8cae3399b65d935f4d0615bfc5efb923acef1bd4e061e0a44e2f3f62c2e1b"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/native-geometry-readback-audit-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 1752,
+    "sha256": "5e8bfc3cdeeb7801b4b78ddbf33e88e3a72a32c0561ae8b0588f29fa5db98e17"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/preservation-audit-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 769,
+    "sha256": "e532024d90ea0ac5c9f5abd712e644bced1aa3ed7d071623bab9391228806cad"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/preview-destination-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 123,
+    "sha256": "dd4cedb7533232d6198cf6960e6a230c1a55a936fa38f497c9eec53e41f7fa41"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/preview-source-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 485,
+    "sha256": "b1180f74d065ecce45552c0b0c7865d94e3863b1688d9d0b5f7011948a34f2ee"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/preview-source-attempt-2-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 123,
+    "sha256": "2d92d4929ef8c444e0bcfbbb7b28cc8b7b45dd6b157c963767c5674c44a698dd"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/prior-evidence-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 129319,
+    "sha256": "4bb33675b511ccb15562cfaf4a62af2a972fcfdbf1b908baa1e3003c6e48d156"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/qualification-attempt-10-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 1092,
+    "sha256": "518538499b547e0660627c54989462987dd7801d99c4c3684ab3b3bcd7be5b48"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/removal-diagnostic-attempt-4-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 2465,
+    "sha256": "9b87984c31b25e13465928e57f42e4a54eee9a4442de228a35297cafb0bbd9f7"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/repaired-observation-attempt-1-RESULT.json",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 14452,
+    "sha256": "05825eed0d805e06892d947df0727e846af6706f36246fdd6f933a1a7ee2a33f"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/repaired-repro-RESULT.test.ts",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 3570,
+    "sha256": "9b4df242982db5c022904ea4a92df1258e530ac9f26714c2aee7932e57b9dbbd"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/repaired-repro-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 229,
+    "sha256": "4313c610f243e7b478d33be25a9d7df3944662cb2233594b563b381b0155a3f0"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/repaired-repro-config-RESULT.mjs",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 179,
+    "sha256": "31424ab3d8ab99c61a15ad8543b8bcc01797bc30fbf69614935f28f9121c3b93"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/retained-continuation-3-hashes-RESULT.json",
+    "purpose": "source/build/evidence preservation or exact readback verification",
+    "bytes": 15460,
+    "sha256": "a846caf8686cab9d93f2424efdf7af2e32f96643d56349fe33e1e8f624a0019c"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/seed-build-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 411,
+    "sha256": "e3706302ceb024fe4819b6f59496500c0cdd077fe49d895f5021d9cdf2d1c43c"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/seed-build-config-RESULT.mjs",
+    "purpose": "canonical diagnostic or native driver/seed/configuration",
+    "bytes": 361,
+    "sha256": "c08e53f828f867242855f694016f299fac9afd4c94c0d123ed51885f7b6b5e23"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/task-relative-source-diff-RESULT.patch",
+    "purpose": "task baseline, diagnostic observation or native measurement/readback",
+    "bytes": 9289,
+    "sha256": "2d4ddb6d239c89a22db3345e15dbb4fc6c8d67b1346f5e0facf5d7a2952c3d89"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/typecheck-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 44,
+    "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/typed-evidence-build-attempt-1-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 8142,
+    "sha256": "f0ee9128d0a89751a9b8580a82c113a8ca1515cf11e9a0df2d0f0faac4ab28f5"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/workflow-integration-attempt-2-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 81067,
+    "sha256": "2d7fc19e0660da5e817303bceb77244fb407198a399aaf5f10b32ca11e6e73a5"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/workflow-integration-attempt-3-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 1589,
+    "sha256": "ac747a334a3f04749a2683ea8d8ef1746f358c045635b51542ab3ea2c3f1e20c"
+  },
+  {
+    "path": "docs/implementation/phase-9/evidence/task-9.29.7/workflow-integration-attempt-5-RESULT.log",
+    "purpose": "distinct retained execution log",
+    "bytes": 231,
+    "sha256": "73f3edbe8d2d8fab8e968a4918a4d9a487424f4d7a850ec67a82a0a60913a00e"
+  }
+]

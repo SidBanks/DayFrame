@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactElement } from "react";
 import type { GoalV1 } from "../core/goals/goal.js";
-import type { GoalProgressQueryResultV1 } from "../state/goalProgressQuery.js";
 import type { HistoricalIntelligenceSummaryStore } from "./HistoricalIntelligenceSummary.js";
 
 export function GoalProgressSummary({
@@ -8,14 +7,29 @@ export function GoalProgressSummary({
   store,
   evaluationAsOf,
   onOpenPlanner,
+  disclosure,
+  showIdentity = false,
+  refreshKey,
 }: {
   goal: GoalV1;
-  store: HistoricalIntelligenceSummaryStore;
+  store: Pick<
+    HistoricalIntelligenceSummaryStore,
+    | "queryGoalProgress"
+    | "listMeasurementDefinitionHistory"
+    | "subscribeMeasurementDefinitions"
+    | "subscribeProgressObservations"
+  >;
   evaluationAsOf: string;
   onOpenPlanner?: () => void;
+  disclosure?: { open: boolean; setOpen: (value: boolean) => void };
+  showIdentity?: boolean;
+  refreshKey?: number;
 }): ReactElement {
   const [revision, setRevision] = useState(0);
-  const [detail, setDetail] = useState(false);
+  const [localDetail, setLocalDetail] = useState(false);
+  const detail = disclosure?.open ?? localDetail;
+  const setDetail = (value: boolean) =>
+    disclosure ? disclosure.setOpen(value) : setLocalDetail(value);
   const detailRef = useRef<HTMLDivElement>(null),
     focusDetail = useRef(false);
   useEffect(() => {
@@ -28,17 +42,28 @@ export function GoalProgressSummary({
     };
   }, [store]);
   useEffect(() => {
-    setDetail(false);
+    if (!disclosure) setLocalDetail(false);
   }, [evaluationAsOf, goal.id]);
   useEffect(() => {
     if (detail && focusDetail.current) detailRef.current?.focus();
     focusDetail.current = false;
   }, [detail]);
-  let result: GoalProgressQueryResultV1;
-  try {
-    void revision;
-    result = store.queryGoalProgress({ goalId: goal.id, evaluationAsOf });
-  } catch {
+  const read = useMemo(() => {
+    try {
+      const result = store.queryGoalProgress({ goalId: goal.id, evaluationAsOf });
+      const stopped =
+        result.status === "notDefined" &&
+        store
+          .listMeasurementDefinitionHistory(goal.id)
+          .filter((item) => item.effectiveFrom <= evaluationAsOf)
+          .at(-1)?.status === "inactive";
+      return { result, stopped };
+    } catch {
+      return { result: undefined };
+    }
+  }, [store, goal, evaluationAsOf, revision, refreshKey]);
+  const result = read.result;
+  if (!result) {
     return (
       <ProgressShell>
         <p className="df-danger-message" role="alert">
@@ -88,10 +113,7 @@ export function GoalProgressSummary({
       </ProgressShell>
     );
   if (result.status === "notDefined") {
-    const definitions = store
-      .listMeasurementDefinitionHistory(goal.id)
-      .filter((item) => item.effectiveFrom <= evaluationAsOf);
-    const stopped = definitions.at(-1)?.status === "inactive";
+    const stopped = read.stopped;
     return (
       <ProgressShell>
         <p>
@@ -144,20 +166,24 @@ export function GoalProgressSummary({
           : "Above target";
   function activate(event: MouseEvent<HTMLButtonElement>) {
     focusDetail.current = event.detail === 0;
-    setDetail((value) => !value);
+    setDetail(!detail);
   }
   return (
     <ProgressShell>
       <div
         className="df-progress-quantity"
-        aria-label={`${quantity(result.quantity.observedValue)} of ${quantity(result.quantity.targetValue)} ${result.quantity.unitId}; ${result.percentage} percent`}
+        aria-label={`${quantity(result.quantity.observedValue)} of ${quantity(result.quantity.targetValue)} ${result.quantity.unitId}; ${result.percentage} percent${result.comparison === "belowTarget" && result.percentage === "100" ? "; rounded percentage, below target" : ""}`}
       >
         <strong>{quantity(result.quantity.observedValue)}</strong>
         <span>
           of {quantity(result.quantity.targetValue)} {result.quantity.unitId}
         </span>
       </div>
-      <p className="df-progress-percentage">{percentage}%</p>
+      <p className="df-progress-percentage">
+        {result.comparison === "belowTarget" && percentage === "100"
+          ? "Below 100% (canonical percentage rounds to 100%)"
+          : `${percentage}%`}
+      </p>
       <p>{comparison}</p>
       <p className="df-muted">Observed {formatInstant(result.observation.observedAt)}</p>
       <button
@@ -177,6 +203,26 @@ export function GoalProgressSummary({
           tabIndex={-1}
         >
           <h5>Measurement details</h5>
+          {showIdentity && (
+            <>
+              <Detail
+                label="Definition identity / revision"
+                value={`${result.definition.id} / ${result.definition.revision}`}
+              />
+              <Detail label="Measurement epoch begins" value={result.definition.effectiveFrom} />
+              <Detail
+                label="Observation identity / revision"
+                value={`${result.observation.id} / ${result.observation.revision}`}
+              />
+              <Detail label="Exact observation time" value={result.observation.observedAt} />
+              <Detail label="Exact record time" value={result.observation.recordedAt} />
+              <p>
+                Values are absolute totals, not increments. This measurement epoch is independent of
+                the Activity period. Current Goal title and status are current context, not
+                reconstructed historical Goal state.
+              </p>
+            </>
+          )}
           <Detail label="Measurement method" value="Quantity toward a target" />
           <Detail
             label="Target"

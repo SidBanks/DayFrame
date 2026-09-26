@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=2 src/ui/tests/GoalRecordedInspection.test.tsx
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  27 passed (27)
+   Start at  17:35:31
+   Duration  17.21s (transform 1.94s, setup 0ms, import 1.61s, tests 14.99s, environment 507ms)
+

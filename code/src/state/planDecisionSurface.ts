@@ -1,8 +1,11 @@
+import { createSourceObservation } from "./sourceObservation.js";
 import {
   PLAN_DECISION_VERSION,
   clonePlanDecision,
+  planDecisionsSemanticallyEquivalent,
   createPlanDecisionId,
   getPlanDecisionTargetKey,
+  getPlanDecisionConflictKey,
   isPlanDecisionId,
   validatePlanDecision,
   type AcceptPlanDecisionInput,
@@ -71,7 +74,9 @@ export type AcceptPlanDecisionResult =
         | "targetOccurrenceMissing"
         | "invalidPayload"
         | "unsupportedDecisionKind"
-        | "allocationFailure";
+        | "allocationFailure"
+        | "sleepPlacementReviewRequired"
+        | "storageFailure";
     };
 
 export type RemovePlanDecisionResult =
@@ -81,7 +86,7 @@ export type RemovePlanDecisionResult =
       decisions: PlanDecisionV1[];
       persistence: PersistenceWriteOutcome;
     }
-  | { status: "notAttempted"; reason: "notFound" | "protectedDecisionIngress" };
+  | { status: "notAttempted"; reason: "notFound" | "protectedDecisionIngress" | "storageFailure" };
 
 export type PlanDecisionRetryResult =
   | { status: "attempted"; persistence: PersistenceWriteOutcome }
@@ -111,6 +116,9 @@ export type PlanDecisionRuntimeSnapshot = {
 
 export function createPlanDecisionSurface(options: {
   getAuthoredSetup: () => DayFrameAuthoredSetup;
+  validateSleepPlacement?: (
+    input: Extract<AcceptPlanDecisionInput, { kind: "placeSleepOccurrence" }>,
+  ) => boolean;
   allocatePlanDecisionId?: PlanDecisionIdAllocator;
   now?: () => string;
   serialize?: (value: unknown) => string;
@@ -126,6 +134,7 @@ export function createPlanDecisionSurface(options: {
   let desired = cloneEntries(decisions, quarantined);
   const decisionListeners = new Set<(value: PlanDecisionV1[]) => void>();
   const durabilityListeners = new Set<(value: SurfaceDurabilityStatus) => void>();
+  const reviewObservation = createSourceObservation();
   const ingressListeners = new Set<(value: PlanDecisionIngressStatus) => void>();
   const allocate = options.allocatePlanDecisionId ?? createPlanDecisionId;
   const now = options.now ?? (() => new Date().toISOString());
@@ -149,6 +158,7 @@ export function createPlanDecisionSurface(options: {
       protectedRaw = target.protectedRaw;
       durability = target.durability;
       desired = structuredClone(target.desired);
+      reviewObservation.changed();
       options.notificationScheduler?.notify("planDecisions", () => {
         notifyDecisions();
         for (const listener of durabilityListeners) listener(durability);
@@ -163,6 +173,7 @@ export function createPlanDecisionSurface(options: {
   const getPlanDecisionIngressStatus = () => ({ ...ingress });
 
   function notifyDecisions(): void {
+    reviewObservation.changed();
     for (const listener of decisionListeners) listener(getPlanDecisions());
   }
   function setDurability(value: SurfaceDurabilityStatus): void {
@@ -172,6 +183,7 @@ export function createPlanDecisionSurface(options: {
   }
   function setIngress(value: PlanDecisionIngressStatus): void {
     ingress = value;
+    reviewObservation.changed();
     for (const listener of ingressListeners) listener(getPlanDecisionIngressStatus());
   }
   function persist(): PersistenceWriteOutcome {
@@ -200,9 +212,73 @@ export function createPlanDecisionSurface(options: {
     }
   }
 
+  function commitSleepDecisions(next: PlanDecisionV1[]): boolean {
+    if (
+      quarantined.length ||
+      ingress.status === "recoveryRequired" ||
+      next.some((d) => validatePlanDecision(d).status !== "valid")
+    )
+      return false;
+    const storage = getStorage();
+    if (!storage) return false;
+    try {
+      const entries = cloneEntries(next, quarantined);
+      const raw = serialize(envelope(entries));
+      if (!verifiedEnvelope(raw, entries)) return false;
+      // A single Web Storage setItem is the atomic commit point. Do not turn a
+      // successful commit into a rejected acceptance because a later read fails.
+      storage.setItem(DAYFRAME_PLAN_DECISIONS_STORAGE_KEY, raw);
+    } catch {
+      return false;
+    }
+    decisions = next.map(clonePlanDecision).sort(compareDecisions);
+    desired = cloneEntries(decisions, quarantined);
+    setDurability("durable");
+    setIngress({ status: "accepted", quarantinedEntryCount: 0 });
+    options.onAuthorityChanged?.();
+    notifyDecisions();
+    return true;
+  }
+
   function acceptPlanDecision(input: AcceptPlanDecisionInput): AcceptPlanDecisionResult {
     if (ingress.status === "recoveryRequired")
       return { status: "rejected", reason: "protectedDecisionIngress" };
+    if (input.kind === "placeSleepOccurrence") {
+      if (
+        validatePlanDecision({
+          ...input,
+          version: 1,
+          id: "00000000-0000-4000-8000-000000000914",
+          acceptedAt: "2026-01-01T00:00:00.000Z",
+        }).status !== "valid"
+      )
+        return { status: "rejected", reason: "invalidPayload" };
+      const existing = decisions.find(
+        (d) =>
+          d.kind === "placeSleepOccurrence" &&
+          d.payload.revokedAt === null &&
+          getPlanDecisionTargetKey(d.target) === getPlanDecisionTargetKey(input.target) &&
+          planDecisionsSemanticallyEquivalent(d, { ...d, payload: input.payload }),
+      );
+      if (
+        existing &&
+        durability === "durable" &&
+        validatePlanDecision({
+          ...input,
+          version: 1,
+          id: existing.id,
+          acceptedAt: existing.acceptedAt,
+        }).status === "valid"
+      )
+        return {
+          status: "accepted",
+          decision: clonePlanDecision(existing),
+          decisions: getPlanDecisions(),
+          persistence: { status: "persisted" },
+        };
+      if (input.payload.revokedAt !== null || !options.validateSleepPlacement?.(input))
+        return { status: "rejected", reason: "sleepPlacementReviewRequired" };
+    }
     let id: PlanDecisionId;
     try {
       id = allocate();
@@ -225,6 +301,7 @@ export function createPlanDecisionSurface(options: {
       return {
         status: "rejected",
         reason: ![
+          "placeSleepOccurrence",
           "placeOccurrence",
           "omitOccurrence",
           "setOccurrenceDuration",
@@ -248,6 +325,24 @@ export function createPlanDecisionSurface(options: {
       } as const;
       return { status: "rejected", reason: reasons[resolution.status] };
     }
+    if (validation.decision.kind === "placeSleepOccurrence") {
+      const key = getPlanDecisionTargetKey(validation.decision.target);
+      const next = decisions.map((d) =>
+        d.kind === "placeSleepOccurrence" &&
+        d.payload.revokedAt === null &&
+        getPlanDecisionTargetKey(d.target) === key
+          ? { ...d, payload: { ...d.payload, revokedAt: candidate.acceptedAt } }
+          : d,
+      );
+      next.push(validation.decision);
+      if (!commitSleepDecisions(next)) return { status: "rejected", reason: "storageFailure" };
+      return {
+        status: "accepted",
+        decision: clonePlanDecision(validation.decision),
+        decisions: getPlanDecisions(),
+        persistence: { status: "persisted" },
+      };
+    }
     const key = getPlanDecisionTargetKey(validation.decision.target);
     decisions = [
       ...decisions.filter((decision) => getPlanDecisionTargetKey(decision.target) !== key),
@@ -270,6 +365,24 @@ export function createPlanDecisionSurface(options: {
       return { status: "notAttempted", reason: "protectedDecisionIngress" };
     if (!decisions.some((decision) => decision.id === id))
       return { status: "notAttempted", reason: "notFound" };
+    const target = decisions.find((d) => d.id === id)!;
+    if (target.kind === "placeSleepOccurrence") {
+      if (
+        target.payload.revokedAt === null &&
+        !commitSleepDecisions(
+          decisions.map((d) =>
+            d.id === id ? { ...target, payload: { ...target.payload, revokedAt: now() } } : d,
+          ),
+        )
+      )
+        return { status: "notAttempted", reason: "storageFailure" };
+      return {
+        status: "removed",
+        decisionId: id,
+        decisions: getPlanDecisions(),
+        persistence: { status: "persisted" },
+      };
+    }
     decisions = decisions.filter((decision) => decision.id !== id);
     desired = cloneEntries(decisions, quarantined);
     const persistence = persist();
@@ -373,6 +486,7 @@ export function createPlanDecisionSurface(options: {
   return {
     getPlanDecisions,
     getQuarantinedPlanDecisions,
+    getPlanDecisionReviewObservation: () => reviewObservation,
     getPlanDecisionDurabilityStatus,
     getPlanDecisionIngressStatus,
     acceptPlanDecision,
@@ -430,7 +544,7 @@ export function buildPlanDecisionRuntimeTarget(
     else if (validation.status === "unsupportedTargetVersion") reason = "unsupportedTargetVersion";
     else if (validation.status === "invalid") reason = "invalidDecision";
     else {
-      const target = getPlanDecisionTargetKey(validation.decision.target);
+      const target = getPlanDecisionConflictKey(validation.decision);
       if (ids.has(validation.decision.id)) reason = "duplicateDecisionId";
       else if (targets.has(target)) reason = "conflictingTarget";
       else {
@@ -520,7 +634,7 @@ function load(storage: Storage | undefined) {
     else if (validation.status === "unsupportedTargetVersion") reason = "unsupportedTargetVersion";
     else if (validation.status === "invalid") reason = "invalidDecision";
     else {
-      const target = getPlanDecisionTargetKey(validation.decision.target);
+      const target = getPlanDecisionConflictKey(validation.decision);
       if (ids.has(validation.decision.id)) reason = "duplicateDecisionId";
       else if (targets.has(target)) reason = "conflictingTarget";
       else {

@@ -1,3 +1,8 @@
+import {
+  structureEligibilityV1,
+  type StructureEvaluationInput,
+  type StructureQueryResult,
+} from "../core/planning/goalStructureTemporal.js";
 import type { GoalId, GoalV1 } from "../core/goals/goal.js";
 import { projectDemandForUserDayResolver } from "../core/planning/goalDemandProjection.js";
 import type { GoalPlanningAuthorityV2 } from "../core/planning/goalDemand.js";
@@ -11,6 +16,8 @@ export function queryGoalDemandProjection(input: {
   revision?: number;
   getGoal: (id: GoalId) => GoalV1 | undefined;
   getStructuralEligibility: (id: GoalId) => StructuralEligibilityV1;
+  queryGoalStructure?: (input: StructureEvaluationInput) => StructureQueryResult;
+  evaluationInstant: string;
   getUserDayResolver: () => CanonicalUserDayResolverInput;
 }) {
   const values = input.authority.demands
@@ -23,12 +30,20 @@ export function queryGoalDemandProjection(input: {
   if (!demand) return { status: "notFound" as const };
   const goal = input.getGoal(demand.goalId);
   if (!goal) return { status: "unknown" as const, reason: "missingGoal" as const };
+  const structure = input.queryGoalStructure?.({
+    goalId: goal.id,
+    evaluationInstant: input.evaluationInstant,
+    basis: "currentAuthority",
+  });
   return {
+    structure,
     status: "projected" as const,
     projection: projectDemandForUserDayResolver({
       demand,
       goal,
-      structuralEligibility: input.getStructuralEligibility(goal.id),
+      structuralEligibility: structure
+        ? structureEligibilityV1(structure, goal.id)
+        : input.getStructuralEligibility(goal.id),
       resolver: input.getUserDayResolver(),
     }),
   };

@@ -1,0 +1,847 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/DayFrameApp.test.tsx src/ui/tests/ProductSurfaces.test.tsx src/ui/tests/GoalsFocusedEditing.test.tsx src/ui/tests/GoalStructureAuthoring.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/DayFrameApp.test.tsx (124 tests | 60 failed) 304737ms
+     × allocates distinct manual-event IDs for an identical creation timestamp and preserves edits 5020ms
+     × generates preview work from a repeating sequence cycle 5009ms
+     × saves, loads, and deletes a local setup profile 5004ms
+     × generates a preview from an explicit example schedule when the user requests it 5009ms
+     × filters the full preview to a selected day and range from the compact calendar 5007ms
+     × keeps the selected compact-preview day stable when switching between Setup and Preview 5011ms
+     × uses a lighter interior style for selected preview ranges 5006ms
+     × marks compact calendar friction days and restores the full visible range 5008ms
+     × marks today in the compact calendar and keeps setup and preview navigation working 5006ms
+     × clears the selected compact-preview range when a loaded profile replaces the preview 5006ms
+     × generates preview using the saved preview range instead of the old hardcoded window 5002ms
+     × can save a cycle-based preview range and generate the full authored cycle 5010ms
+     × creates, edits, and deletes a manual event from the compact preview day details 5003ms
+     × opens the singular Event workflow from the selected Review Schedule user-day 5008ms
+     × routes Month contextual actions through the canonical Event, Commitment, and Work workflows 5007ms
+     × reuses canonical Goals, Preferences, Range, and Save Setup in Month Planning Settings 5010ms
+     × extracts canonical structural Work into the shared Work Pattern workspace 5005ms
+     × extracts the complete authored inventory into the shared Commitment Library 5007ms
+     × generates and refreshes canonically from Month without changing Month context 5005ms
+     × opens exact Month attention in specialized Review without cloning resolution 5007ms
+     × navigates from an exact scheduled occurrence to the reused lazy Commitment editor 5005ms
+     × keeps daily before-work sleep on every visible night-shift day across a one-week app preview 5009ms
+     × keeps all 3 generated days accessible in bounded detail pages for 'threeDays' 5004ms
+     × keeps all 7 generated days accessible in bounded detail pages for 'oneWeek' 5011ms
+     × keeps all 14 generated days accessible in bounded detail pages for 'twoWeeks' 5002ms
+     × keeps all 30 generated days accessible in bounded detail pages for 'oneMonth' 5008ms
+     × uses the current preferred window values when generating preview placements 5006ms
+     × shows a clear setup message when preview data is incomplete 5010ms
+     × shows only the missing setup items that still need attention 5005ms
+     × generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks 5009ms
+     × lets the user apply a suggested fix after generating a preview 5004ms
+     × marks an existing preview as stale after setup changes 5012ms
+     × regenerates a stale preview after a template edit and clears the stale warning 5005ms
+     × shows non-blocking preview range mismatch warnings only after preview generation 5010ms
+     × blocks stale Review fixed time navigation until the preview is regenerated 5005ms
+     × regenerates the preview after Review fixed time, setup save, and Regenerate Preview 5009ms
+     × focuses the fixed-time input for the selected friction when multiple fixed templates exist 5007ms
+     × re-enables persisted untouched default sleep and generates preview 5008ms
+     × allows preview generation when sleep is intentionally disabled but another template is enabled 5006ms
+     × shows a clear guardrail when all templates are disabled 5012ms
+     × clears local setup data after confirmation 5006ms
+     × exports authored setup as a json backup file 5011ms
+     × imports current Backup V14 through the ordinary file picker 5001ms
+     × imports a valid setup backup json file 5012ms
+     × restores a Backup V2 file with lifetime-specific feedback 5009ms
+     × rejects a semantic-invalid backup without replacing the current workflow state 5012ms
+     × shows an error when backup import fails 5008ms
+     × keeps a manual event runtime change and editor behavior after retryable persistence failure 5006ms
+     × keeps a valid backup import in runtime while reflecting recovery-required semantics 5010ms
+     × retains structured partiallyCleared clear semantics after the runtime reset 5013ms
+     × retains structured notCleared clear semantics after the runtime reset 5008ms
+     × suppresses persistent durability awareness for initial unknown and durable surfaces 84ms
+     × retries a partial-clear active removal without replaying clear 5002ms
+     × retries a partial-clear profiles removal without replaying clear 5004ms
+     × opens historical intelligence as a bounded top-level Summary destination 5006ms
+     × uses two primary destinations with Today inside Planner 5007ms
+     × separates destination navigation from explicit Preview generation 5007ms
+     × preserves one dirty draft across Planner modes and Summary without implicit writes 5008ms
+     × regenerates Schedule from saved Active without consuming the dirty Plan draft 5008ms
+     × reviews one selected canonical user-day without execution outcome controls 5007ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 60 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > allocates distinct manual-event IDs for an identical creation timestamp and preserves edits
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1392:3
+    1390|   });
+    1391|
+    1392|   it("allocates distinct manual-event IDs for an identical creation ti…
+       |   ^
+    1393|     vi.useFakeTimers();
+    1394|     vi.setSystemTime(new Date("2026-08-19T13:00:00.000Z"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > generates preview work from a repeating sequence cycle
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1440:3
+    1438|   });
+    1439|
+    1440|   it("generates preview work from a repeating sequence cycle", async (…
+       |   ^
+    1441|     const store = createReadyDayFrameTestStore({
+    1442|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > saves, loads, and deletes a local setup profile
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1526:3
+    1524|   });
+    1525|
+    1526|   it("saves, loads, and deletes a local setup profile", async () => {
+       |   ^
+    1527|     const store = createReadyDayFrameTestStore({
+    1528|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > generates a preview from an explicit example schedule when the user requests it
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1677:3
+    1675|   });
+    1676|
+    1677|   it("generates a preview from an explicit example schedule when the u…
+       |   ^
+    1678|     render(
+    1679|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > filters the full preview to a selected day and range from the compact calendar
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1704:3
+    1702|   });
+    1703|
+    1704|   it("filters the full preview to a selected day and range from the co…
+       |   ^
+    1705|     render(
+    1706|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps the selected compact-preview day stable when switching between Setup and Preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1748:3
+    1746|   });
+    1747|
+    1748|   it("keeps the selected compact-preview day stable when switching bet…
+       |   ^
+    1749|     render(
+    1750|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > uses a lighter interior style for selected preview ranges
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1774:3
+    1772|   });
+    1773|
+    1774|   it("uses a lighter interior style for selected preview ranges", asyn…
+       |   ^
+    1775|     render(
+    1776|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > marks compact calendar friction days and restores the full visible range
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1792:3
+    1790|   });
+    1791|
+    1792|   it("marks compact calendar friction days and restores the full visib…
+       |   ^
+    1793|     const store = createReadyDayFrameTestStore({
+    1794|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > marks today in the compact calendar and keeps setup and preview navigation working
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1911:3
+    1909|   });
+    1910|
+    1911|   it("marks today in the compact calendar and keeps setup and preview …
+       |   ^
+    1912|     render(
+    1913|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > clears the selected compact-preview range when a loaded profile replaces the preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:1982:3
+    1980|   });
+    1981|
+    1982|   it("clears the selected compact-preview range when a loaded profile …
+       |   ^
+    1983|     render(
+    1984|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > generates preview using the saved preview range instead of the old hardcoded window
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2024:3
+    2022|   });
+    2023|
+    2024|   it("generates preview using the saved preview range instead of the o…
+       |   ^
+    2025|     render(
+    2026|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > can save a cycle-based preview range and generate the full authored cycle
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2046:3
+    2044|   });
+    2045|
+    2046|   it("can save a cycle-based preview range and generate the full autho…
+       |   ^
+    2047|     render(
+    2048|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > creates, edits, and deletes a manual event from the compact preview day details
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2107:3
+    2105|   });
+    2106|
+    2107|   it("creates, edits, and deletes a manual event from the compact prev…
+       |   ^
+    2108|     render(
+    2109|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > opens the singular Event workflow from the selected Review Schedule user-day
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2163:3
+    2161|   });
+    2162|
+    2163|   it("opens the singular Event workflow from the selected Review Sched…
+       |   ^
+    2164|     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00…
+    2165|     await openDetailedReview();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > routes Month contextual actions through the canonical Event, Commitment, and Work workflows
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2177:3
+    2175|   });
+    2176|
+    2177|   it("routes Month contextual actions through the canonical Event, Com…
+       |   ^
+    2178|     render(
+    2179|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > reuses canonical Goals, Preferences, Range, and Save Setup in Month Planning Settings
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2224:3
+    2222|   });
+    2223|
+    2224|   it("reuses canonical Goals, Preferences, Range, and Save Setup in Mo…
+       |   ^
+    2225|     const store = createExampleScheduleStore();
+    2226|     render(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > extracts canonical structural Work into the shared Work Pattern workspace
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2267:3
+    2265|   });
+    2266|
+    2267|   it("extracts canonical structural Work into the shared Work Pattern …
+       |   ^
+    2268|     const store = createExampleScheduleStore();
+    2269|     const cycle = store.getState().shiftCycles[0]!;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > extracts the complete authored inventory into the shared Commitment Library
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2338:3
+    2336|   });
+    2337|
+    2338|   it("extracts the complete authored inventory into the shared Commitm…
+       |   ^
+    2339|     const store = createExampleScheduleStore();
+    2340|     const disabled = store.getState().blockTemplates[0]!;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > generates and refreshes canonically from Month without changing Month context
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2388:3
+    2386|   });
+    2387|
+    2388|   it("generates and refreshes canonically from Month without changing …
+       |   ^
+    2389|     const store = createExampleScheduleStore();
+    2390|     render(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > opens exact Month attention in specialized Review without cloning resolution
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2427:3
+    2425|   });
+    2426|
+    2427|   it("opens exact Month attention in specialized Review without clonin…
+       |   ^
+    2428|     render(
+    2429|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > navigates from an exact scheduled occurrence to the reused lazy Commitment editor
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2462:3
+    2460|   });
+    2461|
+    2462|   it("navigates from an exact scheduled occurrence to the reused lazy …
+       |   ^
+    2463|     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00…
+    2464|     await openDetailedReview();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps daily before-work sleep on every visible night-shift day across a one-week app preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2482:3
+    2480|   });
+    2481|
+    2482|   it("keeps daily before-work sleep on every visible night-shift day a…
+       |   ^
+    2483|     const store = createReadyDayFrameTestStore({
+    2484|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps all 3 generated days accessible in bounded detail pages for 'threeDays'
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps all 7 generated days accessible in bounded detail pages for 'oneWeek'
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps all 14 generated days accessible in bounded detail pages for 'twoWeeks'
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps all 30 generated days accessible in bounded detail pages for 'oneMonth'
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2621:5
+    2619|       expectedPlanningWindowLabel: "May 5 - June 3, 2026",
+    2620|     },
+    2621|   ])(
+       |     ^
+    2622|     "keeps all $expectedVisibleDayCount generated days accessible in b…
+    2623|     async ({ preset, expectedVisibleDayCount, expectedPlanningWindowLa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > uses the current preferred window values when generating preview placements
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2656:3
+    2654|   );
+    2655|
+    2656|   it("uses the current preferred window values when generating preview…
+       |   ^
+    2657|     render(
+    2658|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > shows a clear setup message when preview data is incomplete
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2729:3
+    2727|   });
+    2728|
+    2729|   it("shows a clear setup message when preview data is incomplete", as…
+       |   ^
+    2730|     const store = createReadyDayFrameTestStore();
+    2731|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > shows only the missing setup items that still need attention
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2745:3
+    2743|   });
+    2744|
+    2745|   it("shows only the missing setup items that still need attention", a…
+       |   ^
+    2746|     const store = createReadyDayFrameTestStore({
+    2747|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > generates a preview in the app for a 3-day night-shift window with edge-day sleep and workout blocks
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2775:3
+    2773|   });
+    2774|
+    2775|   it("generates a preview in the app for a 3-day night-shift window wi…
+       |   ^
+    2776|     const store = createReadyDayFrameTestStore({
+    2777|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > lets the user apply a suggested fix after generating a preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:2896:3
+    2894|   });
+    2895|
+    2896|   it("lets the user apply a suggested fix after generating a preview",…
+       |   ^
+    2897|     const store = createReadyDayFrameTestStore({
+    2898|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > marks an existing preview as stale after setup changes
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3017:3
+    3015|   });
+    3016|
+    3017|   it("marks an existing preview as stale after setup changes", async (…
+       |   ^
+    3018|     render(
+    3019|       <ExampleScheduleApp
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > regenerates a stale preview after a template edit and clears the stale warning
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3046:3
+    3044|   });
+    3045|
+    3046|   it("regenerates a stale preview after a template edit and clears the…
+       |   ^
+    3047|     const getGeneratedAt = vi
+    3048|       .fn<() => string>()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > shows non-blocking preview range mismatch warnings only after preview generation
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3098:3
+    3096|   });
+    3097|
+    3098|   it("shows non-blocking preview range mismatch warnings only after pr…
+       |   ^
+    3099|     const store = createReadyDayFrameTestStore({
+    3100|       previewRange: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > blocks stale Review fixed time navigation until the preview is regenerated
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3188:3
+    3186|   });
+    3187|
+    3188|   it("blocks stale Review fixed time navigation until the preview is r…
+       |   ^
+    3189|     const store = createReadyDayFrameTestStore({
+    3190|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > regenerates the preview after Review fixed time, setup save, and Regenerate Preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3288:3
+    3286|   });
+    3287|
+    3288|   it("regenerates the preview after Review fixed time, setup save, and…
+       |   ^
+    3289|     const getGeneratedAt = vi
+    3290|       .fn<() => string>()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > focuses the fixed-time input for the selected friction when multiple fixed templates exist
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3401:3
+    3399|   });
+    3400|
+    3401|   it("focuses the fixed-time input for the selected friction when mult…
+       |   ^
+    3402|     const store = createReadyDayFrameTestStore({
+    3403|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > re-enables persisted untouched default sleep and generates preview
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3622:3
+    3620|   });
+    3621|
+    3622|   it("re-enables persisted untouched default sleep and generates previ…
+       |   ^
+    3623|     globalThis.localStorage.setItem(
+    3624|       DAYFRAME_STORAGE_KEY,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > allows preview generation when sleep is intentionally disabled but another template is enabled
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3706:3
+    3704|   });
+    3705|
+    3706|   it("allows preview generation when sleep is intentionally disabled b…
+       |   ^
+    3707|     const store = createReadyDayFrameTestStore({
+    3708|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > shows a clear guardrail when all templates are disabled
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3808:3
+    3806|   });
+    3807|
+    3808|   it("shows a clear guardrail when all templates are disabled", async …
+       |   ^
+    3809|     const store = createReadyDayFrameTestStore({
+    3810|       shiftDefinitions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > clears local setup data after confirmation
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3903:3
+    3901|   });
+    3902|
+    3903|   it("clears local setup data after confirmation", async () => {
+       |   ^
+    3904|     render(<DayFrameApp getGeneratedAt={() => "2026-05-03T13:00:00-05:…
+    3905|     await openWorkPattern();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > exports authored setup as a json backup file
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3924:3
+    3922|   });
+    3923|
+    3924|   it("exports authored setup as a json backup file", async () => {
+       |   ^
+    3925|     render(<ExampleScheduleApp getExportedAt={() => "2026-05-05T15:00:…
+    3926|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > imports current Backup V14 through the ordinary file picker
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3966:3
+    3964|   });
+    3965|
+    3966|   it("imports current Backup V14 through the ordinary file picker", as…
+       |   ^
+    3967|     const store = createReadyDayFrameTestStore();
+    3968|     await store.whenReady();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > imports a valid setup backup json file
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:3986:3
+    3984|   });
+    3985|
+    3986|   it("imports a valid setup backup json file", async () => {
+       |   ^
+    3987|     const store = createReadyDayFrameTestStore();
+    3988|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > restores a Backup V2 file with lifetime-specific feedback
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4055:3
+    4053|   });
+    4054|
+    4055|   it("restores a Backup V2 file with lifetime-specific feedback", asyn…
+       |   ^
+    4056|     const source = createExampleScheduleStore();
+    4057|     const backup = source.exportBackup("2026-05-05T10:00:00-05:00");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > rejects a semantic-invalid backup without replacing the current workflow state
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4077:3
+    4075|   });
+    4076|
+    4077|   it("rejects a semantic-invalid backup without replacing the current …
+       |   ^
+    4078|     const store = createExampleScheduleStore();
+    4079|     const before = store.getState();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > shows an error when backup import fails
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4115:3
+    4113|   });
+    4114|
+    4115|   it("shows an error when backup import fails", async () => {
+       |   ^
+    4116|     render(<DayFrameApp />);
+    4117|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps a manual event runtime change and editor behavior after retryable persistence failure
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4193:3
+    4191|   });
+    4192|
+    4193|   it("keeps a manual event runtime change and editor behavior after re…
+       |   ^
+    4194|     const setItem = vi.spyOn(Storage.prototype, "setItem").mockImpleme…
+    4195|       throw new DOMException("Storage write failed.");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > keeps a valid backup import in runtime while reflecting recovery-required semantics
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4268:3
+    4266|   });
+    4267|
+    4268|   it("keeps a valid backup import in runtime while reflecting recovery…
+       |   ^
+    4269|     const store = createReadyDayFrameTestStore();
+    4270|     const importBackup = store.importBackup;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > retains structured partiallyCleared clear semantics after the runtime reset
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > retains structured notCleared clear semantics after the runtime reset
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4334:14
+    4332|       "active setup (storage unavailable) and saved profiles (storage …
+    4333|     ],
+    4334|   ] as const)(
+       |              ^
+    4335|     "retains structured %s clear semantics after the runtime reset",
+    4336|     async (durability, activeState, profiles, unresolvedText) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > suppresses persistent durability awareness for initial unknown and durable surfaces
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <section
+  aria-labelledby="dayframe-durability-awareness-heading"
+  class="df-confirmation df-workflow-block"
+>
+  <div
+    class="df-screen-header"
+  >
+    <p
+      class="df-workflow-eyebrow"
+    >
+      Local save status
+    </p>
+    <h2
+      class="df-panel-title"
+      id="dayframe-durability-awareness-heading"
+    >
+      Some changes are not durably saved
+    </h2>
+  </div>
+  <ul
+    class="df-plain-list"
+  >
+    <li
+      class="df-danger-message"
+    >
+      <p>
+        Active setup is available for this session, but the durable save failed.
+      </p>
+      <button
+        class="df-secondary-button"
+        type="button"
+      >
+        Retry active setup durability
+      </button>
+    </li>
+    <li
+      class="df-danger-message"
+    >
+      <p>
+        Saved profiles are available for this session, but the durable save failed.
+      </p>
+      <button
+        class="df-secondary-button"
+        type="button"
+      >
+        Retry saved profiles durability
+      </button>
+    </li>
+  </ul>
+</section> instead
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4389:11
+    4387|     expect(
+    4388|       screen.queryByRole("region", { name: "Some changes are not durab…
+    4389|     ).not.toBeInTheDocument();
+       |           ^
+    4390|   });
+    4391|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > retries a partial-clear active removal without replaying clear
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > retries a partial-clear profiles removal without replaying clear
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4749:14
+    4747|     ["active", DAYFRAME_STORAGE_KEY, "Retry active setup durability"],
+    4748|     ["profiles", DAYFRAME_PROFILES_STORAGE_KEY, "Retry saved profiles …
+    4749|   ] as const)(
+       |              ^
+    4750|     "retries a partial-clear %s removal without replaying clear",
+    4751|     async (failedSurface, failedKey, retryName) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > opens historical intelligence as a bounded top-level Summary destination
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4865:3
+    4863|   });
+    4864|
+    4865|   it("opens historical intelligence as a bounded top-level Summary des…
+       |   ^
+    4866|     render(<DayFrameApp getNow={() => new Date("2026-08-22T17:00:00.00…
+    4867|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[50/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > uses two primary destinations with Today inside Planner
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4876:3
+    4874|   });
+    4875|
+    4876|   it("uses two primary destinations with Today inside Planner", async …
+       |   ^
+    4877|     render(<DayFrameApp getNow={() => new Date("2026-08-22T17:00:00.00…
+    4878|     const navigation = screen.getByRole("navigation", { name: "App Sec…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > separates destination navigation from explicit Preview generation
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4922:3
+    4920|   });
+    4921|
+    4922|   it("separates destination navigation from explicit Preview generatio…
+       |   ^
+    4923|     const store = createExampleScheduleStore();
+    4924|     const generate = vi.spyOn(store, "generatePreview");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > preserves one dirty draft across Planner modes and Summary without implicit writes
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4970:3
+    4968|   });
+    4969|
+    4970|   it("preserves one dirty draft across Planner modes and Summary witho…
+       |   ^
+    4971|     const store = createReadyDayFrameTestStore();
+    4972|     const commit = vi.spyOn(store, "commitAuthoredSetupTransaction");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[53/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > regenerates Schedule from saved Active without consuming the dirty Plan draft
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:4994:3
+    4992|   });
+    4993|
+    4994|   it("regenerates Schedule from saved Active without consuming the dir…
+       |   ^
+    4995|     const store = createExampleScheduleStore();
+    4996|     render(<DayFrameApp getGeneratedAt={() => "2026-08-22T17:00:00.000…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[54/60]⎯
+
+ FAIL  src/ui/tests/DayFrameApp.test.tsx > DayFrameApp > reviews one selected canonical user-day without execution outcome controls
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/ui/tests/DayFrameApp.test.tsx:5009:3
+    5007|   });
+    5008|
+    5009|   it("reviews one selected canonical user-day without execution outcom…
+       |   ^
+    5010|     render(<ExampleScheduleApp getGeneratedAt={() => "2026-05-03T13:00…
+    5011|     await openDetailedReview();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[55/60]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  60 failed | 113 passed (173)
+   Start at  20:16:08
+   Duration  317.48s (transform 2.35s, setup 0ms, import 2.11s, tests 313.38s, environment 1.66s)
+

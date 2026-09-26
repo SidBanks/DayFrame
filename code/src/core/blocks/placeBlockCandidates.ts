@@ -1,3 +1,7 @@
+import {
+  getOccupiedWindowsForRange,
+  getOpenWindowsWithinSearchWindow,
+} from "../time/physicalOccupancy.js";
 import { parseTimeString } from "../time/userDay.js";
 import type { AnchorType } from "../anchors/types.js";
 import type { LocalDateString } from "../shifts/types.js";
@@ -112,7 +116,10 @@ function placeBlockCandidate(
 
     if (input.hardPlacementCandidateIds?.has(blockCandidate.id)) {
       const occupied = [
-        ...getPlacementOccupiedBlocks(scheduledBlocks, input.generatedWorkBlocks, input),
+        ...getPlacementOccupiedBlocks(scheduledBlocks, input.generatedWorkBlocks, {
+          ...input,
+          movableFoundationOccupiedBlocks: [],
+        }),
         ...(input.additionalOccupiedBlocks ?? []),
       ];
       if (
@@ -504,7 +511,9 @@ function getPlacementSearchWindow(
           placementBounds.end.getTime(),
           addMinutes(
             lastWorkBlock.endsAt,
-            blockCandidate.durationMinutes + getBufferAfterMinutes(blockCandidate),
+            getBufferBeforeMinutes(blockCandidate) +
+              blockCandidate.durationMinutes +
+              getBufferAfterMinutes(blockCandidate),
           ).getTime(),
         ),
       );
@@ -540,15 +549,19 @@ function getPlacementSearchWindow(
         blockCandidate.customWindowEndTime,
       );
 
-      if (customWindowEnd.getTime() <= customWindowStart.getTime()) {
-        return null;
+      const overnight = blockCandidate.customWindowEndTime < blockCandidate.customWindowStartTime;
+      if (overnight && customWindowEnd <= customWindowStart) {
+        customWindowEnd.setDate(customWindowEnd.getDate() + 1);
       }
+      if (customWindowEnd <= customWindowStart) return null;
 
       return {
         windowStart: new Date(
           Math.max(customWindowStart.getTime(), placementBounds.start.getTime()),
         ),
-        windowEnd: new Date(Math.min(customWindowEnd.getTime(), placementBounds.end.getTime())),
+        windowEnd: overnight
+          ? customWindowEnd
+          : new Date(Math.min(customWindowEnd.getTime(), placementBounds.end.getTime())),
         preferredStart: addMinutes(
           new Date(Math.max(customWindowStart.getTime(), placementBounds.start.getTime())),
           getBufferBeforeMinutes(blockCandidate),
@@ -618,51 +631,6 @@ function findBestAvailableStart(
   return bestStart;
 }
 
-function getOpenWindowsWithinSearchWindow(
-  occupiedWindows: Array<{ occupiedStartsAt: Date; occupiedEndsAt: Date }>,
-  searchWindow: { windowStart: Date; windowEnd: Date },
-): Array<{ windowStart: Date; windowEnd: Date }> {
-  const openWindows: Array<{ windowStart: Date; windowEnd: Date }> = [];
-  let cursor = new Date(searchWindow.windowStart);
-
-  for (const occupiedWindow of occupiedWindows) {
-    if (occupiedWindow.occupiedEndsAt.getTime() <= searchWindow.windowStart.getTime()) {
-      continue;
-    }
-
-    if (occupiedWindow.occupiedStartsAt.getTime() >= searchWindow.windowEnd.getTime()) {
-      break;
-    }
-
-    const blockedStart = new Date(
-      Math.max(occupiedWindow.occupiedStartsAt.getTime(), searchWindow.windowStart.getTime()),
-    );
-    const blockedEnd = new Date(
-      Math.min(occupiedWindow.occupiedEndsAt.getTime(), searchWindow.windowEnd.getTime()),
-    );
-
-    if (cursor.getTime() < blockedStart.getTime()) {
-      openWindows.push({
-        windowStart: new Date(cursor),
-        windowEnd: blockedStart,
-      });
-    }
-
-    if (cursor.getTime() < blockedEnd.getTime()) {
-      cursor = blockedEnd;
-    }
-  }
-
-  if (cursor.getTime() < searchWindow.windowEnd.getTime()) {
-    openWindows.push({
-      windowStart: cursor,
-      windowEnd: new Date(searchWindow.windowEnd),
-    });
-  }
-
-  return openWindows;
-}
-
 function overlapsPlanningWindow(
   scheduledBlock: DraftScheduledBlock,
   planningWindowStart: Date,
@@ -672,47 +640,6 @@ function overlapsPlanningWindow(
     scheduledBlock.startsAt.getTime() < planningWindowEnd.getTime() &&
     scheduledBlock.endsAt.getTime() > planningWindowStart.getTime()
   );
-}
-
-function getOccupiedWindowsForRange(
-  scheduledBlocks: Array<{
-    startsAt: Date;
-    endsAt: Date;
-    bufferBeforeMinutes?: number;
-    bufferAfterMinutes?: number;
-  }>,
-  rangeStart: Date,
-  rangeEnd: Date,
-): Array<{ occupiedStartsAt: Date; occupiedEndsAt: Date }> {
-  return scheduledBlocks
-    .map((scheduledBlock) => {
-      const occupiedStartsAt = addMinutes(
-        scheduledBlock.startsAt,
-        -(scheduledBlock.bufferBeforeMinutes ?? 0),
-      );
-      const occupiedEndsAt = addMinutes(
-        scheduledBlock.endsAt,
-        scheduledBlock.bufferAfterMinutes ?? 0,
-      );
-      const clippedStartsAt =
-        occupiedStartsAt.getTime() < rangeStart.getTime() ? rangeStart : occupiedStartsAt;
-      const clippedEndsAt =
-        occupiedEndsAt.getTime() > rangeEnd.getTime() ? rangeEnd : occupiedEndsAt;
-
-      if (clippedStartsAt.getTime() >= clippedEndsAt.getTime()) {
-        return null;
-      }
-
-      return {
-        occupiedStartsAt: clippedStartsAt,
-        occupiedEndsAt: clippedEndsAt,
-      };
-    })
-    .filter(
-      (occupiedWindow): occupiedWindow is { occupiedStartsAt: Date; occupiedEndsAt: Date } =>
-        occupiedWindow !== null,
-    )
-    .sort((left, right) => left.occupiedStartsAt.getTime() - right.occupiedStartsAt.getTime());
 }
 
 function getPlacementBoundsForUserDay(
@@ -749,16 +676,23 @@ function getPlacementOccupiedBlocks(
   bufferAfterMinutes?: number;
 }> {
   if (!input.visiblePlanningWindowStart || !input.visiblePlanningWindowEnd) {
-    return [...scheduledBlocks, ...(input.fixedAuthorityOccupiedBlocks ?? [])];
+    return [
+      ...scheduledBlocks,
+      ...(input.additionalOccupiedBlocks ?? []),
+      ...(input.fixedAuthorityOccupiedBlocks ?? []),
+      ...(input.movableFoundationOccupiedBlocks ?? []),
+    ];
   }
 
   return [
     ...scheduledBlocks,
+    ...(input.additionalOccupiedBlocks ?? []),
     ...generatedWorkBlocks.map((generatedWorkBlock) => ({
       startsAt: generatedWorkBlock.startsAt,
       endsAt: generatedWorkBlock.endsAt,
     })),
     ...(input.fixedAuthorityOccupiedBlocks ?? []),
+    ...(input.movableFoundationOccupiedBlocks ?? []),
   ];
 }
 

@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=2
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  162 passed (162)
+      Tests  1653 passed (1653)
+   Start at  17:10:57
+   Duration  103.19s (transform 6.98s, setup 0ms, import 27.36s, tests 119.30s, environment 26.44s)
+

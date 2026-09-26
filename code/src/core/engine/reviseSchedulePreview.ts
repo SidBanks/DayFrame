@@ -27,6 +27,7 @@ export function reviseSchedulePreview(
   input: ReviseSchedulePreviewInput,
 ): ReviseSchedulePreviewActionResult {
   const appliedFixResult = applySuggestedFix({
+    realizedScheduleFacts: input.preview.realizedScheduleFacts ?? [],
     frictionPoints: input.preview.frictionPoints,
     generatedWorkBlocks: input.preview.generatedWorkBlocks,
     scheduledBlocks: input.preview.scheduledBlocks,
@@ -40,6 +41,18 @@ export function reviseSchedulePreview(
       : {}),
   });
 
+  if (
+    input.preview.foundation?.status === "nonAllocatable" ||
+    appliedFixResult.scheduledBlocks.some((block) =>
+      input.preview.foundation?.protection.some(
+        (p) =>
+          block.startsAt.getTime() - (block.bufferBeforeMinutes ?? 0) * 60000 <
+            Date.parse(p.endsAt) &&
+          Date.parse(p.startsAt) < block.endsAt.getTime() + (block.bufferAfterMinutes ?? 0) * 60000,
+      ),
+    )
+  )
+    return { preview: clonePreviewResult(input.preview), didRevise: false };
   if (!appliedFixResult.didRevise) {
     return {
       preview: clonePreviewResult(input.preview),
@@ -70,6 +83,12 @@ export function reviseSchedulePreview(
 
   return {
     preview: {
+      ...(input.preview.foundation
+        ? { foundation: structuredClone(input.preview.foundation) }
+        : {}),
+      ...(input.preview.realizedScheduleFacts
+        ? { realizedScheduleFacts: structuredClone(input.preview.realizedScheduleFacts) }
+        : {}),
       generatedWorkBlocks: input.preview.generatedWorkBlocks.map((generatedWorkBlock) => ({
         ...generatedWorkBlock,
         ...(generatedWorkBlock.occurrenceIdentity
@@ -101,6 +120,7 @@ export function reviseSchedulePreview(
 
 function clonePreviewResult(preview: GenerateSchedulePreviewResult): GenerateSchedulePreviewResult {
   return {
+    ...(preview.foundation ? { foundation: structuredClone(preview.foundation) } : {}),
     generatedWorkBlocks: preview.generatedWorkBlocks.map((generatedWorkBlock) => ({
       ...generatedWorkBlock,
       ...(generatedWorkBlock.occurrenceIdentity

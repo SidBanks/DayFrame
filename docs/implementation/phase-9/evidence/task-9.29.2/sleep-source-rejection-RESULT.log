@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/sleepPublicationStorage.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  10:35:03
+   Duration  832ms (transform 403ms, setup 0ms, import 518ms, tests 197ms, environment 0ms)
+

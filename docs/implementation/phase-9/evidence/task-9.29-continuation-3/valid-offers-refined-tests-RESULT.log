@@ -1,0 +1,33 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ScheduleReviewWorkspace.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx (5 tests | 1 failed) 2423ms
+   × bounds more than ten canonically generated offers without deciding 671ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ScheduleReviewWorkspace.test.tsx > bounds more than ten canonically generated offers without deciding
+TypeError: Cannot read properties of undefined (reading 'foundationFingerprint')
+ ❯ Object.qualifyFoundation src/state/dayFrameStore.ts:770:30
+    768|           (state.sleepRequirements?.length || input.allocation.foundat…
+    769|           (!("dependencyFingerprint" in foundation.sleep) ||
+    770|             input.allocation.foundationFingerprint !== foundation.slee…
+       |                              ^
+    771|         )
+    772|           return "stale";
+ ❯ Object.deriveProposal src/state/proposalSurface.ts:162:35
+ ❯ Proxy.deriveProposal src/state/lazyProposalSurface.ts:38:27
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx:30:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  20:45:43
+   Duration  4.54s (transform 1.50s, setup 0ms, import 1.45s, tests 2.42s, environment 576ms)
+

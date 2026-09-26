@@ -1,0 +1,1559 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=2 src/ui/tests/GoalRecordedInspection.test.tsx -t real reporting
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+stdout | src/ui/tests/GoalRecordedInspection.test.tsx > real reporting and Daily Planner return preserve independent drafts and refresh only canonical evidence
+REPORT_DEBUG [{"version":1,"id":"8e7a5542-7c12-4cdd-bca0-c2a25a461b59","subjectId":"68f16f6a-e87f-4916-84e2-09560b11661b","kind":"assertion","subject":{"kind":"planned","reference":{"version":1,"sourceKind":"acceptedAllocation","scheduledSubjectId":"667d17b69d5f72bd","realizationId":"7c56aba34e8907cb","acceptedAllocationId":"9588b912-5170-42bf-8119-35212853c1ab","acceptedClaimId":"d4efeb32ad775422","scheduleRole":"productiveGoalWork","startsAt":"2026-09-04T08:00:00.000Z","endsAt":"2026-09-04T09:00:00.000Z","userDayDate":"2026-09-04"}},"snapshot":{"sourceFamily":"acceptedAllocation","title":"Network+ original","category":"work","userDay":{"date":"2026-09-04","dayBoundaryStartTime":"03:00","utcOffsetMinutes":-300},"plan":{"state":"scheduled","startsAt":"2026-09-04T08:00:00.000Z","endsAt":"2026-09-04T09:00:00.000Z"}},"outcome":"completed","provenance":{"kind":"userReported"},"recordedAt":"2026-09-23T12:00:00.000Z","actualTime":{"occurredAt":"2026-09-04T08:10:00.000Z","durationMinutes":47},"note":"Independent Actual, not Progress"},{"version":1,"id":"0ea21eb5-8d85-458c-b860-6a73afda4cd3","subjectId":"7f312be4-ce8f-4060-8213-8168246ee0f0","kind":"assertion","subject":{"kind":"planned","reference":{"version":1,"sourceKind":"manualEvent","manualEvent":{"id":"evidence-13","incarnationId":"00000000-0000-4000-8000-000000000014"}}},"snapshot":{"sourceFamily":"manualEvent","title":"Historical linked work 13","category":"work","userDay":{"date":"2026-09-10","dayBoundaryStartTime":"03:00","utcOffsetMinutes":-300},"plan":{"state":"unplaced"}},"outcome":"completed","provenance":{"kind":"userReported"},"recordedAt":"2026-09-23T13:00:00.000Z"}] Knowledge cutoff: 2026-09-23T13:00:00.000Z. Not continuously live; later records may require Refresh. This shared cutoff does not guarantee an atomic cross-authority snapshot.
+
+ ❯ src/ui/tests/GoalRecordedInspection.test.tsx (12 tests | 1 failed | 11 skipped) 3942ms
+   × real reporting and Daily Planner return preserve independent drafts and refresh only canonical evidence 3939ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/GoalRecordedInspection.test.tsx > real reporting and Daily Planner return preserve independent drafts and refresh only canonical evidence
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Reported completed: 1"
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"df-foundation-header"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"df-collapsible-section-header"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  Name "":
+  [36m<strong />[39m
+
+  --------------------------------------------------
+  navigation:
+
+  Name "App Sections":
+  [36m<nav[39m
+    [33maria-label[39m=[32m"App Sections"[39m
+    [33mclass[39m=[32m"df-foundation-primary"[39m
+  [36m/>[39m
+
+  Name "Planner modes":
+  [36m<nav[39m
+    [33maria-label[39m=[32m"Planner modes"[39m
+    [33mclass[39m=[32m"df-foundation-secondary"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Planner":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Summary":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Back":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Save Current Setup as Profile":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Load Profile":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Delete Profile":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Export Complete Backup":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Import Setup Backup":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Clear Local Data":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Calendar":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "My Schedule":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Goals":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Review Plan":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Today":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Add Goal":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-action-button"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Recorded evidence Goalactive · Target 2026-12-311 supporting commitment":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"df-goal-list-button"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Source A childactive0 supporting commitments":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-goal-list-button"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Save Goal":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-action-button"[39m
+    [33mtype[39m=[32m"submit"[39m
+  [36m/>[39m
+
+  Name "Cancel":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Discard draft and reload saved Goal":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Save Measurement Changes":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-action-button"[39m
+    [33mtype[39m=[32m"submit"[39m
+  [36m/>[39m
+
+  Name "Cancel":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Record New Value":
+  [36m<button[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Correct record: 25 words observed Sep 23, 2026, 8:00 AM":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Correct record: 25 words observed Sep 23, 2026, 8:00 AM"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Remove invalid record: 25 words observed Sep 23, 2026, 8:00 AM":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Remove invalid record: 25 words observed Sep 23, 2026, 8:00 AM"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Correct record: 17 words observed Sep 23, 2026, 7:00 AM":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Correct record: 17 words observed Sep 23, 2026, 7:00 AM"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Remove invalid record: 17 words observed Sep 23, 2026, 7:00 AM":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Remove invalid record: 17 words observed Sep 23, 2026, 7:00 AM"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Close recorded inspection":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"true"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Refresh recorded evidence":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "How this Progress was calculated":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-progress-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-link-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Measurement controls":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open value reporting and correction history":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open accepted planning and scheduled work":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Apply Activity period":
+  [36m<button[39m
+    [33mtype[39m=[32m"submit"[39m
+  [36m/>[39m
+
+  Name "Scheduled: 13":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"true"[39m
+    [33maria-label[39m=[32m"Scheduled: 13"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--scheduled"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Unplaced: 1":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Unplaced: 1"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--unplaced"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Omitted: 1":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Omitted: 1"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--omitted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Blocked: 1":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Blocked: 1"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--blocked"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Reported completed: 0":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Reported completed: 0"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--completed"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Partial: 0":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Partial: 0"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--partial"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Skipped: 0":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Skipped: 0"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--skipped"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Unknown: 0":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Unknown: 0"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--unknown"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Not reported: 13":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"goal-activity-category-details"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"Not reported: 13"[39m
+    [33mclass[39m=[32m"df-history-category df-history-category--notReported"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open Activity day 2026-09-10":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Show more coverage details":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Close Structure":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"true"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Refresh Structure evidence":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Link Subgoal":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Add contribution":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Add prerequisite":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Create Milestone":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Save Structure":
+  [36m<button[39m
+    [33mtype[39m=[32m"submit"[39m
+  [36m/>[39m
+
+  Name "Cancel Structure edit":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Edit relationship c26d99c2-4fda-43eb-b58d-142c8d85628e":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Retire relationship c26d99c2-4fda-43eb-b58d-142c8d85628e":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Open related Goal: Source A child · 520bc666-c67c-4b87-87e3-5ea1ef8c265b":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Edit Milestone: First practice exam · 6afd9abb-79ef-4f89-8009-fe5dabaaa1cc":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Inspect accepted planning":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"df-secondary-button"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Planner / Goals":
+  [36m<h2[39m
+    [33mclass[39m=[32m"df-foundation-location-title"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Saved Setup Profiles":
+  [36m<h2[39m
+    [33mclass[39m=[32m"df-panel-title"[39m
+  [36m/>[39m
+
+  Name "Planner":
+  [36m<h1[39m
+    [33mclass[39m=[32m"df-screen-title"[39m
+    [33mid[39m=[32m"planner-heading"[39m
+  [36m/>[39m
+
+  Name "Goals":
+  [36m<h2[39m
+    [33mid[39m=[32m"goals-heading"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Active Goals":
+  [36m<h3 />[39m
+
+  Name "Completed and archived":
+  [36m<h3 />[39m
+
+  Name "Measurement":
+  [36m<h4[39m
+    [33mid[39m=[32m"measurement-8fbc9010-b0af-4bbd-8427-4f8c694a41ff"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Progress Reporting":
+  [36m<h4[39m
+    [33mid[39m=[32m"reporting-8fbc9010-b0af-4bbd-8427-4f8c694a41ff"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Measurement records":
+  [36m<h5 />[39m
+
+  Name "Current measurement period":
+  [36m<h6 />[39m
+
+  Name "Recorded Progress and Activity":
+  [36m<h3[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Progress":
+  [36m<h4[39m
+    [33mid[39m=[32m"goal-progress-heading"[39m
+  [36m/>[39m
+
+  Name "Goal Activity":
+  [36m<h4 />[39m
+
+  Name "Planning":
+  [36m<h4[39m
+    [33mclass[39m=[32m"df-group-title"[39m
+  [36m/>[39m
+
+  Name "Execution":
+  [36m<h4[39m
+    [33mclass[39m=[32m"df-group-title"[39m
+  [36m/>[39m
+
+  Name "Scheduled evidence":
+  [36m<h5[39m
+    [33mclass[39m=[32m"df-group-title"[39m
+  [36m/>[39m
+
+  Name "Structure":
+  [36m<h3[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  Name "Containment":
+  [36m<h4 />[39m
+
+  Name "Contributions":
+  [36m<h4 />[39m
+
+  Name "Prerequisites":
+  [36m<h4 />[39m
+
+  Name "Manual Milestones":
+  [36m<h4 />[39m
+
+  Name "Accepted planning and scheduled work":
+  [36m<h3[39m
+    [33mid[39m=[32m"_r_g_-heading"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  group:
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"df-foundation-utilities"[39m
+  [36m/>[39m
+
+  Name "Goal outcome":
+  [36m<fieldset[39m
+    [33mclass[39m=[32m"df-form-stack"[39m
+  [36m/>[39m
+
+  Name "Planning Goal Activity counts":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Planning Goal Activity counts"[39m
+    [33mclass[39m=[32m"df-history-distribution"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "Execution Goal Activity counts":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Execution Goal Activity counts"[39m
+    [33mclass[39m=[32m"df-history-distribution"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details />[39m
+
+  Name "New manual Milestone":
+  [36m<fieldset[39m
+    [33mclass[39m=[32m"df-form-stack"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details />[39m
+
+  Name "":
+  [36m<details />[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-workflow-eyebrow"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-warning-message"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-support"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-progress-percentage"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-warning-message"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Profile Name":
+  [36m<input[39m
+    [33mid[39m=[32m"dayframe-profile-name"[39m
+    [33mplaceholder[39m=[32m"Profile name"[39m
+    [33mtype[39m=[32m"text"[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  Name "Goal title":
+  [36m<input[39m
+    [33maria-invalid[39m=[32m"false"[39m
+    [33mmaxlength[39m=[32m"200"[39m
+    [33mrequired[39m=[32m""[39m
+    [33mvalue[39m=[32m"Unwritten Goal draft"[39m
+  [36m/>[39m
+
+  Name "Description (optional)":
+  [36m<textarea[39m
+    [33mmaxlength[39m=[32m"2000"[39m
+  [36m/>[39m
+
+  Name "Quantity target":
+  [36m<input[39m
+    [33maria-invalid[39m=[32m"false"[39m
+    [33minputmode[39m=[32m"decimal"[39m
+    [33mmaxlength[39m=[32m"100"[39m
+    [33mtype[39m=[32m"text"[39m
+    [33mvalue[39m=[32m"555"[39m
+  [36m/>[39m
+
+  Name "Milestone title":
+  [36m<input[39m
+    [33maria-invalid[39m=[32m"false"[39m
+    [33mmaxlength[39m=[32m"200"[39m
+    [33mrequired[39m=[32m""[39m
+    [33mvalue[39m=[32m"Unwritten checkpoint"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"df-plain-list"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"df-goal-list"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"df-observation-list"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"df-history-detail-list"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"df-history-detail-list"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul />[39m
+
+  Name "":
+  [36m<ul />[39m
+
+  Name "":
+  [36m<ul />[39m
+
+  Name "":
+  [36m<ul />[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"df-observation-record"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"df-observation-record"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  --------------------------------------------------
+  main:
+
+  Name "Planner":
+  [36m<main[39m
+    [33maria-labelledby[39m=[32m"planner-heading"[39m
+    [33mclass[39m=[32m"df-product-surface"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  time:
+
+  Name "":
+  [36m<time[39m
+    [33mdatetime[39m=[32m"2026-09-23"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<time[39m
+    [33mdatetime[39m=[32m"2026-09-23T13:00:00.000Z"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  region:
+
+  Name "Goals":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m"goals-heading"[39m
+    [33mclass[39m=[32m"df-panel df-goals"[39m
+  [36m/>[39m
+
+  Name "Measurement":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m"measurement-8fbc9010-b0af-4bbd-8427-4f8c694a41ff"[39m
+    [33mclass[39m=[32m"df-goal-measurement"[39m
+  [36m/>[39m
+
+  Name "Progress Reporting":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m"reporting-8fbc9010-b0af-4bbd-8427-4f8c694a41ff"[39m
+    [33mclass[39m=[32m"df-goal-reporting"[39m
+  [36m/>[39m
+
+  Name "Current measurement period":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Current measurement period"[39m
+    [33mclass[39m=[32m"df-observation-period"[39m
+  [36m/>[39m
+
+  Name "Recorded Progress and Activity":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Recorded Progress and Activity"[39m
+    [33mclass[39m=[32m"df-panel df-recorded-inspection"[39m
+  [36m/>[39m
+
+  Name "Progress":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m"goal-progress-heading"[39m
+    [33mclass[39m=[32m"df-goal-progress"[39m
+  [36m/>[39m
+
+  Name "Goal Structure":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Goal Structure"[39m
+    [33mclass[39m=[32m"df-panel df-goal-structure"[39m
+  [36m/>[39m
+
+  Name "Containment":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Containment"[39m
+  [36m/>[39m
+
+  Name "Contributions":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Contributions"[39m
+  [36m/>[39m
+
+  Name "Prerequisites":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Prerequisites"[39m
+  [36m/>[39m
+
+  Name "Manual Milestones":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Manual Milestones"[39m
+  [36m/>[39m
+
+  Name "Accepted planning and scheduled work":
+  [36m<section[39m
+    [33maria-labelledby[39m=[32m"_r_g_-heading"[39m
+    [33mclass[39m=[32m"df-panel df-accepted-summary df-goal-inspection"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  searchbox:
+
+  Name "Search Goals":
+  [36m<input[39m
+    [33mtype[39m=[32m"search"[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Goal status":
+  [36m<select />[39m
+
+  Name "Unit":
+  [36m<select />[39m
+
+  --------------------------------------------------
+  option:
+
+  Name "All statuses":
+  [36m<option[39m
+    [33mvalue[39m=[32m"all"[39m
+  [36m/>[39m
+
+  Name "Active":
+  [36m<option[39m
+    [33mvalue[39m=[32m"active"[39m
+  [36m/>[39m
+
+  Name "Completed":
+  [36m<option[39m
+    [33mvalue[39m=[32m"completed"[39m
+  [36m/>[39m
+
+  Name "Archived":
+  [36m<option[39m
+    [33mvalue[39m=[32m"archived"[39m
+  [36m/>[39m
+
+  Name "Count":
+  [36m<option[39m
+    [33mvalue[39m=[32m"count"[39m
+  [36m/>[39m
+
+  Name "Words":
+  [36m<option[39m
+    [33mvalue[39m=[32m"words"[39m
+  [36m/>[39m
+
+  Name "Pages":
+  [36m<option[39m
+    [33mvalue[39m=[32m"pages"[39m
+  [36m/>[39m
+
+  Name "Miles":
+  [36m<option[39m
+    [33mvalue[39m=[32m"miles"[39m
+  [36m/>[39m
+
+  Name "Kilometers":
+  [36m<option[39m
+    [33mvalue[39m=[32m"kilometers"[39m
+  [36m/>[39m
+
+  Name "Minutes":
+  [36m<option[39m
+    [33mvalue[39m=[32m"minutes"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  [36m<p[39m
+    [33mrole[39m=[32m"status"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"df-success-message"[39m
+    [33mrole[39m=[32m"status"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  form:
+
+  Name "Edit Goal":
+  [36m<form[39m
+    [33maria-label[39m=[32m"Edit Goal"[39m
+    [33mclass[39m=[32m"df-goal-editor df-form-stack"[39m
+  [36m/>[39m
+
+  Name "change Measurement":
+  [36m<form[39m
+    [33maria-label[39m=[32m"change Measurement"[39m
+    [33mclass[39m=[32m"df-measurement-form df-form-stack"[39m
+  [36m/>[39m
+
+  Name "Activity period":
+  [36m<form[39m
+    [33maria-label[39m=[32m"Activity period"[39m
+    [33mclass[39m=[32m"df-form-stack"[39m
+  [36m/>[39m
+
+  Name "Structure editor":
+  [36m<form[39m
+    [33maria-label[39m=[32m"Structure editor"[39m
+    [33mclass[39m=[32m"df-form-stack"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"df-app"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"df-shell"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"df-foundation-header"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0mDayFrame[0m
+          [36m</strong>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"App Sections"[39m
+            [33mclass[39m=[32m"df-foundation-primary"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"true"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mPlanner[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-pressed[39m=[32m"false"[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mSummary[0m
+            [36m</button>[39m
+          [36m</nav>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-location"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"df-foundation-location-title"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mPlanner / Goals[0m
+            [36m</h2>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"df-secondary-button"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mBack[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"df-foundation-support"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"df-foundation-support-content"[39m
+          [36m>[39m
+            [36m<details[39m
+              [33mclass[39m=[32m"df-foundation-utilities"[39m
+            [36m>[39m
+              [36m<summary>[39m
+                [0mSettings and data[0m
+              [36m</summary>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"df-confirmation df-workflow-block df-workflow-block--profiles"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-form-stack"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-header"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"df-panel-title"[39m
+                    [36m>[39m
+                      [0mSaved Setup Profiles[0m
+                    [36m</h2>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"df-support"[39m
+                    [36m>[39m
+                      [0mSave named local setups, then load one later to replace the current active setup.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-field"[39m
+                  [36m>[39m
+                    [36m<label[39m
+                      [33mfor[39m=[32m"dayframe-profile-name"[39m
+                    [36m>[39m
+                      [0mProfile Name[0m
+                    [36m</label>[39m
+                    [36m<input[39m
+                      [33mid[39m=[32m"dayframe-profile-name"[39m
+                      [33mplaceholder[39m=[32m"Profile name"[39m
+                      [33mtype[39m=[32m"text"[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m/>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"df-screen-actions"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"df-secondary-button"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mSave Current Setup as Profile[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                  [36m<ul[39m
+                    [33mclass[39m=[32m"df-plain-list"[39m
+                  [36m>[39m
+                    [36m<li>[39m
+                      [36m<div>[39m
+                        [36m<strong>[39m
+                          [0mSource A saved setup[0m
+                        [36m</strong>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"df-muted"[39m
+                        [36m>[39m
+                          [0m Saved [0m
+                          [0m2026-09-23T12:00:00.000Z[0m
+                        [36m</span>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"df-screen-actions"[39m
+                      [36m>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mLoad Profile[0m
+                        [36m</button>[39m
+                        [36m<button[39m
+                          [33mclass[39m=[32m"df-secondary-button"[39m
+                          [33mtype[39m=[32m"button"[39m
+                        [36m>[39m
+                          [0mDelete Profile[0m
+                        [36m</button>[39m
+                      [36m</div>[39m
+                    [36m</li>[39m
+                  [36m</ul>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"df-screen-actions"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mExport Complete Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mImport Setup Backup[0m
+                  [36m</button>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"df-secondary-button"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [0mClear Local Data[0m
+                  [36m</button>[39m
+                [36m</div>[39m
+                [36m<input[39m
+                  [33maccept[39m=[32m"application/json,.json"[39m
+                  [33maria-label[39m=[32m"Import Setup Backu...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/tests/GoalRecordedInspection.test.tsx:356:17
+    354|   expect(screen.getAllByRole("button", { name: "Open Activity day 2026…
+    355|   console.log("REPORT_DEBUG", JSON.stringify(f.store.getExecutionHisto…
+    356|   expect(screen.getByRole("button", { name: "Reported completed: 1" })…
+       |                 ^
+    357|   expect(inspector().getByText("25%")).toBeVisible();
+    358|   expect(screen.getByLabelText("Goal title")).toHaveValue("Unwritten G…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  17:25:08
+   Duration  6.13s (transform 1.64s, setup 0ms, import 1.49s, tests 3.94s, environment 588ms)
+

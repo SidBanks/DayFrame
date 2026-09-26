@@ -1,0 +1,12 @@
+NATIVE_CORE_PASS
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:33
+  if (r.exceptionDetails) throw Error(JSON.stringify(r.exceptionDetails));
+                                ^
+
+Error: {"exceptionId":1,"text":"Uncaught","lineNumber":0,"columnNumber":148,"scriptId":"252","stackTrace":{"callFrames":[{"functionName":"","scriptId":"252","url":"","lineNumber":0,"columnNumber":154},{"functionName":"","scriptId":"252","url":"","lineNumber":0,"columnNumber":207}]},"exception":{"type":"object","subtype":"error","className":"Error","description":"Error: Missing Native full footprint\n    at <anonymous>:1:155\n    at <anonymous>:1:208","objectId":"5111156357428054387.10.2"}}
+    at ev (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:33:33)
+    at async clickMatch (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:58:3)
+    at async lifecycleFeedback (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:232:25)
+    at async file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:226:1
+
+Node.js v22.23.2

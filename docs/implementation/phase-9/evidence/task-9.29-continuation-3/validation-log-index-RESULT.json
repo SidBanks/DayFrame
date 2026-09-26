@@ -1,0 +1,566 @@
+{
+  "finalChecks": {
+    "format": {
+      "command": "npm exec prettier -- --check .",
+      "log": "verified-format-RESULT.log",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "npm run lint",
+      "log": "post-focus-lint-RESULT.log",
+      "exitCode": 0
+    },
+    "typecheck": {
+      "command": "npm run typecheck; also repeated by npm run build",
+      "log": "final-typecheck-RESULT.log",
+      "exitCode": 0
+    },
+    "build": {
+      "command": "npm run build",
+      "log": "verified-build-RESULT.log",
+      "exitCode": 0
+    },
+    "bundle": {
+      "command": "npm run check:bundle",
+      "log": "verified-bundle-RESULT.log",
+      "exitCode": 0
+    },
+    "tests": {
+      "command": "npm run test -- --maxWorkers=1",
+      "log": "verified-isolated-tests-RESULT.log",
+      "exitCode": 0,
+      "files": 178,
+      "tests": 1831,
+      "unhandledErrors": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "log": "verified-diff-check-RESULT.log",
+      "exitCode": 0
+    },
+    "canonicalGapDiagnostic": {
+      "command": "npm exec vitest -- run --config ../docs/implementation/phase-9/evidence/task-9.29-continuation-3/correction-repro-config-RESULT.mjs --maxWorkers=1",
+      "log": "correction-repro-RESULT.log",
+      "exitCode": 0,
+      "meaning": "Pass asserts blocked publication, not workflow success"
+    },
+    "native": {
+      "log": "browser-native-RESULT.log",
+      "exitCode": 1,
+      "meaning": "Stopped at reproduced omission/publication gap at 320px; later scenarios not executed"
+    }
+  },
+  "logs": [
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/baseline-build-RESULT.log",
+      "bytes": 8233,
+      "sha256": "0dc564bba992b25e7e133dcf738d2faf9f7154a3ff3bc1c1b1f506183d76916b",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/baseline-bundle-RESULT.log",
+      "bytes": 4833,
+      "sha256": "cd58528e4e77e495579e54fe3852f5ccc8f9e8bb94a1b8cab609374e83cfce1b",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/baseline-lint-RESULT.log",
+      "bytes": 35,
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/baseline-tests-RESULT.log",
+      "bytes": 2731,
+      "sha256": "7511fa08c72b20e4bba241d2378e03ec438c606b36ea6da3b439720569e1ae68",
+      "summary": [
+        "Test Files  1 failed | 175 passed (176)",
+        "Tests  1 failed | 1820 passed (1821)",
+        "Start at  13:01:06",
+        "Duration  207.58s (transform 6.55s, setup 0ms, import 21.98s, tests 140.46s, environment 25.46s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-first-RESULT.log",
+      "bytes": 833,
+      "sha256": "d1e32d71a2b6a91f1a030910c9870be461f3696f3403b3913de6ebc8dfdac28d",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-materialization-diagnostic-RESULT.log",
+      "bytes": 4160,
+      "sha256": "9df5cb47b7105b61d0af0ae3eaa4a39b87896033ce70dd77ac61b487bbf67c3d",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-native-RESULT.log",
+      "bytes": 4160,
+      "sha256": "a70028032d2ee787e4e36971e3e4d42a003f252d665010d4bc171b633bbbaca7",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-try-refresh-diagnostic-RESULT.log",
+      "bytes": 4160,
+      "sha256": "f53f1164f2f377ec23a804a89e1bfa8b388a2d95fb43ba1b2233348eda28ecb3",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/composition-typecheck-RESULT.log",
+      "bytes": 44,
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/correction-repro-RESULT.log",
+      "bytes": 229,
+      "sha256": "66dacbc4c45df6cad5193bf3ddaade167b7a86628ea20cd253ca22934f8f795a",
+      "summary": [
+        "Test Files  1 passed (1)",
+        "Tests  1 passed (1)",
+        "Start at  20:50:25",
+        "Duration  1.37s (transform 787ms, setup 0ms, import 781ms, tests 461ms, environment 0ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "e724e533f059002e992da32c1ff581faa35d940188602245ffba33c5bcfdb98c",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "688f44053a4d33f22964de83b98a44cc66ef947a4edc92cd71fde563410ec8c5",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-diff-check-RESULT.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-focused-tests-RESULT.log",
+      "bytes": 411,
+      "sha256": "eb11d8caa4d5b99e308d56538f6182e1993c327aa0c9373bb95b0cd904212036",
+      "summary": [
+        "Test Files  3 passed (3)",
+        "Tests  24 passed (24)",
+        "Start at  20:51:22",
+        "Duration  6.97s (transform 1.43s, setup 0ms, import 1.60s, tests 3.56s, environment 1.53s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-format-RESULT.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-format-retry-RESULT.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-format-write-RESULT.log",
+      "bytes": 1249,
+      "sha256": "dedda49fadd447d16a6065e4c4d7bc6ec33be67473d127d55cd94624b0637889",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-isolated-tests-RESULT.log",
+      "bytes": 8914,
+      "sha256": "a1b1959304ba5606283ec49d6c788567a672c1660b2296443530b43872066db0",
+      "summary": [
+        "Test Files  1 failed | 177 passed (178)",
+        "Tests  1 failed | 1830 passed (1831)",
+        "Start at  20:53:33",
+        "Duration  184.36s (transform 5.56s, setup 0ms, import 20.05s, tests 127.21s, environment 20.72s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-lint-RESULT.log",
+      "bytes": 225,
+      "sha256": "f6e6fc640fde077383f9225a219e8d701326d9e666dc0c5f837ff003318ed1e1",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-lint-retry-RESULT.log",
+      "bytes": 35,
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/final-typecheck-RESULT.log",
+      "bytes": 44,
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/focus-diagnostic-RESULT.log",
+      "bytes": 1374,
+      "sha256": "039f6854aee64aab3f5850c1e85c60b39c178c884a0ea82f11411f0e603a06b6",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 15 passed (16)",
+        "Start at  19:37:53",
+        "Duration  4.43s (transform 1.64s, setup 0ms, import 1.56s, tests 2.14s, environment 613ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/focus-handoff-tests-RESULT.log",
+      "bytes": 384,
+      "sha256": "ef55cfd417c71e565b69644eaf9ae98c816c925ac353740d7bf3f39556cd5582",
+      "summary": [
+        "Test Files  2 passed (2)",
+        "Tests  18 passed (18)",
+        "Start at  20:56:58",
+        "Duration  21.31s (transform 3.40s, setup 0ms, import 3.19s, tests 15.80s, environment 1.96s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/focus-repair-RESULT.log",
+      "bytes": 375,
+      "sha256": "5cf19e08bb40adf482a54a3a84ae34f5f5a45671583403f6181d4b9d8df752cf",
+      "summary": [
+        "Test Files  2 passed (2)",
+        "Tests  20 passed (20)",
+        "Start at  19:38:23",
+        "Duration  9.23s (transform 1.92s, setup 0ms, import 1.80s, tests 6.22s, environment 1.02s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/lazy-host-build-RESULT.log",
+      "bytes": 8233,
+      "sha256": "a0a8759f4155b358c69edcb5c7484eaefcda81d95cc3288ea075b181edc361a6",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/lazy-host-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "cb1f9b399a95fd42a21013f0d47875e9bfbb25a34902c79446033e95055a059d",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/lazy-host-integrated-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "0fce6970cba708534d7461e67765ddbf29b9ce4687d16d8a985edd7380b360ba",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/native-build-retry-RESULT.log",
+      "bytes": 8142,
+      "sha256": "44ce2c713b3780de3c7320a5d127d809f5611264ce9d2bba6e851a1d41812864",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/native-workflow-build-RESULT.log",
+      "bytes": 208,
+      "sha256": "f16e79c35a86a3ee194579422f1280c9c5e1c5fcc5a9814af3206b16773dcef6",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/navigation-format-RESULT.log",
+      "bytes": 165,
+      "sha256": "754bcaf05ddcb4d0d19f879bfc78f7e0c6b7d53967eba50ba80a759208ec44aa",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/navigation-full-tests-RESULT.log",
+      "bytes": 299,
+      "sha256": "86a2ff173f9e64170ad58f02616ac08973a79090f7a321d8912d6c9918cbc69c",
+      "summary": [
+        "Test Files  176 passed (176)",
+        "Tests  1822 passed (1822)",
+        "Start at  19:40:11",
+        "Duration  182.00s (transform 6.53s, setup 0ms, import 20.61s, tests 122.80s, environment 21.85s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/navigation-workflow-typecheck-RESULT.log",
+      "bytes": 44,
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "25cfd3a9063e2194f009fb8b8efcdb8b75d9147cf12b22e532001988c3b747e5",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "f056b85842e2cf8caf30c9f291748be8ae9101fa1474725bab7eebc5718e98f2",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-diff-check-RESULT.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-format-RESULT.log",
+      "bytes": 149,
+      "sha256": "d33256d45127fac8b202808cd82f7cc81ce231d55bbf8b9063aa441a7fa90cd7",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-format-write-RESULT.log",
+      "bytes": 40,
+      "sha256": "57ef34de591662ed5624eeb1e43a7826832a6514b11383bdde7c6b2f7bf03055",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/post-focus-lint-RESULT.log",
+      "bytes": 35,
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/refined-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "c2e56e04478bd8b812773f060dad2cdaed410ef117394fbbc8accd53c0f40794",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/refined-ui-tests-RESULT.log",
+      "bytes": 9439,
+      "sha256": "2f01282bdeb3b1981294a9411b74108ce7509e02532d4d8ffc10152d15b42771",
+      "summary": [
+        "Test Files  1 failed | 3 passed (4)",
+        "Tests  1 failed | 146 passed (147)",
+        "Start at  20:42:09",
+        "Duration  32.70s (transform 2.31s, setup 0ms, import 2.29s, tests 28.14s, environment 1.89s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/refinement-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "1c81996840ad37ab31d1cd8c181b05d80bb5ed8b1eeafa09b749d0380cb1c3ac",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/seed-build-RESULT.log",
+      "bytes": 413,
+      "sha256": "7e242761318f3114b39ad108b7abf497f88883e0ab87d22e0de4d0d0823ae83f",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/stable-detail-tests-RESULT.log",
+      "bytes": 922,
+      "sha256": "ccd860c07b43e12b1eb666a4a6360f48d7c705de58921b9afc9c9c76bd08f408",
+      "summary": [
+        "Test Files  1 failed | 1 passed (2)",
+        "Tests  1 failed | 128 passed (129)",
+        "Start at  20:44:20",
+        "Duration  33.96s (transform 2.55s, setup 0ms, import 2.19s, tests 30.59s, environment 989ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/trial-typecheck-RESULT.log",
+      "bytes": 881,
+      "sha256": "4be3579a233f4b37efcce168c877e42b70a870f06e94c821047cd888e6347d42",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/valid-offers-covered-tests-RESULT.log",
+      "bytes": 1348,
+      "sha256": "e39ecc829808b21473db2300d48766193d0e3a8e82283da31d9c1d3cc0dac654",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 4 passed (5)",
+        "Start at  20:46:26",
+        "Duration  3.53s (transform 1.22s, setup 0ms, import 1.15s, tests 1.91s, environment 391ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/valid-offers-disjoint-tests-RESULT.log",
+      "bytes": 1335,
+      "sha256": "fdfc1a63ab08631df66fea585907d7e7de5f707a6a4586a8c938751e9311db7e",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 4 passed (5)",
+        "Start at  20:48:14",
+        "Duration  3.43s (transform 1.21s, setup 0ms, import 1.17s, tests 1.74s, environment 439ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/valid-offers-per-day-tests-RESULT.log",
+      "bytes": 1380,
+      "sha256": "79e45473fe9d8ae3cb1a42018bf34235e12fe94484ef821c39ce9398ea7c4cd4",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 4 passed (5)",
+        "Start at  20:49:45",
+        "Duration  4.62s (transform 1.44s, setup 0ms, import 1.40s, tests 2.63s, environment 509ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/valid-offers-refined-tests-RESULT.log",
+      "bytes": 1424,
+      "sha256": "401f2f662748c0577834306e46a5cf79fd19a6838f9b1e27ba50a9a505adf7a5",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 4 passed (5)",
+        "Start at  20:45:43",
+        "Duration  4.54s (transform 1.50s, setup 0ms, import 1.45s, tests 2.42s, environment 576ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/valid-offers-tests-RESULT.log",
+      "bytes": 329,
+      "sha256": "0c2d2bb69803b4b872c577c32e0c894e336111ac6e81fbaeda8ed353263241f8",
+      "summary": [
+        "Test Files  1 passed (1)",
+        "Tests  4 passed (4)",
+        "Start at  20:43:02",
+        "Duration  4.20s (transform 1.48s, setup 0ms, import 1.41s, tests 2.16s, environment 534ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/verified-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "1ae4917ea6358bb4f61568a323f5602e4317b3e5c2df01b61813e634e70c2150",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/verified-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "f056b85842e2cf8caf30c9f291748be8ae9101fa1474725bab7eebc5718e98f2",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/verified-diff-check-RESULT.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/verified-format-RESULT.log",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/verified-isolated-tests-RESULT.log",
+      "bytes": 299,
+      "sha256": "01fa175b3ad8673b9c8e09aa3944a83b227c12dd96a56c287b2fef61a8e3ca50",
+      "summary": [
+        "Test Files  178 passed (178)",
+        "Tests  1831 passed (1831)",
+        "Start at  20:59:30",
+        "Duration  170.26s (transform 6.01s, setup 0ms, import 18.66s, tests 115.75s, environment 19.82s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-app-retry-RESULT.log",
+      "bytes": 10960,
+      "sha256": "ba0e01416578cdf4497a3cdd6b3434821de824a72ad64acfa0299f890be4ffa2",
+      "summary": [
+        "Test Files  1 failed (1)",
+        "Tests  3 failed | 121 passed (124)",
+        "Start at  20:22:11",
+        "Duration  28.01s (transform 2.34s, setup 0ms, import 1.80s, tests 25.64s, environment 461ms)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-build-RESULT.log",
+      "bytes": 8142,
+      "sha256": "edfb362f8d7bc4b00d748dc61bb317b7918e9dd93301fcdf20c52746859c26ff",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-bundle-RESULT.log",
+      "bytes": 4806,
+      "sha256": "203835f8a4367713990c33f33f64d5da4b3274bcc88ee943b46723b97600874d",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-composition-tests-RESULT.log",
+      "bytes": 466,
+      "sha256": "3647a02d2c61f60c240181ed8f823285380e59a30697409cb78974babdeddb45",
+      "summary": [
+        "Test Files  4 passed (4)",
+        "Tests  28 passed (28)",
+        "Start at  19:51:00",
+        "Duration  10.12s (transform 2.03s, setup 0ms, import 2.08s, tests 6.05s, environment 1.63s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-format-RESULT.log",
+      "bytes": 1074,
+      "sha256": "01defba649b3a1a7ebc4ef298d1315fb84c63be0e22234283b56a2a4df7e2f0f",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-initial-tests-RESULT.log",
+      "bytes": 122569,
+      "sha256": "c6492d94016073e8f88357385297431027320c1d36ef09505c2274ee190dbe9a",
+      "summary": [
+        "Test Files  3 failed | 1 passed (4)",
+        "Tests  5 failed | 23 passed (28)",
+        "Start at  19:47:58",
+        "Duration  15.20s (transform 1.90s, setup 0ms, import 2.15s, tests 10.68s, environment 1.99s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-lint-RESULT.log",
+      "bytes": 35,
+      "sha256": "53af88f287222373cf8bf0959dce59c84fa9aca5b8cd1f5af8c635a179b6afba",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-refinement-tests-RESULT.log",
+      "bytes": 411,
+      "sha256": "a916985c60a271f6c478476d42371e6ed493085290cda9f3a788ae9bc70a8f88",
+      "summary": [
+        "Test Files  3 passed (3)",
+        "Tests  22 passed (22)",
+        "Start at  20:21:28",
+        "Duration  4.98s (transform 1.18s, setup 0ms, import 1.25s, tests 2.34s, environment 1.15s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-typecheck-RESULT.log",
+      "bytes": 44,
+      "sha256": "ec99dfc2e84793339694ceea8922dae8bef7f83a96aee6528bbaa8f72e575136",
+      "summary": []
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-ui-compatibility-RESULT.log",
+      "bytes": 42012,
+      "sha256": "2c405736d9823a2c3d034fc542beb434623ca14fc5bc2a834b0fbd8725b2ad1c",
+      "summary": [
+        "Test Files  1 failed | 3 passed (4)",
+        "Tests  60 failed | 113 passed (173)",
+        "Start at  20:16:08",
+        "Duration  317.48s (transform 2.35s, setup 0ms, import 2.11s, tests 313.38s, environment 1.66s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workflow-ui-tests-RESULT.log",
+      "bytes": 612786,
+      "sha256": "02915b9dcc97764f74555d061151c7ddc49ab7c66da4165a97d6f8e0e0b37571",
+      "summary": [
+        "Test Files  4 failed | 38 passed (42)",
+        "Tests  30 failed | 410 passed (440)",
+        "Start at  20:01:19",
+        "Duration  122.15s (transform 3.12s, setup 0ms, import 9.60s, tests 89.39s, environment 18.69s)"
+      ]
+    },
+    {
+      "path": "docs/implementation/phase-9/evidence/task-9.29-continuation-3/workspace-regressions-RESULT.log",
+      "bytes": 373,
+      "sha256": "8b0f70cb9a33a508cf421a2d476fed58ed08b916b005c247c239a739bf1a1c13",
+      "summary": [
+        "Test Files  2 passed (2)",
+        "Tests  19 passed (19)",
+        "Start at  19:58:03",
+        "Duration  4.02s (transform 1.13s, setup 0ms, import 1.16s, tests 1.93s, environment 777ms)"
+      ]
+    }
+  ]
+}

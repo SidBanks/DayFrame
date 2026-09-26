@@ -1,0 +1,11 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/state/publicationSourceAdmission.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  11:47:12
+   Duration  4.37s (transform 1.51s, setup 0ms, import 1.33s, tests 2.85s, environment 0ms)
+

@@ -1758,3 +1758,633 @@ textarea {
     min-height: 640px;
   }
 }
+
+/* Navigation foundation: compact, wrapping controls; child forms retain full width. */
+.df-foundation-header,
+.df-foundation-utilities {
+  padding: 12px;
+  border: 1px solid var(--df-border);
+  border-radius: 14px;
+  background: var(--df-panel);
+}
+.df-foundation-primary,
+.df-foundation-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.df-foundation-primary button,
+.df-foundation-secondary button,
+.df-foundation-location button,
+.df-foundation-day-nav button,
+.df-foundation-utilities > summary {
+  min-height: 44px;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.df-foundation-primary [aria-pressed="true"],
+.df-foundation-secondary [aria-pressed="true"] {
+  border-color: var(--df-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.df-foundation-secondary button {
+  padding-inline: 8px;
+}
+.df-foundation-header button:focus-visible,
+.df-foundation-secondary button:focus-visible,
+.df-foundation-day-nav button:focus-visible,
+.df-foundation-utilities > summary:focus-visible {
+  outline: 3px solid var(--df-accent);
+  outline-offset: 2px;
+}
+.df-foundation-location,
+.df-foundation-day-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+.df-foundation-location-title {
+  font-size: 1rem;
+  margin: 0;
+}
+.df-foundation-utilities > summary {
+  cursor: pointer;
+  padding: 12px 0;
+}
+.df-foundation-utilities[open] > summary {
+  margin-bottom: 12px;
+}
+.df-foundation-support-content,
+.df-compatibility-actions {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.df-compatibility-actions:empty {
+  display: none;
+}
+@media (min-width: 768px) {
+  .df-foundation-secondary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Selected day: agenda first, independent item disclosure, shared across entry paths. */
+.df-day-workspace {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.df-day-workspace .df-panel {
+  min-width: 0;
+}
+.df-day-workspace h2,
+.df-day-workspace h3,
+.df-day-workspace h4,
+.df-day-workspace p {
+  overflow-wrap: anywhere;
+}
+.df-day-agenda {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0;
+  list-style: none;
+}
+.df-day-card {
+  padding: 1rem;
+  border: 1px solid var(--df-border, #8895a6);
+  border-radius: 0.75rem;
+  min-width: 0;
+}
+.df-day-card h4 {
+  font-size: 1.1rem;
+  margin: 0.25rem 0;
+}
+.df-day-card p {
+  margin: 0.4rem 0;
+}
+.df-day-time {
+  font-weight: 600;
+}
+.df-day-support {
+  margin-inline-start: 0.75rem;
+  border-inline-start-width: 4px;
+}
+.df-day-protection {
+  border-style: dashed;
+  padding-block: 0.65rem;
+}
+.df-day-detail {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+.df-day-workspace button,
+.df-day-workspace summary,
+.df-day-workspace input,
+.df-day-workspace select {
+  min-height: 44px;
+}
+.df-day-workspace button {
+  white-space: normal;
+  max-width: 100%;
+}
+.df-day-workspace summary {
+  cursor: pointer;
+  padding-block: 0.6rem;
+}
+.df-day-workspace input,
+.df-day-workspace select,
+.df-day-workspace textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.df-day-workspace :focus-visible {
+  outline: 3px solid var(--df-accent, #5b86e5);
+  outline-offset: 3px;
+}
+.df-day-notices:empty {
+  display: none;
+}
+.df-day-report {
+  display: grid;
+  gap: 0.5rem;
+}
+@media (max-width: 430px) {
+  .df-day-card {
+    padding: 0.75rem;
+  }
+  .df-day-workspace .df-panel {
+    padding: 0.85rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .df-day-mode {
+    gap: 12px;
+  }
+  .df-day-mode .df-planner-header {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+  .df-day-mode #planner-heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .df-day-mode .df-foundation-day-nav > span {
+    display: none;
+  }
+  .df-day-mode .df-foundation-secondary {
+    margin-top: 0;
+  }
+  .df-day-mode .df-foundation-day-nav {
+    margin-top: 4px;
+    justify-content: flex-end;
+  }
+  .df-day-workspace > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 8px;
+    align-items: center;
+  }
+  .df-day-workspace > header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  .df-day-workspace > header > p {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+}
+
+/* Accepted-planning Summary: one Goal/iteration/fact inspected at a time. */
+.df-accepted-summary,
+.df-accepted-detail {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.df-accepted-summary header h2 {
+  margin: 0;
+}
+.df-accepted-range,
+.df-accepted-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+}
+.df-accepted-range > *,
+.df-accepted-toolbar > * {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.df-accepted-list {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.df-accepted-group,
+.df-accepted-iteration,
+.df-accepted-fact {
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  padding: 0.8rem;
+  min-width: 0;
+}
+.df-accepted-group h3,
+.df-accepted-iteration h4,
+.df-accepted-fact h5 {
+  font-size: 1.1rem;
+  margin: 0.3rem 0;
+}
+.df-accepted-summary p,
+.df-accepted-summary h3,
+.df-accepted-summary dd {
+  overflow-wrap: anywhere;
+}
+.df-accepted-summary dd {
+  margin-inline-start: 0.5rem;
+}
+.df-accepted-summary button,
+.df-accepted-summary summary,
+.df-accepted-summary input,
+.df-accepted-summary select {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+}
+.df-accepted-summary input,
+.df-accepted-summary select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+.df-accepted-summary summary {
+  cursor: pointer;
+  padding-block: 0.6rem;
+  overflow-wrap: anywhere;
+}
+.df-accepted-summary :focus-visible {
+  outline: 3px solid var(--df-accent);
+  outline-offset: 3px;
+}
+.df-accepted-supportActivity {
+  border-inline-start: 4px solid var(--df-border);
+}
+.df-accepted-bufferProtection {
+  border-style: dashed;
+}
+@media (max-width: 430px) {
+  .df-accepted-summary {
+    padding: 0.8rem;
+  }
+  .df-accepted-detail .df-accepted-iteration,
+  .df-accepted-detail .df-accepted-fact {
+    padding: 0.5rem 0;
+    border-inline: 0;
+    border-radius: 0;
+  }
+}
+
+/* My Schedule authored-source surfaces share layout, never domain state. */
+.df-my-schedule,
+.df-commitments {
+  min-width: 0;
+}
+.df-schedule-domains {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+.df-schedule-domains article {
+  padding: 1rem;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  min-width: 0;
+}
+.df-my-schedule p,
+.df-my-schedule h3,
+.df-my-schedule summary,
+.df-commitments h3 {
+  overflow-wrap: anywhere;
+}
+.df-my-schedule button,
+.df-my-schedule summary,
+.df-commitments button,
+.df-commitments summary {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+}
+.df-my-schedule input:not([type="checkbox"]),
+.df-my-schedule select,
+.df-commitments input:not([type="checkbox"]),
+.df-commitments select {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.df-my-schedule fieldset,
+.df-commitments fieldset {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.df-my-schedule summary,
+.df-commitments summary {
+  cursor: pointer;
+  padding-block: 0.7rem;
+}
+.df-my-schedule .df-checkbox-row,
+.df-commitments .df-checkbox-row {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.df-my-schedule :focus-visible,
+.df-commitments :focus-visible {
+  outline: 3px solid var(--df-accent);
+  outline-offset: 3px;
+}
+.df-duration-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  border: 1px solid var(--df-border);
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+.df-duration-fields label {
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.df-sleep-editor > *,
+.df-work-item,
+.df-commitment-advanced {
+  min-width: 0;
+}
+@media (max-width: 430px) {
+  .df-my-schedule .df-grid,
+  .df-commitments .df-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .df-my-schedule.df-panel,
+  .df-my-schedule .df-panel {
+    padding: 0.8rem;
+  }
+  .df-my-schedule .df-list-card {
+    padding: 0.65rem;
+  }
+  .df-my-schedule .df-section-heading-row,
+  .df-commitments .df-section-heading-row {
+    flex-wrap: wrap;
+  }
+}
+.df-my-schedule label:has(input[type="checkbox"]) {
+  min-height: 44px;
+}
+@media (max-width: 767px), (max-height: 600px) {
+  .df-my-schedule .df-setup-action-bar,
+  .df-my-schedule .df-collapsible-section-header--sticky {
+    position: static;
+  }
+}
+
+/* Goal editing is a bounded, reflowing workspace; never clip authored controls. */
+.df-goals,
+.df-goal-planning,
+.df-goals :is(form, fieldset, details, label, article, section, div),
+.df-goal-planning :is(form, fieldset, details, label, div) {
+  min-width: 0;
+}
+.df-goals,
+.df-goal-planning {
+  overflow-wrap: anywhere;
+}
+.df-goals :is(input:not([type="checkbox"]), select, textarea),
+.df-goal-planning :is(input:not([type="checkbox"]), select, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  font: inherit;
+}
+.df-goals :is(button, summary),
+.df-goal-planning :is(button, summary) {
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.df-goals summary,
+.df-goal-planning summary {
+  padding: 12px 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.df-goals :focus-visible,
+.df-goal-planning :focus-visible {
+  outline: 3px solid var(--df-accent);
+  outline-offset: 3px;
+}
+.df-goal-list-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+.df-goal-list-controls label,
+.df-goal-planning label {
+  display: grid;
+  gap: 6px;
+  margin-block: 8px;
+}
+.df-goal-planning label:has(input[type="checkbox"]),
+.df-goals label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 10px;
+}
+.df-goal-planning input[type="checkbox"],
+.df-goals input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+.df-goal-planning .df-screen-actions > label {
+  flex: 1 1 90px;
+}
+.df-goal-planning details {
+  border: 1px solid var(--df-border);
+  border-radius: 10px;
+  padding: 8px;
+}
+.df-goal-planning details[open] > :not(summary) {
+  margin-block: 12px;
+}
+@media (max-width: 480px) {
+  .df-goals :is(.df-goal-editor, .df-goal-detail),
+  .df-goal-planning {
+    padding: 12px;
+  }
+  .df-goals .df-screen-actions,
+  .df-goal-planning .df-screen-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Goal-scoped evidence is readable at phone widths without clipping its lineage. */
+.df-goal-inspection :is(form, label, ul, li, div, details, dl, dd) {
+  min-width: 0;
+}
+.df-goal-inspection {
+  overflow-wrap: anywhere;
+}
+.df-goal-inspection .df-accepted-range {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+}
+.df-goal-inspection input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+}
+.df-goal-inspection :is(button, summary) {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.df-goal-inspection summary {
+  padding: 12px 8px;
+  cursor: pointer;
+}
+.df-goal-inspection h3:focus,
+.df-goal-inspection :focus-visible {
+  outline: 3px solid var(--df-accent);
+  outline-offset: 3px;
+}
+.df-goal-inspection dd {
+  margin-inline-start: 12px;
+}
+@media (max-width: 480px) {
+  .df-goal-inspection .df-accepted-detail {
+    padding-inline: 6px;
+  }
+  .df-goal-inspection .df-accepted-fact,
+  .df-goal-inspection .df-accepted-iteration {
+    padding: 10px;
+  }
+}
+
+/* Backup/import utilities retain practical touch targets on narrow screens. */
+.df-workflow-block--profiles button {
+  min-height: 44px;
+}
+
+.df-goal-structure {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.df-goal-structure button,
+.df-goal-structure input,
+.df-goal-structure select,
+.df-goal-structure summary {
+  min-height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.df-goal-structure button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  margin: 0.25rem 0;
+}
+.df-goal-structure fieldset {
+  min-width: 0;
+}
+.df-goal-structure label {
+  display: grid;
+  gap: 0.35rem;
+}
+.df-goal-structure input,
+.df-goal-structure select {
+  width: 100%;
+  min-width: 0;
+}
+.df-goal-structure ul {
+  list-style: none;
+  padding: 0;
+}
+.df-goal-structure li {
+  border-block-start: 1px solid #ccd3df;
+  padding-block: 0.75rem;
+}
+.df-goal-structure pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.df-goal-structure :focus-visible {
+  outline: 3px solid #265dce;
+  outline-offset: 2px;
+}
+.df-goal-structure [role="alert"] {
+  border-inline-start: 4px solid #ad2436;
+  padding: 0.5rem;
+}
+
+.df-recorded-inspection {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.df-recorded-inspection button,
+.df-recorded-inspection input,
+.df-goal-measurement button,
+.df-goal-reporting button {
+  min-height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.df-recorded-inspection input {
+  width: 100%;
+  min-width: 0;
+}
+.df-recorded-inspection :focus-visible,
+.df-recorded-inspection [tabindex="-1"]:focus {
+  outline: 3px solid var(--df-focus, #285a85);
+  outline-offset: 2px;
+}
+.df-recorded-inspection [role="alert"] {
+  border-left: 3px solid #a52a2a;
+  padding: 0.75rem;
+}
+
+/* Publication and review actions must remain practical touch targets during settlement. */
+.df-month-status button,
+.df-workflow-block--preview .df-action-button,
+.df-schedule-review-summary button {
+  min-height: 44px;
+}

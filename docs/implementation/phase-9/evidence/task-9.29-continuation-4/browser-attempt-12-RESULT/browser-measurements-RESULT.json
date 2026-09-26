@@ -1,0 +1,150 @@
+[
+  {
+    "label": "320-stale-source",
+    "width": 320,
+    "height": 844,
+    "client": 305,
+    "scroll": 305,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Saved sources changed. Generate an updated schedule and Try again before accepting.",
+      "The generated schedule changed. Generate an updated schedule before trying a correction."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 248,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "390-stale-source",
+    "width": 390,
+    "height": 844,
+    "client": 375,
+    "scroll": 375,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Saved sources changed. Generate an updated schedule and Try again before accepting.",
+      "The generated schedule changed. Generate an updated schedule before trying a correction."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 58,
+        "width": 313,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "768-stale-source",
+    "width": 768,
+    "height": 844,
+    "client": 753,
+    "scroll": 753,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Saved sources changed. Generate an updated schedule and Try again before accepting.",
+      "The generated schedule changed. Generate an updated schedule before trying a correction."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": true
+      }
+    ]
+  },
+  {
+    "label": "1280-stale-source",
+    "width": 1280,
+    "height": 844,
+    "client": 1265,
+    "scroll": 1265,
+    "focus": {
+      "tag": "H2",
+      "text": "Schedule details",
+      "outline": "auto",
+      "width": "1px"
+    },
+    "alerts": [
+      "Saved sources changed. Generate an updated schedule and Try again before accepting.",
+      "The generated schedule changed. Generate an updated schedule before trying a correction."
+    ],
+    "controls": [
+      {
+        "text": "Refresh Schedule",
+        "height": 44,
+        "width": 157.1875,
+        "disabled": false
+      },
+      {
+        "text": "Accept preferred option",
+        "height": 44,
+        "width": 182.328125,
+        "disabled": false
+      },
+      {
+        "text": "Build this Schedule: 2026-09-27–2026-09-27",
+        "height": 44,
+        "width": 347.5625,
+        "disabled": true
+      }
+    ]
+  }
+]

@@ -29,8 +29,8 @@ import {
   PROPOSAL_AUTHORITY_STORE,
   REALIZATION_AUTHORITY_STORE,
 } from "../infrastructure/storage/dayFrameDurableDb.js";
-import type { DayFrameActiveV2 } from "./activeV2.js";
-import type { DayFrameProfilesStorageV2 } from "./dayFrameProfiles.js";
+import type { CurrentActiveEnvelope as DayFrameActiveV3 } from "./activeV4.js";
+import type { DayFrameProfilesStorageV3 } from "./dayFrameProfilesV3.js";
 import {
   DAYFRAME_PLAN_DECISIONS_STORAGE_KEY,
   type PlanDecisionEnvelopeV1,
@@ -64,8 +64,8 @@ const DAYFRAME_ACTIVE_V2_STORAGE_KEY = "dayframe-active-v2";
 const DAYFRAME_PROFILES_V2_STORAGE_KEY = "dayframe-profiles-v2";
 
 export type DayFrameRestoreAuthoritySources = {
-  active(): DayFrameActiveV2;
-  profiles(): DayFrameProfilesStorageV2;
+  active(): DayFrameActiveV3;
+  profiles(): DayFrameProfilesStorageV3;
   planDecisions(): PlanDecisionEnvelopeV1;
   executionHistory(): ExecutionHistoryEnvelopeV1;
   historicalPlan(): Promise<
@@ -110,10 +110,39 @@ export function createDayFrameRestoreComposition(options: {
   now?: () => string;
 }) {
   const adapters = createRegistry(options);
+  // The existing coordinator owns this token. It is never exposed to ordinary callers.
+  let coordinatorEpoch: number | undefined;
+  const currentCoordinator = () =>
+    coordinatorEpoch !== undefined &&
+    options.runtime.getState().status === "active" &&
+    (options.runtime.getEpoch?.() ?? coordinatorEpoch) === coordinatorEpoch;
+  const runtime: DayFrameRuntimeAuthorityController = {
+    ...options.runtime,
+    begin: (kind) => {
+      const result = options.runtime.begin(kind);
+      if (result.status === "begun") coordinatorEpoch = result.epoch;
+      return result;
+    },
+    commit: () => (currentCoordinator() ? options.runtime.commit() : { status: "notActive" }),
+    abort: () => (currentCoordinator() ? options.runtime.abort() : { status: "notActive" }),
+    install: (id, target) =>
+      currentCoordinator() ? options.runtime.install(id, target) : { status: "notActive" },
+  };
+  const coordinatorStorage = {
+    ...options.indexedDb,
+    mutate: ((operations, admit, observe) => {
+      const expectedEpoch = coordinatorEpoch;
+      return options.indexedDb.mutate(
+        operations,
+        () => expectedEpoch === coordinatorEpoch && currentCoordinator() && (admit?.() ?? true),
+        observe,
+      );
+    }) as IndexedDbCollectionStorage["mutate"],
+  };
   const coordinator = createRestoreCoordinator({
     participants: Object.values(adapters),
-    runtime: options.runtime,
-    combinedIndexedDb: createCombinedIndexedDbRestoreAdapter(options.indexedDb),
+    runtime,
+    combinedIndexedDb: createCombinedIndexedDbRestoreAdapter(coordinatorStorage),
     antiResurrection: createExecutionHistoryAntiResurrectionAdapter(options.storage),
     journal: createRestoreJournalStorage(options.storage),
     durableStage: createRestoreIndexedDbStaging(options.indexedDb),
@@ -145,7 +174,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = translate(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: async () => sourceFingerprint(options.storage, key),
     recheckSourceFingerprint: async (expected) =>
@@ -187,7 +216,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.executionHistory(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [
@@ -227,7 +256,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.historicalPlan(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [
@@ -260,7 +289,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.goals(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () => indexedFingerprint(options.indexedDb, [GOAL_AUTHORITY_STORE]),
     recheckSourceFingerprint: async (expected) =>
@@ -286,7 +315,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.measurementDefinitions(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [MEASUREMENT_DEFINITION_STORE]),
@@ -313,7 +342,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.progressObservations(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [PROGRESS_OBSERVATION_STORE]),
@@ -340,7 +369,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.goalStructure(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () => indexedFingerprint(options.indexedDb, [GOAL_STRUCTURE_STORE]),
     recheckSourceFingerprint: async (expected) =>
@@ -366,7 +395,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.goalPlanning(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () => indexedFingerprint(options.indexedDb, [GOAL_PLANNING_STORE]),
     recheckSourceFingerprint: async (expected) =>
@@ -404,7 +433,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.composition(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [COMPOSITION_AUTHORITY_STORE]),
@@ -444,7 +473,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.proposals(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [PROPOSAL_AUTHORITY_STORE]),
@@ -483,7 +512,7 @@ function createRegistry(options: Parameters<typeof createDayFrameRestoreComposit
       const checked = restoreTranslators.realizations(value);
       return checked.status === "valid" ? { status: "valid", payload: checked.durable } : checked;
     },
-    clonePayload: structuredClone,
+    clonePayload: (payload) => structuredClone(payload),
     fingerprint: semanticFingerprint,
     captureSourceFingerprint: () =>
       indexedFingerprint(options.indexedDb, [REALIZATION_AUTHORITY_STORE]),

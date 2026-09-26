@@ -7,6 +7,8 @@ import type { PlanDecisionReplayResult } from "../core/decisions/replayPlanDecis
 import type { DayFramePreview, DayFrameState } from "../state/types.js";
 
 export type AcceptedDecisionStatus =
+  | "revoked"
+  | "reviewRequired"
   | "applied"
   | "blocked"
   | "outsideWindow"
@@ -21,6 +23,7 @@ export type AcceptedDecisionStatus =
 export type AcceptedDecisionViewModel = {
   decisionId: PlanDecisionId;
   summary: string;
+  removalLabel?: "Revoke";
   targetSummary: string;
   occurrenceContext: string;
   status: AcceptedDecisionStatus;
@@ -47,14 +50,26 @@ export function buildAcceptedDecisionViewModels(input: {
     )
     .map((decision) => {
       const targetSummary = targetLabel(decision, input.authoredSetup);
+      const sleepReview = input.preview?.result.foundation?.sleep.placementReviews?.find(
+        (r) => r.decisionId === decision.id,
+      );
       const status =
-        input.preview === null
-          ? "notEvaluated"
-          : input.preview.isStale
-            ? "regenerateToEvaluate"
-            : toStatus(replayById.get(decision.id));
+        decision.kind === "placeSleepOccurrence" && decision.payload.revokedAt
+          ? "revoked"
+          : decision.kind === "placeSleepOccurrence" && input.preview && !input.preview.isStale
+            ? sleepReview?.status === "applicable"
+              ? "applied"
+              : sleepReview?.status === "reviewRequired" || sleepReview?.status === "inapplicable"
+                ? "reviewRequired"
+                : "outsideWindow"
+            : input.preview === null
+              ? "notEvaluated"
+              : input.preview.isStale
+                ? "regenerateToEvaluate"
+                : toStatus(replayById.get(decision.id));
       return {
         decisionId: decision.id,
+        ...(decision.kind === "placeSleepOccurrence" ? { removalLabel: "Revoke" as const } : {}),
         targetSummary,
         occurrenceContext: occurrenceContext(decision),
         summary: semanticSummary(decision, targetSummary),
@@ -69,6 +84,7 @@ function targetLabel(
   state: Pick<DayFrameState, "blockTemplates" | "manualEvents" | "shiftDefinitions">,
 ): string {
   const target = decision.target;
+  if (target.sourceKind === "sleepRequirement") return "required Sleep";
   if (target.sourceKind === "template") {
     const source = state.blockTemplates.find(
       (item) =>
@@ -100,6 +116,8 @@ function targetLabel(
 
 function semanticSummary(decision: PlanDecisionV1, target: string): string {
   switch (decision.kind) {
+    case "placeSleepOccurrence":
+      return `Place ${target} at ${decision.payload.sleepStart}${decision.payload.revokedAt ? " (revoked)" : ""}`;
     case "placeOccurrence":
       return `Place ${target} on ${decision.payload.userDayDate} at ${formatTime(decision.payload.startTime)}`;
     case "omitOccurrence":
@@ -113,6 +131,7 @@ function semanticSummary(decision: PlanDecisionV1, target: string): string {
 
 function occurrenceContext(decision: PlanDecisionV1): string {
   const target = decision.target;
+  if (target.sourceKind === "sleepRequirement") return `Sleep on ${target.coordinate.userDayDate}`;
   if (target.sourceKind === "acceptedAllocation")
     return `${target.scheduleRole} on ${target.userDayDate}`;
   if (target.sourceKind === "manualEvent") return "Manual event";
@@ -143,6 +162,10 @@ function toStatus(result: PlanDecisionReplayResult | undefined): AcceptedDecisio
 
 function statusCopy(status: AcceptedDecisionStatus): string {
   switch (status) {
+    case "revoked":
+      return "Revoked — Sleep remains required";
+    case "reviewRequired":
+      return "Review required — correct or revoke this placement";
     case "applied":
       return "Applied";
     case "blocked":

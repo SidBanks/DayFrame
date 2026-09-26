@@ -2,7 +2,7 @@
 
 **Document:** DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION.md
 
-**Version:** 1.0.0
+**Version:** 1.0.1
 
 **Status:** Accepted
 
@@ -14,6 +14,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 1.0.1 | 2026-09-17 | Dedicated authored Sleep requirement and relative Commitment authority; see ADR_FIRST_CLASS_SLEEP_DOMAIN_AND_PERSISTENCE_FOUNDATION. Task 9.11 implements domain/persistence only. |
 | 1.0.0 | TBD | Initial publication of the complete conceptual architecture. Establishes the distinction between responsibility, capability, and workflow as the fundamental organizational model of the architecture. Establishes the distinction between Domain Object Categories and Named Domain Objects as the basis for architectural ownership and information production. Introduces Information Provenance and Explainability as first-class architectural principles. Establishes the distinction between responsibility, capability, and workflow as the fundamental organizational model of the architecture. |
 
 ---
@@ -457,13 +458,17 @@ All planning calculations occur relative to User Days.
 
 A Commitment represents an obligation that owns time.
 
-Commitments possess the highest scheduling authority within planning.
+Fixed, locked and explicitly accepted Commitment geometry constrains planning. Ordinary movable Commitment geometry is resolved around foundational Work and required Sleep before Goal allocation. Task 9.11 establishes Sleep identity/persistence only; scheduling activation follows the remaining Task 9.10 contract.
 
 Planning accommodates Commitments before allocating Capacity to Goals.
 
 Examples include employment, appointments, and recurring obligations.
 
 ---
+
+## Sleep Requirement
+
+Sleep is a dedicated authored biological time requirement, not an ordinary Commitment subtype. Its authored revision is distinct from derived Sleep occurrences, publication and actual execution. Required Sleep resolution precedes discretionary Capacity; unresolved required Sleep is not an ordinary Commitment liability. See [the Sleep ADR](../adr/ADR_FIRST_CLASS_SLEEP_DOMAIN_AND_PERSISTENCE_FOUNDATION.md) for authority and implementation boundaries.
 
 ## Goal
 

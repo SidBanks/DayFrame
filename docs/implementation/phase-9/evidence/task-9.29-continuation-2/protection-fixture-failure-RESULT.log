@@ -1,0 +1,30 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --config ../docs/implementation/phase-9/evidence/task-9.29-continuation-2/protection-preflight-config-RESULT.mjs --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29-continuation-2/protection-preflight-RESULT.test.ts (1 test | 1 failed) 347ms
+   × observes publication readiness after an unconfirmed physically committed Proposal acceptance 346ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../docs/implementation/phase-9/evidence/task-9.29-continuation-2/protection-preflight-RESULT.test.ts > observes publication readiness after an unconfirmed physically committed Proposal acceptance
+RangeError: Cannot generate preview without shiftCycles
+ ❯ generatePreview src/state/dayFrameStore.ts:2891:13
+    2889|   function generatePreview(input: GeneratePreviewActionInput): DayFram…
+    2890|     if (state.shiftCycles.length === 0) {
+    2891|       throw new RangeError("Cannot generate preview without shiftCycle…
+       |             ^
+    2892|     }
+    2893|
+ ❯ Proxy.<anonymous> src/state/dayFrameStore.ts:3440:19
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29-continuation-2/protection-preflight-RESULT.test.ts:9:8
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  10:05:19
+   Duration  1.13s (transform 735ms, setup 0ms, import 676ms, tests 347ms, environment 0ms)
+

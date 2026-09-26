@@ -1,0 +1,8 @@
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:199
+if(sourceRows.historicalPlanBatches.length!==1||!sourceRows.historicalPlanDays.length||sourceRows.realizationAuthority.length!==4||!sourceRows.executionHistoryRecords.filter(row=>row.kind === "assertion").length||!sourceRows.progressObservations.length)throw Error('Nonempty round-trip fixture missing a required family '+JSON.stringify(Object.fromEntries(Object.entries(sourceRows).map(([k,v])=>[k,v.length]))));
+                                                                                                                                                                                                                                                                   ^
+
+Error: Nonempty round-trip fixture missing a required family {"proposalAuthority":4,"realizationAuthority":4,"historicalPlanBatches":1,"historicalPlanDays":1,"executionHistoryRecords":1,"progressObservations":1}
+    at file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.6/browser-driver-RESULT.mjs:199:260
+
+Node.js v22.23.2

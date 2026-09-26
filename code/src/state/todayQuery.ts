@@ -1,3 +1,4 @@
+import { validateSleepExecutionPublications } from "../core/sleep/sleepExecution.js";
 import {
   buildTodayReadModel,
   isCanonicalTodayEvaluationInstant,
@@ -34,6 +35,7 @@ export type TodayQueryResult =
 export function createTodayQuery(dependencies: {
   getAuthoredSetup: () => DayFrameAuthoredSetup;
   historicalPlan: {
+    exportHistoricalPlan?: import("./historicalPlanSurface.js").HistoricalPlanSurface["exportHistoricalPlan"];
     getHistoricalPlanDay: (
       userDayDate: string,
       asOf: string,
@@ -85,8 +87,23 @@ export function createTodayQuery(dependencies: {
       };
     const ingress = dependencies.executionHistory.getExecutionHistoryIngressStatus();
     const migration = dependencies.executionHistory.getExecutionHistoryMigrationStatus();
+    const allRecords = dependencies.executionHistory.getExecutionHistory();
+    const requiresSleepEvidence = allRecords.some(
+      (record) => record.kind === "assertion" && record.subject.kind === "publishedSleep",
+    );
+    const frozenHistory = requiresSleepEvidence
+      ? await dependencies.historicalPlan.exportHistoricalPlan?.()
+      : undefined;
+    const brokenSleepEvidence =
+      requiresSleepEvidence &&
+      (!frozenHistory ||
+        frozenHistory.status !== "exported" ||
+        !validateSleepExecutionPublications(allRecords, frozenHistory.batches));
     const execution =
-      ingress.status === "recoveryRequired" || migration === "protected"
+      ingress.status === "recoveryRequired" ||
+      migration === "protected" ||
+      brokenSleepEvidence ||
+      (ingress.status === "accepted" && ingress.quarantinedComponentCount > 0)
         ? ({ coverage: "unavailableProtected" } as const)
         : migration === "initializing" || migration === "migrating" || migration === "unavailable"
           ? ({ coverage: "unavailable" } as const)

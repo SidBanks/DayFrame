@@ -92,7 +92,8 @@ describe("HistoricalPlanReportingSection", () => {
     render(
       <HistoricalPlanReportingSection
         initialDate="2026-08-20"
-        store={{ ...base, getHistoricalPlanDay }}
+        // The fixed historical query is independent of the fixture store’s bootstrap events.
+        store={{ ...base, getHistoricalPlanDay, subscribeHistory: () => () => false }}
         now={() => new Date("2026-08-22T12:00:00.000Z")}
       />,
     );

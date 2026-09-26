@@ -1,0 +1,10 @@
+
+> dayframe@0.1.0 lint
+> eslint .
+
+
+/home/sid/Penn Digital Services/DayFrame/code/src/ui/tests/DayFrameApp.test.tsx
+  2661:16  error  Unexpected constant condition  no-constant-condition
+
+✖ 1 problem (1 error, 0 warnings)
+

@@ -1,0 +1,94 @@
+{
+  "documents": {
+    "docs/architecture/REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_V1_PROPOSED_RESULT.md": {
+      "absolutePath": "/home/sid/Penn Digital Services/DayFrame/docs/architecture/REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_V1_PROPOSED_RESULT.md",
+      "sha256": "611eb5c0b800c8e3d9d7a0254d4b807e0fe456e59ac1a5309cd07a53baa498c7",
+      "bytes": 64559,
+      "headings": [
+        "# Realization Lifecycle & Replacement Isolation Contract V1",
+        "## 1. Decision, scope and evidence",
+        "## 2. Preserved domain boundaries",
+        "## 3. Runtime identity and entry",
+        "## 4. Acceptance persistence and automatic handoff",
+        "### 4.1 Earlier, independent boundary",
+        "### 4.2 Handoff order",
+        "## 5. Realization phase and transition table",
+        "## 6. Same-owner concurrency and source witness",
+        "### 6.1 No queue, no joining",
+        "### 6.2 Source validity is separate from lifetime",
+        "## 7. Physical terminal, certainty and complete-set verification",
+        "## 8. Runtime results, receipts, automatic outcome and consumers",
+        "## 9. Coordinator and replacement routes",
+        "## 10. Initialization, reads, desired state and notifications",
+        "## 11. Compatibility decision",
+        "## 12. Required phase-selected future regression matrix",
+        "## 13. Rejected alternatives and implementation boundary",
+        "## 14. Exactly one bounded repair handoff and resumption"
+      ],
+      "firstStatus": "**PROPOSED — AWAITING ARCHITECTURAL ACCEPTANCE — NOT IMPLEMENTED**",
+      "finalParagraph": "**PROPOSED — AWAITING ARCHITECTURAL ACCEPTANCE — NOT IMPLEMENTED**"
+    },
+    "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md": {
+      "absolutePath": "/home/sid/Penn Digital Services/DayFrame/docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "sha256": "86913cd446e901e21bd89714485659c8358fd5332a63477b05d64efba019cd50",
+      "bytes": 21293,
+      "headings": [
+        "# Task 9.29.3 — Realization Lifecycle & Replacement Isolation Contract Resolution V1 — RESULT",
+        "## 1. Bounded outcome",
+        "## 2. Identity and measured baseline",
+        "## 3. Governing versions and inspection",
+        "## 4. Reproduced original orderings",
+        "## 5. Independently demonstrated and source-inspected findings",
+        "## 6. Selected lifecycle, concurrency and handoff",
+        "## 7. Coordinator, outcomes, initialization and compatibility",
+        "## 8. Future tests and one repair handoff",
+        "## 9. Fresh validation and bundle",
+        "## 10. Files, preservation and evidence limits",
+        "## 11. Decisions, acceptance and resumption"
+      ],
+      "firstStatus": "**Status: COMPLETE as a bounded architecture-resolution proposal — architectural acceptance and implementation pending.**",
+      "finalParagraph": "**The task is complete when one concrete proposed contract defines how acceptance handoff, automatic and explicit realization, physical writes, runtime adoption, and replacement are ordered so displaced operations cannot reinstall orphan scheduled facts—while preserving valid acceptance, exact realization identity, current scheduling checks, compatibility, and existing recovery protection.**"
+    }
+  },
+  "proposalMatrixCases": 22,
+  "proposalMarkers": 2,
+  "relativeLinks": [
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "../../architecture/REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_V1_PROPOSED_RESULT.md",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/governing-source-hashes-RESULT.json",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/WRITER_HANDOFF_AND_COVERAGE_LEDGER_RESULT.md",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/REPRODUCTION_AND_VALIDATION_RESULT.md",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/extended-contract-repro-RESULT.test.ts",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/FILE_MANIFEST_RESULT.md",
+      "exists": true
+    },
+    {
+      "document": "docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.3/preservation-RESULT.json",
+      "exists": true
+    }
+  ],
+  "bothDocumentsReadBack": true,
+  "implementationOrAdoption": false
+}

@@ -43,6 +43,29 @@ export function createLazyGoalStructureSurface(
       (
         surface?.getGoalStructureMilestoneRevision as ((...values: never[]) => unknown) | undefined
       )?.(...args) ?? { status: "notFound" },
+    queryGoalStructure: (input: { goalId: string; evaluationInstant: string; basis: string }) =>
+      surface?.queryGoalStructure(input as never) ??
+      (input.basis !== "currentAuthority"
+        ? { status: "unavailable", reason: "historicalReconstructionUnsupported" }
+        : Number.isNaN(Date.parse(input.evaluationInstant)) ||
+            new Date(input.evaluationInstant).toISOString() !== input.evaluationInstant
+          ? { status: "invalidQuery", reason: "invalidInstant" }
+          : {
+              status: "evaluated",
+              value: {
+                version: 2,
+                basis: "currentAuthority",
+                evaluatedAt: input.evaluationInstant,
+                qualification: "unavailable",
+                eligibility: "unknown",
+                records: { status: "unavailable", reason: "initializing" },
+                reasons: [{ code: "initializing" }],
+                dependencies: [],
+              },
+            }),
+    getGoalStructureQualification: () =>
+      surface?.getGoalStructureQualification() ?? { status: "unavailable", issues: [] },
+    isGoalStructureQuiescent: () => surface?.isGoalStructureQuiescent() ?? true,
     exportGoalStructureAuthority: () => surface?.exportGoalStructureAuthority() ?? empty(),
     getGoalStructureIngressStatus: () =>
       surface?.getGoalStructureIngressStatus() ?? { status: "initializing" },
@@ -50,6 +73,10 @@ export function createLazyGoalStructureSurface(
       surface?.getGoalStructureDurabilityStatus() ?? "unknown",
   };
   const keys = [
+    "queryGoalStructure",
+    "getGoalStructureQualification",
+    "isGoalStructureQuiescent",
+    "clearGoalStructureForCoordinator",
     "initializeGoalStructure",
     "createRelationship",
     "reviseRelationship",
@@ -70,7 +97,37 @@ export function createLazyGoalStructureSurface(
     "subscribeGoalStructure",
     "getRuntimeAuthorityAdapter",
   ];
+  const ordinary = [
+    "createRelationship",
+    "reviseRelationship",
+    "retireRelationship",
+    "createMilestone",
+    "reviseMilestone",
+    "retryGoalStructurePersistence",
+    "replaceGoalStructureAuthority",
+    "clearGoalStructure",
+  ];
+  const guarded = Object.fromEntries(
+    ordinary.map((key) => [
+      key,
+      (...args: never[]) => {
+        const capturedEpoch = options.getEpoch?.() ?? 0;
+        return load().then((owner) =>
+          capturedEpoch !== (options.getEpoch?.() ?? 0)
+            ? {
+                status: "rejected",
+                reason: "authorityTransactionActive",
+                detail: "contextReplaced",
+              }
+            : (owner[key as keyof GoalStructureSurface] as (...values: never[]) => unknown)(
+                ...args,
+              ),
+        );
+      },
+    ]),
+  );
   return createLazySurface(keys, load, {
+    ...guarded,
     ...sync,
     subscribeGoalStructure: (listener: () => void) =>
       surface?.subscribeGoalStructure(listener) ?? (() => undefined),

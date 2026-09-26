@@ -83,6 +83,7 @@ export function projectHistoricalSchedulingRealizationV1(input: {
   const occurrences: SchedulingRealizationProvenanceV1[] = [];
   for (const evidence of resolved.days)
     for (const occurrence of evidence.day.occurrences) {
+      if (occurrence.version === 4) continue;
       occurrences.push({
         userDayDate: evidence.day.userDayDate,
         reference: structuredClone(occurrence.reference),

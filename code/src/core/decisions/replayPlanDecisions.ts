@@ -1,3 +1,4 @@
+import { resolveEffectiveSchedulePreferencesForUserDayDate } from "../cycles/resolveEffectiveSchedulePreferences.js";
 import type { BlockCandidate, DraftScheduledBlock } from "../blocks/types.js";
 import {
   getPlanDecisionTargetKey,
@@ -35,6 +36,15 @@ export type PlanDecisionReplayResult = {
   | { status: "blocked"; reason: "exactPlacementUnavailable" }
   | { status: "invalid" | "unsupported" }
 );
+
+/** Current expansion context only; never a placement candidate or durable history. */
+export type OmittedOccurrenceContext = Readonly<
+  Pick<BlockCandidate, "title" | "category" | "userDayDate"> & {
+    decisionId: PlanDecisionV1["id"];
+    target: DurableOccurrenceReference;
+    occurrenceIdentity: NonNullable<BlockCandidate["occurrenceIdentity"]>;
+  }
+>;
 
 export function evaluatePlanDecisionApplicability(
   value: unknown,
@@ -78,11 +88,13 @@ export function replayPlanDecisions(input: {
   hardPlacementCandidateIds: Set<string>;
   pendingResults: PlanDecisionReplayResult[];
   exactDecisionCandidateIds: Map<string, PlanDecisionV1>;
+  omittedOccurrences: OmittedOccurrenceContext[];
 } {
   let candidates = input.blockCandidates.map(cloneCandidate);
   const hardPlacementCandidateIds = new Set<string>();
   const exactDecisionCandidateIds = new Map<string, PlanDecisionV1>();
   const pendingResults: PlanDecisionReplayResult[] = [];
+  const omittedOccurrences: OmittedOccurrenceContext[] = [];
   const candidateByTarget = new Map<string, BlockCandidate>();
   for (const candidate of candidates) {
     if (!candidate.occurrenceIdentity) continue;
@@ -95,6 +107,7 @@ export function replayPlanDecisions(input: {
     }
   }
   for (const decision of [...input.decisions].sort(compareDecision)) {
+    if (decision.kind === "placeSleepOccurrence") continue;
     const base = {
       decisionId: decision.id,
       kind: decision.kind,
@@ -112,6 +125,15 @@ export function replayPlanDecisions(input: {
     }
     const index = candidates.findIndex((current) => current.id === candidate.id);
     if (decision.kind === "omitOccurrence") {
+      if (candidate.occurrenceIdentity)
+        omittedOccurrences.push({
+          decisionId: decision.id,
+          target: structuredClone(decision.target),
+          occurrenceIdentity: structuredClone(candidate.occurrenceIdentity),
+          userDayDate: candidate.userDayDate,
+          title: candidate.title,
+          category: candidate.category,
+        });
       candidates = candidates.filter((current) => current.id !== candidate.id);
       pendingResults.push({ ...base, status: "applied" });
     } else if (decision.kind === "setOccurrenceDuration") {
@@ -121,10 +143,15 @@ export function replayPlanDecisions(input: {
       candidates[index] = { ...candidate, priority: decision.payload.priority };
       pendingResults.push({ ...base, status: "applied" });
     } else {
+      const preferences = resolveEffectiveSchedulePreferencesForUserDayDate({
+        shiftCycles: input.authoredSetup.shiftCycles,
+        defaultSchedulingPreferences: input.authoredSetup.schedulingPreferences,
+        userDayDate: decision.payload.userDayDate,
+      });
       const startsAt = placementDate(
         decision.payload.userDayDate,
         decision.payload.startTime,
-        input.dayBoundaryStartTime,
+        preferences.dayBoundaryStartTime,
       );
       const endsAt = new Date(startsAt.getTime() + candidate.durationMinutes * 60_000);
       if (
@@ -141,7 +168,7 @@ export function replayPlanDecisions(input: {
         userDayDate: decision.payload.userDayDate,
         userWeekStartDate: getUserWeekStartDate(
           new Date(`${decision.payload.userDayDate}T12:00:00`),
-          { dayBoundaryStartTime: input.dayBoundaryStartTime, weekStartsOn: input.weekStartsOn },
+          preferences,
         ) as LocalDateString,
         placementType: "fixed",
         fixedStartTime: decision.payload.startTime,
@@ -155,6 +182,7 @@ export function replayPlanDecisions(input: {
     hardPlacementCandidateIds,
     pendingResults,
     exactDecisionCandidateIds,
+    omittedOccurrences,
   };
 }
 

@@ -76,7 +76,7 @@ describe("buildAcceptedDecisionViewModels", () => {
   });
 });
 
-function decision(kind: PlanDecisionV1["kind"]): PlanDecisionV1 {
+function decision(kind: Exclude<PlanDecisionV1["kind"], "placeSleepOccurrence">): PlanDecisionV1 {
   const base = {
     version: 1 as const,
     id: {

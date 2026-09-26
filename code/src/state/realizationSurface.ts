@@ -1,3 +1,10 @@
+import { createAcceptanceLifecycle, type AcceptanceLifecycle } from "./acceptanceLifecycle.js";
+import {
+  persistAcceptanceMutation,
+  exactAuthorityRows,
+  captureAcceptanceProtectionEvidence,
+  type AcceptanceProtectionEvidence,
+} from "./acceptancePersistence.js";
 import {
   stageAcceptedAllocationRealization,
   validateRealizationAuthority,
@@ -15,18 +22,40 @@ import {
 
 export function createRealizationSurface(options: {
   storage: IndexedDbCollectionStorage;
+  lifecycle?: AcceptanceLifecycle;
+  initialRuntime?: {
+    authority: RealizationAuthorityV1;
+    ingress: "initializing" | "ready" | "protected";
+  };
+  sourceWitness?: () => string;
+  prepareSources?: (
+    accepted: AcceptedAllocationV2,
+    at: string,
+  ) => Promise<
+    | {
+        status: "eligible";
+        schedule: readonly import("../core/planning/acceptedAllocationRealization.js").RealizationConflictSubjectV1[];
+      }
+    | { status: "reviewRequired" | "unavailable" }
+  >;
   resolveAcceptedAllocation: (
     id: string,
   ) =>
     | { status: "resolved"; acceptedAllocation: AcceptedAllocationV2 | { version: 1 } }
     | { status: "notFound" };
   now?: () => string;
+  checkFoundation?: (accepted: AcceptedAllocationV2) => "eligible" | "reviewRequired";
   currentSchedule?: () => readonly import("../core/planning/acceptedAllocationRealization.js").RealizationConflictSubjectV1[];
   onAuthorityChanged?: () => void;
 }) {
+  const lifecycle = options.lifecycle ?? createAcceptanceLifecycle();
   type Ingress = "initializing" | "ready" | "protected";
-  let authority: RealizationAuthorityV1 = emptyRealizationAuthority(),
-    ingress: Ingress = "initializing";
+  let authority: RealizationAuthorityV1 = structuredClone(
+      options.initialRuntime?.authority ?? emptyRealizationAuthority(),
+    ),
+    ingress: Ingress = options.initialRuntime?.ingress ?? "initializing";
+  let protectionCause: "commitUnconfirmed" | "verificationFailed" | undefined;
+  let protectionEvidence: AcceptanceProtectionEvidence | undefined;
   const runtime: RuntimeAuthorityAdapter<{
     authority: RealizationAuthorityV1;
     ingress: Ingress;
@@ -34,13 +63,30 @@ export function createRealizationSurface(options: {
     id: "realizations",
     captureRuntimeSnapshot: () => structuredClone({ authority, ingress }),
     installRuntimeExact: (value) => {
+      lifecycle.assertInstall();
+      lifecycle.invalidate();
+      protectionEvidence = undefined;
       authority = structuredClone(value.authority);
       ingress = value.ingress;
+      protectionCause = undefined;
+      lifecycle.observation.changed();
     },
   };
 
   async function initializeRealizations() {
+    if (ingress === "protected") return { status: "protected" as const };
+    const origin = lifecycle.origin();
+    const previous = authority,
+      previousIngress = ingress;
+    if (!lifecycle.isQuiescent()) return { status: "busy" as const };
     const loaded = await options.storage.getAll<unknown>(REALIZATION_AUTHORITY_STORE);
+    if (
+      !lifecycle.current(origin) ||
+      authority !== previous ||
+      ingress !== previousIngress ||
+      !lifecycle.isQuiescent()
+    )
+      return { status: "contextReplaced" as const };
     if (loaded.status === "failure") return protect();
     const checked = validateRealizationAuthority({
       version: 1,
@@ -56,53 +102,216 @@ export function createRealizationSurface(options: {
       return protect();
     authority = checked.authority;
     ingress = "ready";
+    lifecycle.observation.changed();
     return { status: "ready" as const };
   }
 
   async function realizeAcceptedAllocation(
     acceptedAllocationId: string,
   ): Promise<RealizationCommandResultV1> {
-    if (ingress !== "ready") return failed(acceptedAllocationId);
-    const existing = authority.realizations.find(
-      (item) => item.acceptedAllocationId === acceptedAllocationId,
-    );
-    if (existing) return resultFor(existing, "alreadyRealized", "none", ["alreadyRealized"]);
-    const resolved = options.resolveAcceptedAllocation(acceptedAllocationId);
-    if (resolved.status !== "resolved") return invalid(acceptedAllocationId);
-    if (resolved.acceptedAllocation.version !== 2)
-      return {
-        ...invalid(acceptedAllocationId),
-        status: "inapplicable",
-        reasons: ["acceptedAllocationIncomplete"],
+    const origin = lifecycle.origin();
+    const finish = (value: RealizationCommandResultV1) => lifecycle.result(value, origin);
+    const refusal = (
+      status: RealizationCommandResultV1["status"],
+      reason: RealizationCommandResultV1["reasons"][number],
+    ) => finish({ ...invalid(acceptedAllocationId), status, reasons: [reason] });
+    if (!lifecycle.current(origin)) return refusal("rejected", "contextReplaced");
+    const denied = lifecycle.acquire(origin);
+    if (denied)
+      return refusal(
+        denied === "authorityProtected" ? "protected" : "rejected",
+        denied === "busy" ? "realizationBusy" : denied,
+      );
+    // Every awaited physical mutation below owns its terminal waiting. No unresolved
+    // transaction can reach this release; unresolved calls keep this invocation pending.
+    try {
+      if (ingress !== "ready")
+        return refusal(
+          ingress === "protected" ? "protected" : "rejected",
+          ingress === "protected" ? "authorityProtected" : "authorityUnavailable",
+        );
+      const resolved = options.resolveAcceptedAllocation(acceptedAllocationId);
+      if (resolved.status !== "resolved") return finish(invalid(acceptedAllocationId));
+      if (resolved.acceptedAllocation.version !== 2)
+        return refusal("inapplicable", "acceptedAllocationIncomplete");
+      const accepted = structuredClone(resolved.acceptedAllocation);
+      const base = authority;
+      const exactTarget = () => {
+        const current = options.resolveAcceptedAllocation(acceptedAllocationId);
+        return (
+          current.status === "resolved" &&
+          JSON.stringify(current.acceptedAllocation) === JSON.stringify(accepted)
+        );
       };
-    const staged = stageAcceptedAllocationRealization({
-      acceptedAllocation: resolved.acceptedAllocation,
-      realizedAt: (options.now ?? (() => new Date().toISOString()))(),
-      currentSchedule: [...authority.facts, ...(options.currentSchedule?.() ?? [])],
-    });
-    if (staged.status !== "staged") return staged.result;
-    const next = {
-      version: 1 as const,
-      realizations: [...authority.realizations, staged.realization],
-      facts: [...authority.facts, ...staged.facts],
-    };
-    const checked = validateRealizationAuthority(next);
-    if (checked.status === "invalid") return invalid(acceptedAllocationId);
-    const persisted = await options.storage.mutate([
-      { type: "put", store: REALIZATION_AUTHORITY_STORE, value: staged.realization },
-      ...staged.facts.map((fact) => ({
-        type: "put" as const,
-        store: REALIZATION_AUTHORITY_STORE,
-        value: fact,
-      })),
-    ]);
-    if (persisted.status === "failure") return failed(acceptedAllocationId);
+      const source = () =>
+        options.sourceWitness?.() ?? JSON.stringify(options.currentSchedule?.() ?? []);
+      const existing = base.realizations.find(
+        (item) => item.acceptedAllocationId === acceptedAllocationId,
+      );
+      if (existing) {
+        const verified = await verify(base);
+        if (!lifecycle.current(origin)) return refusal("rejected", "contextReplaced");
+        if (!verified || authority !== base || !exactTarget()) {
+          protect();
+          protectionEvidence = await captureAcceptanceProtectionEvidence(
+            options.storage,
+            REALIZATION_AUTHORITY_STORE,
+            base,
+          );
+          return refusal("unconfirmed", "verificationFailedAfterCommit");
+        }
+        return finish(resultFor(existing, "alreadyRealized", "none", ["alreadyRealized"]));
+      }
+      const at = (options.now ?? (() => new Date().toISOString()))();
+      const witness = source();
+      const sources = await options.prepareSources?.(accepted, at);
+      if (source() !== witness || !exactTarget()) return refusal("rejected", "sourceChanged");
+      if (sources?.status === "unavailable") return refusal("inapplicable", "sourceUnavailable");
+      if (
+        sources?.status === "reviewRequired" ||
+        (!sources && options.checkFoundation?.(accepted) === "reviewRequired")
+      )
+        return refusal("inapplicable", "sleepFoundationReviewRequired");
+      const staged = stageAcceptedAllocationRealization({
+        acceptedAllocation: accepted,
+        realizedAt: at,
+        currentSchedule: [
+          ...base.facts,
+          ...(sources?.status === "eligible"
+            ? sources.schedule
+            : (options.currentSchedule?.() ?? [])),
+        ],
+      });
+      if (staged.status !== "staged") return finish(staged.result);
+      const next = {
+        version: 1 as const,
+        realizations: [...base.realizations, staged.realization],
+        facts: [...base.facts, ...staged.facts],
+      };
+      const checked = validateRealizationAuthority(next);
+      if (checked.status === "invalid") return finish(invalid(acceptedAllocationId));
+      let sourceChanged = false;
+      const persisted = await persistAcceptanceMutation(
+        options.storage,
+        [
+          { type: "put", store: REALIZATION_AUTHORITY_STORE, value: staged.realization },
+          ...staged.facts.map((value) => ({
+            type: "put" as const,
+            store: REALIZATION_AUTHORITY_STORE,
+            value,
+          })),
+        ],
+        () => {
+          sourceChanged = source() !== witness || !exactTarget();
+          return (
+            lifecycle.owns(origin) &&
+            !lifecycle.admission() &&
+            ingress === "ready" &&
+            authority === base &&
+            !sourceChanged
+          );
+        },
+      );
+      if (persisted === "notWritten")
+        return sourceChanged
+          ? refusal("rejected", "sourceChanged")
+          : finish(failed(acceptedAllocationId));
+      if (persisted === "uncertain") {
+        protect("commitUnconfirmed");
+        protectionEvidence = await captureAcceptanceProtectionEvidence(
+          options.storage,
+          REALIZATION_AUTHORITY_STORE,
+          next,
+        );
+        return refusal("unconfirmed", "commitStateUncertain");
+      }
+      if (
+        !(await verify(next)) ||
+        authority !== base ||
+        !exactTarget() ||
+        !lifecycle.current(origin)
+      ) {
+        protect("verificationFailed");
+        protectionEvidence = await captureAcceptanceProtectionEvidence(
+          options.storage,
+          REALIZATION_AUTHORITY_STORE,
+          next,
+        );
+        return refusal("unconfirmed", "verificationFailedAfterCommit");
+      }
+      const reviewRequired = source() !== witness;
+      authority = checked.authority;
+      lifecycle.observation.changed();
+      try {
+        options.onAuthorityChanged?.();
+      } catch {
+        protect();
+        protectionEvidence = await captureAcceptanceProtectionEvidence(
+          options.storage,
+          REALIZATION_AUTHORITY_STORE,
+          next,
+        );
+        return refusal("unconfirmed", "verificationFailedAfterCommit");
+      }
+      return finish({
+        ...resultFor(staged.realization, "realized", "stale", []),
+        ...(reviewRequired ? { reviewRequired: true } : {}),
+      });
+    } finally {
+      lifecycle.release(origin);
+    }
+  }
+
+  async function verify(value: RealizationAuthorityV1) {
+    try {
+      const loaded = await options.storage.getAll<unknown>(REALIZATION_AUTHORITY_STORE);
+      return (
+        loaded.status === "success" &&
+        exactAuthorityRows(loaded.value, [...value.realizations, ...value.facts]) &&
+        relationshipsResolve(value)
+      );
+    } catch {
+      return false;
+    }
+  }
+  async function replace(value: RealizationAuthorityV1, epoch?: number) {
+    if (epoch !== undefined && !lifecycle.coordinatorCurrent(epoch))
+      return { status: "failure" as const };
+    const checked = validateRealizationAuthority(structuredClone(value));
+    if (checked.status === "invalid" || !relationshipsResolve(checked.authority))
+      return { status: "invalid" as const };
+    const persisted = await persistAcceptanceMutation(
+      options.storage,
+      [
+        { type: "clear", store: REALIZATION_AUTHORITY_STORE },
+        ...[...checked.authority.realizations, ...checked.authority.facts].map((value) => ({
+          type: "put" as const,
+          store: REALIZATION_AUTHORITY_STORE,
+          value,
+        })),
+      ],
+      () => epoch === undefined || lifecycle.coordinatorCurrent(epoch),
+    );
+    if (persisted === "notWritten") return { status: "failure" as const };
+    if (persisted !== "committed" || !(await verify(checked.authority))) {
+      protect();
+      return { status: "failure" as const };
+    }
+    lifecycle.invalidate();
     authority = checked.authority;
-    options.onAuthorityChanged?.();
-    return resultFor(staged.realization, "realized", "stale", []);
+    ingress = "ready";
+    lifecycle.observation.changed();
+    return { status: "accepted" as const };
   }
 
   return {
+    getRealizationProtectionEvidence: (
+      capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
+    ) => {
+      if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
+        throw new Error("Invalid capability");
+      return structuredClone(protectionEvidence);
+    },
     initializeRealizations,
     realizeAcceptedAllocation,
     resolveRealization: (id: string) => {
@@ -142,29 +351,40 @@ export function createRealizationSurface(options: {
         : { status: "notFound" as const };
     },
     exportRealizationAuthority: () => structuredClone(authority),
-    replaceRealizationAuthority: async (value: RealizationAuthorityV1) => {
-      const checked = validateRealizationAuthority(value);
-      if (checked.status === "invalid") return { status: "invalid" as const };
-      const records = [...checked.authority.realizations, ...checked.authority.facts];
-      const persisted = await options.storage.mutate([
-        { type: "clear", store: REALIZATION_AUTHORITY_STORE },
-        ...records.map((value) => ({
-          type: "put" as const,
-          store: REALIZATION_AUTHORITY_STORE,
-          value,
-        })),
-      ]);
-      if (persisted.status === "failure") return { status: "failure" as const };
-      authority = checked.authority;
-      ingress = "ready";
-      return { status: "accepted" as const };
+    replaceRealizationAuthority: (value: RealizationAuthorityV1) => {
+      const frozen = structuredClone(value);
+      return !lifecycle.current(lifecycle.origin()) || ingress === "protected"
+        ? Promise.resolve({ status: "failure" as const })
+        : lifecycle.replace((epoch) => replace(frozen, epoch));
     },
     clearRealizationAuthority: async () => {
-      const result = await options.storage.clear(REALIZATION_AUTHORITY_STORE);
-      if (result.status === "failure") return { status: "storageFailure" as const };
-      authority = emptyRealizationAuthority();
-      return { status: "removed" as const };
+      const result =
+        !lifecycle.current(lifecycle.origin()) || ingress === "protected"
+          ? { status: "failure" }
+          : await lifecycle.replace((epoch) => replace(emptyRealizationAuthority(), epoch));
+      return result.status === "accepted"
+        ? { status: "removed" as const }
+        : { status: "storageFailure" as const };
     },
+    clearRealizationForCoordinator: async (
+      capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
+      epoch: number,
+    ) => {
+      if (
+        capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY ||
+        !lifecycle.coordinatorCurrent(epoch)
+      )
+        return { status: "storageFailure" as const };
+      const result = await replace(emptyRealizationAuthority(), epoch);
+      return result.status === "accepted"
+        ? { status: "removed" as const }
+        : { status: "storageFailure" as const };
+    },
+    getRealizationReviewEvidence: () => ({
+      observation: lifecycle.observation,
+      protectionCause,
+      active: !lifecycle.isQuiescent(),
+    }),
     getRealizationIngressStatus: () => ingress,
     getRealizationRuntimeAdapter: (capability: typeof DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY) => {
       if (capability !== DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY)
@@ -172,8 +392,10 @@ export function createRealizationSurface(options: {
       return runtime;
     },
   };
-  function protect() {
+  function protect(cause?: typeof protectionCause) {
+    protectionCause = cause;
     ingress = "protected";
+    lifecycle.observation.changed();
     return { status: "protected" as const };
   }
   function select(
@@ -197,7 +419,11 @@ export function createRealizationSurface(options: {
         realizedAt: realization.realizedAt,
         currentSchedule: [],
       });
-      if (staged.status !== "staged" || staged.realization.id !== realization.id) return false;
+      if (
+        staged.status !== "staged" ||
+        JSON.stringify(staged.realization) !== JSON.stringify(realization)
+      )
+        return false;
       const owned = value.facts.filter((fact) => fact.origin.realizationId === realization.id);
       const ordered = (facts: RealizedScheduleFactV1[]) =>
         facts.slice().sort((left, right) => left.id.localeCompare(right.id));

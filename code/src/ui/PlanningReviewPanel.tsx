@@ -1,6 +1,8 @@
-import { useEffect, useState, type ReactElement } from "react";
+import { deriveScheduleReviewReadiness } from "./scheduleReviewReadiness.js";
+import { useReviewInvalidation } from "./useReviewInvalidation.js";
+import { useEffect, useState, useRef, type ReactElement } from "react";
 import type { ReviewScopeV1 } from "../core/planning/planningScope.js";
-import type { PlanningReviewReadModelV1 } from "../state/planningScopeQuery.js";
+import type { PlanningReviewReadModelV2 } from "../state/planningScopeQuery.js";
 import { presentPlanningReview } from "./plannerReviewPresentation.js";
 import { formatHumanTimeRange } from "./timeDisplay.js";
 
@@ -10,29 +12,45 @@ export function PlanningReviewPanel({
   query,
   refreshKey,
   selectedDay,
+  subscribeReview,
 }: {
   reviewScope: ReviewScopeV1;
   historyAsOf: string;
   query: (input: {
     reviewScope: ReviewScopeV1;
     historyAsOf: string;
-  }) => Promise<PlanningReviewReadModelV1>;
+  }) => Promise<PlanningReviewReadModelV2>;
   refreshKey: unknown;
   selectedDay?: string;
+  subscribeReview?: (listener: () => void) => () => void;
 }): ReactElement {
-  const [result, setResult] = useState<PlanningReviewReadModelV1 | "loading" | "error">("loading");
+  const revision = useReviewInvalidation(subscribeReview);
+  const readRevision = useRef(revision);
+  const readContext = useRef({ query: query, scope: reviewScope.id });
+  const [result, setResult] = useState<PlanningReviewReadModelV2 | "loading" | "error">("loading");
   useEffect(() => {
     let current = true;
     setResult("loading");
     void query({ reviewScope, historyAsOf }).then(
-      (value) => current && setResult(value),
+      (value) => {
+        if (current) {
+          readRevision.current = revision;
+          readContext.current = { query: query, scope: reviewScope.id };
+          setResult(value);
+        }
+      },
       () => current && setResult("error"),
     );
     return () => {
       current = false;
     };
-  }, [historyAsOf, query, refreshKey, reviewScope.id]);
-  if (result === "loading")
+  }, [historyAsOf, query, refreshKey, reviewScope.id, revision]);
+  if (
+    result === "loading" ||
+    readRevision.current !== revision ||
+    readContext.current.query !== query ||
+    readContext.current.scope !== reviewScope.id
+  )
     return (
       <section aria-busy="true" aria-label="Planning review" className="df-panel">
         <h3>Planning review</h3>
@@ -66,6 +84,17 @@ export function PlanningReviewPanel({
           {reviewScope.startUserDayDate} through {reviewScope.endUserDayDateExclusive} (exclusive)
         </p>
       </div>
+      {deriveScheduleReviewReadiness({
+        model: result,
+        unresolvedFrictionCount: result.unresolvedFrictionCount,
+        publicationRangeValid: true,
+      })
+        .blockers.filter((item) => item.blocksReview)
+        .map((item) => (
+          <p role="status" className="df-warning-message" key={item.code}>
+            {item.message}
+          </p>
+        ))}
       <div aria-live="polite" className="df-form-stack" role="status">
         <p
           className={

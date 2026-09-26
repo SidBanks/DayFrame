@@ -75,6 +75,7 @@ export type CapacityUserDayV1 = {
   qualification: CapacityQualificationV1;
 };
 export type CapacityResultV1 = {
+  foundation?: import("./foundationalPlanning.js").FoundationalPlanningQualificationV1;
   version: 1;
   queryId: string;
   fingerprint: string;
@@ -111,6 +112,8 @@ export type CapacityResultV1 = {
 };
 
 export type CapacityScheduleSnapshotV1 = {
+  hardOccupancy?: readonly { id: string; startsAt: string; endsAt: string }[];
+  foundation?: import("./foundationalPlanning.js").FoundationalPlanningQualificationV1;
   scheduledBlocks: readonly DraftScheduledBlock[];
   generatedWorkBlocks: readonly {
     id: string;
@@ -163,6 +166,7 @@ export function deriveCapacity(input: {
       requestedStart.toISOString(),
       requestedEnd.toISOString(),
     ],
+    foundation: input.schedule.foundation,
     schedule: {
       occupied: exclusions,
       liabilities,
@@ -245,7 +249,18 @@ export function deriveCapacity(input: {
       liabilities.length > 0,
     ),
     summary = summarize(intervals, liabilities);
+  if (input.schedule.foundation?.status === "nonAllocatable") {
+    resultQualification.allocability = "nonAllocatable";
+    resultQualification.coverage = "unavailable";
+    for (const day of days) {
+      day.qualification = { ...resultQualification };
+      day.coverage = "partial";
+    }
+    intervals.length = 0;
+    Object.assign(summary, summarize([], liabilities));
+  }
   const base = {
+    ...(input.schedule.foundation ? { foundation: input.schedule.foundation } : {}),
     version: 1 as const,
     queryId: semanticFingerprint({
       policy: CAPACITY_POLICY_V1,
@@ -283,6 +298,16 @@ export function resolveCapacityInterval(result: CapacityResultV1, id: string) {
 
 function exclusionContributors(schedule: CapacityScheduleSnapshotV1, start: Date, end: Date) {
   const result: CapacityExclusionContributorV1[] = [];
+  for (const item of schedule.hardOccupancy ?? [])
+    add(
+      "occupied",
+      item.id,
+      "foundationalAuthority",
+      new Date(item.startsAt),
+      new Date(item.endsAt),
+    );
+  for (const item of schedule.foundation?.protection ?? [])
+    add(item.kind, item.id, item.sourceFamily, new Date(item.startsAt), new Date(item.endsAt));
   for (const item of schedule.generatedWorkBlocks)
     add("occupied", item.id, "work", item.startsAt, item.endsAt);
   for (const item of schedule.scheduledBlocks) {

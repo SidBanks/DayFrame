@@ -131,7 +131,12 @@ export function createRestoreCoordinator(options: {
     const begun = options.runtime.begin("restore");
     if (begun.status !== "begun") {
       status = "idle";
-      return { status: "busy" };
+      return begun.status === "protected"
+        ? {
+            status: "participantProtected",
+            participantId: begun.participantId as RestoreParticipantId,
+          }
+        : { status: "busy" };
     }
     const precondition = checkReadiness(mode);
     if (precondition) return stop(precondition);

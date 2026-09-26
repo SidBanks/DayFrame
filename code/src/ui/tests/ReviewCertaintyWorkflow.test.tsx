@@ -1,0 +1,513 @@
+/* @vitest-environment jsdom */
+import "@testing-library/jest-dom/vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { publicationFixture, at } from "../../state/publicationSourceTestFixtures.js";
+import { deferred } from "../../state/acceptanceLifecycleTestFixtures.js";
+import { ScheduleReviewWorkspace } from "../ScheduleReviewWorkspace.js";
+import { createGoalEditingContext } from "../goalEditingContext.js";
+import { createReviewScope } from "../../core/planning/reviewScope.js";
+import { hasCurrentAcceptanceReceipt } from "../../state/acceptanceLifecycle.js";
+import type { PublishScheduleRangeResultV1 } from "../../state/types.js";
+afterEach(cleanup);
+const acceptButton = (id: string) =>
+  screen
+    .getAllByRole("button", { name: "Accept preferred option" })
+    .find((b) => b.closest("li")?.textContent?.includes(id))!;
+async function fixture() {
+  const f = await publicationFixture(),
+    context = createGoalEditingContext();
+  const accept = vi.fn(f.store.acceptProposalOption),
+    publish = vi.fn(f.store.publishScheduleRange),
+    retry = vi.fn(f.store.realizeAcceptedAllocation),
+    query = vi.fn(f.store.queryPlanningReview);
+  const props = {
+    context,
+    missingSetup: [],
+    message: "",
+    onOpenSetup: vi.fn(),
+    onDay: vi.fn(),
+    review: {
+      startUserDayDate: "2026-09-17" as const,
+      endUserDayDateExclusive: "2026-09-18" as const,
+      weekStartsOn: "monday" as const,
+      historyAsOf: at,
+      getPublishedAt: () => at,
+      query,
+      subscribeReview: f.store.subscribePlanningReview,
+      unresolvedFrictionCount: 0,
+      onGeneratePreview: vi.fn(),
+      onOpenFriction: vi.fn(),
+      onAcceptProposal: accept,
+      onRejectProposal: f.store.rejectProposal,
+      onRetryRealization: retry,
+      onPublish: publish,
+    },
+    preview: {
+      preview: f.store.getState().preview,
+      getDayBoundaryStartTimeForUserDayDate: () => "00:00" as const,
+      onApplySuggestedFix: vi.fn(),
+    },
+  };
+  const scope = createReviewScope({
+    kind: "custom",
+    anchorUserDayDate: "2026-09-17",
+    weekStartsOn: "monday",
+    source: "navigation",
+    customRange: { startUserDayDate: "2026-09-17", endUserDayDateExclusive: "2026-09-18" },
+  });
+  type Outcome = Awaited<ReturnType<typeof accept>>;
+  const feedback = () =>
+    context
+      .cell<{
+        proposalResult: Outcome | null;
+        publicationResult: PublishScheduleRangeResultV1 | null;
+        realizationResult: Awaited<ReturnType<typeof retry>> | null;
+      }>(`review-feedback:${scope.id}`, () => ({
+        proposalResult: null,
+        publicationResult: null,
+        realizationResult: null,
+      }))
+      .get();
+  return { ...f, props, context, accept, publish, retry, query, feedback };
+}
+
+it.each([
+  ["proposalAuthority", "abort"],
+  ["proposalAuthority", "lostAck"],
+  ["proposalAuthority", "verification"],
+  ["realizationAuthority", "abort"],
+  ["realizationAuthority", "lostAck"],
+  ["realizationAuthority", "verification"],
+  ["historicalPlanBatches", "abort"],
+  ["historicalPlanBatches", "lostAck"],
+] as const)(
+  "retained workspace preserves original results and physical truth for %s/%s",
+  async (owner, fault) => {
+    const f = await fixture(),
+      mutate = vi.mocked(f.durable.mutate).getMockImplementation()!,
+      read = f.durable.getAll;
+    let writes = 0,
+      completed = false,
+      verification = true;
+    vi.spyOn(f.durable, "mutate").mockImplementation(async (rows, admit, observe) => {
+      const affected = rows.some((r) => r.store === owner);
+      if (affected) writes++;
+      const result = await mutate(
+        affected && fault === "abort"
+          ? [...rows, { type: "put", store: owner, value: { invalid: "missing key" } }]
+          : rows,
+        admit,
+        observe,
+      );
+      if (affected) {
+        completed = true;
+        if (fault === "lostAck")
+          throw Error("Controlled lost acknowledgment after real transaction");
+      }
+      return result;
+    });
+    vi.spyOn(f.durable, "getAll").mockImplementation(async (...args) => {
+      const result = await read(...args);
+      if (
+        fault === "verification" &&
+        completed &&
+        verification &&
+        args[0] === owner &&
+        result.status === "success"
+      ) {
+        verification = false;
+        return { status: "success", value: result.value.slice(1) };
+      }
+      return result;
+    });
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    await screen.findByRole("heading", { name: "Ready to publish" });
+    const history = owner === "historicalPlanBatches";
+    const action = history ? f.publish : f.accept;
+    fireEvent.click(
+      history
+        ? screen.getByRole("button", { name: /Build this Schedule:/ })
+        : acceptButton(f.input.proposalId),
+    );
+    await waitFor(() => expect(action).toHaveBeenCalledOnce());
+    const original = await action.mock.results[0]!.value;
+    await waitFor(() =>
+      expect(history ? f.feedback().publicationResult : f.feedback().proposalResult).toBe(original),
+    );
+    expect(Object.getOwnPropertyDescriptor(original, "receipt")?.enumerable).toBe(false);
+    expect(original.receipt?.isCurrent()).toBe(true);
+    expect(writes).toBe(1);
+    const physical = await f.durable.getAll(owner);
+    expect(physical.status).toBe("success");
+    if (history) {
+      expect(original).toMatchObject({
+        status: "rejected",
+        reason: fault === "abort" ? "writeFailedBeforeCommit" : "commitStateUncertain",
+      });
+      expect(
+        await screen.findByText(
+          fault === "abort" ? /No new plan was saved/ : /History may have been saved/,
+        ),
+      ).toBeVisible();
+      if (physical.status === "success")
+        expect(physical.value.length).toBe(fault === "abort" ? 0 : 1);
+    } else if (owner === "proposalAuthority") {
+      expect(hasCurrentAcceptanceReceipt(original)).toBe(true);
+      expect(original).toMatchObject(
+        fault === "abort"
+          ? { status: "rejected", reason: "persistenceFailure" }
+          : {
+              status: "unconfirmed",
+              reason:
+                fault === "lostAck" ? "commitStateUncertain" : "verificationFailedAfterCommit",
+            },
+      );
+      expect(
+        await screen.findByText(
+          fault === "abort" ? /decision was not recorded/ : /Authority is protected/,
+        ),
+      ).toBeVisible();
+      expect(f.store.listRealizedScheduleFacts()).toHaveLength(0);
+      expect(f.counts().transactions).toBe(0);
+    } else {
+      if (original.status !== "accepted" || !("realization" in original.value))
+        throw Error(JSON.stringify(original));
+      const nested = original.value.realization;
+      expect(hasCurrentAcceptanceReceipt(nested)).toBe(true);
+      expect(f.feedback().proposalResult).toBe(original);
+      expect(Object.getOwnPropertyDescriptor(nested, "receipt")?.enumerable).toBe(false);
+      expect(nested.status).toBe(fault === "abort" ? "failed" : "unconfirmed");
+      expect(f.store.exportProposalAuthority().acceptedAllocations).toHaveLength(1);
+      expect(
+        await screen.findByText(
+          fault === "abort"
+            ? /Acceptance is saved, but scheduling has not completed/
+            : fault === "lostAck"
+              ? /Scheduling may have been saved/
+              : /complete scheduling evidence could not be verified/,
+        ),
+      ).toBeVisible();
+      expect(f.accept).toHaveBeenCalledOnce();
+      expect(f.retry).not.toHaveBeenCalled();
+      expect(f.counts().transactions).toBe(0);
+    }
+    if (fault !== "abort") {
+      expect(
+        screen.queryByText(/No new plan was saved|decision was not recorded/),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Build this Schedule:/ })).toBeDisabled();
+    }
+    expect(f.props.review.onGeneratePreview).not.toHaveBeenCalled();
+  },
+);
+
+it.each(["proposal", "publication"] as const)(
+  "a thrown %s delivery requires explicit read-only inspection without automatic retry",
+  async (owner) => {
+    const f = await fixture();
+    if (owner === "proposal")
+      f.accept.mockRejectedValueOnce(Error("controlled unexpected delivery"));
+    else f.publish.mockRejectedValueOnce(Error("controlled unexpected delivery"));
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    await screen.findByRole("heading", { name: "Ready to publish" });
+    fireEvent.click(
+      owner === "proposal"
+        ? acceptButton(f.input.proposalId)
+        : screen.getByRole("button", { name: /Build this Schedule:/ }),
+    );
+    await screen.findByText(/operation outcome is unconfirmed/);
+    expect(screen.getByRole("button", { name: /Build this Schedule:/ })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Refresh review" }));
+    await screen.findByRole("heading", { name: "Ready to publish" });
+    expect(owner === "proposal" ? f.accept : f.publish).toHaveBeenCalledOnce();
+    expect(f.counts().transactions).toBe(0);
+  },
+);
+
+it("scope change retains the originating real acceptance and nested receipt without refreshing the new period", async () => {
+  const f = await fixture(),
+    entered = deferred(),
+    release = deferred(),
+    accept = f.store.acceptProposalOption;
+  let original: Awaited<ReturnType<typeof accept>> | undefined;
+  f.accept.mockImplementation(async (input) => {
+    original = await accept(input);
+    entered.resolve();
+    await release.promise;
+    return original;
+  });
+  const mounted = render(<ScheduleReviewWorkspace {...f.props} />);
+  await screen.findByRole("heading", { name: "Ready to publish" });
+  fireEvent.click(acceptButton(f.input.proposalId));
+  await entered.promise;
+  fireEvent.change(screen.getByLabelText("Review end date"), { target: { value: "2026-09-18" } });
+  fireEvent.click(screen.getByRole("button", { name: "Apply review period" }));
+  await screen.findByText("Reviewing 2026-09-17 through 2026-09-18, including both dates.");
+  const reads = f.query.mock.calls.length;
+  await act(async () => release.resolve());
+  await waitFor(() => expect(f.feedback().proposalResult).toBe(original));
+  expect(f.query.mock.calls.length).toBe(reads);
+  expect(screen.queryByText(/Decision recorded/)).not.toBeInTheDocument();
+  expect(f.accept).toHaveBeenCalledOnce();
+  mounted.unmount();
+  expect(f.store.listRealizedScheduleFacts()).toHaveLength(3);
+});
+
+it.each(["reviewRequired", "verificationFailedAfterCommit"] as const)(
+  "actual post-admission %s retains its original result and never claims unchanged history",
+  async (phase) => {
+    const f = await fixture(),
+      entered = deferred(),
+      release = deferred(),
+      get = f.durable.get,
+      mutate = vi.mocked(f.durable.mutate).getMockImplementation()!;
+    let committed = false;
+    vi.spyOn(f.durable, "mutate").mockImplementation((rows, admit, observe) =>
+      mutate(rows, admit, (receipt) => {
+        observe?.(receipt);
+        if (rows.some((r) => r.store === "historicalPlanBatches")) committed = true;
+      }),
+    );
+    vi.spyOn(f.durable, "get").mockImplementation(async (store, key) => {
+      if (store === "historicalPlanBatches" && committed) {
+        entered.resolve();
+        await release.promise;
+        if (phase === "verificationFailedAfterCommit")
+          return {
+            status: "failure",
+            error: { code: "readFailed", operation: "controlledPostCommitRead" },
+          };
+      }
+      return get(store, key);
+    });
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Build this Schedule:/ }));
+    await entered.promise;
+    await act(async () => {
+      f.store.setShiftDefinitions(
+        f.store.getState().shiftDefinitions.map((s) => ({ ...s, name: "Changed after admission" })),
+      );
+      release.resolve();
+    });
+    const original = await f.publish.mock.results[0]!.value;
+    await waitFor(() => expect(f.feedback().publicationResult).toBe(original));
+    expect(original).toMatchObject(
+      phase === "reviewRequired"
+        ? { status: "published", reviewRequired: true }
+        : { status: "rejected", reason: phase },
+    );
+    expect(
+      await screen.findByText(
+        phase === "reviewRequired"
+          ? /Schedule saved. Required sources changed/
+          : /plan was written, but verification failed/,
+      ),
+    ).toBeVisible();
+    expect(screen.queryByText(/No new plan was saved/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Ready to publish" })).not.toBeInTheDocument();
+    expect(f.counts().transactions).toBe(1);
+    expect(f.publish).toHaveBeenCalledOnce();
+  },
+);
+
+// Explicit consumer-delivery seams: real canonical Review fixture and owner-issued
+// receipts, typed result variants. These prove presentation/identity, not storage semantics.
+it.each([
+  ["proposalBusy", /Another decision is finishing/],
+  ["contextReplaced", /earlier state/],
+  ["sourceChanged", /Saved planning information changed/],
+  ["authorityUnavailable", /authority is unavailable/],
+  ["authorityProtected", /authority is protected/],
+  ["replacementBusy", /Clear or restore is in progress/],
+  ["initializing", /authority is still loading/],
+  ["protected", /authority is protected/],
+  ["authorityTransactionActive", /Clear or restore is in progress/],
+  ["notFound", /revision is no longer available/],
+  ["notActionable", /revision no longer supports/],
+  ["stale", /out of date/],
+  ["invalidInput", /input could not be validated/],
+  ["conflictingClaim", /out of date/],
+  ["allocationFailure", /identity could not be allocated/],
+  ["persistenceFailure", /decision was not recorded/],
+] as const)(
+  "presents the current Proposal rejection %s without reconstructing its receipt",
+  async (reason, message) => {
+    const f = await fixture();
+    const { createAcceptanceLifecycle } = await import("../../state/acceptanceLifecycle.js");
+    const lifecycle = createAcceptanceLifecycle();
+    const original = lifecycle.result({ status: "rejected" as const, reason }, lifecycle.capture());
+    f.accept.mockResolvedValueOnce(original);
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    await screen.findByRole("heading", { name: "Ready to publish" });
+    fireEvent.click(acceptButton(f.input.proposalId));
+    expect(await screen.findByText(message)).toBeVisible();
+    expect(f.feedback().proposalResult).toBe(original);
+    expect(hasCurrentAcceptanceReceipt(f.feedback().proposalResult)).toBe(true);
+    expect(f.counts().transactions).toBe(0);
+    expect(f.retry).not.toHaveBeenCalled();
+  },
+);
+
+it.each([
+  ["contextReplaced", /schedule context changed/],
+  ["publicationBusy", /Publication was not started/],
+  ["pendingPublication", /pending persistence, not durably published/],
+  ["invalidPublicationRange", /publication period is invalid/],
+  ["planningCoverageIncomplete", /Planning information does not cover/],
+  ["previewMissing", /no longer current for this range/],
+  ["previewStale", /no longer current for this range/],
+  ["previewRangeMismatch", /no longer current for this range/],
+  ["frictionUnresolved", /Resolve schedule conflicts/],
+  ["acceptedAllocationUnrealized", /must be realized/],
+  ["sourceChanged", /schedule changed since this review/],
+  ["queryFailure", /Review evidence could not be read/],
+  ["materializationFailure", /complete publication evidence/],
+  ["persistenceFailure", /History may have been saved/],
+  ["historicalPlanProtected", /Saved plan history is protected/],
+  ["historicalPlanUnavailable", /Saved plan history is unavailable/],
+  ["tryPreview", /Accept or discard the trial/],
+  ["verificationFailedAfterCommit", /plan was written, but verification failed/],
+  ["commitStateUncertain", /History may have been saved/],
+  ["writeFailedBeforeCommit", /No new plan was saved/],
+] as const)(
+  "presents the current publication refusal %s with the original result",
+  async (reason, message) => {
+    const f = await fixture(),
+      { withPublicationReceipt } = await import("../../state/publicationReceipt.js");
+    const original = withPublicationReceipt(
+      { status: "rejected" as const, reason },
+      { isCurrent: () => true },
+    );
+    f.publish.mockResolvedValueOnce(original);
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Build this Schedule:/ }));
+    expect(await screen.findByText(message)).toBeVisible();
+    expect(f.feedback().publicationResult).toBe(original);
+    expect(f.counts().transactions).toBe(0);
+    expect(f.accept).not.toHaveBeenCalled();
+  },
+);
+
+// Typed delivery seams certify consumer copy and identity, not storage semantics.
+it.each([
+  ["realized", []],
+  ["alreadyRealized", ["alreadyRealized"]],
+  ["conflicted", ["scheduleConflict"]],
+  ["inapplicable", ["acceptedAllocationIncomplete"]],
+  ["invalid", ["acceptedAllocationInvalid", "claimGeometryMismatch", "claimIdentityMismatch"]],
+  ["failed", ["atomicPersistenceFailure"]],
+  ["rejected", ["sourceChanged", "realizationBusy", "replacementBusy", "contextReplaced"]],
+  [
+    "protected",
+    [
+      "sleepFoundationReviewRequired",
+      "sourceUnavailable",
+      "authorityUnavailable",
+      "authorityProtected",
+    ],
+  ],
+  ["unconfirmed", ["commitStateUncertain", "verificationFailedAfterCommit"]],
+] as const)("preserves original nested %s delivery and every reason", async (status, reasons) => {
+  const f = await fixture();
+  const { createAcceptanceLifecycle } = await import("../../state/acceptanceLifecycle.js");
+  const { realizationReasons } = await import("../planningResultCopy.js");
+  const lifecycle = createAcceptanceLifecycle();
+  const saved = await f.store.acceptProposalOption(f.input);
+  if (saved.status !== "accepted" || !("realization" in saved.value))
+    throw Error("real acceptance required");
+  const nested = lifecycle.result(
+    {
+      status,
+      acceptedAllocationId: saved.value.acceptedAllocation.id,
+      scheduledGoalWorkIds: [],
+      scheduledSupportActivityIds: [],
+      bufferProtectionIds: [],
+      conflicts: [],
+      reasons: [...reasons],
+      previewFreshnessImpact: "none" as const,
+    },
+    lifecycle.capture(),
+  );
+  const original = lifecycle.result(
+    {
+      status: "accepted" as const,
+      persistence: saved.persistence,
+      value: { ...saved.value, realization: nested },
+    },
+    lifecycle.capture(),
+  );
+  f.accept.mockResolvedValueOnce(original);
+  render(<ScheduleReviewWorkspace {...f.props} />);
+  fireEvent.click((await screen.findAllByRole("button", { name: "Accept preferred option" }))[0]!);
+  expect(await screen.findByText(/Decision recorded/)).toBeVisible();
+  expect(f.feedback().proposalResult).toBe(original);
+  expect(original.value.realization).toBe(nested);
+  expect(hasCurrentAcceptanceReceipt(nested)).toBe(true);
+  if (status !== "alreadyRealized" && status !== "realized")
+    for (const reason of reasons)
+      expect(
+        screen.getByText(
+          (_, e) =>
+            e?.tagName === "P" && e.textContent?.includes(realizationReasons[reason]) === true,
+        ),
+      ).toBeVisible();
+  expect(f.retry).not.toHaveBeenCalled();
+  expect(f.counts().transactions).toBe(0);
+});
+
+it.each(["outerDisplaced", "nestedDisplaced", "reviewRequired"] as const)(
+  "guards %s acceptance delivery without replacing original receipt objects",
+  async (variant) => {
+    const f = await fixture();
+    const { createAcceptanceLifecycle } = await import("../../state/acceptanceLifecycle.js");
+    const outer = createAcceptanceLifecycle(),
+      inner = createAcceptanceLifecycle();
+    const saved = await f.store.acceptProposalOption(f.input);
+    if (saved.status !== "accepted") throw Error("acceptance required");
+    const nested = inner.result(
+      {
+        status: "realized" as const,
+        reviewRequired: variant === "reviewRequired",
+        acceptedAllocationId: saved.value.acceptedAllocation.id,
+        scheduledGoalWorkIds: [],
+        scheduledSupportActivityIds: [],
+        bufferProtectionIds: [],
+        conflicts: [],
+        reasons: [],
+        previewFreshnessImpact: "stale" as const,
+      },
+      inner.capture(),
+    );
+    const original = outer.result(
+      {
+        status: "accepted" as const,
+        persistence: saved.persistence,
+        value: { ...saved.value, realization: nested },
+      },
+      outer.capture(),
+    );
+    if (variant === "outerDisplaced") outer.invalidate();
+    if (variant === "nestedDisplaced") inner.invalidate();
+    f.accept.mockResolvedValueOnce(original);
+    render(<ScheduleReviewWorkspace {...f.props} />);
+    fireEvent.click(
+      (await screen.findAllByRole("button", { name: "Accept preferred option" }))[0]!,
+    );
+    await waitFor(() => expect(f.feedback().proposalResult).toBe(original));
+    if (variant === "outerDisplaced")
+      expect(screen.queryByText(/Decision recorded/)).not.toBeInTheDocument();
+    else
+      expect(
+        await screen.findByText(
+          variant === "nestedDisplaced"
+            ? /scheduling outcome belongs to an earlier context/
+            : /current schedule needs review/,
+        ),
+      ).toBeVisible();
+    expect(original.value.realization).toBe(nested);
+    expect(f.retry).not.toHaveBeenCalled();
+    expect(f.props.review.onGeneratePreview).not.toHaveBeenCalled();
+    expect(f.counts().transactions).toBe(0);
+  },
+);

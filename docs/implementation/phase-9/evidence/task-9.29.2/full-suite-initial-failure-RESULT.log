@@ -1,0 +1,32 @@
+npm notice run dayframe@0.1.0 test
+npm notice run vitest run --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/sleepPublicationStorage.test.ts (7 tests | 1 failed) 182ms
+   × rejects a queued candidate whose authority changes before commit 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/sleepPublicationStorage.test.ts > rejects a queued candidate whose authority changes before commit
+AssertionError: expected 'rejected' to be 'writeFailedBeforeCommit' // Object.is equality
+
+Expected: "writeFailedBeforeCommit"
+Received: "rejected"
+
+ ❯ src/state/sleepPublicationStorage.test.ts:81:95
+     79|   } as typeof real;
+     80|   const surface = createHistoricalPlanSurface({ storage });
+     81|   expect((await surface.publishAtomically(published(), { isCurrent: ()…
+       |                                                                                               ^
+     82|     "writeFailedBeforeCommit",
+     83|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 165 passed (166)
+      Tests  1 failed | 1717 passed (1718)
+   Start at  10:27:34
+   Duration  178.21s (transform 5.57s, setup 0ms, import 18.20s, tests 121.57s, environment 20.71s)
+

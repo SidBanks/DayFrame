@@ -1,0 +1,22 @@
+src/ui/SleepRequirementSection.tsx 94ms (unchanged)
+src/ui/ScheduleReviewPanel.tsx 93ms
+src/ui/DayFrameApp.tsx 327ms
+src/ui/MonthlyPlannerSurface.tsx 45ms
+src/ui/ScheduleReviewWorkspace.tsx 15ms
+src/ui/GoalAcceptedPlanningSection.tsx 53ms (unchanged)
+src/ui/scheduleReviewNavigation.ts 2ms (unchanged)
+src/ui/MyScheduleSurface.tsx 11ms (unchanged)
+src/ui/ReviewConflicts.tsx 18ms
+src/ui/ReviewTrial.tsx 13ms
+src/ui/PlannerSurface.tsx 5ms (unchanged)
+src/ui/PlanningReviewPanel.tsx 10ms (unchanged)
+src/ui/HistoricalIntelligenceSummary.tsx 60ms (unchanged)
+src/ui/tests/NavigationFoundation.test.tsx 37ms (unchanged)
+src/ui/tests/MonthlyPlannerSurface.test.tsx 22ms (unchanged)
+src/ui/tests/ProductSurfaces.test.tsx 10ms (unchanged)
+src/ui/tests/ScheduleReviewPanel.test.tsx 36ms (unchanged)
+src/ui/tests/ScheduleReviewWorkspace.test.tsx 12ms
+src/ui/tests/ConstructivePlanningWorkflow.test.tsx 53ms (unchanged)
+src/ui/tests/GoalAcceptedPlanning.test.tsx 54ms (unchanged)
+src/ui/tests/DayFrameApp.test.tsx 264ms
+src/ui/tests/ReviewSourceQualification.test.tsx 9ms (unchanged)

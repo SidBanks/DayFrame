@@ -1,0 +1,318 @@
+ M code/src/core/blocks/placeBlockCandidates.ts
+ M code/src/core/blocks/types.ts
+ M code/src/core/decisions/createPlanDecisionAcceptanceCandidate.ts
+ M code/src/core/decisions/planDecision.ts
+ M code/src/core/decisions/replayPlanDecisions.test.ts
+ M code/src/core/decisions/replayPlanDecisions.ts
+ M code/src/core/engine/generateSchedulePreview.ts
+ M code/src/core/engine/reviseSchedulePreview.ts
+ M code/src/core/engine/tests/generateSchedulePreview.test.ts
+ M code/src/core/execution/executionRecord.ts
+ M code/src/core/execution/executionSummary.ts
+ M code/src/core/execution/historicalExecutionTarget.ts
+ M code/src/core/friction/applySuggestedFix.ts
+ M code/src/core/friction/types.ts
+ M code/src/core/historicalIntelligence/completionDistribution.ts
+ M code/src/core/historicalIntelligence/schedulingRealization.ts
+ M code/src/core/historicalPlan/historicalPlan.ts
+ M code/src/core/historicalPlan/historicalPlanFingerprint.ts
+ M code/src/core/historicalPlan/historicalPlanValidation.ts
+ M code/src/core/historicalPlan/materializePlanPublication.ts
+ M code/src/core/occurrences/durableOccurrenceReference.ts
+ M code/src/core/occurrences/occurrenceIdentity.ts
+ M code/src/core/planning/acceptedAllocationRealization.ts
+ M code/src/core/planning/allocation.ts
+ M code/src/core/planning/capacity.ts
+ M code/src/core/planning/competingDemand.ts
+ M code/src/core/planning/goalDemandProjection.ts
+ M code/src/core/planning/goalFeasibility.ts
+ M code/src/core/planning/proposal.ts
+ M code/src/core/today/buildTodayReadModel.ts
+ M code/src/infrastructure/restore/restoreCoordinator.ts
+ M code/src/infrastructure/storage/indexedDbCollectionStorage.test.ts
+ M code/src/infrastructure/storage/indexedDbCollectionStorage.ts
+ M code/src/state/activeV2.ts
+ M code/src/state/activeV2Migration.test.ts
+ M code/src/state/allocationSurface.ts
+ M code/src/state/capacitySurface.ts
+ M code/src/state/compositionSurface.ts
+ M code/src/state/createInitialDayFrameState.ts
+ M code/src/state/dayFrameAuthorityTransaction.test.ts
+ M code/src/state/dayFrameAuthorityTransaction.ts
+ M code/src/state/dayFrameBackup.ts
+ M code/src/state/dayFrameBackupV3.ts
+ M code/src/state/dayFrameProfiles.ts
+ M code/src/state/dayFrameRestoreComposition.ts
+ M code/src/state/dayFrameRestoreTranslation.ts
+ M code/src/state/dayFrameRuntimeAuthority.ts
+ M code/src/state/dayFrameStore.ts
+ M code/src/state/executionHistorySurface.ts
+ M code/src/state/goalDemandProjectionQuery.ts
+ M code/src/state/goalPlanningSurface.ts
+ M code/src/state/goalStructureSurface.ts
+ M code/src/state/goalSurface.ts
+ M code/src/state/historicalIntelligenceQuery.ts
+ M code/src/state/historicalPlanSurface.test.ts
+ M code/src/state/historicalPlanSurface.ts
+ M code/src/state/lazyCompositionSurface.ts
+ M code/src/state/lazyGoalStructureSurface.ts
+ M code/src/state/lazyProposalSurface.ts
+ M code/src/state/lazyRealizationSurface.ts
+ M code/src/state/planDecisionSurface.ts
+ M code/src/state/planningScopeQuery.test.ts
+ M code/src/state/planningScopeQuery.ts
+ M code/src/state/proposalSurface.ts
+ M code/src/state/realizationSurface.ts
+ M code/src/state/schedulePublication.test.ts
+ M code/src/state/schedulePublication.ts
+ M code/src/state/tests/dayFrameStore.test.ts
+ M code/src/state/todayQuery.ts
+ M code/src/state/types.ts
+ M code/src/ui/CommitmentSection.tsx
+ M code/src/ui/DayFrameApp.tsx
+ M code/src/ui/GoalActivitySummary.tsx
+ M code/src/ui/GoalMeasurementSection.tsx
+ M code/src/ui/GoalProgressReportingSection.tsx
+ M code/src/ui/GoalProgressSummary.tsx
+ M code/src/ui/GoalSection.tsx
+ M code/src/ui/HistoricalIntelligenceSummary.tsx
+ M code/src/ui/HistoricalPlanReportingSection.tsx
+ M code/src/ui/MonthlyPlannerSurface.tsx
+ M code/src/ui/PlannerSurface.tsx
+ M code/src/ui/PlanningReviewPanel.tsx
+ M code/src/ui/PreviewScreen.tsx
+ M code/src/ui/ScheduleReviewPanel.tsx
+ M code/src/ui/SetupScreen.tsx
+ M code/src/ui/TodaySurface.tsx
+ M code/src/ui/acceptedDecisionPresentation.test.ts
+ M code/src/ui/acceptedDecisionPresentation.ts
+ M code/src/ui/dayFrameUi.css
+ M code/src/ui/plannerReviewPresentation.ts
+ M code/src/ui/scheduleReviewReadiness.ts
+ M code/src/ui/tests/DayFrameApp.test.tsx
+ M code/src/ui/tests/HistoricalPlanReportingSection.test.tsx
+ M code/src/ui/tests/PlanningReviewPanel.test.tsx
+ M code/src/ui/tests/PreviewScreen.test.tsx
+ M code/src/ui/tests/ProductSurfaces.test.tsx
+ M code/src/ui/tests/ScheduleReviewPanel.test.tsx
+ M code/src/ui/tests/TodaySurface.test.tsx
+ M code/src/ui/tests/plannerReviewPresentation.test.ts
+ M code/src/ui/tests/scheduleReviewReadiness.test.ts
+ M docs/architecture/ARCHITECTURE_CHARTER.md
+ M docs/architecture/CAPACITY_ARCHITECTURE_SPECIFICATION_RESULT.md
+ M docs/architecture/DAYFRAME_COMPLETE_ARCHITECTURE_SPECIFICATION_v1.0.0.md
+?? DayFrame_Dogfood_Pass_02_Findings_Hydration.pdf
+?? code/src/core/engine/generatePlanningSchedule.ts
+?? code/src/core/engine/tests/preMigrationCorrectness.test.ts
+?? code/src/core/engine/tests/workRelativeFootprint.test.ts
+?? code/src/core/occurrences/sleepOccurrenceReference.ts
+?? code/src/core/planning/deriveFoundationalSchedule.ts
+?? code/src/core/planning/foundationalPlanning.ts
+?? code/src/core/planning/goalStructureTemporal.ts
+?? code/src/core/planning/sleepPlanningIntegration.test.ts
+?? code/src/core/productEvidence/
+?? code/src/core/sleep/
+?? code/src/core/time/physicalOccupancy.ts
+?? code/src/state/acceptanceCoordinator.test.ts
+?? code/src/state/acceptanceLifecycle.ts
+?? code/src/state/acceptanceLifecycleTestFixtures.ts
+?? code/src/state/acceptanceOwnerLifecycle.test.ts
+?? code/src/state/acceptancePersistence.ts
+?? code/src/state/acceptanceReplacementIsolation.test.ts
+?? code/src/state/acceptanceSourceWitness.test.ts
+?? code/src/state/acceptedPlanningEvidenceQuery.ts
+?? code/src/state/activeV3.ts
+?? code/src/state/activeV4.ts
+?? code/src/state/backupTransferSurface.ts
+?? code/src/state/constructivePlanningWorkflow.ts
+?? code/src/state/dayFrameBackupV13.ts
+?? code/src/state/dayFrameBackupV14.ts
+?? code/src/state/dayFrameBackupV14Restore.test.ts
+?? code/src/state/dayFrameProfilesV3.ts
+?? code/src/state/goalStructureOwnerSafety.test.ts
+?? code/src/state/goalStructurePlanningSafety.test.ts
+?? code/src/state/historicalPlanLifecycle.test.ts
+?? code/src/state/legacySleepConversion.test.ts
+?? code/src/state/omissionPublication.test.ts
+?? code/src/state/omissionPublicationTestFixtures.ts
+?? code/src/state/productEvidence.test.ts
+?? code/src/state/productEvidenceSources.ts
+?? code/src/state/proposalWriteLifecycle.test.ts
+?? code/src/state/publicationEligibility.ts
+?? code/src/state/publicationReceipt.ts
+?? code/src/state/publicationReplacementIsolation.test.ts
+?? code/src/state/publicationSourceAdmission.test.ts
+?? code/src/state/publicationSourceCommitFaults.test.ts
+?? code/src/state/publicationSourceQualification.test.ts
+?? code/src/state/publicationSourceTestFixtures.ts
+?? code/src/state/realizationConcurrency.test.ts
+?? code/src/state/reviewSourceQualification.ts
+?? code/src/state/reviewSourceTestFixtures.ts
+?? code/src/state/selectedDayEvidenceQuery.ts
+?? code/src/state/sleepCorrectiveIntegration.test.ts
+?? code/src/state/sleepExecutionCommand.ts
+?? code/src/state/sleepFoundation.test.ts
+?? code/src/state/sleepHistoryQuery.ts
+?? code/src/state/sleepPlanningIntegration.test.ts
+?? code/src/state/sleepPublicationExecution.test.ts
+?? code/src/state/sleepPublicationStorage.test.ts
+?? code/src/state/sleepResolutionQuery.test.ts
+?? code/src/state/sourceObservation.ts
+?? code/src/ui/AcceptedPlanningCoverage.tsx
+?? code/src/ui/AcceptedPlanningSummary.tsx
+?? code/src/ui/CommitmentAdvancedFields.tsx
+?? code/src/ui/CommitmentRelationshipContext.tsx
+?? code/src/ui/DayOutcomeControl.tsx
+?? code/src/ui/DayWorksurface.tsx
+?? code/src/ui/DurationFields.tsx
+?? code/src/ui/GoalAcceptedPlanningSection.tsx
+?? code/src/ui/GoalPlanningSection.tsx
+?? code/src/ui/GoalRecordedInspection.tsx
+?? code/src/ui/GoalStructureSection.tsx
+?? code/src/ui/LegacySleepConversionSection.tsx
+?? code/src/ui/MyScheduleSurface.tsx
+?? code/src/ui/ReviewConflicts.tsx
+?? code/src/ui/ReviewTrial.tsx
+?? code/src/ui/ScheduleReviewWorkspace.tsx
+?? code/src/ui/ScheduledGoalFacts.tsx
+?? code/src/ui/SleepHistorySection.tsx
+?? code/src/ui/SleepRequirementSection.tsx
+?? code/src/ui/acceptedPlanningSummaryContext.ts
+?? code/src/ui/acceptedPlanningSummaryPresentation.ts
+?? code/src/ui/dayWorksurfacePresentation.ts
+?? code/src/ui/goalAcceptedPlanningContext.ts
+?? code/src/ui/goalEditingContext.ts
+?? code/src/ui/plannerNavigation.ts
+?? code/src/ui/planningResultCopy.ts
+?? code/src/ui/reviewSourceFeedback.ts
+?? code/src/ui/scheduleReviewNavigation.ts
+?? code/src/ui/tests/AcceptedPlanningNavigation.test.tsx
+?? code/src/ui/tests/AcceptedPlanningSummary.test.tsx
+?? code/src/ui/tests/ConstructivePlanningWorkflow.test.tsx
+?? code/src/ui/tests/DayWorksurface.test.tsx
+?? code/src/ui/tests/GoalAcceptedPlanning.test.tsx
+?? code/src/ui/tests/GoalInspectionNavigation.test.tsx
+?? code/src/ui/tests/GoalRecordedInspection.test.tsx
+?? code/src/ui/tests/GoalStructureAuthoring.test.tsx
+?? code/src/ui/tests/GoalsFocusedEditing.test.tsx
+?? code/src/ui/tests/LegacySleepConversionSection.test.tsx
+?? code/src/ui/tests/MyScheduleConvergence.test.tsx
+?? code/src/ui/tests/NavigationFoundation.test.tsx
+?? code/src/ui/tests/OmissionPublicationWorkflow.test.tsx
+?? code/src/ui/tests/PublicationReplacementFeedback.test.tsx
+?? code/src/ui/tests/ReviewCertaintyWorkflow.test.tsx
+?? code/src/ui/tests/ReviewConflicts.test.tsx
+?? code/src/ui/tests/ReviewIndependentDrafts.test.tsx
+?? code/src/ui/tests/ReviewReturnFocus.test.tsx
+?? code/src/ui/tests/ReviewSourceQualification.test.tsx
+?? code/src/ui/tests/ScheduleReviewWorkspace.test.tsx
+?? code/src/ui/tests/SleepHistorySection.test.tsx
+?? code/src/ui/tests/SleepRequirementSection.test.tsx
+?? code/src/ui/tests/V14ImportContext.test.tsx
+?? code/src/ui/tests/acceptedSummaryFixtures.ts
+?? code/src/ui/tests/goalInspectionCanonicalFixture.ts
+?? code/src/ui/tests/goalRecordedCanonicalFixture.ts
+?? code/src/ui/tests/myScheduleFixtures.ts
+?? code/src/ui/tests/v14RestoreFixture.ts
+?? code/src/ui/useGoalEditingState.ts
+?? code/src/ui/useGoalPresentationState.ts
+?? code/src/ui/useReviewInvalidation.ts
+?? code/src/ui/useReviewReturnFocus.ts
+?? docs/adr/ADR_ACCEPTANCE_TO_REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_V1_RESULT.md
+?? docs/adr/ADR_CANONICAL_PRODUCT_EVIDENCE_PROJECTIONS.md
+?? docs/adr/ADR_FIRST_CLASS_SLEEP_DOMAIN_AND_PERSISTENCE_FOUNDATION.md
+?? docs/adr/ADR_GOAL_STRUCTURE_TEMPORAL_QUALIFICATION_AND_OWNER_SAFETY_V1_RESULT.md
+?? docs/adr/ADR_PUBLICATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_V1_RESULT.md
+?? docs/adr/ADR_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_V1_RESULT.md
+?? docs/architecture/DAYFRAME_GOAL_LIFECYCLE_ARCHITECTURE_SPECIFICATION_V1.md
+?? docs/architecture/DayFrame_End_State_Compatibility_Retirement_Architecture_Specification_V1.md
+?? docs/architecture/DayFrame_Product_Ontology_Vocabulary_Specification_V1.md
+?? docs/architecture/GOAL_STRUCTURE_TEMPORAL_COMPATIBILITY_AND_OWNER_SAFETY_CONTRACT_V1_PROPOSED_RESULT.md
+?? docs/architecture/PUBLICATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_V1_PROPOSED_RESULT.md
+?? docs/architecture/REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_V1_PROPOSED_RESULT.md
+?? docs/architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md
+?? docs/architecture/TASK_9.27_GOAL_STRUCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1_CONTINUATION_RESULT.md
+?? docs/hydration/DayFrame_Complete_Hydration_Package_2026-09-21.md
+?? docs/implementation/phase-9/TASK_9.10_FIRST_CLASS_SLEEP_ARCHITECTURE_SPECIFICATION.md
+?? docs/implementation/phase-9/TASK_9.10_FIRST_CLASS_SLEEP_ARCHITECTURE_SPECIFICATION_RESULT.md
+?? docs/implementation/phase-9/TASK_9.11_FIRST_CLASS_SLEEP_DOMAIN_AND_PERSISTANCE_FOUNDATION.md
+?? docs/implementation/phase-9/TASK_9.11_FIRST_CLASS_SLEEP_DOMAIN_PERSISTENCE_FOUNDATION_RESULT.md
+?? docs/implementation/phase-9/TASK_9.12_FIRST_CLASS_SLEEP_DERIVATION_AND_FEASIBILITY_FOUNDATION.md
+?? docs/implementation/phase-9/TASK_9.12_FIRST_CLASS_SLEEP_DERIVATION_FEASIBILITY_FOUNDATION_RESULT.md
+?? docs/implementation/phase-9/TASK_9.13_FIRST_CLASS_SLEEP_CAPACITY_AND_PLANNING_INTEGRATION_V1.md
+?? docs/implementation/phase-9/TASK_9.13_FIRST_CLASS_SLEEP_CAPACITY_PLANNING_INTEGRATION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.14_FIRST_CLASS_SLEEP_FRICTION_AND_CORRECTIVE_AUTHORITY_V1.md
+?? docs/implementation/phase-9/TASK_9.14_FIRST_CLASS_SLEEP_FRICTION_CORRECTIVE_AUTHORITY_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.15_FIRST_CLASS_SLEEP_PUBLICATION_EXECUTION_AND_HISTORICAL_AUTHORITY_V1.md
+?? docs/implementation/phase-9/TASK_9.15_FIRST_CLASS_SLEEP_PUBLICATION_EXECUTION_HISTORICAL_AUTHORITY_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.16_FIRST_CLASS_SLEEP_LEGACY_CONVERSION_AND_PRODUCT_TRANSITION_V1.md
+?? docs/implementation/phase-9/TASK_9.16_FIRST_CLASS_SLEEP_LEGACY_CONVERSION_PRODUCT_TRANSITION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.17_PLANNER_SUMMARY_PRODUCT_CONVERGENCE_MOBILE_UX_SPECIFICATION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.17_Planner_SUMMARY_PRODUCT_CONVERGENCE_AND_MOBILE_UX_SPECIFICATION_V1.md
+?? docs/implementation/phase-9/TASK_9.18_PLANNER_SUMMARY_NAVIGATION_FOUNDATION_V1.md
+?? docs/implementation/phase-9/TASK_9.18_PLANNER_SUMMARY_NAVIGATION_FOUNDATION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.19_CANONICAL_PRODUCT_EVIDENCE_PROJECTION_V1.md
+?? docs/implementation/phase-9/TASK_9.19_CANONICAL_PRODUCT_EVIDENCE_PROJECTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.20_CANONICAL_DAY_WORKSURFACE_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.20_CANONICAL_DAY_WORKSURFACE_CONVERGENCE_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.21_ACCEPTED_PLANNING_SUMMARY_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.21_ACCEPTED_PLANNING_SUMMARY_CONVERGENCE_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.22_MY_SCHEDULE_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.22_MY_SCHEDULE_CONVERGENCE_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.23_GOALS_LIFECYCLE_AND_PRODUCT_CONVERGENCE_READINESS_AUDIT_V1.md
+?? docs/implementation/phase-9/TASK_9.23_GOALS_LIFECYCLE_PRODUCT_CONVERGENCE_READINESS_AUDIT_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.24_GOALS_FOCUSED_EDITING_AND_REQUESTED_TIME_FIDELITY_V1.md
+?? docs/implementation/phase-9/TASK_9.24_GOALS_FOCUSED_EDITING_REQUESTED_TIME_FIDELITY_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.25_GOAL_ACCEPTED_PLANNING_AND_SCHEDULED_WORK_INSPECTION_V1.md
+?? docs/implementation/phase-9/TASK_9.25_GOAL_ACCEPTED_PLANNING_AND_SCHEDULED_WORK_INSPECTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.26_PRODUCTION_V14_BACKUP_IMPORT_REPAIR_AND_BROSWER_RESTORE_VERIFICATION_V1.md
+?? docs/implementation/phase-9/TASK_9.26_PRODUCTION_V14_BACKUP_IMPORT_REPAIR_AND_BROWSER_RESTORE_VERIFICATION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.27.1_GOAL_STRUCTURE_CONTRACT_RESOLUTION_V1.md
+?? docs/implementation/phase-9/TASK_9.27.1_GOAL_STRUCTURE_CONTRACT_RESOLUTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.27.2_GOAL_STRUCTURE_CANONICAL_OWNER_REPAIR_V1.md
+?? docs/implementation/phase-9/TASK_9.27.2_GOAL_STRUCTURE_CANONICAL_OWNER_REPAIR_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.27_GOAL_STRUCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1.md
+?? docs/implementation/phase-9/TASK_9.27_GOAL_STRUCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1_CONTINUATION.md
+?? docs/implementation/phase-9/TASK_9.27_GOAL_STRUCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1_CONTINUATION_RESULT.md
+?? docs/implementation/phase-9/TASK_9.27_GOAL_STRUCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.27_GOAL_STURCTURE_AND_MANUAL_MILESTONE_AUTHORING_V1_AUTHORIZED_CONTINUATION.md
+?? docs/implementation/phase-9/TASK_9.28_GOAL_RECORDED_PROGRESS_AND_ACTIVITY_INSPECTION_V1.md
+?? docs/implementation/phase-9/TASK_9.28_GOAL_RECORDED_PROGRESS_AND_ACTIVITY_INSPECTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.1_PUBLICATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1.md
+?? docs/implementation/phase-9/TASK_9.29.1_PUBLICATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md
+?? "docs/implementation/phase-9/TASK_9.29.2 _PUBLICATION_CANONICAL_OWNER_LIFECYCLE_AND_REPLACEMENT_ISOLATION_REPAIR_V1.md"
+?? docs/implementation/phase-9/TASK_9.29.2_PUBLICATION_CANONICAL_OWNER_LIFECYCLE_AND_REPLACEMENT_ISOLATION_REPAIR_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1.md
+?? docs/implementation/phase-9/TASK_9.29.3_REALIZATION_LIFECYCLE_REPLACEMENT_ISOLATION_CONTRACT_RESOLUTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.4_ACCEPTANCE_TO_REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_REPAIR_V1.md
+?? docs/implementation/phase-9/TASK_9.29.4_ACCEPTANCE_TO_REALIZATION_LIFECYCLE_AND_REPLACEMENT_ISOLATION_REPAIR_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1md
+?? docs/implementation/phase-9/TASK_9.29.6_CANONICAL_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_ADMISSION_REPAIR_V1.md
+?? docs/implementation/phase-9/TASK_9.29.6_CANONICAL_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_ADMISSION_REPAIR_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29.7_ACCEPTED_OMISSION_PUBLICATION_EVIDENCE_REPAIR_V1.md
+?? docs/implementation/phase-9/TASK_9.29.7_ACCEPTED_OMISSION_PUBLICATION_EVIDENCE_REPAIR_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGECE_V1_AUTHORIZED_COTINUATION_2.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_AUTHORIZED_CONTINUATION.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_AUTHORIZED_CONTINUATION_4.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_AUTHORIZED_CONTIUATION_3.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_2.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_2_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_3.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_3_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_4.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_4_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_CONTINUATION_RESULT.md
+?? docs/implementation/phase-9/TASK_9.29_PLANNER_REVIEW_SCHEDULE_WORKFLOW_CONVERGENCE_V1_RESULT.md
+?? docs/implementation/phase-9/TASK_9.8A_POST_DOGFOOD_PRODUCT_REACHABILITY_AND_WORKFLOW_AUDIT.md
+?? docs/implementation/phase-9/TASK_9.8A_POST_DOGFOOD_PRODUCT_REACHABILITY_AUDIT_RESULT.md
+?? docs/implementation/phase-9/TASK_9.8B_CONSTRUCTIVE_PLANNING_REACHABILITY_AND_PRE_MIGRATION_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.8B_CONSTRUCTIVE_PLANNING_REACHABILITY_PRE_MIGRATION_CONVERGENCE_RESULT.md
+?? docs/implementation/phase-9/TASK_9.8C_POST_DOGFOOD_PRODUCT_REACHABILITY_AND_WORKFLOW_AUDIT.md
+?? docs/implementation/phase-9/TASK_9.8C_POST_DOGFOOD_PRODUCT_REACHABILITY_AUDIT_RESULT.md
+?? docs/implementation/phase-9/TASK_9.9_PRE_MIGRATION_CORRECTNESS_AND_AUTHORITY_CONVERGENCE_V1.md
+?? docs/implementation/phase-9/TASK_9.9_PRE_MIGRATION_CORRECTNESS_AUTHORITY_CONVERGENCE_V1_RESULT.md
+?? docs/implementation/phase-9/evidence/
+?? node_modules/

@@ -1,0 +1,39 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run src/ui/tests/PublicationReplacementFeedback.test.tsx src/state/publicationReplacementIsolation.test.ts src/state/historicalPlanLifecycle.test.ts --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/PublicationReplacementFeedback.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/PublicationReplacementFeedback.test.tsx [ src/ui/tests/PublicationReplacementFeedback.test.tsx ]
+Error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] Error:[0m Expected `,` or `)` but found `:`
+      [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/ui/DayFrameApp.tsx:2000:49 [38;5;246m][0m
+      [38;5;246m│[0m
+ [38;5;246m1990 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249ma[0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mh[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mB[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249mu[0m[38;5;249mp[0m[38;5;249mF[0m[38;5;249mi[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mS[0m[38;5;249me[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mc[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m(
+ [38;5;240m     │[0m                                                    ┬  
+ [38;5;240m     │[0m                                                    ╰── Opened here
+ [38;5;240m     │[0m 
+ [38;5;246m2000 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mC[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mD[0m[38;5;249mu[0m[38;5;249mr[0m[38;5;249ma[0m[38;5;249mb[0m[38;5;249mi[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249my[0m[38;5;249mF[0m[38;5;249me[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mb[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m:[38;5;249m [0m[38;5;249m([0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m)[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m>[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mC[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mD[0m[38;5;249mu[0m[38;5;249mr[0m[38;5;249ma[0m[38;5;249mb[0m[38;5;249mi[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249my[0m[38;5;249mF[0m[38;5;249me[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mb[0m[38;5;249ma[0m[38;5;249mc[0m[38;5;249mk[0m[38;5;249m([0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m)[0m[38;5;249m;[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mC[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mF[0m[38;5;249ma[0m[38;5;249mi[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mM[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249ma[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m([0m[38;5;249m"[0m[38;5;249m"[0m[38;5;249m)[0m[38;5;249m;[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m,[0m
+ [38;5;240m     │[0m                                                 ┬  
+ [38;5;240m     │[0m                                                 ╰── `,` or `)` expected
+[38;5;246m──────╯[0m
+
+  Plugin: vite:oxc
+  File: /home/sid/Penn Digital Services/DayFrame/code/src/ui/DayFrameApp.tsx
+ ❯ transformWithOxc ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3343:19
+ ❯ TransformPluginContext.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:3411:26
+ ❯ EnvironmentPluginContainer.transform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:30164:51
+ ❯ loadAndTransform ../../../Penn%20Digital%20Services/DayFrame/code/node_modules/vite/dist/node/chunks/node.js:24512:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  24 passed (24)
+   Start at  10:20:27
+   Duration  3.15s (transform 877ms, setup 0ms, import 1.02s, tests 791ms, environment 697ms)
+

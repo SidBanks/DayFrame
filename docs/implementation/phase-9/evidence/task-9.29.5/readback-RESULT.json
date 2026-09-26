@@ -1,0 +1,161 @@
+{
+  "resultPath": "/home/sid/Penn Digital Services/DayFrame/docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+  "resultSHA256": "c93256ba60e53ff47e42276488152b357eb7f64295f29866d344b35e89633bb2",
+  "resultHeading": "# Task 9.29.5 \u2014 Review / Publication Source Qualification & Protection Contract Resolution V1 \u2014 RESULT",
+  "resultStatusCompleteProposal": true,
+  "resultDeterminationCorrect": true,
+  "resultEndingCorrect": true,
+  "proposalPath": "/home/sid/Penn Digital Services/DayFrame/docs/architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md",
+  "proposalSHA256": "7362d8442fb073bbcc4071c67fcaf4561277568716b58793b7bbc58f63fe86a9",
+  "proposalHeading": "# Review / Publication Source Qualification & Protection Contract V1",
+  "proposalMarkedProposed": true,
+  "proposalEndingCorrect": true,
+  "proposalScopeExplicit": true,
+  "futureCases": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24"
+  ],
+  "inputSections": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18"
+  ],
+  "inputFinalStatement": true,
+  "brokenLinks": [],
+  "checkedLinks": [
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "../../architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/EXECUTION_INPUT_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/baseline-status-RESULT.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/baseline-head-RESULT.txt",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/baseline-hashes-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/baseline-source-RESULT.tar.gz",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/tooling-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/governing-source-hashes-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/EXECUTABLE_CONTRACT_MAP_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/fingerprint-consumers-RESULT.log",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/REPRODUCTION_AND_VALIDATION_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/protection-preflight-RESULT.test.ts",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/protection-preflight-final-RESULT.log",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/reproduction-summary-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/FUTURE_REGRESSION_MATRIX_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/FILE_MANIFEST_RESULT.md",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/preservation-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/implementation/phase-9/TASK_9.29.5_REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_RESOLUTION_V1_RESULT.md",
+      "target": "evidence/task-9.29.5/readback-RESULT.json",
+      "exists": true
+    },
+    {
+      "source": "docs/architecture/REVIEW_PUBLICATION_SOURCE_QUALIFICATION_AND_PROTECTION_CONTRACT_V1_PROPOSED_RESULT.md",
+      "target": "../implementation/phase-9/evidence/task-9.29.5/EXECUTABLE_CONTRACT_MAP_RESULT.md",
+      "exists": true
+    }
+  ],
+  "preservationSHA256": "cb02ffdfffc033461779c31fbe81ecd0286439b162545b6f77e8f62e369aa518",
+  "taskFormatCheckSHA256": "2268d28d816e1c27fbc0f25474ed2dd17e026b5366c93e27bc85cadd4b57d2b4"
+}

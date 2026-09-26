@@ -236,6 +236,8 @@ export function deriveOrdinaryProposal(input: {
     qualification: input.inputQualification,
     abstainReason: input.abstainReason,
   });
+  if (input.allocation.qualification === "nonAllocatable")
+    return noProposal(input, inputFingerprint, "incompleteInput");
   if (input.abstainReason) return noProposal(input, inputFingerprint, input.abstainReason);
   if (input.inputQualification === "unknown" || input.inputQualification === "stale")
     return noProposal(input, inputFingerprint, "incompleteInput");

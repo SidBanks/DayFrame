@@ -1,0 +1,125 @@
+npm notice run dayframe@0.1.0 check:bundle
+npm notice run node scripts/check-bundle.mjs
+{
+  "initialFiles": [
+    "assets/index-8O4zq0EA.js",
+    "assets/vendor-react-BiBT4RTg.js",
+    "assets/rolldown-runtime-9SAPJn0b.js",
+    "assets/sleepRequirement-BF3kSIge.js",
+    "assets/capacityFingerprint-D6Kh-Up0.js",
+    "assets/userDay-BjAk0cL3.js",
+    "assets/dayFrameDurableDb-5Oy7RcIX.js",
+    "assets/dayFrameRuntimeAuthority-xpXPkD2o.js"
+  ],
+  "lazyFiles": [
+    "assets/DurationFields-BE9UOzn9.js",
+    "assets/GoalActivitySummary-8k6mZMWZ.js",
+    "assets/acceptedAllocationRealization-IdZ-giZl.js",
+    "assets/acceptedPlanningSummaryPresentation-9tMOq_HU.js",
+    "assets/buildTodayReadModel-BSnCmv-c.js",
+    "assets/commitmentComposition-B80YlkU1.js",
+    "assets/completionDistribution-COGVIHdi.js",
+    "assets/dayFrameBackupV10-BSw-9YAK.js",
+    "assets/dayFrameBackupV11-DaXuMtFf.js",
+    "assets/dayFrameBackupV12-DkB-imf1.js",
+    "assets/dayFrameBackupV7-CfXFcdMQ.js",
+    "assets/dayFrameBackupV8-787M7Mwq.js",
+    "assets/dayFrameBackupV9-D5Jm5CU3.js",
+    "assets/demandResourceFootprint-Cg3BThGC.js",
+    "assets/deriveFoundationalSchedule-BgvLKksu.js",
+    "assets/evidence-GxHJOpTO.js",
+    "assets/goalActivity-DsommYrz.js",
+    "assets/goalDemand-CIVpgPzZ.js",
+    "assets/goalStructure-CzH08kPG.js",
+    "assets/goalStructureTemporal-C8IbMjnn.js",
+    "assets/legacySleepConversion-Bg2GOzhs.js",
+    "assets/materializePlanPublication-BzISNChk.js",
+    "assets/plannerReviewPresentation-P48dxeAy.js",
+    "assets/planningFoundation-DHIpm1Pe.js",
+    "assets/planningResultCopy-C4MdIE1l.js",
+    "assets/productEvidenceSources-__9jjd1m.js",
+    "assets/proposal-UynMOWZX.js",
+    "assets/publicationEligibility-CqzZKq3R.js",
+    "assets/queryMonthlyPlanner-D8WhY07A.js",
+    "assets/resolveRequiredSleep-c2PByYyj.js",
+    "assets/reviewScope-AO2MNnfa.js",
+    "assets/useGoalEditingState-BkEHYafW.js",
+    "assets/useGoalPresentationState-BIlm4hdW.js",
+    "assets/schedulingRealization-D5l6udJf.js",
+    "assets/allocation-CmTy9Bsn.js",
+    "assets/capacity-DCSXnByU.js",
+    "assets/competingDemand-Dg_vB8g9.js",
+    "assets/goalFeasibility-Bc44G3Qk.js",
+    "assets/acceptedPlanningEvidenceQuery-BZk6qVhU.js",
+    "assets/allocationSurface-D82rTPGw.js",
+    "assets/backupTransferSurface-DyMUEKRs.js",
+    "assets/capacitySurface-DPpVHQO6.js",
+    "assets/compositionSurface-BBkwZcBL.js",
+    "assets/dayFrameBackupV13-BylgOxin.js",
+    "assets/dayFrameBackupV14-DKQMvvI8.js",
+    "assets/dayFrameRestoreComposition-DcK9R4Ez.js",
+    "assets/goalDemandProjectionQuery-opV4xM4r.js",
+    "assets/goalPlanningSurface-Bf-kqR2i.js",
+    "assets/goalStructureSurface-GdpFHw70.js",
+    "assets/planningScopeQuery-WKBvD0xD.js",
+    "assets/proposalSurface-DlIyO71X.js",
+    "assets/realizationSurface-bSQLbd8u.js",
+    "assets/schedulePublication-Bd6Uhgw5.js",
+    "assets/selectedDayEvidenceQuery-CiHr-Ui0.js",
+    "assets/sleepExecutionCommand-OWTvy5kM.js",
+    "assets/sleepHistoryQuery-CeH8fyOJ.js",
+    "assets/todayQuery-Bb58cVK5.js",
+    "assets/AcceptedPlanningSummary-CRrPBd7f.js",
+    "assets/DayOutcomeControl-BRqz7hgA.js",
+    "assets/DayWorksurface-Ddg-eDbq.js",
+    "assets/GoalAcceptedPlanningSection-D2h8odhV.js",
+    "assets/GoalPlanningSection-zLCLVoL6.js",
+    "assets/GoalRecordedInspection-BACu79be.js",
+    "assets/GoalSection-DX23ADwx.js",
+    "assets/GoalStructureSection-BQSJAYb0.js",
+    "assets/HistoricalIntelligenceSummary-Bgsnwog1.js",
+    "assets/LegacySleepConversionSection-7ItPjwZB.js",
+    "assets/MonthlyPlannerSurface-B8NKee-_.js",
+    "assets/MyScheduleSurface-5wAJiThD.js",
+    "assets/PreviewScreen-Buq_5vQ9.js",
+    "assets/ScheduleReviewPanel-BmQPiNxt.js",
+    "assets/SetupScreen-JktKCTSA.js",
+    "assets/SleepRequirementSection-DiSfVBJz.js"
+  ],
+  "initialBytes": 626896,
+  "initialGzip": 164266,
+  "largestLazy": 62657,
+  "totalBytes": 1271716,
+  "policy": {
+    "hard": {
+      "initialBytes": 685000,
+      "initialGzip": 170000,
+      "largestLazy": 100000
+    },
+    "warning": {
+      "initialBytes": 650000,
+      "initialGzip": 161500,
+      "largestLazy": 80000
+    },
+    "total": {
+      "warning": 800000,
+      "architectureReview": 825000
+    }
+  },
+  "warnings": [
+    {
+      "kind": "headroom",
+      "name": "initialGzip",
+      "threshold": 161500,
+      "value": 164266
+    },
+    {
+      "kind": "architecture-review",
+      "name": "totalBytes",
+      "threshold": 825000,
+      "value": 1271716
+    }
+  ]
+}
+Bundle policy warning: initialGzip is 164266 bytes (threshold 161500; headroom).
+Bundle policy warning: totalBytes is 1271716 bytes (threshold 825000; architecture-review).

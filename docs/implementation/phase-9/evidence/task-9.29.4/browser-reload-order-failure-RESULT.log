@@ -1,0 +1,8 @@
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:201
+if(JSON.stringify(backup.data)!==JSON.stringify(reloaded.data)) throw Error('reload V14 mismatch');
+                                                                      ^
+
+Error: reload V14 mismatch
+    at file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29.4/browser-driver-RESULT.mjs:201:71
+
+Node.js v22.23.2

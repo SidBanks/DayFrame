@@ -1,0 +1,8 @@
+src/core/decisions/replayPlanDecisions.ts 125ms (unchanged)
+src/core/engine/generatePlanningSchedule.ts 103ms
+src/core/execution/historicalExecutionTarget.ts 82ms
+src/core/historicalPlan/materializePlanPublication.ts 62ms
+src/state/dayFrameStore.ts 478ms
+src/state/omissionPublication.test.ts 130ms
+src/state/omissionPublicationTestFixtures.ts 21ms
+src/ui/tests/OmissionPublicationWorkflow.test.tsx 23ms

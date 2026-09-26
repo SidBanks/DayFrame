@@ -1,0 +1,22 @@
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/omissionPublication.test.ts (22 tests | 1 failed) 3891ms
+   × keeps the qualification physical admission guard on omitted publication 146ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/omissionPublication.test.ts > keeps the qualification physical admission guard on omitted publication
+Error: Proposal never reached mutation: {"status":"rejected","reason":"invalidInput"}
+ ❯ src/state/omissionPublication.test.ts:170:194
+
+ ❯ src/state/omissionPublication.test.ts:170:127
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 passed (22)
+   Start at  21:59:57
+   Duration  4.82s (transform 932ms, setup 0ms, import 819ms, tests 3.89s, environment 0ms)
+

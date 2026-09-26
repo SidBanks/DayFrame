@@ -1,0 +1,28 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --root code src/state/historicalPlanLifecycle.test.ts src/state/publicationReplacementIsolation.test.ts src/state/historicalPlanSurface.test.ts src/state/schedulePublication.test.ts src/state/dayFrameAuthorityTransaction.test.ts src/state/goalStructureOwnerSafety.test.ts src/state/dayFrameBackupV14Restore.test.ts src/state/dayFrameRestoreComposition.test.ts src/infrastructure/storage/indexedDbCollectionStorage.test.ts src/ui/tests/ScheduleReviewPanel.test.tsx --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/state/goalStructureOwnerSafety.test.ts (28 tests | 1 failed) 199ms
+   × preserves original anomalous latest and nonlatest legacy rows while protecting ordinary writes 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/state/goalStructureOwnerSafety.test.ts > preserves original anomalous latest and nonlatest legacy rows while protecting ordinary writes
+Error: ENOENT: no such file or directory, open '../docs/implementation/phase-9/evidence/task-9.27/contract-observations-RESULT.json'
+ ❯ src/state/goalStructureOwnerSafety.test.ts:199:5
+    197|   const f = await fixture();
+    198|   const evidence = JSON.parse(
+    199|     readFileSync(
+       |     ^
+    200|       "../docs/implementation/phase-9/evidence/task-9.27/contract-obse…
+    201|       "utf8",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  1 failed | 124 passed (125)
+   Start at  10:01:44
+   Duration  13.85s (transform 2.17s, setup 0ms, import 2.90s, tests 8.25s, environment 1.40s)
+

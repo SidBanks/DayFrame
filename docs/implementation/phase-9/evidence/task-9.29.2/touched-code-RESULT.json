@@ -1,0 +1,22 @@
+[
+  "code/src/infrastructure/restore/restoreCoordinator.ts",
+  "code/src/infrastructure/storage/indexedDbCollectionStorage.test.ts",
+  "code/src/infrastructure/storage/indexedDbCollectionStorage.ts",
+  "code/src/state/dayFrameAuthorityTransaction.test.ts",
+  "code/src/state/dayFrameAuthorityTransaction.ts",
+  "code/src/state/dayFrameRestoreComposition.ts",
+  "code/src/state/dayFrameRuntimeAuthority.ts",
+  "code/src/state/dayFrameStore.ts",
+  "code/src/state/historicalPlanLifecycle.test.ts",
+  "code/src/state/historicalPlanSurface.ts",
+  "code/src/state/publicationReceipt.ts",
+  "code/src/state/publicationReplacementIsolation.test.ts",
+  "code/src/state/schedulePublication.ts",
+  "code/src/state/sleepPublicationStorage.test.ts",
+  "code/src/state/types.ts",
+  "code/src/ui/DayFrameApp.tsx",
+  "code/src/ui/ScheduleReviewPanel.tsx",
+  "code/src/ui/dayFrameUi.css",
+  "code/src/ui/tests/PublicationReplacementFeedback.test.tsx",
+  "code/src/ui/tests/ScheduleReviewPanel.test.tsx"
+]

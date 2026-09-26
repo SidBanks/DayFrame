@@ -1,0 +1,8 @@
+npm notice run dayframe@0.1.0 lint
+npm notice run eslint .
+
+/home/sid/Penn Digital Services/DayFrame/code/src/state/historicalPlanLifecycle.test.ts
+  15:3  error  'HISTORICAL_PLAN_DAY_STORE' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (1 error, 0 warnings)
+

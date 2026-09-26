@@ -1,0 +1,12 @@
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29-continuation-4/correction-browser-driver-RESULT.mjs:219
+await click('Apply Planning Change');await until(has('Retry accepted choice save'));const pending=await ev('qaStore.getPlanDecisions()');await ev('qaRestoreStorage()');await click('Retry accepted choice save');await until(`![...document.querySelectorAll('button')].some(b=>b.checkVisibility()&&b.textContent.trim()==='Retry accepted choice save')`);exact(await ev('qaStore.getPlanDecisions()'),pending,'retry exact decision');checks.persistenceRetry={exactDecision:true};await widths('correction-save-retried');retain('browser-checks',checks);
+                                                                                          ^
+
+SyntaxError: Identifier 'pending' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:346:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:107:18)
+    at #translate (node:internal/modules/esm/loader:540:12)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:587:27)
+    at async ModuleJob._link (node:internal/modules/esm/module_job:162:19)
+
+Node.js v22.19.0

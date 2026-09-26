@@ -1,4 +1,4 @@
-import type { PlanningReviewReadModelV1 } from "../state/planningScopeQuery.js";
+import type { PlanningReviewReadModelV2 } from "../state/planningScopeQuery.js";
 
 export type PlannerPresentationKind =
   | "work"
@@ -45,7 +45,7 @@ const order: PlannerPresentationKind[] = [
 ];
 
 export function presentPlanningReview(
-  model: PlanningReviewReadModelV1,
+  model: PlanningReviewReadModelV2,
 ): PlannerReviewPresentationV1 {
   const items: PlannerPresentationItem[] = [];
   for (const entry of model.derivedSchedule) {
@@ -62,7 +62,7 @@ export function presentPlanningReview(
       action: "inspect",
     });
   }
-  for (const entry of model.scheduledReality) {
+  for (const entry of model.scheduledReality.records) {
     const kind =
       entry.fact.scheduleRole === "productiveGoalWork"
         ? "goalWork"
@@ -92,12 +92,15 @@ export function presentPlanningReview(
       action: "inspect",
     });
   }
-  for (const entry of model.acceptedLiabilities) {
+  for (const entry of model.acceptedLiabilities.records) {
     items.push({
       id: `accepted:${entry.acceptedAllocationId}:${entry.claim.id}`,
       kind: "acceptedUnrealized",
-      heading: "Accepted — awaiting realization",
-      detail: `${roleLabel(entry.claim.role)} resource authority; not yet scheduled reality`,
+      heading:
+        model.acceptedLiabilities.availability === "available"
+          ? "Accepted — awaiting realization"
+          : "Readable accepted authority",
+      detail: `${roleLabel(entry.claim.role)} resource authority; ${model.acceptedLiabilities.availability === "available" ? "not yet scheduled reality" : "current realization coverage unknown"}`,
       userDayDate: entry.claim.userDayDate,
       startsAt: entry.visibleInterval.startsAt,
       endsAt: entry.visibleInterval.endsAt,
@@ -106,7 +109,7 @@ export function presentPlanningReview(
       action: "inspect",
     });
   }
-  for (const entry of model.proposals) {
+  for (const entry of model.proposals.records) {
     items.push({
       id: `proposal:${entry.proposal.id}:${entry.proposal.revision}`,
       kind: "proposal",
@@ -129,13 +132,31 @@ export function presentPlanningReview(
     publication: { label: publicationLabel(model) },
     groups: order.flatMap((kind) => {
       const grouped = items.filter((item) => item.kind === kind);
-      return grouped.length ? [{ kind, heading: groupLabel(kind), items: grouped }] : [];
+      return grouped.length
+        ? [
+            {
+              kind,
+              heading:
+                kind === "acceptedUnrealized" &&
+                model.acceptedLiabilities.availability !== "available"
+                  ? "Readable accepted authority; realization coverage unknown"
+                  : groupLabel(kind),
+              items: grouped,
+            },
+          ]
+        : [];
     }),
-    isKnownEmpty: model.planningDataCoverage === "complete" && items.length === 0,
+    isKnownEmpty:
+      model.queryState === "current" &&
+      [model.acceptedLiabilities, model.scheduledReality, model.proposals].every(
+        (family) => family.coverage.status === "complete" && family.availability === "available",
+      ) &&
+      model.planningDataCoverage === "complete" &&
+      items.length === 0,
   };
 }
 
-function coveragePresentation(value: PlanningReviewReadModelV1["planningDataCoverage"]) {
+function coveragePresentation(value: PlanningReviewReadModelV2["planningDataCoverage"]) {
   if (value === "complete")
     return { tone: "complete" as const, label: "Planning data covers this review period." };
   if (value === "partial")
@@ -154,7 +175,7 @@ function coveragePresentation(value: PlanningReviewReadModelV1["planningDataCove
   };
 }
 
-function previewPresentation(value: PlanningReviewReadModelV1["preview"]) {
+function previewPresentation(value: PlanningReviewReadModelV2["preview"]) {
   if (value.availability === "unavailable")
     return {
       tone: "unavailable" as const,
@@ -172,7 +193,9 @@ function previewPresentation(value: PlanningReviewReadModelV1["preview"]) {
   };
 }
 
-function publicationLabel(model: PlanningReviewReadModelV1) {
+function publicationLabel(model: PlanningReviewReadModelV2) {
+  if (model.publication.availability?.status === "protected")
+    return "Saved plan history is protected and cannot currently be verified.";
   const coverage = model.publication.coverage;
   return coverage === "complete"
     ? "Published history covers this period."

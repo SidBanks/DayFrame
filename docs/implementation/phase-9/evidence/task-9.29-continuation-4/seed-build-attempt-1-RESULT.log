@@ -1,0 +1,11 @@
+vite v8.0.10 building client environment for production...
+[2Ktransforming...✓ 158 modules transformed.
+
+(!) outDir /tmp/dayframe-929c4-seed-build-RESULT is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../../../../../tmp/dayframe-929c4-seed-build-RESULT/canonical-seed-RESULT.js  692.39 kB │ gzip: 162.96 kB
+
+✓ built in 139ms

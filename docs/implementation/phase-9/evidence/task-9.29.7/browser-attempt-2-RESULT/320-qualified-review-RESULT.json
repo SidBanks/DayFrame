@@ -1,0 +1,395 @@
+{
+  "version": 2,
+  "sourceQualification": {
+    "proposal": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    },
+    "realization": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    },
+    "activeSetup": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "planDecision": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "composition": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "goal": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "sleepFoundation": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "currentRuntime",
+      "lastWrite": "none"
+    },
+    "historicalPlan": {
+      "status": "qualified",
+      "coverage": {
+        "status": "complete",
+        "basis": "wholeAuthority"
+      },
+      "basis": "verifiedCommitted",
+      "lastWrite": "verified"
+    }
+  },
+  "queryState": "current",
+  "publicationWitness": {
+    "status": "publishable"
+  },
+  "sourceFingerprint": "review-qualified-v2:5cdf6f246070ca4d",
+  "reviewScope": {
+    "version": 1,
+    "scopeType": "reviewScope",
+    "id": "native-range",
+    "kind": "custom",
+    "anchorUserDayDate": "2026-09-26",
+    "startUserDayDate": "2026-09-26",
+    "endUserDayDateExclusive": "2026-09-27",
+    "provenance": {
+      "source": "explicit"
+    }
+  },
+  "planningDataCoverage": "complete",
+  "preview": {
+    "availability": "available",
+    "revision": "generated",
+    "coverage": "covers",
+    "freshness": "current"
+  },
+  "scheduledReality": {
+    "records": [
+      {
+        "epistemicClass": "scheduledReality",
+        "fact": {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "dcfff546f11bb687",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "productiveGoalWork",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "64629efd39d81906",
+            "acceptedAllocationId": "4bb6a3e7-b1da-4207-8c43-f2e60019d67f",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "947331da889b9d08",
+            "proposalDecisionId": "c07a5f96-48a4-4d55-bed4-463836732fd0",
+            "proposalId": "355ea43e02ebe6b9",
+            "proposalRevision": 1,
+            "proposalOptionId": "3ea7939727c5215c"
+          },
+          "startsAt": "2026-09-26T20:15:00.000Z",
+          "endsAt": "2026-09-26T21:15:00.000Z",
+          "durationMinutes": 60,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "5a86db892e74a40f",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "7cba434ce4c57aa9",
+            "goalId": "ba7d1339-e0c2-4a09-b120-69044c40c8bd",
+            "demandId": "a46c9d94-d0c2-48d2-b1d4-90a1f4f4c4b6",
+            "demandRevision": 1,
+            "demandProjectionId": "ae129117b7ae11d4",
+            "productiveOpportunityId": "9c2fe0b643d0d9c0",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "productiveRoot"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "1a031c22-049b-4559-9c71-dd78ade04134",
+            "specificationRevision": 1,
+            "associationId": "b69d1a62-23aa-4e9b-b80f-cab825a88ca9",
+            "associationRevision": 1,
+            "variantId": "study"
+          },
+          "timeSemantics": "activity",
+          "executionEligibility": "eligible"
+        },
+        "authoritativeInterval": {
+          "startsAt": "2026-09-26T20:15:00.000Z",
+          "endsAt": "2026-09-26T21:15:00.000Z"
+        },
+        "visibleInterval": {
+          "startsAt": "2026-09-26T20:15:00.000Z",
+          "endsAt": "2026-09-26T21:15:00.000Z"
+        }
+      },
+      {
+        "epistemicClass": "scheduledReality",
+        "fact": {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "0dd1ea7addd5a12b",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "supportActivity",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "64629efd39d81906",
+            "acceptedAllocationId": "4bb6a3e7-b1da-4207-8c43-f2e60019d67f",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "7e5f72353c8554bc",
+            "proposalDecisionId": "c07a5f96-48a4-4d55-bed4-463836732fd0",
+            "proposalId": "355ea43e02ebe6b9",
+            "proposalRevision": 1,
+            "proposalOptionId": "3ea7939727c5215c"
+          },
+          "startsAt": "2026-09-26T21:15:00.000Z",
+          "endsAt": "2026-09-26T21:45:00.000Z",
+          "durationMinutes": 30,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "5a86db892e74a40f",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "7cba434ce4c57aa9",
+            "goalId": "ba7d1339-e0c2-4a09-b120-69044c40c8bd",
+            "demandId": "a46c9d94-d0c2-48d2-b1d4-90a1f4f4c4b6",
+            "demandRevision": 1,
+            "demandProjectionId": "ae129117b7ae11d4",
+            "productiveOpportunityId": "9c2fe0b643d0d9c0",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "supportsProductive",
+              "productiveClaimId": "947331da889b9d08"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "1a031c22-049b-4559-9c71-dd78ade04134",
+            "specificationRevision": 1,
+            "associationId": "b69d1a62-23aa-4e9b-b80f-cab825a88ca9",
+            "associationRevision": 1,
+            "variantId": "study",
+            "componentId": "notes"
+          },
+          "timeSemantics": "activity",
+          "executionEligibility": "eligible"
+        },
+        "authoritativeInterval": {
+          "startsAt": "2026-09-26T21:15:00.000Z",
+          "endsAt": "2026-09-26T21:45:00.000Z"
+        },
+        "visibleInterval": {
+          "startsAt": "2026-09-26T21:15:00.000Z",
+          "endsAt": "2026-09-26T21:45:00.000Z"
+        }
+      },
+      {
+        "epistemicClass": "scheduledReality",
+        "fact": {
+          "recordType": "realizedScheduleFact",
+          "version": 1,
+          "id": "ee44851b9d368f31",
+          "sourceKind": "acceptedAllocation",
+          "scheduleRole": "bufferProtection",
+          "origin": {
+            "kind": "acceptedAllocation",
+            "realizationId": "64629efd39d81906",
+            "acceptedAllocationId": "4bb6a3e7-b1da-4207-8c43-f2e60019d67f",
+            "acceptedAllocationRevision": 1,
+            "acceptedClaimId": "1aa59dafcc83750c",
+            "proposalDecisionId": "c07a5f96-48a4-4d55-bed4-463836732fd0",
+            "proposalId": "355ea43e02ebe6b9",
+            "proposalRevision": 1,
+            "proposalOptionId": "3ea7939727c5215c"
+          },
+          "startsAt": "2026-09-26T21:45:00.000Z",
+          "endsAt": "2026-09-26T22:00:00.000Z",
+          "durationMinutes": 15,
+          "userDayDate": "2026-09-26",
+          "capacityIntervalId": "5a86db892e74a40f",
+          "placement": "fixedAcceptedGeometry",
+          "recurrence": "none",
+          "autonomousMovability": "prohibited",
+          "lineage": {
+            "candidateParentId": "7cba434ce4c57aa9",
+            "goalId": "ba7d1339-e0c2-4a09-b120-69044c40c8bd",
+            "demandId": "a46c9d94-d0c2-48d2-b1d4-90a1f4f4c4b6",
+            "demandRevision": 1,
+            "demandProjectionId": "ae129117b7ae11d4",
+            "productiveOpportunityId": "9c2fe0b643d0d9c0",
+            "requiredness": "required",
+            "relationship": {
+              "kind": "protectsSupport",
+              "supportClaimId": "7e5f72353c8554bc",
+              "supportComponentId": "notes"
+            },
+            "source": {
+              "kind": "direct"
+            },
+            "specificationId": "1a031c22-049b-4559-9c71-dd78ade04134",
+            "specificationRevision": 1,
+            "associationId": "b69d1a62-23aa-4e9b-b80f-cab825a88ca9",
+            "associationRevision": 1,
+            "variantId": "study",
+            "componentId": "buffer"
+          },
+          "timeSemantics": "protection",
+          "executionEligibility": "prohibited"
+        },
+        "authoritativeInterval": {
+          "startsAt": "2026-09-26T21:45:00.000Z",
+          "endsAt": "2026-09-26T22:00:00.000Z"
+        },
+        "visibleInterval": {
+          "startsAt": "2026-09-26T21:45:00.000Z",
+          "endsAt": "2026-09-26T22:00:00.000Z"
+        }
+      }
+    ],
+    "coverage": {
+      "status": "complete",
+      "basis": "wholeAuthority"
+    },
+    "availability": "available"
+  },
+  "derivedSchedule": [
+    {
+      "epistemicClass": "derivedSchedule",
+      "scheduleClass": "work",
+      "fact": {
+        "id": "work_day_2026-09-26",
+        "shiftDefinitionId": "day",
+        "userId": "u",
+        "title": "Day",
+        "anchorType": "work",
+        "startsAt": {},
+        "endsAt": {},
+        "startDate": "2026-09-26",
+        "endDate": "2026-09-26",
+        "userDayDate": "2026-09-26",
+        "crossesMidnight": false,
+        "shiftCycleId": "cycle",
+        "shiftSegmentId": "segment",
+        "occurrenceIdentity": {
+          "version": 1,
+          "sourceKind": "work",
+          "shiftDefinitionId": "day",
+          "shiftCycleId": "cycle",
+          "shiftSegmentId": "segment",
+          "localStartDate": "2026-09-26",
+          "slot": 0
+        }
+      },
+      "authoritativeInterval": {
+        "startsAt": "2026-09-26T17:00:00.000Z",
+        "endsAt": "2026-09-26T18:00:00.000Z"
+      },
+      "visibleInterval": {
+        "startsAt": "2026-09-26T17:00:00.000Z",
+        "endsAt": "2026-09-26T18:00:00.000Z"
+      }
+    },
+    {
+      "epistemicClass": "derivedSchedule",
+      "scheduleClass": "commitment",
+      "fact": {
+        "id": "correction-premise",
+        "occurrenceIdentity": {
+          "version": 1,
+          "sourceKind": "manualEvent",
+          "manualEventId": "correction-premise"
+        },
+        "userId": "user_001",
+        "source": "manual",
+        "isAllDay": false,
+        "title": "Fixed appointment",
+        "category": "optional",
+        "anchorType": "manual",
+        "placementType": "fixed",
+        "startsAt": {},
+        "endsAt": {},
+        "userDayDate": "2026-09-26",
+        "userWeekStartDate": "2026-09-21",
+        "priority": 2,
+        "status": "planned",
+        "externalResources": []
+      },
+      "authoritativeInterval": {
+        "startsAt": "2026-09-26T19:30:00.000Z",
+        "endsAt": "2026-09-26T20:30:00.000Z"
+      },
+      "visibleInterval": {
+        "startsAt": "2026-09-26T19:30:00.000Z",
+        "endsAt": "2026-09-26T20:30:00.000Z"
+      }
+    }
+  ],
+  "acceptedLiabilities": {
+    "records": [],
+    "coverage": {
+      "status": "complete",
+      "basis": "wholeAuthority"
+    },
+    "availability": "available"
+  },
+  "proposals": {
+    "records": [],
+    "coverage": {
+      "status": "complete",
+      "basis": "wholeAuthority"
+    },
+    "availability": "available"
+  },
+  "unresolvedFrictionCount": 0,
+  "publication": {
+    "epistemicClass": "historical",
+    "availability": {
+      "status": "available"
+    },
+    "materialization": {
+      "status": "eligible"
+    },
+    "coverage": "none",
+    "publishedUserDays": [],
+    "missingUserDays": [
+      "2026-09-26"
+    ]
+  }
+}

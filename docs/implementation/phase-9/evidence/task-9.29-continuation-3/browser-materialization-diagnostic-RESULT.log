@@ -1,0 +1,187 @@
+file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-driver-RESULT.mjs:42
+  throw Error(
+        ^
+
+Error: Timed out: document.body?.innerText.includes("Ready to publish")
+DayFrame
+Planner
+Summary
+Planner / Review Schedule
+Back
+Settings and data
+
+LATEST SCHEDULE
+
+No friction
+
+September 26, 2026 · Generated Today at 8:45 PM
+
+Open Review Schedule
+Planning Range
+September 26, 2026
+Generated
+Today at 8:45 PM
+Visible Days
+1
+Friction
+No friction
+Sat
+26
+Planner
+Calendar
+My Schedule
+Goals
+Review Schedule
+Selected day: 2026-09-25
+Today
+Review Schedule
+
+Reviewing 2026-09-26 through 2026-09-26, including both dates.
+
+Review start date
+Review end date
+Apply review period
+
+Decisions and Build use saved planning information. Unrelated editor drafts are not saved by this review.
+
+Refresh Schedule
+Generation range and setup
+
+Generation uses the saved generation range; changing the review period only changes what you inspect and build.
+
+REVIEW WORKFLOW
+
+Review readiness
+
+2026-09-26 through 2026-09-26 (inclusive)
+
+Refresh review
+Planning data
+complete
+Preview coverage
+covers
+Preview freshness
+current
+Schedule conflicts
+0
+Accepted awaiting realization
+0
+Proposals
+0
+Not ready to publish
+This schedule cannot be saved as a published plan. Refresh and review the schedule.
+
+No publication exists for this period.
+
+Decision recorded. Accepted work is scheduled. Refresh the schedule and review it before explicit publication.
+
+No actionable Proposal intersects this Review Scope.
+
+Inspect accepted planning: Workflow 320
+Scheduled Goal work and resources
+Goal work · Workflow 320 · 2026-09-26 · 3:15 PM - 4:15 PM
+Support activity · Workflow 320 · 2026-09-26 · 4:15 PM - 4:45 PM
+Protected Buffer — not an activity · Workflow 320 · 2026-09-26 · 4:45 PM - 5:00 PM
+
+Accepted work has been scheduled. Publication remains a separate action.
+
+Conflicts and corrective decisions
+
+Try one exact occurrence, inspect the result, then explicitly accept. Similar conflicts are separate decisions.
+
+Filter conflicts by subject
+Filter conflicts by day
+
+0 matching conflict groups. Filters do not change acceptance or Build scope.
+
+Conflicts, corrections and schedule detail
+Review one user-day
+
+This detail filter does not change the Build period.
+
+Open Daily Planner for 2026-09-26Show generated period detail
+Schedule details
+
+Review planned geometry for the selected user-day and try bounded resolution options when something conflicts.
+
+Accepted and saved. The choice is active in the regenerated schedule.
+
+Accepted choices (1)
+Omit Routine
+
+Occurrence on 2026-09-26
+
+Status: Applied
+
+Remove
+Summary
+Planning Window
+September 26, 2026
+Generated
+Today at 8:45 PM
+Revised
+Not revised yet
+Needs attention
+0 total, 0 critical, 0 warning, 0 infoWork-dependent activities skipped: 0
+Saturday, 2026-09-26
+Add Event
+Day Visualizer
+
+A read-only view across this 24-hour user-day.
+
+12:00 AM
+1:00 AM
+2:00 AM
+3:00 AM
+4:00 AM
+5:00 AM
+6:00 AM
+7:00 AM
+8:00 AM
+9:00 AM
+10:00 AM
+11:00 AM
+12:00 PM
+1:00 PM
+2:00 PM
+3:00 PM
+4:00 PM
+5:00 PM
+6:00 PM
+7:00 PM
+8:00 PM
+9:00 PM
+10:00 PM
+11:00 PM
+Day
+12:00 PM - 1:00 PM
+Fixed appointment
+2:30 PM - 3:30 PM
+Manual Events
+Fixed appointment 2:30 PM - 3:30 PM (Manual event)Edit Event
+Work
+Day 12:00 PM - 1:00 PMEdit Work
+Scheduled
+
+No scheduled blocks.
+
+Plan attention — Unplaced
+
+No unplaced commitments.
+
+Needs attention
+
+No schedule conflicts detected.
+
+Build this Schedule
+
+Records immutable schedule evidence for later reporting for 2026-09-26 through 2026-09-26. This does not accept offers, schedule missing work, or save editor drafts.
+
+Saved schedule: current; coverage: covers. Required Sleep and source protection are included in the canonical readiness above.
+
+Refresh Preview
+Build this Schedule: 2026-09-26–2026-09-26
+    at until (file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-driver-RESULT.mjs:42:9)
+    at async file:///home/sid/Penn%20Digital%20Services/DayFrame/docs/implementation/phase-9/evidence/task-9.29-continuation-3/browser-driver-RESULT.mjs:214:3
+
+Node.js v22.19.0

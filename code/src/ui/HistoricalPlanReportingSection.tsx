@@ -102,6 +102,9 @@ export function HistoricalPlanReportingSection({
               <li key={key}>
                 <div className="df-history-detail">
                   <strong>{occurrence.title}</strong>
+                  {occurrence.sourceFamily === "template" && occurrence.category === "sleep" && (
+                    <span> · legacy Sleep Commitment</span>
+                  )}
                   <span> · {planLabel(occurrence.plan)}</span>
                   {materialized.status === "materialized" ? (
                     <ExecutionReportControl store={store} target={materialized.target} />

@@ -1,0 +1,2178 @@
+--- a/code/src/core/planning/goalDemandProjection.ts
++++ b/code/src/core/planning/goalDemandProjection.ts
+@@ -187,6 +187,23 @@
+   },
+ ): PlanningFreshnessV1 {
+   if (!input) return evaluatePlanningFreshness({ dependencyKind: "goal.demandProjection" });
++  const reprojected = projectDemand({
++    demand: input.demand,
++    goal: input.goal,
++    structuralEligibility: input.structuralEligibility,
++    coverage: projection.coverage,
++  });
++  if (reprojected.semanticId !== projection.semanticId)
++    return {
++      status: "stale",
++      reasons: [
++        {
++          version: 1,
++          code: "freshness.dependencyMismatch",
++          dependencyKind: "goal.demandProjection",
++        },
++      ],
++    };
+   const current = fingerprintDependencies([
+     demandDependency(input.demand),
+     goalDependency(input.goal),
+--- /dev/null
++++ b/code/src/core/planning/goalStructureTemporal.ts
+@@ -0,0 +1,291 @@
++import type { GoalId, GoalV1 } from "../goals/goal.js";
++import { semanticFingerprint } from "../../infrastructure/restore/restoreStaging.js";
++import { fingerprintDependencies } from "./planningFoundation.js";
++import {
++  queryStructuralEligibility,
++  type GoalStructureAuthorityV1,
++  type GoalStructureRelationshipV1,
++  type StructuralEligibilityV1,
++} from "./goalStructure.js";
++
++export type TemporalIssue = {
++  id: string;
++  revision: number;
++  reason: "invertedInterval" | "commandTimeOrder" | "lifecycleTimeOrder";
++};
++export function qualifyGoalStructure(authority: GoalStructureAuthorityV1) {
++  const issues: TemporalIssue[] = [];
++  for (const rows of [authority.relationships, authority.milestones]) {
++    const previous = new Map<string, string>();
++    for (const row of [...rows].sort(
++      (a, b) => a.id.localeCompare(b.id) || a.revision - b.revision,
++    )) {
++      if (row.updatedAt < row.createdAt || (previous.get(row.id) ?? "") > row.updatedAt)
++        issues.push({ id: row.id, revision: row.revision, reason: "commandTimeOrder" });
++      previous.set(row.id, row.updatedAt);
++      if (
++        "effectiveFrom" in row &&
++        row.effectiveTo !== undefined &&
++        row.effectiveTo < row.effectiveFrom
++      )
++        issues.push({ id: row.id, revision: row.revision, reason: "invertedInterval" });
++      if (
++        "state" in row &&
++        [row.satisfiedAt, row.retiredAt].some(
++          (t) => t !== undefined && (t < row.createdAt || t > row.updatedAt),
++        )
++      )
++        issues.push({ id: row.id, revision: row.revision, reason: "lifecycleTimeOrder" });
++    }
++  }
++  return { status: issues.length ? ("protected" as const) : ("qualified" as const), issues };
++}
++export function structureCommandTime(
++  authority: GoalStructureAuthorityV1,
++  now: string,
++  start?: string,
++) {
++  if (!validInstant(now)) return "invalidClock";
++  if (
++    [...authority.relationships, ...authority.milestones].some(
++      (row) => now < row.createdAt || now < row.updatedAt,
++    )
++  )
++    return "clockBeforeRecordedAuthority";
++  if (start !== undefined && now < start) return "retirementBeforeEffectiveStart";
++}
++function validInstant(value: string) {
++  return !Number.isNaN(Date.parse(value)) && new Date(value).toISOString() === value;
++}
++export function relationshipApplicability(row: GoalStructureRelationshipV1, at: string) {
++  const intervalPosition =
++    row.effectiveTo !== undefined && row.effectiveTo < row.effectiveFrom
++      ? "unknown"
++      : row.effectiveTo === row.effectiveFrom
++        ? "empty"
++        : at < row.effectiveFrom
++          ? "beforeStart"
++          : row.effectiveTo !== undefined && at >= row.effectiveTo
++            ? "atOrAfterEnd"
++            : "inside";
++  const applicability =
++    intervalPosition === "unknown"
++      ? "unknown"
++      : row.status === "active" && intervalPosition === "inside"
++        ? "applicable"
++        : "notApplicable";
++  return {
++    id: row.id,
++    revision: row.revision,
++    status: row.status,
++    effectiveFrom: row.effectiveFrom,
++    ...(row.effectiveTo === undefined ? {} : { effectiveTo: row.effectiveTo }),
++    intervalPosition,
++    applicability,
++    reason:
++      intervalPosition === "unknown"
++        ? "temporalAnomaly"
++        : row.status === "retired"
++          ? "retired"
++          : intervalPosition === "inside"
++            ? "activeInterval"
++            : intervalPosition === "empty"
++              ? "emptyInterval"
++              : intervalPosition === "atOrAfterEnd"
++                ? "ended"
++                : intervalPosition,
++  };
++}
++export type StructureEvaluationInput = {
++  goalId: GoalId;
++  evaluationInstant: string;
++  basis: "currentAuthority";
++};
++export function evaluateGoalStructure(
++  input: StructureEvaluationInput,
++  authority: GoalStructureAuthorityV1,
++  goals: GoalV1[],
++  availability: "accepted" | "initializing" | "protected" = "accepted",
++) {
++  if (input.basis !== "currentAuthority")
++    return {
++      status: "unavailable" as const,
++      reason: "historicalReconstructionUnsupported" as const,
++    };
++  if (!validInstant(input.evaluationInstant))
++    return { status: "invalidQuery" as const, reason: "invalidInstant" as const };
++  const temporal = qualifyGoalStructure(authority);
++  const available = availability === "accepted";
++  const qualified = available && temporal.status === "qualified";
++  const latest = new Map<string, GoalStructureRelationshipV1>();
++  for (const row of authority.relationships)
++    if (!latest.has(row.id) || latest.get(row.id)!.revision < row.revision) latest.set(row.id, row);
++  const relevant = [...latest.values()]
++    .filter(
++      (row) =>
++        row.sourceGoalId === input.goalId ||
++        (row.target.kind === "goal" && row.target.goalId === input.goalId),
++    )
++    .sort((a, b) => a.id.localeCompare(b.id));
++  const records = relevant.map((row) => {
++    const record = relationshipApplicability(row, input.evaluationInstant);
++    return qualified ? record : { ...record, applicability: "unknown", reason: "temporalAnomaly" };
++  });
++  const applicable = new Set(
++    records.filter((row) => row.applicability === "applicable").map((row) => row.id),
++  );
++  let legacy: StructuralEligibilityV1 = {
++    version: 1,
++    goalId: input.goalId,
++    status: "unknown",
++    reasons: [],
++    dependencies: [],
++    dependencyFingerprint: fingerprintDependencies([]),
++  };
++  if (qualified) {
++    legacy = queryStructuralEligibility({
++      goalId: input.goalId,
++      goals,
++      authority: {
++        ...authority,
++        relationships: [...latest.values()].filter((row) => applicable.has(row.id)),
++      },
++    });
++    const reasons = legacy.reasons;
++    if (
++      !goals.some((g) => g.id === input.goalId) ||
++      reasons.some((r) => r.code === "goalStructure.prerequisiteUnknown")
++    )
++      legacy.status = "unknown";
++    else if (
++      reasons.some(
++        (r) =>
++          r.code === "goalStructure.prerequisiteUnsatisfied" ||
++          r.code === "goalStructure.goalLifecycle",
++      )
++    )
++      legacy.status = "ineligible";
++  }
++  const boundary = qualified
++    ? relevant
++        .filter((row) => row.status === "active" && row.effectiveFrom > input.evaluationInstant)
++        .map((row) => row.effectiveFrom)
++        .sort()[0]
++    : undefined;
++  return {
++    status: "evaluated" as const,
++    value: {
++      version: 2 as const,
++      basis: "currentAuthority" as const,
++      evaluatedAt: input.evaluationInstant,
++      qualification: qualified
++        ? ("qualified" as const)
++        : available || availability === "protected"
++          ? ("protected" as const)
++          : ("unavailable" as const),
++      eligibility: legacy.status,
++      records: available
++        ? { status: "available" as const, values: records }
++        : { status: "unavailable" as const, reason: availability },
++      reasons:
++        available && temporal.status === "protected"
++          ? temporal.issues.map((issue) => ({ code: "temporalAnomaly", record: issue }))
++          : !available
++            ? [{ code: availability }]
++            : [
++                ...(!goals.some((g) => g.id === input.goalId) ? [{ code: "missingGoal" }] : []),
++                ...legacy.reasons.map((reason) => {
++                  const code =
++                    reason.code === "goalStructure.goalLifecycle"
++                      ? "goalLifecycle"
++                      : reason.code === "goalStructure.prerequisiteUnsatisfied"
++                        ? "hardPrerequisiteUnsatisfied"
++                        : reason.code === "goalStructure.prerequisiteUnknown"
++                          ? "hardPrerequisiteUnknown"
++                          : (() => {
++                              const row = relevant.find(
++                                (r) => "relationshipId" in reason && r.id === reason.relationshipId,
++                              );
++                              if (!row) return "advisoryPrerequisiteUnknown";
++                              const target = row.target;
++                              const goal =
++                                target.kind === "goal"
++                                  ? goals.find((g) => g.id === target.goalId)
++                                  : undefined;
++                              const milestone =
++                                target.kind === "milestone"
++                                  ? authority.milestones
++                                      .filter((m) => m.id === target.milestoneId)
++                                      .sort((a, b) => b.revision - a.revision)[0]
++                                  : undefined;
++                              return target.kind === "goal"
++                                ? !goal || goal.status === "archived"
++                                  ? "advisoryPrerequisiteUnknown"
++                                  : "advisoryPrerequisiteUnmet"
++                                : !milestone || milestone.state === "retired"
++                                  ? "advisoryPrerequisiteUnknown"
++                                  : "advisoryPrerequisiteUnmet";
++                            })();
++                  return {
++                    code,
++                    ...("relationshipId" in reason
++                      ? {
++                          record: {
++                            id: reason.relationshipId,
++                            revision: reason.relationshipRevision,
++                          },
++                        }
++                      : {}),
++                  };
++                }),
++              ],
++      dependencies: legacy.dependencies,
++      ...(available ? { authorityFingerprint: semanticFingerprint(authority) } : {}),
++      ...(qualified
++        ? {
++            applicabilityFingerprint: semanticFingerprint({
++              policy: "goal-structure-current-temporal-v1",
++              records,
++              eligibility: legacy.status,
++              dependencies: legacy.dependencies,
++            }),
++          }
++        : {}),
++      ...(boundary ? { nextApplicabilityChangeAt: boundary } : {}),
++      legacy,
++    },
++  };
++}
++export type StructureQueryResult = ReturnType<typeof evaluateGoalStructure>;
++/** Pure adapter: deliberately does not sample a clock or serialize new reason codes. */
++export function structureEligibilityV1(
++  result: StructureQueryResult,
++  goalId: GoalId,
++): StructuralEligibilityV1 {
++  return result.status === "evaluated" && result.value.legacy
++    ? structuredClone(result.value.legacy)
++    : {
++        version: 1,
++        goalId,
++        status: "unknown",
++        reasons: [],
++        dependencies: [],
++        dependencyFingerprint: fingerprintDependencies([]),
++      };
++}
++export function structureEvaluationFreshness(
++  before: StructureQueryResult,
++  current: StructureQueryResult,
++) {
++  if (
++    before.status !== "evaluated" ||
++    current.status !== "evaluated" ||
++    current.value.qualification !== "qualified" ||
++    current.value.evaluatedAt < before.value.evaluatedAt
++  )
++    return "unknown";
++  return before.value.authorityFingerprint === current.value.authorityFingerprint &&
++    before.value.applicabilityFingerprint === current.value.applicabilityFingerprint
++    ? "current"
++    : "stale";
++}
+--- a/code/src/infrastructure/storage/indexedDbCollectionStorage.ts
++++ b/code/src/infrastructure/storage/indexedDbCollectionStorage.ts
+@@ -2,6 +2,7 @@
+ export const DAYFRAME_DURABLE_DB_VERSION = 11;
+ 
+ export type DurableStorageErrorCode =
++  | "admissionDenied"
+   | "unavailable"
+   | "openFailed"
+   | "upgradeBlocked"
+@@ -179,10 +180,12 @@
+ 
+   async function mutate(
+     mutations: readonly DurableMutation[],
++    admit?: () => boolean,
+   ): Promise<DurableStorageResult<void>> {
+     if (mutations.length === 0) return success(undefined);
+     const opened = await open();
+     if (opened.status === "failure") return opened;
++    if (admit && !admit()) return failure("admissionDenied", "mutate");
+     const stores = [...new Set(mutations.map((mutation) => mutation.store))];
+     let transaction: IDBTransaction;
+     try {
+--- a/code/src/state/allocationSurface.ts
++++ b/code/src/state/allocationSurface.ts
+@@ -47,6 +47,7 @@
+       startUserDayDate: LocalDateString;
+       endUserDayDateExclusive: LocalDateString;
+       evaluationCutoff: string;
++      comparisonCutoff?: string;
+     }) => {
+       const capacityResult = await options.capacity.queryCapacity(query);
+       if (capacityResult.status !== "derived") return capacityResult;
+@@ -63,12 +64,18 @@
+           .sort((a, b) => a.id.localeCompare(b.id));
+       const inputs: CompetingDemandInputV1[] = [];
+       for (const demand of demands) {
+-        const projection = await options.planning.projectGoalDemand(demand.id),
++        const projection = await options.planning.projectGoalDemand(
++            demand.id,
++            undefined,
++            query.evaluationCutoff,
++          ),
+           feasibility =
+             projection.status === "projected"
+               ? await options.capacity.evaluateGoalDemandFeasibility({
+                   demandId: demand.id,
+                   capacity: capacityResult.capacity,
++                  evaluationInstant: query.evaluationCutoff,
++                  projection: projection.projection,
+                 })
+               : undefined;
+         if (projection.status !== "projected" || feasibility?.status !== "evaluated") continue;
+@@ -84,7 +91,7 @@
+         competition = deriveCompetingDemandSets({
+           capacity: capacityResult.capacity,
+           demands: inputs,
+-          evaluationCutoff: query.evaluationCutoff,
++          evaluationCutoff: query.comparisonCutoff ?? query.evaluationCutoff,
+         }),
+         { allocateAllCompetitionSets } = await import("../core/planning/allocation.js");
+       return {
+--- a/code/src/state/capacitySurface.ts
++++ b/code/src/state/capacitySurface.ts
+@@ -83,12 +83,16 @@
+     evaluateGoalDemandFeasibility: async (input: {
+       demandId: PlanningFactId;
+       capacity: CapacityResultV1;
++      evaluationInstant?: string;
++      projection?: import("../core/planning/goalDemandProjection.js").DemandProjectionV1;
+     }) => {
+       const current = options.derivePlanning
+         ? await queryCapacity(input.capacity.query)
+         : undefined;
+       const capacity = current?.status === "derived" ? current.capacity : input.capacity;
+-      const projected = await options.projectGoalDemand(input.demandId);
++      const projected = input.projection
++        ? { status: "projected" as const, projection: input.projection }
++        : await options.projectGoalDemand(input.demandId, undefined, input.evaluationInstant);
+       if (projected.status !== "projected")
+         return { status: projected.status as "notFound" | "unknown" };
+       const { evaluateGoalFeasibility } = await import("../core/planning/goalFeasibility.js");
+--- a/code/src/state/dayFrameAuthorityTransaction.ts
++++ b/code/src/state/dayFrameAuthorityTransaction.ts
+@@ -13,6 +13,7 @@
+ 
+ export function createDayFrameAuthorityTransaction(options: {
+   scheduler: DayFrameNotificationScheduler;
++  canBegin?: () => boolean;
+   participants: readonly RuntimeAuthorityParticipant[];
+ }) {
+   let epoch = 0;
+@@ -20,7 +21,7 @@
+   let snapshot: Map<string, unknown> | undefined;
+ 
+   function begin(kind: AuthorityTransactionKind = "internalReplacement") {
+-    if (state.status !== "inactive" || !options.scheduler.begin())
++    if (state.status !== "inactive" || options.canBegin?.() === false || !options.scheduler.begin())
+       return { status: "busy" as const };
+     const captured = new Map<string, unknown>();
+     try {
+@@ -86,5 +87,5 @@
+       ]),
+     );
+   }
+-  return { begin, install, commit, abort, getState, captureAll };
++  return { begin, install, commit, abort, getState, captureAll, getEpoch: () => epoch };
+ }
+--- a/code/src/state/dayFrameRestoreComposition.ts
++++ b/code/src/state/dayFrameRestoreComposition.ts
+@@ -110,10 +110,38 @@
+   now?: () => string;
+ }) {
+   const adapters = createRegistry(options);
++  // The existing coordinator owns this token. It is never exposed to ordinary callers.
++  let coordinatorEpoch: number | undefined;
++  const currentCoordinator = () =>
++    coordinatorEpoch !== undefined &&
++    options.runtime.getState().status === "active" &&
++    (options.runtime.getEpoch?.() ?? coordinatorEpoch) === coordinatorEpoch;
++  const runtime: DayFrameRuntimeAuthorityController = {
++    ...options.runtime,
++    begin: (kind) => {
++      const result = options.runtime.begin(kind);
++      if (result.status === "begun") coordinatorEpoch = result.epoch;
++      return result;
++    },
++    commit: () => (currentCoordinator() ? options.runtime.commit() : { status: "notActive" }),
++    abort: () => (currentCoordinator() ? options.runtime.abort() : { status: "notActive" }),
++    install: (id, target) =>
++      currentCoordinator() ? options.runtime.install(id, target) : { status: "notActive" },
++  };
++  const coordinatorStorage = {
++    ...options.indexedDb,
++    mutate: ((operations, admit) => {
++      const expectedEpoch = coordinatorEpoch;
++      return options.indexedDb.mutate(
++        operations,
++        () => expectedEpoch === coordinatorEpoch && currentCoordinator() && (admit?.() ?? true),
++      );
++    }) as IndexedDbCollectionStorage["mutate"],
++  };
+   const coordinator = createRestoreCoordinator({
+     participants: Object.values(adapters),
+-    runtime: options.runtime,
+-    combinedIndexedDb: createCombinedIndexedDbRestoreAdapter(options.indexedDb),
++    runtime,
++    combinedIndexedDb: createCombinedIndexedDbRestoreAdapter(coordinatorStorage),
+     antiResurrection: createExecutionHistoryAntiResurrectionAdapter(options.storage),
+     journal: createRestoreJournalStorage(options.storage),
+     durableStage: createRestoreIndexedDbStaging(options.indexedDb),
+--- a/code/src/state/dayFrameRuntimeAuthority.ts
++++ b/code/src/state/dayFrameRuntimeAuthority.ts
+@@ -34,6 +34,7 @@
+   commit: () => { status: "committed" | "notActive" | "flushFailed" };
+   abort: () => { status: "aborted" | "notActive" | "abortFailed" };
+   getState: () => { status: string };
++  getEpoch?: () => number;
+   captureAll: () => Record<string, unknown>;
+ };
+ 
+--- a/code/src/state/dayFrameStore.ts
++++ b/code/src/state/dayFrameStore.ts
+@@ -584,7 +584,12 @@
+       notificationScheduler,
+       canMutate: () => observationMutationAdmission(),
+     });
+-  let structureMutationAdmission = () => true;
++  let structureMutationAdmission: () => import("./dayFrameMutationAdmission.js").DayFrameMutationAdmission =
++    () => ({ allowed: false, reason: "initializing" });
++  let structureEpoch = () => 0;
++  let structureTransactionState: () => { status: string; epoch?: number } = () => ({
++    status: "inactive",
++  });
+   const goalStructureSurface =
+     options.goalStructureSurface ??
+     createLazyGoalStructureSurface({
+@@ -593,6 +598,8 @@
+       listGoals: goalSurface.listGoals,
+       notificationScheduler,
+       canMutate: () => structureMutationAdmission(),
++      getEpoch: () => structureEpoch(),
++      getTransactionState: () => structureTransactionState(),
+     });
+   let planningMutationAdmission = () => true;
+   const goalPlanningSurface =
+@@ -602,6 +609,7 @@
+       getGoal: goalSurface.getGoal,
+       listGoals: goalSurface.listGoals,
+       getStructuralEligibility: goalStructureSurface.getStructuralEligibility,
++      queryGoalStructure: goalStructureSurface.queryGoalStructure,
+       getUserDayResolver: () => ({
+         shiftCycles: state.shiftCycles,
+         defaultSchedulingPreferences: state.schedulingPreferences,
+@@ -745,13 +753,45 @@
+           return "stale";
+         return "known";
+       },
+-      revalidate: async (proposal) => {
++      revalidate: async (proposal, acceptanceInstant) => {
++        const invalid = () => ({
++          status: "invalid" as const,
++          reasons: [{ code: "invalidAllocation" as const }],
++        });
++        const { deriveOrdinaryProposal, evaluateProposalFreshness } =
++          await import("../core/planning/proposal.js");
++        const previous = await allocationSurface.evaluateCompetingAllocation({
++          startUserDayDate: proposal.horizon
++            .startUserDayDate as import("../core/shifts/types.js").LocalDateString,
++          endUserDayDateExclusive: proposal.horizon
++            .endUserDayDateExclusive as import("../core/shifts/types.js").LocalDateString,
++          evaluationCutoff: proposal.evaluationCutoff,
++        });
++        if (previous.status !== "evaluated") return invalid();
++        const original = previous.allocation.allocations.find(
++          (value) => value.competingSetId === proposal.sourceCompetingSetId,
++        );
++        if (
++          !original ||
++          evaluateProposalFreshness(
++            proposal,
++            deriveOrdinaryProposal({
++              allocation: original,
++              horizon: proposal.horizon,
++              allocationHorizon: proposal.horizon,
++              generatedAt: proposal.generatedAt,
++              evaluationCutoff: proposal.evaluationCutoff,
++            }),
++          ).status !== "current"
++        )
++          return invalid();
+         const evaluated = await allocationSurface.evaluateCompetingAllocation({
+           startUserDayDate: proposal.horizon
+             .startUserDayDate as import("../core/shifts/types.js").LocalDateString,
+           endUserDayDateExclusive: proposal.horizon
+             .endUserDayDateExclusive as import("../core/shifts/types.js").LocalDateString,
+-          evaluationCutoff: proposal.evaluationCutoff,
++          evaluationCutoff: acceptanceInstant,
++          comparisonCutoff: proposal.evaluationCutoff,
+         });
+         if (evaluated.status !== "evaluated")
+           return { status: "invalid" as const, reasons: [{ code: "invalidAllocation" as const }] };
+@@ -759,7 +799,6 @@
+           (value) => value.competingSetId === proposal.sourceCompetingSetId,
+         );
+         if (allocation) {
+-          const { deriveOrdinaryProposal } = await import("../core/planning/proposal.js");
+           return deriveOrdinaryProposal({
+             allocation,
+             horizon: proposal.horizon,
+@@ -999,6 +1038,7 @@
+     realizationSurface.getRealizationRuntimeAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY),
+   ];
+   const authorityTransaction = createDayFrameAuthorityTransaction({
++    canBegin: () => goalStructureSurface.isGoalStructureQuiescent(),
+     scheduler: notificationScheduler,
+     participants: runtimeParticipants.map((participant) => ({
+       id: participant.id,
+@@ -1012,8 +1052,10 @@
+     readiness.status === "ready" && authorityTransaction.getState().status === "inactive";
+   observationMutationAdmission = () =>
+     readiness.status === "ready" && authorityTransaction.getState().status === "inactive";
++  structureEpoch = authorityTransaction.getEpoch;
++  structureTransactionState = authorityTransaction.getState;
+   structureMutationAdmission = () =>
+-    readiness.status === "ready" && authorityTransaction.getState().status === "inactive";
++    getDayFrameMutationAdmission(readiness, authorityTransaction.getState().status !== "inactive");
+   planningMutationAdmission = () =>
+     readiness.status === "ready" && authorityTransaction.getState().status === "inactive";
+   compositionMutationAdmission = () =>
+@@ -2196,7 +2238,10 @@
+     const measurementDefinitionsPromise =
+       measurementDefinitionSurface.clearMeasurementDefinitions();
+     const progressObservationsPromise = progressObservationSurface.clearProgressObservations();
+-    const goalStructurePromise = goalStructureSurface.clearGoalStructure();
++    const goalStructurePromise = goalStructureSurface.clearGoalStructureForCoordinator(
++      DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++      begun.epoch,
++    );
+     const goalPlanningPromise = goalPlanningSurface.clearGoalPlanning();
+     const compositionPromise = compositionSurface.clearCompositionAuthority();
+     const proposalsPromise = proposalSurface.clearProposalAuthority();
+--- a/code/src/state/goalDemandProjectionQuery.ts
++++ b/code/src/state/goalDemandProjectionQuery.ts
+@@ -1,3 +1,8 @@
++import {
++  structureEligibilityV1,
++  type StructureEvaluationInput,
++  type StructureQueryResult,
++} from "../core/planning/goalStructureTemporal.js";
+ import type { GoalId, GoalV1 } from "../core/goals/goal.js";
+ import { projectDemandForUserDayResolver } from "../core/planning/goalDemandProjection.js";
+ import type { GoalPlanningAuthorityV2 } from "../core/planning/goalDemand.js";
+@@ -11,6 +16,8 @@
+   revision?: number;
+   getGoal: (id: GoalId) => GoalV1 | undefined;
+   getStructuralEligibility: (id: GoalId) => StructuralEligibilityV1;
++  queryGoalStructure?: (input: StructureEvaluationInput) => StructureQueryResult;
++  evaluationInstant: string;
+   getUserDayResolver: () => CanonicalUserDayResolverInput;
+ }) {
+   const values = input.authority.demands
+@@ -23,12 +30,20 @@
+   if (!demand) return { status: "notFound" as const };
+   const goal = input.getGoal(demand.goalId);
+   if (!goal) return { status: "unknown" as const, reason: "missingGoal" as const };
++  const structure = input.queryGoalStructure?.({
++    goalId: goal.id,
++    evaluationInstant: input.evaluationInstant,
++    basis: "currentAuthority",
++  });
+   return {
++    structure,
+     status: "projected" as const,
+     projection: projectDemandForUserDayResolver({
+       demand,
+       goal,
+-      structuralEligibility: input.getStructuralEligibility(goal.id),
++      structuralEligibility: structure
++        ? structureEligibilityV1(structure, goal.id)
++        : input.getStructuralEligibility(goal.id),
+       resolver: input.getUserDayResolver(),
+     }),
+   };
+--- a/code/src/state/goalPlanningSurface.ts
++++ b/code/src/state/goalPlanningSurface.ts
+@@ -68,6 +68,9 @@
+   getGoal: (id: GoalId) => GoalV1 | undefined;
+   listGoals: () => GoalV1[];
+   getStructuralEligibility: (id: GoalId) => StructuralEligibilityV1;
++  queryGoalStructure?: (
++    input: import("../core/planning/goalStructureTemporal.js").StructureEvaluationInput,
++  ) => import("../core/planning/goalStructureTemporal.js").StructureQueryResult;
+   getUserDayResolver: () => CanonicalUserDayResolverInput;
+   allocateId?: () => PlanningFactId;
+   now?: () => string;
+@@ -512,7 +515,12 @@
+       resolveDemandRevision(authority, id, revision),
+     getGoalPriorityRevision: (id: PlanningFactId, revision: number) =>
+       resolvePriorityRevision(authority, id, revision),
+-    projectGoalDemand: async (id: PlanningFactId, revision?: number) => {
++    projectGoalDemand: async (
++      id: PlanningFactId,
++      revision?: number,
++      evaluationInstant?: string,
++    ) => {
++      const at = evaluationInstant ?? now();
+       const { queryGoalDemandProjection } = await import("./goalDemandProjectionQuery.js");
+       return queryGoalDemandProjection({
+         authority,
+@@ -520,6 +528,8 @@
+         ...(revision === undefined ? {} : { revision }),
+         getGoal: options.getGoal,
+         getStructuralEligibility: options.getStructuralEligibility,
++        ...(options.queryGoalStructure ? { queryGoalStructure: options.queryGoalStructure } : {}),
++        evaluationInstant: at,
+         getUserDayResolver: options.getUserDayResolver,
+       });
+     },
+--- /dev/null
++++ b/code/src/state/goalStructureOwnerSafety.test.ts
+@@ -0,0 +1,572 @@
++import { afterEach, expect, it, vi } from "vitest";
++import { IDBFactory } from "fake-indexeddb";
++import { readFileSync } from "node:fs";
++import type { GoalId, GoalV1 } from "../core/goals/goal.js";
++import {
++  emptyGoalStructureAuthority,
++  validateGoalStructureAuthority,
++  type GoalStructureAuthorityV1,
++} from "../core/planning/goalStructure.js";
++import {
++  evaluateGoalStructure,
++  relationshipApplicability,
++  structureEligibilityV1,
++  structureEvaluationFreshness,
++} from "../core/planning/goalStructureTemporal.js";
++import { createDayFrameNotificationScheduler } from "./dayFrameNotificationScheduler.js";
++import { createGoalStructureSurface } from "./goalStructureSurface.js";
++import { createLazyGoalStructureSurface } from "./lazyGoalStructureSurface.js";
++import {
++  createDayFrameDurableDb,
++  GOAL_STRUCTURE_STORE,
++} from "../infrastructure/storage/dayFrameDurableDb.js";
++import {
++  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY as capability,
++  getDayFrameRuntimeAuthorityController,
++} from "./dayFrameRuntimeAuthority.js";
++import { createDayFrameStore } from "./dayFrameStore.js";
++
++const goals: GoalV1[] = [
++  "11111111-1111-4111-8111-111111111111",
++  "22222222-2222-4222-8222-222222222222",
++].map((id) => ({
++  version: 1,
++  id: id as GoalId,
++  revision: 1,
++  title: "Goal",
++  status: "active",
++  createdAt: "2026-09-01T00:00:00.000Z",
++  updatedAt: "2026-09-01T00:00:00.000Z",
++  links: [],
++}));
++const first = goals[0]!,
++  second = goals[1]!;
++const sep23 = "2026-09-23T12:00:00.000Z",
++  sep24 = "2026-09-24T12:00:00.000Z",
++  sep25 = "2026-09-25T12:00:00.000Z";
++function deferred() {
++  let resolve!: () => void;
++  const promise = new Promise<void>((r) => (resolve = r));
++  return { promise, resolve };
++}
++async function fixture() {
++  const db = createDayFrameDurableDb({ indexedDB: new IDBFactory(), name: crypto.randomUUID() });
++  let time = sep23,
++    allowed = true,
++    epoch = 0;
++  const clock = vi.fn(() => time);
++  const options = {
++    storage: db,
++    getGoal: (id: GoalId) => goals.find((g) => g.id === id),
++    listGoals: () => goals,
++    now: clock,
++    canMutate: () => allowed,
++    getEpoch: () => epoch,
++  };
++  const owner = createGoalStructureSurface(options);
++  await owner.initializeGoalStructure();
++  return {
++    owner,
++    db,
++    options,
++    clock,
++    setTime: (value: string) => (time = value),
++    deny: () => (allowed = false),
++    allow: () => (allowed = true),
++    bump: () => epoch++,
++  };
++}
++const edge = {
++  kind: "dependsOn" as const,
++  sourceGoalId: first.id,
++  target: { kind: "goal" as const, goalId: second.id },
++  semantics: {
++    kind: "dependency" as const,
++    strength: "hard" as const,
++    condition: "goalCompleted" as const,
++  },
++};
++function accepted<T>(r: { status?: string; value?: T }): T {
++  expect(r.status).toBe("accepted");
++  if (!r.value) throw Error("not accepted");
++  return r.value;
++}
++afterEach(() => {
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++});
++
++it("rejects backward create/revise/retire without allocating or changing durability; no-op does not sample", async () => {
++  const f = await fixture();
++  const r = accepted(await f.owner.createRelationship(edge));
++  const before = f.owner.exportGoalStructureAuthority();
++  f.setTime("2026-09-22T00:00:00.000Z");
++  for (const op of [
++    () => f.owner.createMilestone({ ownerGoalId: first.id, title: "New" }),
++    () =>
++      f.owner.reviseRelationship(r.id, 1, {
++        semantics: { ...edge.semantics, strength: "advisory" },
++      }),
++    () => f.owner.retireRelationship(r.id, 1),
++  ])
++    expect(await op()).toMatchObject({
++      status: "rejected",
++      reason: "invalidInput",
++      detail: "clockBeforeRecordedAuthority",
++    });
++  f.clock.mockClear();
++  expect(await f.owner.reviseRelationship(r.id, 1, {})).toMatchObject({
++    status: "accepted",
++    changed: false,
++  });
++  expect(f.clock).not.toHaveBeenCalled();
++  expect(f.owner.exportGoalStructureAuthority()).toEqual(before);
++  expect(f.owner.getGoalStructureDurabilityStatus()).toBe("durable");
++  f.setTime(sep23);
++  expect(await f.owner.retireRelationship(r.id, 1)).toMatchObject({
++    status: "accepted",
++    value: { effectiveFrom: sep23, effectiveTo: sep23 },
++  });
++});
++it("rejects an invalid clock before identity allocation and permits empty-authority first write", async () => {
++  const f = await fixture();
++  const allocate = vi.fn(() => {
++    throw Error("should not allocate");
++  });
++  const owner = createGoalStructureSurface({
++    ...f.options,
++    allocateId: allocate,
++    now: () => "invalid",
++  });
++  await owner.initializeGoalStructure();
++  expect(await owner.createRelationship(edge)).toMatchObject({ reason: "invalidInput" });
++  expect(allocate).not.toHaveBeenCalled();
++  expect((await f.owner.createRelationship(edge)).status).toBe("accepted");
++});
++it("preserves satisfied and retired timestamps through metadata/same-state edits and supports genuine transitions", async () => {
++  const f = await fixture();
++  let m = accepted(await f.owner.createMilestone({ ownerGoalId: first.id, title: "Checkpoint" }));
++  f.setTime(sep24);
++  m = accepted(await f.owner.reviseMilestone(m.id, 1, { state: "satisfied" }));
++  const satisfied = structuredClone(m);
++  f.setTime(sep25);
++  m = accepted(await f.owner.reviseMilestone(m.id, 2, { title: "Renamed", state: "satisfied" }));
++  expect(m).toMatchObject({ satisfiedAt: sep24, updatedAt: sep25 });
++  expect(m).not.toHaveProperty("targetDate");
++  expect(f.owner.getGoalStructureMilestoneRevision(m.id, 2)).toEqual({
++    status: "resolved",
++    milestone: satisfied,
++  });
++  m = accepted(await f.owner.reviseMilestone(m.id, 3, { targetDate: "2026-10-01" }));
++  expect(m.satisfiedAt).toBe(sep24);
++  m = accepted(await f.owner.reviseMilestone(m.id, 4, { targetDate: null, state: "retired" }));
++  expect(m).not.toHaveProperty("targetDate");
++  expect(m).not.toHaveProperty("satisfiedAt");
++  const retiredAt = m.retiredAt;
++  f.setTime("2026-09-26T00:00:00.000Z");
++  m = accepted(await f.owner.reviseMilestone(m.id, 5, { title: "Retired rename" }));
++  expect(m.retiredAt).toBe(retiredAt);
++  m = accepted(await f.owner.reviseMilestone(m.id, 6, { state: "active" }));
++  expect(m).not.toHaveProperty("retiredAt");
++  expect(await f.owner.reviseMilestone(m.id, 7, { state: "active" })).toMatchObject({
++    changed: false,
++    value: { revision: 7 },
++  });
++  const restart = createGoalStructureSurface(f.options);
++  await restart.initializeGoalStructure();
++  expect(restart.exportGoalStructureAuthority()).toEqual(f.owner.exportGoalStructureAuthority());
++});
++it("does not retire a referenced Milestone or alter dependent history", async () => {
++  const f = await fixture();
++  const m = accepted(
++    await f.owner.createMilestone({ ownerGoalId: second.id, title: "Checkpoint" }),
++  );
++  await f.owner.createRelationship({
++    ...edge,
++    target: { kind: "milestone", milestoneId: m.id },
++    semantics: { ...edge.semantics, condition: "milestoneSatisfied" },
++  });
++  const before = f.owner.exportGoalStructureAuthority();
++  expect(await f.owner.reviseMilestone(m.id, 1, { state: "retired" })).toMatchObject({
++    status: "rejected",
++    reason: "missingEndpoint",
++  });
++  expect(f.owner.exportGoalStructureAuthority()).toEqual(before);
++});
++it("preserves original anomalous latest and nonlatest legacy rows while protecting ordinary writes", async () => {
++  const f = await fixture();
++  const evidence = JSON.parse(
++    readFileSync(
++      "../docs/implementation/phase-9/evidence/task-9.27/contract-observations-RESULT.json",
++      "utf8",
++    ),
++  );
++  const legacy: GoalStructureAuthorityV1 = {
++    version: 1,
++    relationships: [
++      evidence.futureInterval.relationship,
++      evidence.reversedInterval.retirement.value,
++    ],
++    milestones: [],
++  };
++  // A later coherent revision cannot hide the anomalous retained earlier row.
++  legacy.relationships.push({
++    ...legacy.relationships[1]!,
++    revision: 3 as never,
++    updatedAt: "2026-10-02T00:00:00.000Z",
++    effectiveTo: "2026-10-02T00:00:00.000Z",
++  });
++  expect(validateGoalStructureAuthority(legacy, goals).status).toBe("valid");
++  await f.db.putMany(GOAL_STRUCTURE_STORE, legacy.relationships);
++  const owner = createGoalStructureSurface(f.options);
++  await owner.initializeGoalStructure();
++  expect(owner.exportGoalStructureAuthority()).toEqual(legacy);
++  expect(owner.getGoalStructureIngressStatus()).toEqual({ status: "accepted" });
++  expect(owner.getGoalStructureQualification()).toMatchObject({ status: "protected" });
++  expect(owner.getStructuralEligibility(first.id).status).toBe("unknown");
++  expect(await owner.retryGoalStructurePersistence()).toMatchObject({
++    status: "rejected",
++    reason: "protected",
++  });
++  expect(await owner.createRelationship(edge)).toMatchObject({ reason: "protected" });
++  expect(owner.getGoalStructureRelationshipRevision(legacy.relationships[1]!.id, 2)).toEqual({
++    status: "resolved",
++    relationship: legacy.relationships[1],
++  });
++});
++it.each([
++  "create",
++  "revise",
++  "retire",
++  "milestone",
++  "milestoneRevise",
++  "retry",
++  "replace",
++  "clear",
++] as const)("denies %s without writes or durability changes", async (kind) => {
++  const f = await fixture();
++  const r = accepted(await f.owner.createRelationship(edge));
++  const m = accepted(await f.owner.createMilestone({ ownerGoalId: first.id, title: "M" }));
++  const before = f.owner.exportGoalStructureAuthority();
++  const mutate = vi.spyOn(f.db, "mutate");
++  f.deny();
++  const ops = {
++    create: () => f.owner.createRelationship(edge),
++    revise: () => f.owner.reviseRelationship(r.id, 1, {}),
++    retire: () => f.owner.retireRelationship(r.id, 1),
++    milestone: () => f.owner.createMilestone({ ownerGoalId: first.id, title: "M2" }),
++    milestoneRevise: () => f.owner.reviseMilestone(m.id, 1, { title: "X" }),
++    retry: () => f.owner.retryGoalStructurePersistence(),
++    replace: () => f.owner.replaceGoalStructureAuthority(before),
++    clear: () => f.owner.clearGoalStructure(),
++  };
++  expect(await ops[kind]()).toMatchObject({
++    status: "rejected",
++    reason: "authorityTransactionActive",
++  });
++  expect(mutate).not.toHaveBeenCalled();
++  expect(f.owner.exportGoalStructureAuthority()).toEqual(before);
++  expect(f.owner.getGoalStructureDurabilityStatus()).toBe("durable");
++});
++it("checks optional storage admission after asynchronous opening and leaves unrelated callers unchanged", async () => {
++  const f = await fixture();
++  f.db.close();
++  let allowed = true;
++  const pending = f.db.mutate([{ type: "clear", store: GOAL_STRUCTURE_STORE }], () => allowed);
++  allowed = false;
++  expect(await pending).toMatchObject({ status: "failure", error: { code: "admissionDenied" } });
++  expect(await f.db.mutate([{ type: "clear", store: GOAL_STRUCTURE_STORE }])).toMatchObject({
++    status: "success",
++  });
++});
++it("rejects a call displaced during lazy loading even after the epoch becomes inactive", async () => {
++  const f = await fixture();
++  const lazy = createLazyGoalStructureSurface(f.options);
++  const pending = lazy.createRelationship(edge);
++  f.bump();
++  expect(await pending).toMatchObject({ status: "rejected", detail: "contextReplaced" });
++  expect(lazy.exportGoalStructureAuthority().relationships).toEqual([]);
++});
++it("retains accepted identity under storage throw and releases lease for exact retry", async () => {
++  const f = await fixture();
++  const spy = vi.spyOn(f.db, "mutate").mockRejectedValueOnce(Error("storage"));
++  const r = accepted(await f.owner.createRelationship(edge));
++  expect(f.owner.isGoalStructureQuiescent()).toBe(true);
++  expect(f.owner.getGoalStructureDurabilityStatus()).toBe("storageFailure");
++  spy.mockRestore();
++  expect(await f.owner.retryGoalStructurePersistence()).toEqual({ status: "durable" });
++  expect(
++    f.owner.exportGoalStructureAuthority().relationships.map((x) => [x.id, x.revision]),
++  ).toEqual([[r.id, 1]]);
++});
++it("denies a delayed write and protects displaced runtime rather than overwriting installed data", async () => {
++  const f = await fixture();
++  const gate = deferred();
++  const original = f.db.mutate;
++  vi.spyOn(f.db, "mutate").mockImplementation(async (rows, admit) => {
++    await gate.promise;
++    return original(rows, admit);
++  });
++  const pending = f.owner.createRelationship(edge);
++  expect(f.owner.isGoalStructureQuiescent()).toBe(false);
++  expect(await f.owner.createRelationship(edge)).toMatchObject({ detail: "ownerPersistenceBusy" });
++  f.bump();
++  f.owner.getRuntimeAuthorityAdapter(capability).installRuntimeExact({
++    authority: emptyGoalStructureAuthority(),
++    desired: emptyGoalStructureAuthority(),
++    ingress: { status: "accepted" },
++    durability: "durable",
++  });
++  gate.resolve();
++  expect(await pending).toMatchObject({ status: "accepted", persistence: "pending" });
++  expect(await f.db.getAll(GOAL_STRUCTURE_STORE)).toEqual({ status: "success", value: [] });
++  expect(f.owner.exportGoalStructureAuthority()).toEqual(emptyGoalStructureAuthority());
++  expect(f.owner.getGoalStructureIngressStatus().status).toBe("protected");
++  expect(f.owner.isGoalStructureQuiescent()).toBe(true);
++});
++it("real store controller and clear reject before snapshot while persistence is outstanding", async () => {
++  vi.stubGlobal("indexedDB", new IDBFactory());
++  const db = createDayFrameDurableDb();
++  const store = createDayFrameStore({}, { restoreIndexedDb: db });
++  await store.whenReady();
++  const a = await store.createGoal({ title: "A" }),
++    b = await store.createGoal({ title: "B" });
++  if (a.status !== "accepted" || b.status !== "accepted") throw Error("fixture");
++  const runtime = getDayFrameRuntimeAuthorityController(store, capability);
++  const gate = deferred();
++  const original = db.mutate;
++  vi.spyOn(db, "mutate").mockImplementation(async (rows, admit) => {
++    if (rows.some((r) => r.store === GOAL_STRUCTURE_STORE)) await gate.promise;
++    return original(rows, admit);
++  });
++  const pending = store.createRelationship({
++    ...edge,
++    sourceGoalId: a.goal.id,
++    target: { kind: "goal", goalId: b.goal.id },
++  });
++  await vi.waitFor(() => expect(store.isGoalStructureQuiescent()).toBe(false));
++  const epoch = runtime.getEpoch!();
++  expect(runtime.begin("restore")).toEqual({ status: "busy" });
++  expect(runtime.begin("internalReplacement")).toEqual({ status: "busy" });
++  expect(runtime.getEpoch!()).toBe(epoch);
++  await expect(store.clearLocalData()).rejects.toThrow("authorityTransactionActive");
++  gate.resolve();
++  expect(await pending).toMatchObject({ status: "accepted", persistence: "durable" });
++  expect(runtime.begin("restore").status).toBe("begun");
++  expect(runtime.abort().status).toBe("aborted");
++  expect((await store.clearLocalData()).authorities.goalStructure.status).toBe("removed");
++});
++it("coordinator clear requires the matching capability and active epoch", async () => {
++  const f = await fixture();
++  await expect(f.owner.clearGoalStructureForCoordinator(Symbol(), 0)).rejects.toThrow();
++  await expect(f.owner.clearGoalStructureForCoordinator(capability, 0)).rejects.toThrow();
++});
++
++it("canonical applicability distinguishes boundaries, retired records and unknown intervals", async () => {
++  const f = await fixture();
++  const r = accepted(await f.owner.createRelationship(edge));
++  for (const [at, position] of [
++    ["2026-09-22T00:00:00.000Z", "beforeStart"],
++    [sep23, "inside"],
++    [sep24, "inside"],
++  ])
++    expect(relationshipApplicability(r, at!).intervalPosition).toBe(position);
++  const ended = { ...r, status: "retired" as const, effectiveTo: sep24 };
++  expect(relationshipApplicability(ended, sep23)).toMatchObject({
++    intervalPosition: "inside",
++    applicability: "notApplicable",
++    reason: "retired",
++  });
++  expect(relationshipApplicability(ended, sep24).intervalPosition).toBe("atOrAfterEnd");
++  expect(relationshipApplicability(ended, sep25).applicability).toBe("notApplicable");
++  expect(relationshipApplicability({ ...ended, effectiveTo: sep23 }, sep23).intervalPosition).toBe(
++    "empty",
++  );
++  expect(
++    relationshipApplicability({ ...ended, effectiveTo: "2026-09-01T00:00:00.000Z" }, sep23)
++      .applicability,
++  ).toBe("unknown");
++});
++it("pure mapping samples no clock and time-only membership and rollback affect freshness", async () => {
++  const f = await fixture();
++  await f.owner.createRelationship(edge);
++  const authority = f.owner.exportGoalStructureAuthority();
++  const query = (at: string) =>
++    evaluateGoalStructure(
++      { goalId: first.id, evaluationInstant: at, basis: "currentAuthority" },
++      authority,
++      goals,
++    );
++  const before = query("2026-09-22T00:00:00.000Z"),
++    at = query(sep23);
++  f.clock.mockClear();
++  expect(structureEligibilityV1(before, first.id).status).toBe("eligible");
++  expect(structureEligibilityV1(at, first.id).status).toBe("ineligible");
++  expect(f.clock).not.toHaveBeenCalled();
++  expect(structureEvaluationFreshness(before, at)).toBe("stale");
++  expect(structureEvaluationFreshness(at, query(sep24))).toBe("current");
++  expect(structureEvaluationFreshness(at, before)).toBe("unknown");
++  if (before.status === "evaluated") expect(before.value.nextApplicabilityChangeAt).toBe(sep23);
++  f.owner.getStructuralEligibility(first.id);
++  expect(f.clock).toHaveBeenCalledTimes(1);
++});
++it("distinguishes qualified empty authority, unavailable ingress, protected temporal evidence and unsupported history", () => {
++  const input = { goalId: first.id, evaluationInstant: sep23, basis: "currentAuthority" as const };
++  const a = emptyGoalStructureAuthority();
++  expect(evaluateGoalStructure(input, a, goals)).toMatchObject({
++    status: "evaluated",
++    value: {
++      qualification: "qualified",
++      eligibility: "eligible",
++      records: { status: "available", values: [] },
++    },
++  });
++  const unavailable = evaluateGoalStructure(input, a, goals, "protected");
++  expect(unavailable).toMatchObject({
++    value: { eligibility: "unknown", records: { status: "unavailable" } },
++  });
++  if (unavailable.status === "evaluated")
++    expect(unavailable.value).not.toHaveProperty("authorityFingerprint");
++  expect(evaluateGoalStructure({ ...input, basis: "historical" as never }, a, goals)).toEqual({
++    status: "unavailable",
++    reason: "historicalReconstructionUnsupported",
++  });
++});
++
++it("future-effective retirement rejects before start without changing retained authority", async () => {
++  const f = await fixture();
++  const r = accepted(await f.owner.createRelationship(edge));
++  const future = f.owner.exportGoalStructureAuthority();
++  future.relationships[0]!.effectiveFrom = sep25;
++  expect(await f.owner.replaceGoalStructureAuthority(future)).toMatchObject({ status: "accepted" });
++  f.setTime(sep24);
++  expect(await f.owner.retireRelationship(r.id, 1)).toMatchObject({
++    status: "rejected",
++    detail: "retirementBeforeEffectiveStart",
++  });
++  expect(f.owner.exportGoalStructureAuthority()).toEqual(future);
++});
++it("initialization cannot install a delayed read over a newer runtime generation", async () => {
++  const f = await fixture();
++  const gate = deferred();
++  const read = f.db.getAll;
++  vi.spyOn(f.db, "getAll").mockImplementation(async (store) => {
++    const result = await read(store);
++    await gate.promise;
++    return result;
++  });
++  const owner = createGoalStructureSurface(f.options);
++  const pending = owner.initializeGoalStructure();
++  owner.getRuntimeAuthorityAdapter(capability).installRuntimeExact({
++    authority: emptyGoalStructureAuthority(),
++    desired: emptyGoalStructureAuthority(),
++    ingress: { status: "protected", reason: "invalidAuthority" },
++    durability: "storageFailure",
++  });
++  gate.resolve();
++  expect(await pending).toEqual({ status: "protected" });
++  expect(owner.getGoalStructureIngressStatus()).toEqual({
++    status: "protected",
++    reason: "invalidAuthority",
++  });
++  expect(await owner.initializeGoalStructure()).toEqual({ status: "protected" });
++});
++it("already-started storage settles while the owner remains leased until acknowledgement", async () => {
++  const f = await fixture();
++  const gate = deferred(),
++    committed = deferred();
++  const write = f.db.mutate;
++  vi.spyOn(f.db, "mutate").mockImplementation(async (rows, admit) => {
++    const result = await write(rows, admit);
++    committed.resolve();
++    await gate.promise;
++    return result;
++  });
++  const pending = f.owner.createRelationship(edge);
++  await committed.promise;
++  expect(f.owner.isGoalStructureQuiescent()).toBe(false);
++  const stored = await f.db.getAll(GOAL_STRUCTURE_STORE);
++  expect(stored.status === "success" && stored.value.length).toBe(1);
++  expect(await f.owner.clearGoalStructure()).toMatchObject({
++    status: "rejected",
++    detail: "ownerPersistenceBusy",
++  });
++  gate.resolve();
++  expect(await pending).toMatchObject({ status: "accepted", persistence: "durable" });
++  expect(f.owner.isGoalStructureQuiescent()).toBe(true);
++});
++it("canonical aggregate precedence preserves hard, advisory and manual Milestone conditions", async () => {
++  const f = await fixture();
++  const r = accepted(await f.owner.createRelationship(edge));
++  const query = (authority: GoalStructureAuthorityV1, currentGoals = goals) =>
++    structureEligibilityV1(
++      evaluateGoalStructure(
++        { goalId: first.id, evaluationInstant: sep23, basis: "currentAuthority" },
++        authority,
++        currentGoals,
++      ),
++      first.id,
++    ).status;
++  const a = f.owner.exportGoalStructureAuthority();
++  expect(query(a)).toBe("ineligible");
++  a.relationships[0]!.semantics = { ...edge.semantics, strength: "advisory" };
++  expect(query(a)).toBe("conditionallyEligible");
++  expect(
++    query(
++      a,
++      goals.map((g) => (g.id === second.id ? { ...g, status: "completed" } : g)),
++    ),
++  ).toBe("eligible");
++  a.relationships.push({
++    ...r,
++    id: "33333333-3333-4333-8333-333333333333" as never,
++    target: { kind: "goal", goalId: "44444444-4444-4444-8444-444444444444" as GoalId },
++  });
++  a.relationships[0]!.semantics = edge.semantics;
++  expect(
++    query(a, [
++      ...goals,
++      { ...second, id: "44444444-4444-4444-8444-444444444444" as GoalId, status: "archived" },
++    ]),
++  ).toBe("unknown");
++  a.relationships.reverse();
++  expect(
++    query(a, [
++      ...goals,
++      { ...second, id: "44444444-4444-4444-8444-444444444444" as GoalId, status: "archived" },
++    ]),
++  ).toBe("unknown");
++  const m = accepted(await f.owner.createMilestone({ ownerGoalId: second.id, title: "Manual" }));
++  await f.owner.retireRelationship(r.id, 1);
++  await f.owner.createRelationship({
++    ...edge,
++    target: { kind: "milestone", milestoneId: m.id },
++    semantics: { kind: "dependency", strength: "hard", condition: "milestoneSatisfied" },
++  });
++  expect(f.owner.getStructuralEligibility(first.id).status).toBe("ineligible");
++  await f.owner.reviseMilestone(m.id, 1, { state: "satisfied" });
++  expect(f.owner.getStructuralEligibility(first.id).status).toBe("eligible");
++});
++
++it.each(["replace", "clear"] as const)(
++  "%s keeps its lease through runtime installation notifications",
++  async (operation) => {
++    const f = await fixture();
++    const owner = createGoalStructureSurface({
++      ...f.options,
++      notificationScheduler: createDayFrameNotificationScheduler(),
++    });
++    await owner.initializeGoalStructure();
++    await owner.createRelationship(edge);
++    const observations: boolean[] = [];
++    owner.subscribeGoalStructure(() => observations.push(owner.isGoalStructureQuiescent()));
++    if (operation === "replace")
++      expect(
++        await owner.replaceGoalStructureAuthority(emptyGoalStructureAuthority()),
++      ).toMatchObject({ status: "accepted" });
++    else expect(await owner.clearGoalStructure()).toMatchObject({ status: "removed" });
++    expect(observations).toEqual([false]);
++    expect(owner.isGoalStructureQuiescent()).toBe(true);
++    expect(owner.exportGoalStructureAuthority()).toEqual(emptyGoalStructureAuthority());
++  },
++);
+--- /dev/null
++++ b/code/src/state/goalStructurePlanningSafety.test.ts
+@@ -0,0 +1,311 @@
++/* @vitest-environment jsdom */
++import { afterEach, beforeEach, expect, it, vi } from "vitest";
++import { IDBFactory } from "fake-indexeddb";
++import { createDayFrameStore } from "./dayFrameStore.js";
++import { goalInspectionCanonicalFixture } from "../ui/tests/goalInspectionCanonicalFixture.js";
++import { evaluateDemandProjectionFreshness } from "../core/planning/goalDemandProjection.js";
++import { createDayFrameDurableDb } from "../infrastructure/storage/dayFrameDurableDb.js";
++import { queryGoalDemandProjection } from "./goalDemandProjectionQuery.js";
++import { createProposalSurface } from "./proposalSurface.js";
++import { structureEligibilityV1 } from "../core/planning/goalStructureTemporal.js";
++import {
++  DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++  getDayFrameRuntimeAuthorityController,
++} from "./dayFrameRuntimeAuthority.js";
++beforeEach(() => {
++  localStorage.clear();
++  vi.stubGlobal("indexedDB", new IDBFactory());
++  vi.useFakeTimers({ toFake: ["Date"] });
++  vi.setSystemTime(new Date("2026-09-23T12:00:00.000Z"));
++});
++afterEach(() => {
++  vi.useRealTimers();
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++});
++async function fixture() {
++  const f = await goalInspectionCanonicalFixture();
++  const store = f.store;
++  const goal = await store.createGoal({ title: "Temporal planning" });
++  if (goal.status !== "accepted") throw Error("goal");
++  const target = await store.createGoal({ title: "Prerequisite" });
++  if (target.status !== "accepted") throw Error("target");
++  const d = await store.createDemand({
++    goalId: goal.goal.id,
++    requestedEffort: { unit: "minutes", amount: 60 },
++    horizon: {
++      kind: "userDayInterval",
++      startUserDayDate: "2026-09-24",
++      endUserDayDateExclusive: "2026-09-25",
++    },
++    session: { mode: "indivisible", exactMinutes: 60 },
++    satisfaction: { kind: "target", allowPartial: false },
++    cadence: { kind: "total" },
++  });
++  if (d.status !== "accepted") throw Error("demand");
++  await store.setDemandResourceFootprintAssociation({
++    demandId: d.value.id,
++    selection: { kind: "productiveOnly" },
++  });
++  return { store, goal: goal.goal, target: target.goal, demand: d.value };
++}
++const horizon = {
++  startUserDayDate: "2026-09-24" as const,
++  endUserDayDateExclusive: "2026-09-25" as const,
++};
++async function proposal(f: Awaited<ReturnType<typeof fixture>>) {
++  const evaluation = await f.store.evaluateCompetingAllocation({
++    ...horizon,
++    evaluationCutoff: new Date().toISOString(),
++  });
++  if (evaluation.status !== "evaluated") throw Error("evaluate");
++  const allocation = evaluation.allocation.allocations[0]!;
++  const result = await f.store.deriveProposal({
++    allocation,
++    horizon,
++    allocationHorizon: horizon,
++    generatedAt: new Date().toISOString(),
++    evaluationCutoff: new Date().toISOString(),
++  });
++  if (result.status !== "proposed") throw Error(JSON.stringify(result));
++  await f.store.recordProposal(result);
++  return result.proposal;
++}
++it("single captured planning instant bypasses the legacy clock-sampling wrapper and later equivalent acceptance succeeds", async () => {
++  const f = await fixture();
++  const legacy = vi.spyOn(f.store, "getStructuralEligibility");
++  const p = await proposal(f);
++  expect(legacy).not.toHaveBeenCalled();
++  const old = f.store.exportProposalAuthority().acceptedAllocations;
++  vi.setSystemTime(new Date("2026-09-23T12:00:01.000Z"));
++  expect(
++    await f.store.acceptProposalOption({
++      proposalId: p.id,
++      proposalRevision: p.revision,
++      optionId: p.preferredOptionId,
++    }),
++  ).toMatchObject({ status: "accepted" });
++  expect(f.store.exportProposalAuthority().acceptedAllocations.slice(0, old.length)).toEqual(old);
++});
++it("time-only advisory membership change stales acceptance even with unchanged requested minutes", async () => {
++  const f = await fixture();
++  const e = await f.store.createRelationship({
++    kind: "dependsOn",
++    sourceGoalId: f.goal.id,
++    target: { kind: "goal", goalId: f.target.id },
++    semantics: { kind: "dependency", strength: "advisory", condition: "goalCompleted" },
++  });
++  if (e.status !== "accepted") throw Error("edge");
++  const authority = f.store.exportGoalStructureAuthority();
++  authority.relationships.find((r) => r.id === e.value.id)!.effectiveFrom =
++    "2026-09-23T13:00:00.000Z";
++  expect(await f.store.replaceGoalStructureAuthority(authority)).toMatchObject({
++    status: "accepted",
++  });
++  const projected = await f.store.projectGoalDemand(
++    f.demand.id,
++    undefined,
++    new Date().toISOString(),
++  );
++  if (projected.status !== "projected") throw Error("projection");
++  const p = await proposal(f);
++  const before = f.store.exportProposalAuthority().acceptedAllocations;
++  vi.setSystemTime(new Date("2026-09-23T13:00:00.000Z"));
++  const current = await f.store.projectGoalDemand(f.demand.id, undefined, new Date().toISOString());
++  if (current.status !== "projected") throw Error("projection");
++  expect(current.projection.requestedEffort).toEqual(projected.projection.requestedEffort);
++  expect(current.projection.semanticId).not.toBe(projected.projection.semanticId);
++  const q = f.store.queryGoalStructure({
++    goalId: f.goal.id,
++    evaluationInstant: new Date().toISOString(),
++    basis: "currentAuthority",
++  });
++  expect(
++    evaluateDemandProjectionFreshness(projected.projection, {
++      goal: f.goal,
++      demand: f.demand,
++      structuralEligibility: structureEligibilityV1(q, f.goal.id),
++    }).status,
++  ).toBe("stale");
++  expect(
++    await f.store.acceptProposalOption({
++      proposalId: p.id,
++      proposalRevision: p.revision,
++      optionId: p.preferredOptionId,
++    }),
++  ).toMatchObject({ status: "rejected", reason: "stale" });
++  expect(f.store.exportProposalAuthority().acceptedAllocations).toEqual(before);
++});
++it("V14 preserves legacy anomalies across exact restore, export and reinitialization; planning is unknown", async () => {
++  const f = await fixture();
++  const e = await f.store.createRelationship({
++    kind: "dependsOn",
++    sourceGoalId: f.goal.id,
++    target: { kind: "goal", goalId: f.target.id },
++    semantics: { kind: "dependency", strength: "hard", condition: "goalCompleted" },
++  });
++  if (e.status !== "accepted") throw Error("edge");
++  const exported = await f.store.exportBackupV14(new Date().toISOString());
++  if (exported.status !== "exported") throw Error(JSON.stringify(exported));
++  const backup = structuredClone(exported.backup);
++  const row = backup.data.goalStructure.relationships.find((r) => r.id === e.value.id)!;
++  backup.data.goalStructure.relationships.push({
++    ...row,
++    revision: 2 as never,
++    status: "retired",
++    updatedAt: "2026-09-22T00:00:00.000Z",
++    effectiveTo: "2026-09-22T00:00:00.000Z",
++  });
++  expect(await f.store.importBackupFile(backup)).toMatchObject({ status: "restoredV14" });
++  expect(f.store.getGoalStructureQualification().status).toBe("protected");
++  expect(f.store.getStructuralEligibility(f.goal.id).status).toBe("unknown");
++  expect(await f.store.retryGoalStructurePersistence()).toMatchObject({
++    status: "rejected",
++    reason: "protected",
++  });
++  const after = await f.store.exportBackupV14(new Date().toISOString());
++  if (after.status !== "exported") throw Error("export");
++  expect(after.backup.data.goalStructure).toEqual(backup.data.goalStructure);
++  const restart = createDayFrameStore(undefined, { restoreIndexedDb: createDayFrameDurableDb() });
++  await restart.whenReady();
++  expect(restart.exportGoalStructureAuthority()).toEqual(backup.data.goalStructure);
++  expect(restart.getGoalStructureQualification().status).toBe("protected");
++  expect(restart.getReadiness().status).toBe("ready");
++});
++it("acceptance is denied while a restore transaction is active", async () => {
++  const f = await fixture();
++  const p = await proposal(f);
++  const controller = getDayFrameRuntimeAuthorityController(
++    f.store,
++    DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++  );
++  const begun = controller.begin("restore");
++  expect(begun.status).toBe("begun");
++  expect(
++    await f.store.acceptProposalOption({
++      proposalId: p.id,
++      proposalRevision: p.revision,
++      optionId: p.preferredOptionId,
++    }),
++  ).toMatchObject({ status: "rejected", reason: "authorityTransactionActive" });
++  expect(controller.abort().status).toBe("aborted");
++});
++
++it("persisted proposals require and pass explicit current acceptance revalidation after reload", async () => {
++  const f = await fixture();
++  const exported = await f.store.exportBackupV14(new Date().toISOString());
++  if (exported.status !== "exported") throw Error("export");
++  expect(await f.store.importBackupFile(exported.backup)).toMatchObject({ status: "restoredV14" });
++  const p = await proposal(f);
++  const old = f.store.exportProposalAuthority().acceptedAllocations;
++  vi.setSystemTime(new Date("2026-09-23T12:00:10.000Z"));
++  const restart = createDayFrameStore(undefined, { restoreIndexedDb: createDayFrameDurableDb() });
++  await restart.whenReady();
++
++  expect(
++    await restart.acceptProposalOption({
++      proposalId: p.id,
++      proposalRevision: p.revision,
++      optionId: p.preferredOptionId,
++    }),
++  ).toMatchObject({ status: "accepted" });
++  for (const accepted of old)
++    expect(
++      restart.exportProposalAuthority().acceptedAllocations.find((row) => row.id === accepted.id),
++    ).toEqual(accepted);
++  expect(restart.exportProposalAuthority().acceptedAllocations).toHaveLength(old.length + 1);
++});
++
++it("projection passes its captured instant exactly once and never invokes the legacy wrapper", async () => {
++  const f = await fixture();
++  const query = vi.fn(f.store.queryGoalStructure);
++  const legacy = vi.fn(() => {
++    throw Error("hidden clock sample");
++  });
++  const state = f.store.getState();
++  const result = queryGoalDemandProjection({
++    authority: f.store.exportGoalPlanningAuthority(),
++    id: f.demand.id,
++    getGoal: f.store.getGoal,
++    getStructuralEligibility: legacy,
++    queryGoalStructure: query,
++    evaluationInstant: "2026-09-23T12:00:03.000Z",
++    getUserDayResolver: () => ({
++      shiftCycles: state.shiftCycles,
++      defaultSchedulingPreferences: state.schedulingPreferences,
++    }),
++  });
++  expect(result.status).toBe("projected");
++  expect(query).toHaveBeenCalledExactlyOnceWith({
++    goalId: f.goal.id,
++    evaluationInstant: "2026-09-23T12:00:03.000Z",
++    basis: "currentAuthority",
++  });
++  expect(legacy).not.toHaveBeenCalled();
++});
++it("a deferred acceptance cannot resume after exact runtime replacement", async () => {
++  const f = await fixture();
++  const p = await proposal(f);
++  let release!: () => void;
++  const gate = new Promise<void>((r) => (release = r));
++  let entered!: () => void;
++  const started = new Promise<void>((r) => (entered = r));
++  const owner = createProposalSurface({
++    storage: createDayFrameDurableDb(),
++    revalidate: async () => {
++      entered();
++      await gate;
++      return { status: "proposed", proposal: p };
++    },
++  });
++  await owner.initializeProposals();
++  const pending = owner.acceptProposalOption({
++    proposalId: p.id,
++    proposalRevision: p.revision,
++    optionId: p.preferredOptionId,
++  });
++  await started;
++  const adapter = owner.getProposalRuntimeAdapter(DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY);
++  const before = adapter.captureRuntimeSnapshot();
++  adapter.installRuntimeExact(before);
++  release();
++  expect(await pending).toMatchObject({ status: "rejected", reason: "notActionable" });
++  expect(owner.exportProposalAuthority()).toEqual(before.authority);
++});
++
++it("restore storage and installation reject a displaced coordinator epoch", async () => {
++  const f = await fixture();
++  const db = createDayFrameDurableDb();
++  const store = createDayFrameStore(undefined, { restoreIndexedDb: db });
++  await store.whenReady();
++  const backup = await store.exportBackupV14(new Date().toISOString());
++  if (backup.status !== "exported") throw Error("export");
++  const before = store.exportGoalStructureAuthority();
++  const controller = getDayFrameRuntimeAuthorityController(
++    store,
++    DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY,
++  );
++  let release!: () => void, entered!: () => void;
++  const gate = new Promise<void>((r) => (release = r)),
++    started = new Promise<void>((r) => (entered = r));
++  const write = db.mutate;
++  vi.spyOn(db, "mutate").mockImplementation(async (ops, admit) => {
++    if (ops.some((op) => op.store === "goalStructure" && op.type === "clear")) {
++      entered();
++      await gate;
++    }
++    return write(ops, admit);
++  });
++  const pending = store.importBackupFile(backup.backup);
++  await started;
++  expect(controller.abort().status).toBe("aborted");
++  expect(controller.begin("restore").status).toBe("begun");
++  const epoch = controller.getEpoch!();
++  release();
++  expect((await pending).status).not.toBe("restoredV14");
++  expect(controller.getEpoch!()).toBe(epoch);
++  expect(controller.getState().status).toBe("active");
++  expect(store.exportGoalStructureAuthority()).toEqual(before);
++  controller.abort();
++  expect(f.store.exportGoalStructureAuthority()).toEqual(before);
++});
+--- a/code/src/state/goalStructureSurface.ts
++++ b/code/src/state/goalStructureSurface.ts
+@@ -1,3 +1,14 @@
++import {
++  evaluateGoalStructure,
++  qualifyGoalStructure,
++  structureCommandTime,
++  structureEligibilityV1,
++  type StructureEvaluationInput,
++} from "../core/planning/goalStructureTemporal.js";
++import {
++  DayFrameMutationAdmissionError,
++  type DayFrameMutationAdmission,
++} from "./dayFrameMutationAdmission.js";
+ import type { GoalId, GoalV1 } from "../core/goals/goal.js";
+ import { semanticFingerprint } from "../infrastructure/restore/restoreStaging.js";
+ import {
+@@ -10,7 +21,6 @@
+   currentMilestonesForGoal,
+   currentRelationshipsForGoal,
+   emptyGoalStructureAuthority,
+-  queryStructuralEligibility,
+   resolveMilestoneRevision,
+   resolveRelationshipRevision,
+   validateGoalStructureAuthority,
+@@ -43,6 +53,7 @@
+   | { status: "accepted"; value: T; persistence: "durable" | "pending"; changed: boolean }
+   | {
+       status: "rejected";
++      detail?: string;
+       reason:
+         | "initializing"
+         | "protected"
+@@ -62,7 +73,9 @@
+   allocateId?: () => PlanningFactId;
+   now?: () => string;
+   notificationScheduler?: DayFrameNotificationScheduler;
+-  canMutate?: () => boolean;
++  canMutate?: () => boolean | DayFrameMutationAdmission;
++  getEpoch?: () => number;
++  getTransactionState?: () => { status: string; epoch?: number };
+ }) {
+   const storage = options.storage ?? createDayFrameDurableDb();
+   const allocateId = options.allocateId ?? createPlanningFactId;
+@@ -71,11 +84,17 @@
+   let desired = structuredClone(authority);
+   let ingress: GoalStructureIngressStatus = { status: "initializing" };
+   let durability: GoalStructureDurabilityStatus = "unknown";
++  let generation = 0,
++    desiredVersion = 0,
++    leased = false;
++  const epoch = () => options.getEpoch?.() ?? 0;
+   const listeners = new Set<() => void>();
+   const runtime: RuntimeAuthorityAdapter<GoalStructureRuntimeSnapshot> = {
+     id: "goalStructure",
+     captureRuntimeSnapshot: () => structuredClone({ authority, desired, ingress, durability }),
+     installRuntimeExact: (target) => {
++      generation++;
++      desiredVersion++;
+       authority = structuredClone(target.authority);
+       desired = structuredClone(target.desired);
+       ingress = structuredClone(target.ingress);
+@@ -84,7 +103,14 @@
+     },
+   };
+   async function initializeGoalStructure() {
++    if (ingress.status !== "initializing")
++      return {
++        status: ingress.status === "accepted" ? ("ready" as const) : ("protected" as const),
++      };
++    const token = generation,
++      capturedEpoch = epoch();
+     const result = await storage.getAll<unknown>(GOAL_STRUCTURE_STORE);
++    if (token !== generation || capturedEpoch !== epoch()) return { status: "protected" as const };
+     if (result.status === "failure") return protect("readFailure");
+     const relationships = result.value.filter(
+       (item): item is GoalStructureRelationshipV1 =>
+@@ -134,13 +160,16 @@
+   ) {
+     const blocked = mutationBlocked();
+     if (blocked) return blocked;
++    const at = now();
++    const invalidTime = structureCommandTime(authority, at);
++    if (invalidTime)
++      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
+     let id: PlanningFactId;
+     try {
+       id = allocateId();
+     } catch {
+       return { status: "rejected" as const, reason: "allocationFailure" as const };
+     }
+-    const at = now();
+     const candidate: GoalStructureRelationshipV1 = {
+       ...structuredClone(input),
+       recordType: "relationship",
+@@ -166,6 +195,8 @@
+       Pick<GoalStructureRelationshipV1, "kind" | "sourceGoalId" | "target" | "semantics">
+     >,
+   ) {
++    const blocked = mutationBlocked();
++    if (blocked) return blocked;
+     const found = currentRelationship(id, expectedRevision);
+     if ("status" in found) return found;
+     const semantic = {
+@@ -189,11 +220,15 @@
+         persistence: durability === "durable" ? ("durable" as const) : ("pending" as const),
+         changed: false,
+       };
++    const at = now();
++    const invalidTime = structureCommandTime(authority, at, undefined);
++    if (invalidTime)
++      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
+     const candidate: GoalStructureRelationshipV1 = {
+       ...found.value,
+       ...structuredClone(semantic),
+       revision: planningRevision(found.value.revision + 1),
+-      updatedAt: now(),
++      updatedAt: at,
+     } as GoalStructureRelationshipV1;
+     return accept(
+       { ...authority, relationships: [...authority.relationships, candidate] },
+@@ -202,6 +237,8 @@
+     );
+   }
+   async function retireRelationship(id: PlanningFactId, expectedRevision: number) {
++    const blocked = mutationBlocked();
++    if (blocked) return blocked;
+     const found = currentRelationship(id, expectedRevision);
+     if ("status" in found) return found;
+     if (found.value.status === "retired")
+@@ -212,6 +249,9 @@
+         changed: false,
+       };
+     const at = now();
++    const invalidTime = structureCommandTime(authority, at, found.value.effectiveFrom);
++    if (invalidTime)
++      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
+     const candidate: GoalStructureRelationshipV1 = {
+       ...found.value,
+       revision: planningRevision(found.value.revision + 1),
+@@ -232,13 +272,16 @@
+   }) {
+     const blocked = mutationBlocked();
+     if (blocked) return blocked;
++    const at = now();
++    const invalidTime = structureCommandTime(authority, at);
++    if (invalidTime)
++      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
+     let id: PlanningFactId;
+     try {
+       id = allocateId();
+     } catch {
+       return { status: "rejected" as const, reason: "allocationFailure" as const };
+     }
+-    const at = now();
+     const candidate: GoalStructureMilestoneV1 = {
+       recordType: "milestone",
+       version: 1,
+@@ -268,10 +311,11 @@
+       state?: "active" | "satisfied" | "retired";
+     },
+   ) {
++    const blocked = mutationBlocked();
++    if (blocked) return blocked;
+     const found = currentMilestone(id, expectedRevision);
+     if ("status" in found) return found;
+     const state = patch.state ?? found.value.state;
+-    const at = now();
+     const semantic = {
+       ownerGoalId: found.value.ownerGoalId,
+       title: (patch.title ?? found.value.title).trim(),
+@@ -296,6 +340,10 @@
+         persistence: durability === "durable" ? ("durable" as const) : ("pending" as const),
+         changed: false,
+       };
++    const at = now();
++    const invalidTime = structureCommandTime(authority, at);
++    if (invalidTime)
++      return { status: "rejected" as const, reason: "invalidInput" as const, detail: invalidTime };
+     const candidate: GoalStructureMilestoneV1 = {
+       ...found.value,
+       title: semantic.title,
+@@ -306,10 +354,12 @@
+     };
+     delete candidate.targetDate;
+     if (semantic.targetDate) candidate.targetDate = semantic.targetDate;
+-    delete candidate.satisfiedAt;
+-    delete candidate.retiredAt;
+-    if (state === "satisfied") candidate.satisfiedAt = at;
+-    if (state === "retired") candidate.retiredAt = at;
++    if (state !== found.value.state) {
++      delete candidate.satisfiedAt;
++      delete candidate.retiredAt;
++      if (state === "satisfied") candidate.satisfiedAt = at;
++      if (state === "retired") candidate.retiredAt = at;
++    }
+     return accept(
+       { ...authority, milestones: [...authority.milestones, candidate] },
+       candidate,
+@@ -321,6 +371,8 @@
+     value: T,
+     changed: boolean,
+   ): Promise<GoalStructureCommandResult<T>> {
++    const blocked = mutationBlocked();
++    if (blocked) return blocked;
+     const checked = validateGoalStructureAuthority(next, options.listGoals());
+     if (checked.status === "invalid")
+       return {
+@@ -331,10 +383,11 @@
+       };
+     authority = checked.authority;
+     desired = structuredClone(authority);
++    desiredVersion++;
+     durability = "pending";
++    const pending = persistOrdinary(authority);
+     notify();
+-    const persisted = await replaceDurable(authority);
+-    durability = persisted ? "durable" : "storageFailure";
++    const persisted = await pending;
+     notify();
+     return {
+       status: "accepted",
+@@ -343,16 +396,19 @@
+       changed,
+     };
+   }
+-  async function replaceDurable(value: GoalStructureAuthorityV1) {
++  async function replaceDurable(value: GoalStructureAuthorityV1, admit?: () => boolean) {
+     const records = [...value.relationships, ...value.milestones];
+-    const result = await storage.mutate([
+-      { type: "clear", store: GOAL_STRUCTURE_STORE },
+-      ...records.map((record) => ({
+-        type: "put" as const,
+-        store: GOAL_STRUCTURE_STORE,
+-        value: record,
+-      })),
+-    ]);
++    const result = await storage.mutate(
++      [
++        { type: "clear", store: GOAL_STRUCTURE_STORE },
++        ...records.map((record) => ({
++          type: "put" as const,
++          store: GOAL_STRUCTURE_STORE,
++          value: record,
++        })),
++      ],
++      admit,
++    );
+     return result.status === "success";
+   }
+   function currentRelationship(id: PlanningFactId, expectedRevision: number) {
+@@ -375,16 +431,54 @@
+       ? { value: structuredClone(value) }
+       : { status: "rejected" as const, reason: "staleRevision" as const };
+   }
+-  function mutationBlocked() {
+-    if (options.canMutate?.() === false)
++  function mutationBlocked(ignoreLease = false) {
++    const allowed = options.canMutate?.();
++    if (allowed === false)
+       return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
+-    return ingress.status === "accepted"
+-      ? undefined
+-      : {
+-          status: "rejected" as const,
+-          reason:
+-            ingress.status === "protected" ? ("protected" as const) : ("initializing" as const),
+-        };
++    if (allowed && typeof allowed === "object" && !allowed.allowed)
++      return { status: "rejected" as const, reason: allowed.reason };
++    if (leased && !ignoreLease)
++      return {
++        status: "rejected" as const,
++        reason: "authorityTransactionActive" as const,
++        detail: "ownerPersistenceBusy",
++      };
++    if (ingress.status !== "accepted")
++      return {
++        status: "rejected" as const,
++        reason: ingress.status === "protected" ? ("protected" as const) : ("initializing" as const),
++      };
++    if (qualifyGoalStructure(authority).status === "protected")
++      return {
++        status: "rejected" as const,
++        reason: "protected" as const,
++        detail: "temporalQualificationRequired",
++      };
++  }
++  async function persistOrdinary(value: GoalStructureAuthorityV1, retainLease = false) {
++    leased = true;
++    const g = generation,
++      e = epoch(),
++      v = desiredVersion;
++    const matches = () => g === generation && e === epoch() && v === desiredVersion;
++    try {
++      const persisted = await replaceDurable(value, () => matches() && !mutationBlocked(true));
++      if (!matches()) {
++        protect("invalidAuthority");
++        return false;
++      }
++      durability = persisted ? "durable" : "storageFailure";
++      return persisted;
++    } catch {
++      if (matches()) durability = "storageFailure";
++      else protect("invalidAuthority");
++      return false;
++    } finally {
++      if (!retainLease) leased = false;
++    }
++  }
++  function queryGoalStructure(input: StructureEvaluationInput) {
++    return evaluateGoalStructure(input, authority, options.listGoals(), ingress.status);
+   }
+   function notify() {
+     options.notificationScheduler?.notify("goalStructure", () =>
+@@ -401,8 +495,17 @@
+     listGoalStructureRelationships: (goalId: GoalId) =>
+       currentRelationshipsForGoal(authority, goalId),
+     listGoalStructureMilestones: (goalId: GoalId) => currentMilestonesForGoal(authority, goalId),
++    queryGoalStructure,
++    getGoalStructureQualification: () =>
++      ingress.status === "accepted"
++        ? qualifyGoalStructure(authority)
++        : { status: "unavailable" as const, issues: [] },
++    isGoalStructureQuiescent: () => !leased,
+     getStructuralEligibility: (goalId: GoalId) =>
+-      queryStructuralEligibility({ goalId, goals: options.listGoals(), authority }),
++      structureEligibilityV1(
++        queryGoalStructure({ goalId, evaluationInstant: now(), basis: "currentAuthority" }),
++        goalId,
++      ),
+     getGoalStructureRelationshipRevision: (id: PlanningFactId, revision: number) =>
+       resolveRelationshipRevision(authority, id, planningRevision(revision)),
+     getGoalStructureMilestoneRevision: (id: PlanningFactId, revision: number) =>
+@@ -411,34 +514,78 @@
+     getGoalStructureIngressStatus: () => structuredClone(ingress),
+     getGoalStructureDurabilityStatus: () => durability,
+     replaceGoalStructureAuthority: async (value: GoalStructureAuthorityV1) => {
++      const blocked = mutationBlocked();
++      if (blocked) return blocked;
+       const checked = validateGoalStructureAuthority(value, options.listGoals());
+       if (checked.status === "invalid") return { status: "invalid" as const };
+-      const persisted = await replaceDurable(checked.authority);
+-      if (!persisted) return { status: "failure" as const };
+-      authority = checked.authority;
+-      desired = structuredClone(authority);
++      if (qualifyGoalStructure(checked.authority).status === "protected")
++        return { status: "rejected" as const, reason: "protected" as const };
++      const e = epoch(),
++        g = generation;
++      try {
++        if (!(await persistOrdinary(checked.authority, true)))
++          return { status: "failure" as const };
++        if (e !== epoch() || g !== generation)
++          return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
++        generation++;
++        desiredVersion++;
++        authority = checked.authority;
++        desired = structuredClone(authority);
++        notify();
++        return { status: "accepted" as const };
++      } finally {
++        leased = false;
++      }
++    },
++    retryGoalStructurePersistence: async () => {
++      const blocked = mutationBlocked();
++      if (blocked) return blocked;
++      const persisted = await persistOrdinary(structuredClone(desired));
++      notify();
++      return persisted ? { status: "durable" as const } : { status: "storageFailure" as const };
++    },
++    clearGoalStructure: async () => {
++      const blocked = mutationBlocked();
++      if (blocked) return blocked;
++      const empty = emptyGoalStructureAuthority();
++      const e = epoch(),
++        g = generation;
++      try {
++        if (!(await persistOrdinary(empty, true))) return { status: "storageFailure" as const };
++        if (e !== epoch() || g !== generation)
++          return { status: "rejected" as const, reason: "authorityTransactionActive" as const };
++        generation++;
++        desiredVersion++;
++        authority = empty;
++        desired = structuredClone(empty);
++        notify();
++        return { status: "removed" as const };
++      } finally {
++        leased = false;
++      }
++    },
++    clearGoalStructureForCoordinator: async (capability: symbol, expectedEpoch: number) => {
++      const admitted = () =>
++        capability === DAYFRAME_RUNTIME_AUTHORITY_CAPABILITY &&
++        epoch() === expectedEpoch &&
++        options.getTransactionState?.().status === "active";
++      if (!admitted() || leased)
++        throw new DayFrameMutationAdmissionError("authorityTransactionActive");
++      generation++;
++      desiredVersion++;
++      const empty = emptyGoalStructureAuthority();
++      try {
++        if (!(await replaceDurable(empty, admitted))) return { status: "storageFailure" as const };
++      } catch {
++        return { status: "storageFailure" as const };
++      }
++      if (!admitted()) throw new DayFrameMutationAdmissionError("authorityTransactionActive");
++      authority = empty;
++      desired = structuredClone(empty);
+       ingress = { status: "accepted" };
+       durability = "durable";
+       notify();
+-      return { status: "accepted" as const };
+-    },
+-    retryGoalStructurePersistence: async () => {
+-      const persisted = await replaceDurable(desired);
+-      durability = persisted ? "durable" : "storageFailure";
+-      notify();
+-      return persisted ? { status: "durable" as const } : { status: "storageFailure" as const };
+-    },
+-    clearGoalStructure: async () => {
+-      const empty = emptyGoalStructureAuthority();
+-      const persisted = await replaceDurable(empty);
+-      if (persisted) {
+-        authority = empty;
+-        desired = structuredClone(empty);
+-        ingress = { status: "accepted" };
+-        durability = "durable";
+-        notify();
+-      }
+-      return persisted ? { status: "removed" as const } : { status: "storageFailure" as const };
++      return { status: "removed" as const };
+     },
+     subscribeGoalStructure: (listener: () => void) => {
+       listeners.add(listener);
+--- a/code/src/state/lazyGoalStructureSurface.ts
++++ b/code/src/state/lazyGoalStructureSurface.ts
+@@ -43,6 +43,29 @@
+       (
+         surface?.getGoalStructureMilestoneRevision as ((...values: never[]) => unknown) | undefined
+       )?.(...args) ?? { status: "notFound" },
++    queryGoalStructure: (input: { goalId: string; evaluationInstant: string; basis: string }) =>
++      surface?.queryGoalStructure(input as never) ??
++      (input.basis !== "currentAuthority"
++        ? { status: "unavailable", reason: "historicalReconstructionUnsupported" }
++        : Number.isNaN(Date.parse(input.evaluationInstant)) ||
++            new Date(input.evaluationInstant).toISOString() !== input.evaluationInstant
++          ? { status: "invalidQuery", reason: "invalidInstant" }
++          : {
++              status: "evaluated",
++              value: {
++                version: 2,
++                basis: "currentAuthority",
++                evaluatedAt: input.evaluationInstant,
++                qualification: "unavailable",
++                eligibility: "unknown",
++                records: { status: "unavailable", reason: "initializing" },
++                reasons: [{ code: "initializing" }],
++                dependencies: [],
++              },
++            }),
++    getGoalStructureQualification: () =>
++      surface?.getGoalStructureQualification() ?? { status: "unavailable", issues: [] },
++    isGoalStructureQuiescent: () => surface?.isGoalStructureQuiescent() ?? true,
+     exportGoalStructureAuthority: () => surface?.exportGoalStructureAuthority() ?? empty(),
+     getGoalStructureIngressStatus: () =>
+       surface?.getGoalStructureIngressStatus() ?? { status: "initializing" },
+@@ -50,6 +73,10 @@
+       surface?.getGoalStructureDurabilityStatus() ?? "unknown",
+   };
+   const keys = [
++    "queryGoalStructure",
++    "getGoalStructureQualification",
++    "isGoalStructureQuiescent",
++    "clearGoalStructureForCoordinator",
+     "initializeGoalStructure",
+     "createRelationship",
+     "reviseRelationship",
+@@ -70,7 +97,37 @@
+     "subscribeGoalStructure",
+     "getRuntimeAuthorityAdapter",
+   ];
++  const ordinary = [
++    "createRelationship",
++    "reviseRelationship",
++    "retireRelationship",
++    "createMilestone",
++    "reviseMilestone",
++    "retryGoalStructurePersistence",
++    "replaceGoalStructureAuthority",
++    "clearGoalStructure",
++  ];
++  const guarded = Object.fromEntries(
++    ordinary.map((key) => [
++      key,
++      (...args: never[]) => {
++        const capturedEpoch = options.getEpoch?.() ?? 0;
++        return load().then((owner) =>
++          capturedEpoch !== (options.getEpoch?.() ?? 0)
++            ? {
++                status: "rejected",
++                reason: "authorityTransactionActive",
++                detail: "contextReplaced",
++              }
++            : (owner[key as keyof GoalStructureSurface] as (...values: never[]) => unknown)(
++                ...args,
++              ),
++        );
++      },
++    ]),
++  );
+   return createLazySurface(keys, load, {
++    ...guarded,
+     ...sync,
+     subscribeGoalStructure: (listener: () => void) =>
+       surface?.subscribeGoalStructure(listener) ?? (() => undefined),
+--- a/code/src/state/proposalSurface.ts
++++ b/code/src/state/proposalSurface.ts
+@@ -55,6 +55,7 @@
+   ) => "known" | "unknown" | "stale";
+   revalidate?: (
+     proposal: ConstructiveProposalV1,
++    acceptanceInstant: string,
+   ) => Promise<ProposalGenerationResultV1> | ProposalGenerationResultV1;
+ }) {
+   const now = options.now ?? (() => new Date().toISOString()),
+@@ -219,9 +220,14 @@
+     if (!proposal) return reject("notFound");
+     if (!actionable(proposal) || rejectedOption(proposal, input.optionId))
+       return reject("notActionable");
++    const at = now();
+     const revalidated = options.revalidate
+-      ? await options.revalidate(clone(proposal))
++      ? await options.revalidate(clone(proposal), at)
+       : input.current;
++    const afterRead = mutationBlocked();
++    if (afterRead) return afterRead;
++    if (exactProposal(input.proposalId, input.proposalRevision) !== proposal)
++      return reject("notActionable");
+     if (!revalidated || evaluateProposalFreshness(proposal, revalidated).status !== "current")
+       return staleProposal(proposal);
+     const currentProposal = revalidated.status === "proposed" ? revalidated.proposal : undefined,
+@@ -241,8 +247,7 @@
+     } catch {
+       return reject("allocationFailure");
+     }
+-    const at = now(),
+-      decision: ProposalDecisionV1 = {
++    const decision: ProposalDecisionV1 = {
+         recordType: "proposalDecision",
+         version: 1,
+         revision: 1,
+--- a/code/src/ui/DayFrameApp.tsx
++++ b/code/src/ui/DayFrameApp.tsx
+@@ -187,6 +187,7 @@
+   | "loadProfile"
+   | "deleteProfile"
+   | "clearLocalData"
++  | "getGoalStructureQualification"
+   | "exportBackup"
+   | "importBackup"
+   | "exportBackupV11"
+@@ -3463,13 +3464,15 @@
+       // Only a confirmed authority replacement discards ephemeral Goal drafts.
+       resetGoalEditing();
+       setBackupMessage(
+-        result.status === "restoredV14" ||
+-          result.status === "restoredV13" ||
+-          result.status === "restoredV4" ||
+-          result.status === "restoredV5" ||
+-          result.status === "restoredV6"
+-          ? "Complete backup restored across setup, history, goals, measurement definitions, and observations."
+-          : "Complete Backup V3 restored across setup and history.",
++        store.getGoalStructureQualification().status === "protected"
++          ? "Complete backup restored. Structure records and history were preserved, but their recorded times cannot safely support planning. Planning and Structure changes are blocked. You can still export a complete backup; no dates were repaired."
++          : result.status === "restoredV14" ||
++              result.status === "restoredV13" ||
++              result.status === "restoredV4" ||
++              result.status === "restoredV5" ||
++              result.status === "restoredV6"
++            ? "Complete backup restored across setup, history, goals, measurement definitions, and observations."
++            : "Complete Backup V3 restored across setup and history.",
+       );
+       setBackupDurabilityFeedback(null);
+       setBackupErrorMessage("");
+--- a/code/src/ui/GoalPlanningSection.tsx
++++ b/code/src/ui/GoalPlanningSection.tsx
+@@ -26,6 +26,7 @@
+ 
+ export type GoalPlanningStore = Pick<
+   DayFrameStore,
++  | "getGoalStructureQualification"
+   | "getGoal"
+   | "listCurrentGoalDemands"
+   | "exportGoalPlanningAuthority"
+@@ -198,6 +199,13 @@
+   return (
+     <section className="df-panel df-goal-planning" aria-label="Goal planning">
+       <h3>Requested Time</h3>
++      {props.store.getGoalStructureQualification().status === "protected" && (
++        <p role="status">
++          Structure records and history are preserved, but their recorded times cannot safely
++          support planning. Planning and Structure changes are blocked. You can still export a
++          complete backup. No dates were repaired.
++        </p>
++      )}
+       <p>
+         Choose a finite period and how much time to request. This is separate from your Goal and
+         measured Progress.

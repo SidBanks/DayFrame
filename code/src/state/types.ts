@@ -79,6 +79,10 @@ export type PublishScheduleRangeInputV1 = {
 };
 
 export type PublishScheduleRangeFailureReasonV1 =
+  | "publicationSourceUnqualified"
+  | "contextReplaced"
+  | "publicationBusy"
+  | "pendingPublication"
   | "invalidPublicationRange"
   | "planningCoverageIncomplete"
   | "previewMissing"
@@ -89,12 +93,29 @@ export type PublishScheduleRangeFailureReasonV1 =
   | "sourceChanged"
   | "queryFailure"
   | "materializationFailure"
-  | "persistenceFailure";
+  | "persistenceFailure"
+  | "historicalPlanProtected"
+  | "historicalPlanUnavailable"
+  | "tryPreview"
+  | "verificationFailedAfterCommit"
+  | "commitStateUncertain"
+  | "writeFailedBeforeCommit";
 
-export type PublishScheduleRangeResultV1 =
-  | { status: "published"; batchId: string; publishedAt: string }
-  | { status: "alreadyPublished" }
-  | { status: "rejected"; reason: PublishScheduleRangeFailureReasonV1 };
+export type PublishScheduleRangeResultV1 = {
+  readonly receipt?: import("./publicationReceipt.js").PublicationReceipt;
+} & (
+  | ({
+      status: "published";
+      batchId: string;
+      publishedAt: string;
+    } & import("./reviewSourceQualification.js").ReviewRequired)
+  | ({ status: "alreadyPublished" } & import("./reviewSourceQualification.js").ReviewRequired)
+  | {
+      status: "rejected";
+      reason: Exclude<PublishScheduleRangeFailureReasonV1, "publicationSourceUnqualified">;
+    }
+  | ({ status: "rejected" } & import("./reviewSourceQualification.js").PublicationSourceFailure)
+);
 
 export type DayFramePreviewRangePreset =
   | "threeDays"
@@ -147,6 +168,8 @@ export type ActiveBlockRecurrence = BlockRecurrence & RuntimeIncarnation;
 export type ActiveManualCalendarEvent = ManualCalendarEvent & RuntimeIncarnation;
 
 export type DayFrameState = {
+  legacySleepConversions?: import("../core/sleep/legacySleepConversionRecord.js").LegacySleepConversionV1[];
+  sleepRequirements?: import("../core/sleep/sleepRequirement.js").SleepRequirementV1[];
   schedulingPreferences: DayFrameSchedulingPreferences;
   previewRange: DayFramePreviewRange;
   shiftDefinitions: ActiveShiftDefinition[];
@@ -160,6 +183,8 @@ export type DayFrameState = {
 
 export type DayFrameAuthoredSetup = Pick<
   DayFrameState,
+  | "sleepRequirements"
+  | "legacySleepConversions"
   | "schedulingPreferences"
   | "previewRange"
   | "shiftDefinitions"
@@ -172,6 +197,7 @@ export type DayFrameAuthoredSetup = Pick<
 export type ActiveDayFrameAuthoredSetup = DayFrameAuthoredSetup;
 
 export type DayFrameAuthoredPattern = {
+  sleepRequirements?: import("../core/sleep/sleepRequirement.js").SleepRequirementPatternV1[];
   schedulingPreferences: DayFrameSchedulingPreferences;
   previewRange: DayFramePreviewRange;
   shiftDefinitions: ShiftDefinition[];
@@ -399,6 +425,26 @@ export type BackupV12ImportResult =
   | { status: "restoredV12"; semanticFingerprint: string }
   | Exclude<BackupV11ImportResult, { status: "restoredV11" }>;
 
+export type BackupV14ExportResult =
+  | {
+      status: "exported";
+      backup: import("./dayFrameBackupV14.js").DayFrameBackupV14;
+      semanticFingerprint: string;
+    }
+  | Exclude<BackupV13ExportResult, { status: "exported" }>;
+export type BackupV14ImportResult =
+  | { status: "restoredV14"; semanticFingerprint: string }
+  | Exclude<BackupV13ImportResult, { status: "restoredV13" }>;
+export type BackupV13ExportResult =
+  | {
+      status: "exported";
+      backup: import("./dayFrameBackupV13.js").DayFrameBackupV13;
+      semanticFingerprint: string;
+    }
+  | Exclude<BackupV12ExportResult, { status: "exported" }>;
+export type BackupV13ImportResult =
+  | { status: "restoredV13"; semanticFingerprint: string }
+  | Exclude<BackupV12ImportResult, { status: "restoredV12" }>;
 export type FullClearAuthorityResults = {
   active: ActiveRemovalOutcome;
   profiles: PersistenceRemovalOutcome;
@@ -646,6 +692,11 @@ export type DayFrameStore = DayFrameReadinessApi & {
   subscribePlanDecisionIngress: (
     listener: (status: PlanDecisionIngressStatus) => void,
   ) => () => void;
+  trySleepPlacement: (
+    input: import("../core/sleep/sleepCorrective.js").SleepPlacementTryInput & {
+      ownerRange: import("../core/sleep/sleepResolution.js").SleepOwnerRange;
+    },
+  ) => import("../core/sleep/sleepCorrective.js").SleepPlacementTryResult;
   acceptPlanDecision: (input: AcceptPlanDecisionInput) => AcceptPlanDecisionResult;
   removePlanDecision: (id: PlanDecisionId) => RemovePlanDecisionResult;
   retryPlanDecisionPersistence: () => PlanDecisionRetryResult;
@@ -664,6 +715,48 @@ export type DayFrameStore = DayFrameReadinessApi & {
   replaceProtectedProfileCheckpointWithCurrentProfiles: () => ProfileProtectedRecoveryResult;
   abandonProtectedProfileCheckpoint: () => ProfileProtectedRecoveryResult;
   removeQuarantinedProfile: (quarantineId: string) => QuarantineRemovalResult;
+  reviewLegacySleepConversion: (
+    request: import("../core/sleep/legacySleepConversion.js").ConversionRequest,
+  ) => Promise<import("../core/sleep/legacySleepConversion.js").ConversionReview>;
+  convertLegacySleepToFirstClass: (
+    input: import("../core/sleep/legacySleepConversion.js").ConfirmConversionInput,
+  ) => Promise<
+    | {
+        status: "converted" | "alreadyConverted";
+        conversion: import("../core/sleep/legacySleepConversionRecord.js").LegacySleepConversionV1;
+      }
+    | { status: "rejected"; reason: string }
+  >;
+  authorSleepRequirement: (input: {
+    id: string;
+    expectedRevision: number | null;
+    expectedIncarnationId?: string;
+    intent: import("../core/sleep/sleepRequirement.js").SleepRequirementIntentV1;
+    recordedAt: string;
+  }) =>
+    | {
+        status: "authored";
+        requirement: import("../core/sleep/sleepRequirement.js").SleepRequirementV1;
+        persistence: ActivePersistenceOutcome;
+      }
+    | { status: "protected" | "stale" }
+    | { status: "invalid"; reason: string };
+  deleteSleepRequirement: (input: {
+    id: string;
+    incarnationId: string;
+    expectedRevision: number;
+  }) =>
+    | { status: "deleted"; persistence: ActivePersistenceOutcome }
+    | { status: "protected" | "stale" };
+  resolveRequiredSleep: (query: {
+    ownerRange: import("../core/sleep/sleepResolution.js").SleepOwnerRange;
+    budget?: number;
+  }) => Promise<import("../core/sleep/sleepResolution.js").SleepResolutionV1>;
+  queryEffectiveSleepRequirement: (
+    ownerDay: import("../core/shifts/types.js").LocalDateString,
+  ) =>
+    | import("../core/sleep/sleepRequirement.js").EffectiveSleepRequirementResult
+    | { status: "protected" };
   commitAuthoredSetupTransaction: (
     transaction: CommitAuthoredSetupTransactionInput,
   ) => StoreMutationResult;
@@ -699,6 +792,8 @@ export type DayFrameStore = DayFrameReadinessApi & {
     | BackupV9ImportResult
     | BackupV10ImportResult
     | BackupV11ImportResult
+    | BackupV14ImportResult
+    | BackupV13ImportResult
     | BackupV12ImportResult
   >;
   exportBackupV4: (exportedAt: string) => Promise<BackupV4ExportResult>;
@@ -717,6 +812,10 @@ export type DayFrameStore = DayFrameReadinessApi & {
   importBackupV10: (backup: unknown) => Promise<BackupV10ImportResult>;
   exportBackupV11: (exportedAt: string) => Promise<BackupV11ExportResult>;
   importBackupV11: (backup: unknown) => Promise<BackupV11ImportResult>;
+  exportBackupV14: (exportedAt: string) => Promise<BackupV14ExportResult>;
+  importBackupV14: (backup: unknown) => Promise<BackupV14ImportResult>;
+  exportBackupV13: (exportedAt: string) => Promise<BackupV13ExportResult>;
+  importBackupV13: (backup: unknown) => Promise<BackupV13ImportResult>;
   exportBackupV12: (exportedAt: string) => Promise<BackupV12ExportResult>;
   importBackupV12: (backup: unknown) => Promise<BackupV12ImportResult>;
   generatePreview: (input: GeneratePreviewActionInput) => DayFrameState;
@@ -739,13 +838,28 @@ export type DayFrameStore = DayFrameReadinessApi & {
   queryGoalProgressObservationHistory: (
     goalId: import("../core/goals/goal.js").GoalId,
   ) => import("./goalProgressObservationHistoryQuery.js").GoalProgressObservationHistoryResult;
+  recordSleepExecution: (
+    input: import("./sleepExecutionCommand.js").SleepExecutionCommand,
+  ) => ReturnType<typeof import("./sleepExecutionCommand.js").executeSleepCommand>;
+  querySleepHistory: (
+    query: import("./sleepHistoryQuery.js").SleepHistoryQuery,
+  ) => ReturnType<typeof import("./sleepHistoryQuery.js").querySleepHistory>;
   queryToday: (
     query: import("./todayQuery.js").TodayQuery,
   ) => Promise<import("./todayQuery.js").TodayQueryResult>;
+  querySelectedDayEvidence: (
+    query: import("../core/productEvidence/selectedDayEvidence.js").SelectedDayEvidenceQuery,
+  ) => ReturnType<typeof import("./selectedDayEvidenceQuery.js").querySelectedDayEvidence>;
+  queryAcceptedPlanningEvidence: (
+    query: import("../core/productEvidence/acceptedPlanningEvidence.js").AcceptedPlanningEvidenceQuery,
+  ) => ReturnType<
+    typeof import("./acceptedPlanningEvidenceQuery.js").queryAcceptedPlanningEvidence
+  >;
+  subscribePlanningReview: (listener: () => void) => () => void;
   queryPlanningReview: (input: {
     reviewScope: ReviewScopeV1;
     historyAsOf: string;
-  }) => Promise<import("./planningScopeQuery.js").PlanningReviewReadModelV1>;
+  }) => Promise<import("./planningScopeQuery.js").PlanningReviewReadModelV2>;
   queryCapacity: (query: {
     startUserDayDate: LocalDateString;
     endUserDayDateExclusive: LocalDateString;
@@ -799,8 +913,20 @@ export type DayFrameStore = DayFrameReadinessApi & {
   Omit<GoalStructureSurface, "clearGoalStructure" | "getRuntimeAuthorityAdapter"> &
   Omit<GoalPlanningSurface, "clearGoalPlanning" | "getRuntimeAuthorityAdapter"> &
   Omit<CompositionSurface, "clearCompositionAuthority" | "getCompositionRuntimeAdapter"> &
-  Omit<ProposalSurface, "clearProposalAuthority" | "getProposalRuntimeAdapter"> &
-  Omit<RealizationSurface, "clearRealizationAuthority" | "getRealizationRuntimeAdapter">;
+  Omit<
+    ProposalSurface,
+    | "getProposalLifecycle"
+    | "clearProposalAuthority"
+    | "clearProposalForCoordinator"
+    | "getProposalRuntimeAdapter"
+  > &
+  Omit<
+    RealizationSurface,
+    | "getRealizationProtectionEvidence"
+    | "clearRealizationAuthority"
+    | "clearRealizationForCoordinator"
+    | "getRealizationRuntimeAdapter"
+  >;
 
 export type { SourceIncarnationId };
 export type { PlanDecisionId, PlanDecisionIdAllocator, PlanDecisionV1 };

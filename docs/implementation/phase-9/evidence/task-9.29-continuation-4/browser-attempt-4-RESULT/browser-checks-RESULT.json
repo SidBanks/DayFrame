@@ -1,0 +1,50 @@
+{
+  "320": {
+    "goal": true,
+    "day": true,
+    "summaryInvalidDraft": true,
+    "work": true,
+    "commitment": true,
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 0
+    }
+  },
+  "390": {
+    "goal": true,
+    "day": true,
+    "summaryInvalidDraft": true,
+    "work": true,
+    "commitment": true,
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 0
+    }
+  },
+  "768": {
+    "goal": true,
+    "day": true,
+    "summaryInvalidDraft": true,
+    "work": true,
+    "commitment": true,
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 0
+    }
+  },
+  "1280": {
+    "goal": true,
+    "day": true,
+    "summaryInvalidDraft": true,
+    "work": true,
+    "commitment": true,
+    "counts": {
+      "proposal": 1,
+      "realization": 1,
+      "history": 0
+    }
+  }
+}

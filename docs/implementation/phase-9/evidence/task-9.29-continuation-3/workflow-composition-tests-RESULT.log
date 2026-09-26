@@ -1,0 +1,13 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ScheduleReviewPanel.test.tsx src/ui/tests/ReviewSourceQualification.test.tsx src/ui/tests/NavigationFoundation.test.tsx src/ui/tests/GoalInspectionNavigation.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+
+ Test Files  4 passed (4)
+      Tests  28 passed (28)
+   Start at  19:51:00
+   Duration  10.12s (transform 2.03s, setup 0ms, import 2.08s, tests 6.05s, environment 1.63s)
+

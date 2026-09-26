@@ -1,0 +1,35 @@
+
+> dayframe@0.1.0 test
+> vitest run src/ui/tests/ScheduleReviewWorkspace.test.tsx --maxWorkers=1
+
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx (5 tests | 1 failed) 2626ms
+   × bounds more than ten canonically generated offers without deciding 1146ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/ui/tests/ScheduleReviewWorkspace.test.tsx > bounds more than ten canonically generated offers without deciding
+Error: expect(element).toHaveAttribute("open") // element.hasAttribute("open")
+
+Expected the element to have attribute:
+  open
+Received:
+  null
+ ❯ src/ui/tests/ScheduleReviewWorkspace.test.tsx:48:113
+     46|   render(<ScheduleReviewWorkspace {...props} />);
+     47|   expect(await screen.findAllByRole("button", {name:"Accept preferred …
+     48|   expect(screen.getAllByText("Requested Time and full option effects",…
+       |                                                                                                                 ^
+     49|   expect(f.counts().transactions).toBe(0);
+     50| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  20:49:45
+   Duration  4.62s (transform 1.44s, setup 0ms, import 1.40s, tests 2.63s, environment 509ms)
+

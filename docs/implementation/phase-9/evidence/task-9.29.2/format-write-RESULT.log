@@ -1,0 +1,18 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'prettier' --write code/src/ui/ScheduleReviewPanel.tsx code/src/ui/DayFrameApp.tsx code/src/state/historicalPlanSurface.ts code/src/state/dayFrameAuthorityTransaction.test.ts code/src/state/publicationReceipt.ts code/src/state/dayFrameAuthorityTransaction.ts code/src/state/publicationReplacementIsolation.test.ts code/src/state/historicalPlanLifecycle.test.ts code/src/state/dayFrameStore.ts code/src/state/schedulePublication.ts code/src/state/types.ts code/src/state/dayFrameRuntimeAuthority.ts code/src/infrastructure/storage/indexedDbCollectionStorage.ts code/src/infrastructure/storage/indexedDbCollectionStorage.test.ts code/src/infrastructure/restore/restoreCoordinator.ts code/src/ui/tests/ScheduleReviewPanel.test.tsx
+code/src/ui/ScheduleReviewPanel.tsx 106ms
+code/src/ui/DayFrameApp.tsx 483ms
+code/src/state/historicalPlanSurface.ts 151ms
+code/src/state/dayFrameAuthorityTransaction.test.ts 10ms
+code/src/state/publicationReceipt.ts 4ms
+code/src/state/dayFrameAuthorityTransaction.ts 22ms (unchanged)
+code/src/state/publicationReplacementIsolation.test.ts 56ms
+code/src/state/historicalPlanLifecycle.test.ts 36ms
+code/src/state/dayFrameStore.ts 273ms
+code/src/state/schedulePublication.ts 10ms
+code/src/state/types.ts 73ms
+code/src/state/dayFrameRuntimeAuthority.ts 8ms
+code/src/infrastructure/storage/indexedDbCollectionStorage.ts 63ms
+code/src/infrastructure/storage/indexedDbCollectionStorage.test.ts 36ms
+code/src/infrastructure/restore/restoreCoordinator.ts 36ms
+code/src/ui/tests/ScheduleReviewPanel.test.tsx 23ms

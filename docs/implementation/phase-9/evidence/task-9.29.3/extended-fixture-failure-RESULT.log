@@ -1,0 +1,28 @@
+npm notice run dayframe@0.1.0 npx
+npm notice run 'vitest' run --config ../docs/implementation/phase-9/evidence/task-9.29.3/extended-repro-config-RESULT.mjs --configLoader runner --maxWorkers=1
+
+ RUN  v4.1.5 /home/sid/Penn Digital Services/DayFrame/code
+
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29.3/extended-contract-repro-RESULT.test.ts (4 tests | 1 failed) 650ms
+   × multi-role canonical healthy realization preserves exact required claims 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../docs/implementation/phase-9/evidence/task-9.29.3/extended-contract-repro-RESULT.test.ts > multi-role canonical healthy realization preserves exact required claims
+AssertionError: expected 'rejected' to be 'accepted' // Object.is equality
+
+Expected: "accepted"
+Received: "rejected"
+
+ ❯ prepared ../docs/implementation/phase-9/evidence/task-9.29.3/extended-contract-repro-RESULT.test.ts:129:268
+
+ ❯ ../docs/implementation/phase-9/evidence/task-9.29.3/extended-contract-repro-RESULT.test.ts:187:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  12:39:06
+   Duration  1.78s (transform 1.04s, setup 0ms, import 987ms, tests 650ms, environment 0ms)
+

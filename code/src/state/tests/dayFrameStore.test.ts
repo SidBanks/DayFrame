@@ -54,6 +54,7 @@ function currentActiveSetup(state: DayFrameState): DayFrameAuthoredSetup {
     manualEvents,
   } = state;
   return {
+    sleepRequirements: state.sleepRequirements ?? [],
     schedulingPreferences,
     previewRange,
     shiftDefinitions,
@@ -957,7 +958,7 @@ describe("dayFrameStore", () => {
     expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_V2_STORAGE_KEY) ?? "{}")).toEqual({
       app: "DayFrame",
       surface: "profiles",
-      version: 2,
+      version: 3,
       profiles: [],
       quarantinedProfiles: [],
     });
@@ -4022,7 +4023,7 @@ describe("Profile V2 reusable-pattern persistence", () => {
       status: "accepted",
       quarantinedEntryCount: 0,
     });
-    expect(v2).toMatchObject({ surface: "profiles", version: 2, quarantinedProfiles: [] });
+    expect(v2).toMatchObject({ surface: "profiles", version: 3, quarantinedProfiles: [] });
     expect(v2.profiles[0]?.data).not.toHaveProperty("incarnationId");
     expect(JSON.parse(localStorage.getItem(DAYFRAME_PROFILES_STORAGE_KEY) ?? "null")).toEqual(
       legacy,
